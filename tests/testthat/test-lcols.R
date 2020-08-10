@@ -23,7 +23,13 @@ test_that("lcols checks input", {
 })
 
 test_that("lcollector checks default value", {
-  expect_error(lcol_chr("a", 1))
+  expect_error(
+    lcol_chr("a", 1),
+    class = "vctrs_error_incompatible_type"
+  )
 
-  expect_error(lcol_chr("a", c("a", "b")))
+  expect_error(
+    lcol_chr("a", c("a", "b")),
+    class = "vctrs_error_incompatible_size"
+  )
 })

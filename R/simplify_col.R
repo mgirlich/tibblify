@@ -29,11 +29,11 @@ simplify_col <- function(x, ptype, transform = NULL) {
     vec_cast(x, to = ptype)
   } else {
     if (any(purrr::map_lgl(x, vec_is_list))) {
-      stop("x contains list elements")
+      abort("x contains list elements")
     }
 
     if (any(list_sizes(x) > 1)) {
-      stop("x contains list elements")
+      abort("x contains list elements")
     }
     vec_c(!!!x, .ptype = ptype)
   }

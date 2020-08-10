@@ -1,7 +1,7 @@
 lcollector <- function(path, type, ptype, .default, .parser = NULL,
                        .parser_expr = substitute(.parser, parent.frame(1)),
                        ...) {
-  check_default(.default, ptype)
+  check_default(.default, ptype, path)
 
   if (type %in% c("df", "df_lst", "lst", "lst_flat")) {
     type2 <- type
@@ -22,7 +22,7 @@ lcollector <- function(path, type, ptype, .default, .parser = NULL,
 }
 
 
-check_default <- function(default, ptype) {
+check_default <- function(default, ptype, path) {
   if (is_zap(default)) {
     return()
   }
@@ -32,13 +32,25 @@ check_default <- function(default, ptype) {
   }
 
   if (!vec_is_list(ptype) && vec_size(default) != 1) {
-    abort("size of `default` is not compatible with `ptype`.")
+    msg <- c(
+      paste0("error in specification for path ", deparse(path)),
+      x = paste0("`default` must have size 1, is ", vec_size(default))
+    )
+
+    abort(msg, class = "vctrs_error_incompatible_size")
   }
 
-  ptype2 <- vec_ptype2(ptype, default)
-  if (!vec_is(ptype2, ptype)) {
-    abort("`default` must be compatible with `ptype`.")
-  }
+  tryCatch(
+    vec_ptype2(ptype, default),
+    vctrs_error_incompatible_type = function(err) {
+      msg <- c(
+        paste0("error in specification for path ", deparse(path)),
+        i = "`default` and `ptype` are incompatible.",
+        x = err$message
+      )
+      abort(msg, class = "vctrs_error_incompatible_type", parent = err)
+    }
+  )
 }
 
 
