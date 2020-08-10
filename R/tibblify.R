@@ -53,7 +53,8 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
         keep_spec = FALSE
       )
 
-      resultlist[[i]] <- split_by_lengths(result, sizes)
+      result_split <- split_by_lengths(result, sizes)
+      resultlist[[i]] <- new_list_of(result_split, vec_ptype(result_split[[1]]))
     } else if (inherits(collector, "lcollector_guess")) {
       # stop("not yet supported")
       result <- guess_col(valueslist, collector$path)
