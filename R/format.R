@@ -37,7 +37,13 @@ format_subtype <- function(x, f_name, npad = 0, show_auto_names = FALSE) {
   # TODO handle auto name?
   # show_name <- !(attr(x$.parser$cols, "auto_name") %||% rlang::rep_along(x$.parser$cols, TRUE)) | show_auto_names
 
-  format.lcollector(x, body_parts, parser = NULL, npad = npad, inline = FALSE)
+  format.lcollector(
+    x,
+    body_parts,
+    parser = NULL,
+    npad = npad,
+    multi_line = TRUE
+  )
 }
 
 
@@ -138,7 +144,7 @@ colourise_lcol <- function(f_name) {
 format.lcollector <- function(x, ...,
                               parser = x[[".parser_expr"]],
                               npad = 0,
-                              inline = NULL) {
+                              multi_line = FALSE) {
   f_name <- colourise_lcol(sub("^lcollector_", "lcol_", class(x)[1]))
 
   if (!is.null(parser)) {
@@ -160,20 +166,22 @@ format.lcollector <- function(x, ...,
     format_default(x)
   )
 
-  parts <- collapse_with_pad(parts, inline = inline)
+  parts <- collapse_with_pad(parts, multi_line = multi_line)
 
   paste0(f_name, "(", parts, ")")
 }
 
-collapse_with_pad <- function(x, inline = NULL) {
+collapse_with_pad <- function(x, multi_line) {
   x_nms <- names2(x)
   x <- name_exprs(x, x_nms, x_nms != "")
 
-  if (inline %||% (length(x) < 3)) {
-    paste0(x, collapse = ", ")
+  x_single_line <- paste0(x, collapse = ", ")
+  x_multi_line <- paste0("\n", paste0(pad(x, 2), collapse = ",\n"), "\n")
+
+  if (multi_line || length(x) > 2 || nchar(x_single_line) > 70) {
+    x_multi_line
   } else {
-    x <- pad(x, 2)
-    paste0("\n", paste0(x, collapse = ",\n"), "\n")
+    x_single_line
   }
 }
 
@@ -210,7 +218,7 @@ format.lcol_spec <- function(x, n = Inf, show_auto_names = FALSE, ...) {
       default <- NULL
     }
 
-    inner <- collapse_with_pad(c(cols_args, default), inline = FALSE)
+    inner <- collapse_with_pad(c(cols_args, default), multi_line = TRUE)
 
     out <- paste0(
       "lcols(",
