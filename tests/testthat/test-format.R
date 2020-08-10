@@ -79,7 +79,7 @@ test_that("format breaks long lines", {
     lcols(
       just_a_very_long_name = lcol_dbl(
         list("this", "is", "just_a_very_long_name"),
-        .parser = ~ readr::parse_double(.x)
+        .parser = ~ and_a_long_function_name(.x)
       )
     ),
     "breaks_long_lines"
