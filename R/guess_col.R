@@ -170,12 +170,14 @@ is_recordlist <- function(x) {
   if (!(is_unnamedlist(x) && length(x))) {
     return(FALSE)
   }
-  at_least_one_object = FALSE
+  at_least_one_object <- FALSE
   for (i in x) {
-    if (!(is_namedlist(i) || is.null(i)))
+    if (!(is_namedlist(i) || is.null(i))) {
       return(FALSE)
-    if (!at_least_one_object && is_namedlist(i))
+    }
+    if (!at_least_one_object && is_namedlist(i)) {
       at_least_one_object <- TRUE
+    }
   }
   return(at_least_one_object)
 }
@@ -197,8 +199,8 @@ is_scalarlist <- function(sizes, ptype) {
   !is.null(ptype) &&
     !vec_is_list(ptype) &&
     all(sizes <= 1)
-    # or
-    # all(sizes == 1)
+  # or
+  # all(sizes == 1)
 
   # ~~~~~~~~~~
   # jsonlite definition
@@ -233,6 +235,8 @@ safe_ptype_common <- function(...) {
 }
 
 is_list_of_lists <- function(x) {
-  list_flag <- vapply(x, function(elt) {is_list(elt) || rlang::is_null(elt)}, logical(1))
+  list_flag <- vapply(x, function(elt) {
+    is_list(elt) || rlang::is_null(elt)
+  }, logical(1))
   all(list_flag)
 }

@@ -49,11 +49,14 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
       next
     }
 
-    tryCatch({
-      valueslist <- extract_index(recordlist, collector$path, collector$.default)
-    }, error = function(x) {
-      abort(paste0("empty or absent element at path ", collector$path))
-    })
+    tryCatch(
+      {
+        valueslist <- extract_index(recordlist, collector$path, collector$.default)
+      },
+      error = function(x) {
+        abort(paste0("empty or absent element at path ", collector$path))
+      }
+    )
     if (inherits(collector, "lcollector_df")) {
       resultlist[[i]] <- tibblify_impl(
         recordlist = valueslist,

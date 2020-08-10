@@ -15,7 +15,7 @@ lcols <- function(..., .default = lcol_skip(zap())) {
   pluckers <- check_pluckers(...)
 
   if (is_empty(pluckers) && is_skip_col(.default)) {
-    abort('must provide columns or not set `.default = zap()`')
+    abort("must provide columns or not set `.default = zap()`")
   }
 
   new_lcol_spec(pluckers, .default)

@@ -165,10 +165,10 @@ test_that("format lcols works", {
   )
 
   test_known_output(
-      lcols(
-        lcol_int("instance_id"),
-        lcol_chr("date_added"),
-        .default = lcol_chr(zap())
+    lcols(
+      lcol_int("instance_id"),
+      lcol_chr("date_added"),
+      .default = lcol_chr(zap())
     ),
     "lcols_default"
   )
