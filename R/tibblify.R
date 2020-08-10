@@ -1,3 +1,19 @@
+#' Rectange a nested list into a tidy tibble
+#'
+#' @param recordlist A nested list.
+#' @param col_specs A specification generated with `lcols()` how to turn the
+#' list into a tibble.
+#'
+#' @return The tibble generated according to the specification.
+#' @export
+#'
+#' @examples
+#' recordlist <- list(
+#'   list(id = 1, name = "Tyrion Lannister"),
+#'   list(id = 2, name = "Victarion Greyjoy")
+#' )
+#'
+#' tibblify(recordlist)
 tibblify <- function(recordlist, col_specs = lcols(.default = lcol_guess(zap()))) {
   tibblify_impl(recordlist, col_specs, keep_spec = TRUE)
 }
@@ -7,7 +23,6 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
   default_collector <- col_specs$.default
   collectors <- col_specs$cols
 
-  # if (!is_zap(default_collector)) {
   if (!is_skip_col(default_collector)) {
     fields <- tl_fields(recordlist)
     fields_with_spec <- purrr::map(collectors, list("path", 1))
@@ -75,6 +90,11 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
 
   if (is_true(keep_spec)) {
     col_specs$cols <- collectors
+
+    if (is_guess_col(default_collector)) {
+      col_specs$.default <- lcol_skip(zap())
+    }
+
     result <- set_spec(result, col_specs)
   }
 
