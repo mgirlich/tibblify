@@ -7,6 +7,7 @@
 \alias{lcol_chr}
 \alias{lcol_dat}
 \alias{lcol_dtt}
+\alias{lcol_vec}
 \alias{lcol_guess}
 \alias{lcol_skip}
 \alias{lcol_lst}
@@ -27,6 +28,8 @@ lcol_dat(path, .default = zap(), .parser = NULL)
 
 lcol_dtt(path, .default = zap(), .parser = NULL)
 
+lcol_vec(path, ptype, .default = zap(), .parser = NULL)
+
 lcol_guess(path, .default = NULL)
 
 lcol_skip(path)
@@ -45,6 +48,8 @@ lcol_df(path, ..., .default = zap())
 \item{.default}{Value to use if target is empty or absent. If \code{zap()} (the default) an error is thrown if target is empty or absent.}
 
 \item{.parser}{A transformation applied to each element of the list before coercing to \code{.ptype}. This is usually needed for \code{lcol_dat()} and \code{lcol_dtt()}.}
+
+\item{ptype}{The prototype of the vector.}
 
 \item{.ptype}{The \code{.ptype} for \code{vctrs::list_of()}.}
 

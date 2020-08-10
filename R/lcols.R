@@ -8,13 +8,10 @@
 #' https://github.com/r-lib/vroom/blob/843e4a66510146120d734980e60cefa550d61ff6/R/col_types.R
 #' @export
 lcols <- function(..., .default = lcol_skip(zap())) {
-  # TODO should have `.default_ptype` and `.default_transform`
-
   if (!is_lcollector(.default)) {
     abort("`.default` must be a lcollector")
   }
 
-  # TODO improve customer parser functionality
   pluckers <- check_pluckers(...)
 
   if (is_empty(pluckers) && is_skip_col(.default)) {
