@@ -1,76 +1,83 @@
+test_known_output <- function(x, name) {
+  expect_known_output(
+    print(x),
+    test_path("data", paste0("format_", name, ".txt"))
+  )
+}
+
 test_that("format for vectors works", {
-  expect_known_output(
-    print(lcol_chr("a")),
-    test_path("data", "format_chr.rds")
+  test_known_output(
+    lcol_chr("a"),
+    "chr"
   )
 
-  expect_known_output(
-    format(lcol_dat("a")),
-    test_path("data", "format_dat.rds")
+  test_known_output(
+    lcol_dat("a"),
+    "dat"
   )
 
-  expect_known_output(
-    format(lcol_dbl("a")),
-    test_path("data", "format_dbl.rds")
+  test_known_output(
+    lcol_dbl("a"),
+    "dbl"
   )
 
-  expect_known_output(
-    format(lcol_dtt("a")),
-    test_path("data", "format_dtt.rds")
+  test_known_output(
+    lcol_dtt("a"),
+    "dtt"
   )
 
-  expect_known_output(
-    format(lcol_guess("a")),
-    test_path("data", "format_guess.rds")
+  test_known_output(
+    lcol_guess("a"),
+    "guess"
   )
 
-  expect_known_output(
-    format(lcol_lgl("a")),
-    test_path("data", "format_lgl.rds")
+  test_known_output(
+    lcol_lgl("a"),
+    "lgl"
   )
 
-  expect_known_output(
-    format(lcol_lst("a")),
-    test_path("data", "format_lst.rds")
+  test_known_output(
+    lcol_lst("a"),
+    "lst"
   )
 
-  expect_known_output(
-    format(lcol_skip("a")),
-    test_path("data", "format_skip.rds")
+  test_known_output(
+    lcol_skip("a"),
+    "skip"
   )
 
-  expect_known_output(
-    format(lcol_int("a")),
-    test_path("data", "format_vector1.rds")
+  test_known_output(
+    lcol_int("a"),
+    "vector1"
   )
 
-  expect_known_output(
-    format(lcol_int("a", .default = NA_integer_)),
-    test_path("data", "format_vector2.rds")
+  test_known_output(
+    lcol_int("a", .default = NA_integer_),
+    "vector2"
   )
 
-  expect_known_output(
-    format(lcol_int("a", .parser = as.integer)),
-    test_path("data", "format_vector3.rds")
+  test_known_output(
+    lcol_int("a", .parser = as.integer),
+    "vector3"
   )
 
-  expect_known_output(
-    format(lcol_int("a", .default = NA_integer_, .parser = as.integer)),
-    test_path("data", "format_vector4.rds")
+  test_known_output(
+    lcol_int("a", .default = NA_integer_, .parser = as.integer),
+    "vector4"
   )
 
   skip("lcol_fct not yet implemented")
-  expect_known_output(
-    format(lcol_fct("a")),
-    test_path("data", "format_fct.rds")
+  test_known_output(
+    lcol_fct("a"),
+    "fct"
   )
 })
 
 
 test_that("format for lst_flat works", {
-  expect_known_output(
-    format(lcol_lst_flat("a", .ptype = character())),
-    test_path("data", "format_lst_flat.rds")
+  test_known_output(
+    lcol_lst_flat("a", .ptype = character()),
+    "lst_flat"
   )
 })
 
@@ -80,7 +87,10 @@ test_that("format for lcol_df works", {
     text = lcol_chr("text", .default = NA_character_)
   )
 
-  expect_known_output(x, test_path("data", "format_lcol_df_simple.rds"))
+  test_known_output(
+    x,
+    "lcol_df_simple"
+  )
 
   x <- lcol_df(
     "basic_information",
@@ -125,30 +135,29 @@ test_that("format for lcol_df works", {
     master_id = lcol_int("master_id")
   )
 
-  expect_known_output(x, test_path("data", "format_lcol_df_complex.rds"))
+  test_known_output(
+    x,
+    "lcol_df_complex"
+  )
 })
 
 
 test_that("format lcols works", {
-  expect_known_output(
-    format(
-      lcols(
-        lcol_int("instance_id"),
-        lcol_chr("date_added")
-      )
+  test_known_output(
+    lcols(
+      lcol_int("instance_id"),
+      lcol_chr("date_added")
     ),
-    test_path("data", "format_lcols_simple.rds")
+    "lcols_simple"
   )
 
-  expect_known_output(
-    format(
+  test_known_output(
       lcols(
         lcol_int("instance_id"),
         lcol_chr("date_added"),
         .default = lcol_chr(zap())
-      )
     ),
-    test_path("data", "format_lcols_default.rds")
+    "lcols_default"
   )
 
   col_specs <- lcols(
@@ -200,8 +209,8 @@ test_that("format lcols works", {
     lcol_int("rating"),
   )
 
-  expect_known_output(
-    print(col_specs),
-    test_path("data", "format_lcols_complex.rds")
+  test_known_output(
+    col_specs,
+    "lcols_complex"
   )
 })

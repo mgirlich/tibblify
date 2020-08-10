@@ -1,0 +1,4 @@
+lcols(
+  instance_id = lcol_int("instance_id"),
+  date_added = lcol_chr("date_added")
+)

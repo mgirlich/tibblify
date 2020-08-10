@@ -1,0 +1,4 @@
+lcol_df(
+  "formats",
+  text = lcol_chr("text", .default = NA)
+)
