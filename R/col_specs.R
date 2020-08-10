@@ -1,4 +1,6 @@
-lcollector <- function(path, type, ptype, .default, .parser = NULL, ...) {
+lcollector <- function(path, type, ptype, .default, .parser = NULL,
+                       .parser_expr = substitute(.parser, parent.frame(1)),
+                       ...) {
   check_default(.default, ptype)
 
   if (type %in% c("df", "df_lst", "lst", "lst_flat")) {
@@ -13,6 +15,7 @@ lcollector <- function(path, type, ptype, .default, .parser = NULL, ...) {
     type2 = type2,
     .default = .default,
     .parser = .parser,
+    .parser_expr = .parser_expr,
     ptype = ptype,
     ...
   )
@@ -145,7 +148,14 @@ lcol_dtt <- function(path, .default = zap(), .parser = NULL) {
 #' @export
 #' @rdname lcol_lgl
 lcol_guess <- function(path, .default = NULL) {
-  lcollector(path, "guess", ptype = NULL, .default = .default, .parser = NULL)
+  lcollector(
+    path,
+    "guess",
+    ptype = NULL,
+    .default = .default,
+    .parser = NULL,
+    .parser_expr = NULL
+  )
 }
 
 #' @export
