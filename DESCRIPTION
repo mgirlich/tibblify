@@ -1,13 +1,12 @@
 Package: listparser
-Title: What the Package Does (One Line, Title Case)
+Title: Rectangle Nested Lists
 Version: 0.0.0.9000
 Authors@R: 
     person(given = "Maximilian",
            family = "Girlich",
            role = c("aut", "cre"),
-           email = "maximilian.girlich@metoda.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+           email = "maximilian.girlich@metoda.com")
+Description: Tool to rectangle nested lists automatically or according to a given specification.
 License: GPL-3
 Suggests: 
     testthat,
