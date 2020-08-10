@@ -32,10 +32,7 @@ name_exprs <- function(exprs, names, show_name) {
 
 
 format_subtype <- function(x, f_name, npad = 0, show_auto_names = FALSE) {
-  # body_names <- names(x$.parser$cols)
   body_parts <- lapply(x$.parser$cols, format, npad = npad + 2)
-  # TODO handle auto name?
-  # show_name <- !(attr(x$.parser$cols, "auto_name") %||% rlang::rep_along(x$.parser$cols, TRUE)) | show_auto_names
 
   format.lcollector(
     x,
@@ -132,7 +129,8 @@ colourise_lcol <- function(f_name) {
       "skip" = crayon::cyan,
       "df" = ,
       "df_lst" = ,
-      "lst" = crayon::magenta
+      "lst" = crayon::magenta,
+      "vec" = crayon::black
     )(f_name)
   }
 

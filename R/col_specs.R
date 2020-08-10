@@ -79,6 +79,11 @@ is_skip_col <- function(x) {
   # inherits(x, "lcollector_skip")
 }
 
+is_guess_col <- function(x) {
+  class(x)[[1]] == "lcollector_guess"
+  # inherits(x, "lcollector_skip")
+}
+
 
 #' Create column specificcation
 #'
@@ -90,6 +95,7 @@ is_skip_col <- function(x) {
 #'
 #' @param ... Column specification passed on to `lcols()`.
 #' @param .ptype The `.ptype` for `vctrs::list_of()`.
+#' @param ptype The prototype of the vector.
 #'
 #' @export
 lcol_lgl <- function(path, .default = zap(), .parser = NULL) {
@@ -143,6 +149,12 @@ lcol_dat <- function(path, .default = zap(), .parser = NULL) {
 #' @rdname lcol_lgl
 lcol_dtt <- function(path, .default = zap(), .parser = NULL) {
   lcollector(path, "dtt", ptype = new_datetime(), .default = .default, .parser = .parser)
+}
+
+#' @export
+#' @rdname lcol_lgl
+lcol_vec <- function(path, ptype, .default = zap(), .parser = NULL) {
+  lcollector(path, "vec", ptype = ptype, .default = .default, .parser = .parser)
 }
 
 #' @export
