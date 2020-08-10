@@ -74,6 +74,19 @@ test_that("format for vectors works", {
 })
 
 
+test_that("format breaks long lines", {
+  test_known_output(
+    lcols(
+      just_a_very_long_name = lcol_dbl(
+        list("this", "is", "just_a_very_long_name"),
+        .parser = ~ readr::parse_double(.x)
+      )
+    ),
+    "breaks_long_lines"
+  )
+})
+
+
 test_that("format for lst_flat works", {
   test_known_output(
     lcol_lst_flat("a", .ptype = character()),
