@@ -62,7 +62,8 @@ guess_col <- function(x, path) {
       type = vec_ptype_abbr(ptype),
       ptype = ptype,
       .default = .default,
-      .parser = NULL
+      .parser = NULL,
+      .parser_expr = NULL
     )
     # attr(spec, "auto_name") <- TRUE
 
