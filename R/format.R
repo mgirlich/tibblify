@@ -58,7 +58,7 @@ has_colour <- function() {
 }
 
 
-# colourise_lcol.character <- function(x) {
+# colourise_lcol <- function(x) {
 #   UseMethod("colourise_lcol")
 # }
 #
@@ -136,7 +136,7 @@ colourise_lcol <- function(f_name) {
 
 #' @export
 format.lcollector <- function(x, ...,
-                              parser = x[[".parser"]],
+                              parser = x[[".parser_expr"]],
                               npad = 0,
                               inline = NULL) {
   f_name <- colourise_lcol(sub("^lcollector_", "lcol_", class(x)[1]))
