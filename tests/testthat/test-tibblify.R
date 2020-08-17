@@ -29,7 +29,7 @@ test_that("works", {
     lcol_skip("skip_it")
   )
 
-  expect_equivalent(
+  expect_equal(
     tibblify(recordlist, col_specs),
     tibble::tibble(
       chr = purrr::map_chr(recordlist, "chr", .default = NA_character_),
@@ -37,7 +37,8 @@ test_that("works", {
       chr_lst_of = list_of(!!!purrr::map(recordlist, "chr_lst"), .ptype = character()),
       chr_lst = purrr::map(recordlist, "chr_lst"),
       datetime = as.POSIXct(purrr::map_chr(recordlist, "datetime"))
-    )
+    ),
+    ignore_attr = TRUE
   )
 })
 
@@ -94,18 +95,19 @@ test_that("default works", {
   )
 
   # no default provided
-  expect_equivalent(
+  expect_equal(
     tibblify(
       recordlist,
       col_specs = lcols(
         lcol_int("int")
       )
     ),
-    tibble::tibble(int = 1:2)
+    tibble::tibble(int = 1:2),
+    ignore_attr = TRUE
   )
 
   # default: skip
-  expect_equivalent(
+  expect_equal(
     tibblify(
       recordlist,
       lcols(
@@ -113,7 +115,8 @@ test_that("default works", {
         .default = lcol_skip(zap())
       )
     ),
-    tibble::tibble(int = 1:2)
+    tibble::tibble(int = 1:2),
+    ignore_attr = TRUE
   )
 
   # default with transform
@@ -125,7 +128,7 @@ test_that("default works", {
     )
   )
 
-  expect_equivalent(
+  expect_equal(
     tibblify(
       recordlist,
       col_specs = col_specs
@@ -133,7 +136,8 @@ test_that("default works", {
     tibble::tibble(
       chr = c("a", "b"),
       int = as.character(1:2)
-    )
+    ),
+    ignore_attr = TRUE
   )
 })
 
@@ -161,14 +165,15 @@ test_that("df_cols work", {
     )
   )
 
-  expect_equivalent(
+  expect_equal(
     tibblify(recordlist, col_specs),
     tibble::tibble(
       df = tibble::tibble(
         chr = c("a", "b"),
         int = 1:2
       )
-    )
+    ),
+    ignore_attr = TRUE
   )
 })
 
@@ -184,20 +189,23 @@ test_that("guess_col works", {
     col_specs = lcols(.default = lcol_guess(zap()))
   )
 
-  expect_equivalent(
+  expect_equal(
     result,
-    tibble::tibble(a = 1:2)
+    tibble::tibble(a = 1:2),
+    ignore_attr = TRUE
   )
 
   skip("not yet testable")
-  expect_equivalent(
+  expect_equal(
     get_spec(result),
-    lcols(lcol_dbl("a"))
+    lcols(lcol_dbl("a")),
+    ignore_attr = TRUE
   )
 })
 
 
 test_that("known examples discog", {
+  local_edition(2)
   result <- tibblify(discog)
   expect_known_value(
     result,
@@ -253,30 +261,32 @@ test_that("known examples discog", {
     lcol_int("rating"),
   )
 
-  expect_equivalent(
+  local_edition(3)
+  expect_equal(
     result,
-    tibblify(discog, col_specs)
+    tibblify(discog, col_specs),
+    ignore_attr = TRUE
   )
 })
 
 test_that("gh_repos works", {
   result <- tibblify(gh_repos)
-  expect_known_value(result, test_path("data/gh_repos.rds"))
+  expect_snapshot_value(result, style = "json2")
 })
 
 test_that("gh_users works", {
   result <- tibblify(gh_users)
-  expect_known_value(result, test_path("data/gh_users.rds"))
+  expect_snapshot_value(result, style = "json2")
 })
 
 test_that("got_chars works", {
   skip_on_covr()
   result <- tibblify(got_chars)
-  expect_known_value(result, test_path("data/got_chars.rds"))
+  expect_snapshot_value(result, style = "json2")
 })
 
 test_that("sw_films works", {
   skip_on_covr()
   result <- tibblify(sw_films)
-  expect_known_value(result, test_path("data/sw_films.rds"))
+  expect_snapshot_value(result, style = "json2")
 })

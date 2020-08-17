@@ -48,9 +48,10 @@ test_that("recordlist work", {
   )
 
   result <- guess_col(recordlist, "tmp")
-  expect_equivalent(
+  expect_equal(
     result$result,
-    tibble::tibble(a = 1:2, chr = c("a", NA_character_))
+    tibble::tibble(a = 1:2, chr = c("a", NA_character_)),
+    ignore_attr = TRUE
   )
 
   spec_goal <- lcol_df(
