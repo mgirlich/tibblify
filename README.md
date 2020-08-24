@@ -1,25 +1,25 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# listparser
+# tibblify
 
 <!-- badges: start -->
 
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![CRAN
-status](https://www.r-pkg.org/badges/version/listparser)](https://CRAN.R-project.org/package=listparser)
+status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.org/package=tibblify)
 <!-- badges: end -->
 
-The goal of listparser is to …
+The goal of tibblify is to …
 
 ## Installation
 
-You can install the released version of listparser from
+You can install the released version of tibblify from
 [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-install.packages("listparser")
+install.packages("tibblify")
 ```
 
 ## Example
@@ -27,7 +27,7 @@ install.packages("listparser")
 This is a basic example which shows you how to solve a common problem:
 
 ``` r
-library(listparser)
+library(tibblify)
 
 str(got_chars[[1]])
 #> List of 18
@@ -150,7 +150,7 @@ tibblify(
 
 ## Parsing other types
 
-`listparser` provides shortcuts for a couple of common types. To parse a
+`tibblify` provides shortcuts for a couple of common types. To parse a
 type without a parser use `lcol_vec()`. For example to parse a list with
 `difftimes`
 

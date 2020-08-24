@@ -1,4 +1,4 @@
 library(testthat)
-library(listparser)
+library(tibblify)
 
-test_check("listparser")
+test_check("tibblify")
