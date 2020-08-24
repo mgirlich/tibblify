@@ -37,8 +37,8 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
       }
     )
     collectors <- c(collectors, set_names(new_collectors, fields_without_spec))
-    auto_names <- attr(collectors, "auto_name")
-    attr(collectors, "auto_name") <- c(attr(collectors, "auto_name"), rep_along(fields_without_spec, TRUE))
+    # auto_names <- attr(collectors, "auto_name")
+    # attr(collectors, "auto_name") <- c(attr(collectors, "auto_name"), rep_along(fields_without_spec, TRUE))
   }
 
   resultlist <- vector("list", length(collectors))

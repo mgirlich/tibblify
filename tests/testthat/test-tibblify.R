@@ -207,6 +207,11 @@ test_that("guess_col works", {
 test_that("known examples discog", {
   local_edition(2)
   result <- tibblify(discog)
+  # expect_snapshot_value doesn't work due to different environments
+  # expect_snapshot_value(
+  #   result,
+  #   style = "json2"
+  # )
   expect_known_value(
     result,
     test_path("data/discog.rds")
@@ -265,7 +270,8 @@ test_that("known examples discog", {
   expect_equal(
     result,
     tibblify(discog, col_specs),
-    ignore_attr = TRUE
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
   )
 })
 

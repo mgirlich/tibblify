@@ -116,6 +116,7 @@ guess_col <- function(x, path) {
     result_unlisted <- set_spec(result_unlisted, NULL)
 
     result <- split_by_lengths(result_unlisted, lengths(x))
+    result <- new_list_of(result, ptype = vec_ptype(result_unlisted))
 
     if (absent_or_empty) {
       .default <- NULL
@@ -123,7 +124,11 @@ guess_col <- function(x, path) {
       .default <- zap()
     }
 
-    spec <- lcol_df_lst(path, !!!spec_unlisted$cols, .default = .default)
+    spec <- lcol_df_lst(
+      path,
+      !!!spec_unlisted$cols,
+      .default = .default
+    )
 
     return(list(result = result, spec = spec))
   }
