@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Maximilian Girlich \email{maximilian.girlich@metoda.com}
+\strong{Maintainer}: Maximilian Girlich \email{maximilian.girlich@outlook.com}
 
 }
 \keyword{internal}
