@@ -15,5 +15,237 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup}
-library(tibblify)
 ```
+
+## Usage
+
+Let's convert the Leaders dataset into a tibble. It is a list with one element per character:
+
+```{r usage_example}
+library(tibblify)
+
+str(politicians[1])
+```
+
+We can let `tibblify()` automatically recognize the structure of the list and find an appropriate presentation as a tibble:
+
+```{r usage_leaders}
+politicians_tibble <- tibblify(politicians)
+politicians_tibble
+```
+
+The `parents` column is a tibble with the columns `mother` and `father` because in the original list `leader1` the field `parents` is a named list.
+
+```{r usage_tibble_column}
+politicians_tibble$parents
+```
+
+and the `spouses` column is a [`list_of`](https://vctrs.r-lib.org/reference/list_of.html) character because the `spouses` field is a list and all elements are characters
+
+```{r usage_list_of_column}
+politicians_tibble$spouses
+```
+
+
+## Specification
+
+In the above example we used `tibblify()` without any further specification on how to convert the list into a tibble. This is quite useful in an interactive session but often you want to provide a specification yourself. Some of the reasons are:
+
+* to ensure type and shape stability of the resulting tibble in automated scripts.
+* to use a different type of a column.
+* to use different names.
+* to parse only a subset of columns.
+* to specify what happens if a value is missing.
+
+First, we use `get_spec()` to view the specification used to convert our list to a tibble:
+
+```{r specification}
+get_spec(politicians_tibble)
+```
+
+A specification always starts with a call to `lcols()` (similar to [`readr::cols()`](https://readr.tidyverse.org/reference/cols.html)). Then you specify the columns you want with name-value pairs. The name is the name of the resulting column and the value is a specification created with one of the `lcol_*()` functions.
+
+
+## Path
+
+The first argument to `lcol_*()` is always a `path` which describes where to find the element. The syntax is the same as in `purrr::map()` used to extract fields. Some examples
+
+```{r path_examples}
+leader <- politicians[[1]]
+
+# get the element `id`
+path <- c("id")
+leader[["id"]]
+
+# get the element `father` in the element `parents`
+path <- c("parents", "father")
+leader[["parents"]][["mother"]]
+
+# get the first element in the element `spouses`
+path <- list("spouses", 1)
+leader[["spouses"]][[1]]
+```
+
+
+## Vector Columns
+
+A couple of typical vector types have a predefined extractor:
+
+* `lcol_chr()`: create a character column.
+* `lcol_lgl()`: create a logical column.
+* `lcol_int()`: create an integer column.
+* `lcol_dbl()`: create a double column.
+* `lcol_dat()`: create a date column.
+* `lcol_dtt()`: create a datetime column.
+
+See [parsing other types] to create a column of your own prototype.
+
+```{r vector_cols}
+tibblify(
+  politicians,
+  lcols(
+    lcol_int("id"),
+    lcol_chr("name"),
+    `family name` = lcol_chr("surname")
+  )
+)
+```
+
+
+## Missing Elements
+
+If an element doesn't exist an error is thrown as in `purrr::chuck()`. To use a default value instead of throwing an error use the `.default` argument. The `.default` value is also used in case the element at the path is empty:
+
+```{r missing_elements, error=TRUE}
+list_default <- list(
+  list(a = 1),
+  list(a = NULL),
+  list(a = integer()),
+  list()
+)
+
+tibblify(
+  list_default,
+  lcols(lcol_int("a"))
+)
+
+tibblify(
+  list_default,
+  lcols(lcol_int("a", .default = 0))
+)
+```
+
+
+## Parser
+
+When the cast is not possible with `vctrs::vec_cast()` you can use the `.parser` argument to supply a custom parser. It is passed to `rlang::as_function()` so you can use a function or a formula. A typical use case are dates stored as strings.
+
+```{r custom_parser}
+tibblify(
+  politicians,
+  lcols(
+    lcol_chr("surname"),
+    lcol_dat("dob", .parser = ~ as.Date(.x, format = "%Y-%m-%d"))
+  )
+)
+```
+
+
+## List and List Of Columns
+
+A `list_of` is a list where each element in the list has the same prototype. It is useful when you have fields with more than one element as in the `spouses` field.
+
+```{r}
+spouses_tbl <- tibblify(
+  politicians,
+  lcols(
+    lcol_chr("surname"),
+    lcol_lst_of("spouses", .ptype = character())
+  )
+)
+
+spouses_tbl$spouses
+```
+
+You can use [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/nest.html) or [`tidyr::unnest_longer()`][https://tidyr.tidyverse.org/reference/hoist.html] to flatten these columns to regular columns.
+
+A list column is used when you have a field with mixed elements.
+
+
+## Guess and Skip
+
+Analogue to `readr::col_guess()` and `readr::col_skip()` you can specify that you want to guess the column type with `lcol_guess()` respectively skip a field with `lcol_skip()`. Skipping a column can be useful when you set a default column type or you want to make clear that you know about the field and intentionally skip it.
+
+Guessing a column is useful in interactive sessions but you shouldn't rely on it in automated scripts.
+
+
+## Tibble Columns and List Of Tibble Columns
+
+If a field contains is a named list where each element has length 1 or 0 the field is converted to a tibble column. This is for example the case for the `parents` field:
+
+```{r}
+leaders_tibble <- tibblify(
+  politicians,
+  lcols(
+    lcol_chr("surname"),
+    lcol_guess("parents")
+  )
+)
+
+leaders_tibble
+```
+
+Tibble columns are a relatively new concept in the tidyverse. You can unpack a tibble column into regular columns with `tidyr::unpack()`.
+
+
+
+## Parsing other types
+
+`tibblify` provides shortcuts for a couple of common types. To parse a vector or record type without a parser use `lcol_vec()`. Let's say you have a list with `difftimes`
+
+```{r}
+now <- Sys.time()
+past <- now - c(100, 200)
+
+x <- list(
+  list(timediff = now - past[1]),
+  list(timediff = now - past[2])
+)
+
+x
+```
+
+You need to define a prototype
+
+```{r}
+ptype <- as.difftime(0, units = "secs")
+ptype
+```
+
+and then use it in `lcol_vec()`
+
+```{r}
+tibblify(
+  x,
+  lcols(
+    lcol_vec("timediff", ptype = ptype)
+  )
+)
+```
+
+
+## Default Column Type
+
+You can use the `.default` argument of `lcols()` to define a parser used for all unspecified fields.
+
+```{r}
+tibblify(
+  politicians,
+  lcols(
+    lcol_chr("name"),
+    lcol_chr("surname"),
+    .default = lcol_lst(path = zap(), .default = NULL)
+  )
+)
+```
+
