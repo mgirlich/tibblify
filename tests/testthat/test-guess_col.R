@@ -26,7 +26,7 @@ test_that("list_of work", {
     guess_col(list(1, 1:2), "a"),
     list(
       result = list_of(1, 1:2, .ptype = double()),
-      spec = lcol_lst_flat("a", .ptype = double())
+      spec = lcol_lst_of("a", .ptype = double())
     )
   )
 })

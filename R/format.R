@@ -124,7 +124,7 @@ colourise_lcol <- function(f_name) {
       "dat" = crayon::blue,
       "dtt" = crayon::blue,
       "lst" = crayon::yellow,
-      "lst_flat" = crayon::yellow,
+      "lst_of" = crayon::yellow,
       "guess" = crayon::cyan,
       "skip" = crayon::cyan,
       "df" = ,
@@ -185,7 +185,7 @@ collapse_with_pad <- function(x, multi_line) {
 
 
 #' @export
-format.lcollector_lst_flat <- function(x, ...) {
+format.lcollector_lst_of <- function(x, ...) {
   format.lcollector(x, .ptype = deparse(x$.ptype))
 }
 

@@ -26,7 +26,7 @@ lcol_df(
   title = lcol_chr("title"),
   formats = lcol_df_lst(
     "formats",
-    descriptions = lcol_lst_flat(
+    descriptions = lcol_lst_of(
       "descriptions",
       .ptype = character(0),
       .parser = ~vec_c(!!!.x, .ptype = character()),

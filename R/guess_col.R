@@ -79,7 +79,7 @@ guess_col <- function(x, path) {
       .default <- zap()
     }
 
-    spec <- lcol_lst_flat(
+    spec <- lcol_lst_of(
       path = path,
       .ptype = ptype,
       .default = .default
@@ -96,7 +96,7 @@ guess_col <- function(x, path) {
       ~ vec_c(!!!.x, .ptype = ptype_flat)
     )
 
-    spec <- lcol_lst_flat(
+    spec <- lcol_lst_of(
       path = path,
       .ptype = ptype_flat,
       .parser = ~ vec_c(!!!.x, .ptype = character()),

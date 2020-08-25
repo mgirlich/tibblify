@@ -87,8 +87,8 @@ get_spec(got_chars_tibble)
 #>   born = lcol_chr("born"),
 #>   died = lcol_chr("died"),
 #>   alive = lcol_lgl("alive"),
-#>   titles = lcol_lst_flat("titles", .ptype = character(0)),
-#>   aliases = lcol_lst_flat(
+#>   titles = lcol_lst_of("titles", .ptype = character(0)),
+#>   aliases = lcol_lst_of(
 #>     "aliases",
 #>     .ptype = character(0),
 #>     .default = NULL
@@ -96,19 +96,19 @@ get_spec(got_chars_tibble)
 #>   father = lcol_chr("father"),
 #>   mother = lcol_chr("mother"),
 #>   spouse = lcol_chr("spouse"),
-#>   allegiances = lcol_lst_flat(
+#>   allegiances = lcol_lst_of(
 #>     "allegiances",
 #>     .ptype = character(0),
 #>     .default = NULL
 #>   ),
-#>   books = lcol_lst_flat(
+#>   books = lcol_lst_of(
 #>     "books",
 #>     .ptype = character(0),
 #>     .default = NULL
 #>   ),
-#>   povBooks = lcol_lst_flat("povBooks", .ptype = character(0)),
-#>   tvSeries = lcol_lst_flat("tvSeries", .ptype = character(0)),
-#>   playedBy = lcol_lst_flat("playedBy", .ptype = character(0)),
+#>   povBooks = lcol_lst_of("povBooks", .ptype = character(0)),
+#>   tvSeries = lcol_lst_of("tvSeries", .ptype = character(0)),
+#>   playedBy = lcol_lst_of("playedBy", .ptype = character(0)),
 #>   .default = lcol_guess(zap(), .default = NULL)
 #> )
 ```
@@ -120,12 +120,12 @@ tibblify(
     id = lcol_int("id"),
     name = lcol_chr("name"),
     gender = lcol_chr("gender"),
-    aliases = lcol_lst_flat(
+    aliases = lcol_lst_of(
       "aliases",
       .ptype = character(0),
       .default = NULL
     ),
-    allegiances = lcol_lst_flat(
+    allegiances = lcol_lst_of(
       "allegiances",
       .ptype = character(0),
       .default = NULL

@@ -23,7 +23,7 @@ test_that("works", {
   col_specs <- lcols(
     lcol_chr("chr", .default = NA_character_),
     lcol_int("int"),
-    chr_lst_of = lcol_lst_flat("chr_lst", .ptype = character()),
+    chr_lst_of = lcol_lst_of("chr_lst", .ptype = character()),
     chr_lst = lcol_lst("chr_lst"),
     lcol_dtt("datetime", .parser = as.POSIXct),
     lcol_skip("skip_it")
@@ -248,7 +248,7 @@ test_that("known examples discog", {
       title = lcol_chr("title"),
       formats = lcol_df_lst(
         "formats",
-        descriptions = lcol_lst_flat(
+        descriptions = lcol_lst_of(
           "descriptions",
           .ptype = character(0),
           .parser = ~ vec_c(!!!.x, .ptype = character()),

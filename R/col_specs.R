@@ -3,7 +3,7 @@ lcollector <- function(path, type, ptype, .default, .parser = NULL,
                        ...) {
   check_default(.default, ptype, path)
 
-  if (type %in% c("df", "df_lst", "lst", "lst_flat")) {
+  if (type %in% c("df", "df_lst", "lst", "lst_of")) {
     type2 <- type
   } else {
     type2 <- "vector"
@@ -206,9 +206,9 @@ lcol_lst <- function(path, .default = zap(), .parser = NULL) {
 
 #' @export
 #' @rdname lcol_lgl
-lcol_lst_flat <- function(path, .ptype, .default = zap(), .parser = NULL) {
+lcol_lst_of <- function(path, .ptype, .default = zap(), .parser = NULL) {
   lcollector(
-    path, "lst_flat",
+    path, "lst_of",
     ptype = list_of(.ptype = .ptype),
     .default = .default,
     .parser = .parser,

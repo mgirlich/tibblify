@@ -11,7 +11,7 @@
 \alias{lcol_guess}
 \alias{lcol_skip}
 \alias{lcol_lst}
-\alias{lcol_lst_flat}
+\alias{lcol_lst_of}
 \alias{lcol_df_lst}
 \alias{lcol_df}
 \title{Create column specificcation}
@@ -36,7 +36,7 @@ lcol_skip(path)
 
 lcol_lst(path, .default = zap(), .parser = NULL)
 
-lcol_lst_flat(path, .ptype, .default = zap(), .parser = NULL)
+lcol_lst_of(path, .ptype, .default = zap(), .parser = NULL)
 
 lcol_df_lst(path, ..., .default = zap())
 

@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.org/package=tibblify)
 <!-- badges: end -->
 
-The goal of tibblify is to ...
+The goal of tibblify is to provide an easy way of converting a nested list into a tibble.
 
 ## Installation
 
@@ -30,74 +30,12 @@ You can install the released version of tibblify from [CRAN](https://CRAN.R-proj
 install.packages("tibblify")
 ```
 
-## Example
+Or install the development version from GitHub with:
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(tibblify)
-
-str(got_chars[[1]])
+```{r, eval = FALSE}
+# install.packages("devtools")
+devtools::install_github("mgirlich/tibblify")
 ```
 
-```{r}
-got_chars_tibble <- tibblify(got_chars)
-dplyr::glimpse(got_chars_tibble)
+```{r child='vignettes/tibblify.Rmd'} 
 ```
-
-```{r}
-get_spec(got_chars_tibble)
-```
-
-```{r}
-tibblify(
-  got_chars,
-  lcols(
-    id = lcol_int("id"),
-    name = lcol_chr("name"),
-    gender = lcol_chr("gender"),
-    aliases = lcol_lst_flat(
-      "aliases",
-      .ptype = character(0),
-      .default = NULL
-    ),
-    allegiances = lcol_lst_flat(
-      "allegiances",
-      .ptype = character(0),
-      .default = NULL
-    )
-  )
-)
-```
-
-
-
-## Parsing other types
-
-`tibblify` provides shortcuts for a couple of common types. To parse a type without a parser use `lcol_vec()`. For example to parse a list with `difftimes`
-
-```{r}
-now <- Sys.time()
-past <- now - c(100, 200)
-
-x <- list(
-  list(timediff = now - past[1]),
-  list(timediff = now - past[2])
-)
-
-x
-```
-
-
-
-```{r}
-ptype <- as.difftime(0, units = "secs")
-
-tibblify(
-  x,
-  lcols(
-    lcol_vec("timediff", ptype)
-  )
-)
-```
-

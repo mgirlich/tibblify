@@ -59,9 +59,9 @@
       )
     )
 
-# format for lst_flat works
+# format for lst_of works
 
-    lcol_lst_flat("a", .ptype = character(0))
+    lcol_lst_of("a", .ptype = character(0))
 
 # format for lcol_df works
 
@@ -100,7 +100,7 @@
       title = lcol_chr("title"),
       formats = lcol_df_lst(
         "formats",
-        descriptions = lcol_lst_flat(
+        descriptions = lcol_lst_of(
           "descriptions",
           .ptype = character(0),
           .parser = ~vec_c(!!!.x, .ptype = character()),
@@ -163,7 +163,7 @@
         title = lcol_chr("title"),
         formats = lcol_df_lst(
           "formats",
-          descriptions = lcol_lst_flat(
+          descriptions = lcol_lst_of(
             "descriptions",
             .ptype = character(0),
             .parser = ~vec_c(!!!.x, .ptype = character()),
