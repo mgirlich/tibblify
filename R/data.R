@@ -16,3 +16,10 @@
 #' got_chars
 #' str(lapply(got_chars, `[`, c("name", "culture")))
 "got_chars"
+
+#' Politicians
+#'
+#' A dataset containing some basic information about some politicians.
+#'
+#' @format A list of lists.
+"politicians"
