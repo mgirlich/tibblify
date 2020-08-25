@@ -37,5 +37,6 @@ Or install the development version from GitHub with:
 devtools::install_github("mgirlich/tibblify")
 ```
 
+
 ```{r child='vignettes/tibblify.Rmd'} 
 ```
