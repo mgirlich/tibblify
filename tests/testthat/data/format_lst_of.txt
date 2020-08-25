@@ -1,0 +1,1 @@
+lcol_lst_of("a", .ptype = character(0))

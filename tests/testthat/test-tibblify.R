@@ -29,7 +29,7 @@ test_that("works", {
     lcol_skip("skip_it")
   )
 
-  expect_equal(
+  expect_equivalent(
     tibblify(recordlist, col_specs),
     tibble::tibble(
       chr = purrr::map_chr(recordlist, "chr", .default = NA_character_),
@@ -95,7 +95,7 @@ test_that("default works", {
   )
 
   # no default provided
-  expect_equal(
+  expect_equivalent(
     tibblify(
       recordlist,
       col_specs = lcols(
@@ -107,7 +107,7 @@ test_that("default works", {
   )
 
   # default: skip
-  expect_equal(
+  expect_equivalent(
     tibblify(
       recordlist,
       lcols(
@@ -128,7 +128,7 @@ test_that("default works", {
     )
   )
 
-  expect_equal(
+  expect_equivalent(
     tibblify(
       recordlist,
       col_specs = col_specs
@@ -165,7 +165,7 @@ test_that("df_cols work", {
     )
   )
 
-  expect_equal(
+  expect_equivalent(
     tibblify(recordlist, col_specs),
     tibble::tibble(
       df = tibble::tibble(
@@ -189,14 +189,14 @@ test_that("guess_col works", {
     col_specs = lcols(.default = lcol_guess(zap()))
   )
 
-  expect_equal(
+  expect_equivalent(
     result,
     tibble::tibble(a = 1:2),
     ignore_attr = TRUE
   )
 
   skip("not yet testable")
-  expect_equal(
+  expect_equivalent(
     get_spec(result),
     lcols(lcol_dbl("a")),
     ignore_attr = TRUE
@@ -205,7 +205,6 @@ test_that("guess_col works", {
 
 
 test_that("known examples discog", {
-  local_edition(2)
   result <- tibblify(discog)
   # expect_snapshot_value doesn't work due to different environments
   # expect_snapshot_value(
@@ -266,7 +265,6 @@ test_that("known examples discog", {
     lcol_int("rating"),
   )
 
-  local_edition(3)
   expect_equal(
     result,
     tibblify(discog, col_specs),
@@ -277,22 +275,22 @@ test_that("known examples discog", {
 
 test_that("gh_repos works", {
   result <- tibblify(gh_repos)
-  expect_snapshot_value(result, style = "json2")
+  expect_known_value(result, test_path("data/gh_repos.rds"))
 })
 
 test_that("gh_users works", {
   result <- tibblify(gh_users)
-  expect_snapshot_value(result, style = "json2")
+  expect_known_value(result, test_path("data/gh_users.rds"))
 })
 
 test_that("got_chars works", {
   skip_on_covr()
   result <- tibblify(got_chars)
-  expect_snapshot_value(result, style = "json2")
+  expect_known_value(result, test_path("data/got_chars.rds"))
 })
 
 test_that("sw_films works", {
   skip_on_covr()
   result <- tibblify(sw_films)
-  expect_snapshot_value(result, style = "json2")
+  expect_known_value(result, test_path("data/sw_films.rds"))
 })

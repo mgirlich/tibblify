@@ -1,76 +1,96 @@
+test_known_output <- function(x, name) {
+  expect_known_output(
+    print(x),
+    test_path("data", paste0("format_", name, ".txt"))
+  )
+}
+
 test_that("format for vectors works", {
-  expect_snapshot_output(print(lcol_chr("a")))
-
-  expect_snapshot_output(
-    print(lcol_dat("a"))
+  test_known_output(
+    lcol_chr("a"),
+    "chr"
   )
 
-  expect_snapshot_output(
-    print(lcol_dbl("a"))
+  test_known_output(
+    lcol_dat("a"),
+    "dat"
   )
 
-  expect_snapshot_output(
-    print(lcol_dtt("a"))
+  test_known_output(
+    lcol_dbl("a"),
+    "dbl"
   )
 
-  expect_snapshot_output(
-    print(lcol_guess("a"))
+  test_known_output(
+    lcol_dtt("a"),
+    "dtt"
   )
 
-  expect_snapshot_output(
-    print(lcol_lgl("a"))
+  test_known_output(
+    lcol_guess("a"),
+    "guess"
   )
 
-  expect_snapshot_output(
-    print(lcol_lst("a"))
+  test_known_output(
+    lcol_lgl("a"),
+    "lgl"
   )
 
-  expect_snapshot_output(
-    print(lcol_skip("a"))
+  test_known_output(
+    lcol_lst("a"),
+    "lst"
   )
 
-  expect_snapshot_output(
-    print(lcol_int("a"))
+  test_known_output(
+    lcol_skip("a"),
+    "skip"
   )
 
-  expect_snapshot_output(
-    print(lcol_int("a", .default = NA_integer_))
+  test_known_output(
+    lcol_int("a"),
+    "vector1"
   )
 
-  expect_snapshot_output(
-    print(lcol_int("a", .parser = as.integer))
+  test_known_output(
+    lcol_int("a", .default = NA_integer_),
+    "vector2"
   )
 
-  expect_snapshot_output(
-    print(lcol_int("a", .default = NA_integer_, .parser = as.integer))
+  test_known_output(
+    lcol_int("a", .parser = as.integer),
+    "vector3"
   )
-})
 
-test_that("format for factors work", {
+  test_known_output(
+    lcol_int("a", .default = NA_integer_, .parser = as.integer),
+    "vector4"
+  )
+
   skip("lcol_fct not yet implemented")
-  expect_snapshot_output(
-    print(lcol_fct("a"))
+  test_known_output(
+    lcol_fct("a"),
+    "fct"
   )
 })
 
 
 test_that("format breaks long lines", {
-  expect_snapshot_output(
-    print(
-      lcols(
-        just_a_very_long_name = lcol_dbl(
-          list("this", "is", "just_a_very_long_name"),
-          .parser = ~ and_a_long_function_name(.x)
-        )
+  test_known_output(
+    lcols(
+      just_a_very_long_name = lcol_dbl(
+        list("this", "is", "just_a_very_long_name"),
+        .parser = ~ and_a_long_function_name(.x)
       )
-    )
+    ),
+    "breaks_long_lines"
   )
 })
 
 
 test_that("format for lst_of works", {
-  expect_snapshot_output(
-    print(lcol_lst_of("a", .ptype = character()))
+  test_known_output(
+    lcol_lst_of("a", .ptype = character()),
+    "lst_of"
   )
 })
 
@@ -80,7 +100,10 @@ test_that("format for lcol_df works", {
     text = lcol_chr("text", .default = NA_character_)
   )
 
-  expect_snapshot_output(print(x))
+  test_known_output(
+    x,
+    "lcol_df_simple"
+  )
 
   x <- lcol_df(
     "basic_information",
@@ -125,28 +148,29 @@ test_that("format for lcol_df works", {
     master_id = lcol_int("master_id")
   )
 
-  expect_snapshot_output(print(x))
+  test_known_output(
+    x,
+    "lcol_df_complex"
+  )
 })
 
 
 test_that("format lcols works", {
-  expect_snapshot_output(
-    print(
-      lcols(
-        lcol_int("instance_id"),
-        lcol_chr("date_added")
-      )
-    )
+  test_known_output(
+    lcols(
+      lcol_int("instance_id"),
+      lcol_chr("date_added")
+    ),
+    "lcols_simple"
   )
 
-  expect_snapshot_output(
-    print(
-      lcols(
-        lcol_int("instance_id"),
-        lcol_chr("date_added"),
-        .default = lcol_chr(zap())
-      )
-    )
+  test_known_output(
+    lcols(
+      lcol_int("instance_id"),
+      lcol_chr("date_added"),
+      .default = lcol_chr(zap())
+    ),
+    "lcols_default"
   )
 
   col_specs <- lcols(
@@ -198,5 +222,8 @@ test_that("format lcols works", {
     lcol_int("rating"),
   )
 
-  expect_snapshot_output(print(col_specs))
+  test_known_output(
+    col_specs,
+    "lcols_complex"
+  )
 })
