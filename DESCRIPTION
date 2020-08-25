@@ -9,7 +9,7 @@ Authors@R:
 Description: Tool to rectangle nested lists automatically or according to a given specification.
 License: GPL-3
 Suggests: 
-    testthat (>= 2.99.0.9000),
+    testthat,
     knitr,
     rmarkdown,
     covr
@@ -28,5 +28,3 @@ Depends:
     R (>= 2.10)
 URL: https://github.com/mgirlich/tibblify
 BugReports: https://github.com/mgirlich/tibblify/issues
-Remotes: 
-    r-lib/testthat
