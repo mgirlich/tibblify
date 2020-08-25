@@ -409,3 +409,10 @@ tibblify(
 #> 1 Barack Obama   <int [1… <chr [1… <dbl [1]>  <named list [… <list [1… <list [2…
 #> 2 Boris  Johnson <int [1… <chr [1… <NULL>     <named list [… <list [2… <list [3…
 ```
+
+## Code of Conduct
+
+Please note that the tibblify project is released with a [Contributor
+Code of
+Conduct](https://contributor-covenant.org/version/2/0/CODE_OF_CONDUCT.html).
+By contributing to this project, you agree to abide by its terms.
