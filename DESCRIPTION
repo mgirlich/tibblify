@@ -12,7 +12,8 @@ Suggests:
     testthat,
     knitr,
     rmarkdown,
-    covr
+    covr,
+    spelling
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
@@ -28,3 +29,4 @@ Depends:
     R (>= 3.4.0)
 URL: https://github.com/mgirlich/tibblify
 BugReports: https://github.com/mgirlich/tibblify/issues
+Language: en-US
