@@ -5,7 +5,7 @@ Authors@R:
     person(given = "Maximilian",
            family = "Girlich",
            role = c("aut", "cre"),
-           email = "maximilian.girlich@metoda.com")
+           email = "maximilian.girlich@outlook.com")
 Description: Tool to rectangle nested lists automatically or according to a given specification.
 License: GPL-3
 Suggests: 
