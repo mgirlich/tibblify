@@ -9,6 +9,10 @@
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.org/package=tibblify)
+[![Codecov test
+coverage](https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg)](https://codecov.io/gh/mgirlich/tibblify?branch=master)
+[![R build
+status](https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg)](https://github.com/mgirlich/tibblify/actions)
 <!-- badges: end -->
 
 The goal of tibblify is to provide an easy way of converting a nested
