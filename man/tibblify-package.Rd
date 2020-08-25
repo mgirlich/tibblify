@@ -2,8 +2,8 @@
 % Please edit documentation in R/tibblify-package.R
 \docType{package}
 \name{tibblify-package}
-\alias{tibblify}
 \alias{tibblify-package}
+\alias{_PACKAGE}
 \title{tibblify: Rectangle Nested Lists}
 \description{
 Tool to rectangle nested lists automatically or according to a given specification.
