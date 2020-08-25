@@ -8,3 +8,8 @@
 ## usethis namespace: start
 ## usethis namespace: end
 NULL
+
+#' @aliases zap
+#' @importFrom rlang zap
+#' @export zap
+rlang::zap
