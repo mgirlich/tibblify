@@ -76,16 +76,6 @@ is_lcollector <- function(x) {
   inherits(x, "lcollector")
 }
 
-# is_scalar_collector <- function(x) {
-#   scalar_classes <- c("lgl", "int", "dbl", "chr", "fct", "dat", "dtt", "hms")
-#   inherits(x, paste0("lcollector_", scalar_classes))
-# }
-
-# is_collector_of <- function(x, type) {
-#   # inherits(x, paste0("lcollector_", type))
-#   class(x)[[1]] == paste0("lcollector_", type)
-# }
-
 is_skip_col <- function(x) {
   class(x)[[1]] == "lcollector_skip"
   # inherits(x, "lcollector_skip")
@@ -131,25 +121,6 @@ lcol_dbl <- function(path, .default = zap(), .parser = NULL) {
 lcol_chr <- function(path, .default = zap(), .parser = NULL) {
   lcollector(path, "chr", ptype = character(), .default = .default, .parser = .parser)
 }
-
-# TODO decide how to deal with factors
-# #' @param ordered Is it an ordered factor?
-# #' @param levels Character vector providing set of allowed values.
-# #' @param include_na If `NA` are present, include as an explicit level in the factor.
-# #'
-# #' @export
-# #' @rdname lcol_lgl
-# lcol_fct <- function(path, levels = NULL, ordered = FALSE,
-#                      include_na = FALSE, .default = zap(), .parser = NULL) {
-#   if (isTRUE(include_na)) {
-#     exclude <- c()
-#   } else {
-#     exclude <- NA
-#   }
-#   ptype <- factor(levels = levels, ordered = ordered, exclude = exclude)
-#
-#   lcollector(path, "fct", ptype = ptype, .default = .default, .parser = .parser)
-# }
 
 #' @export
 #' @rdname lcol_lgl

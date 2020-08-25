@@ -150,20 +150,24 @@ guess_col <- function(x, path) {
   stop("something unexpected happened")
 }
 
-# x <- list(
-#   list(a = 1),
-#   list(a = 2)
-# )
-# should this be a recordlist?
-# x <- list(
-#   list(a = 1),
-#   list()
-# )
-# should this be a recordlist?
-# x <- list(
-#   list(a = 1),
-#   NULL
-# )
+#' @noRd
+#' @examples
+#' x <- list(
+#'   list(a = 1),
+#'   list(a = 2)
+#' )
+#'
+#' # should this be a recordlist?
+#' x <- list(
+#'   list(a = 1),
+#'   list()
+#' )
+#'
+#' # should this be a recordlist?
+#' x <- list(
+#'   list(a = 1),
+#'   NULL
+#' )
 is_recordlist <- function(x) {
   # * all elements are a list or `NULL`
   # * all elements are fully named?
@@ -195,7 +199,6 @@ is_namedlist <- function(x) {
   isTRUE(is.list(x) && !is.null(names(x)))
 }
 
-# is_scalarlist <- function(x) {
 is_scalarlist <- function(sizes, ptype) {
   # what about size 0 elements?
   # * integer()
