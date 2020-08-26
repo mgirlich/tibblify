@@ -1,1 +1,1 @@
-lcol_vec("a", ptype = structure(numeric(0), class = "difftime", units = "secs"))
+lcol_vec("a", ptype = structure(numeric(0), class = "difftime", units = "mins"))

@@ -44,7 +44,7 @@ test_that("lcol_vec works", {
     guess_col(recordlist, "a"),
     list(
       result = vec_c(!!!recordlist),
-      spec = lcol_vec("a", ptype = difftime(c(), c(), units = "mins"))
+      spec = lcol_vec("a", ptype = new_difftime(units = "mins"))
     )
   )
 })

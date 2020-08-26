@@ -67,7 +67,7 @@ test_that("format for vectors works", {
   )
 
   test_known_output(
-    lcol_vec("a", ptype = difftime(c(), c())),
+    lcol_vec("a", ptype = new_difftime(units = "mins")),
     "lcol_vec"
   )
 
