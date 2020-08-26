@@ -56,14 +56,25 @@ guess_col <- function(x, path) {
       .default <- zap()
     }
 
-    spec <- lcollector(
-      path,
-      type = vec_ptype_abbr(ptype),
-      ptype = ptype,
-      .default = .default,
-      .parser = NULL,
-      .parser_expr = NULL
-    )
+    type <- vec_ptype_abbr(ptype)
+
+    known_types <- c("lgl", "int", "dbl", "chr", "dat", "dtt")
+    if (type %in% known_types) {
+      spec <- lcollector(
+        path,
+        type = vec_ptype_abbr(ptype),
+        ptype = ptype,
+        .default = .default,
+        .parser = NULL,
+        .parser_expr = NULL
+      )
+    } else {
+      spec <- lcol_vec(
+        path,
+        ptype = ptype,
+        .default = .default
+      )
+    }
     # attr(spec, "auto_name") <- TRUE
 
     return(list(result = result, spec = spec))

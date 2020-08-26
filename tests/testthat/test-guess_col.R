@@ -31,6 +31,24 @@ test_that("list_of work", {
   )
 })
 
+test_that("lcol_vec works", {
+  now <- Sys.time()
+  past <- now - c(100, 200)
+
+  recordlist <- list(
+    now - past[1],
+    now - past[2]
+  )
+
+  expect_equal(
+    guess_col(recordlist, "a"),
+    list(
+      result = vec_c(!!!recordlist),
+      spec = lcol_vec("a", ptype = difftime(c(), c(), units = "mins"))
+    )
+  )
+})
+
 test_that("lists work", {
   expect_equal(
     guess_col(list(1, "a"), "a"),

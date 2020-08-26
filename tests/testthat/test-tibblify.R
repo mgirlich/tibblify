@@ -25,7 +25,7 @@ test_that("works", {
     lcol_int("int"),
     chr_lst_of = lcol_lst_of("chr_lst", .ptype = character()),
     chr_lst = lcol_lst("chr_lst"),
-    lcol_dtt("datetime", .parser = as.POSIXct),
+    lcol_dtt("datetime", .parser = ~ as.POSIXct(.x, tz = "UTC")),
     lcol_skip("skip_it")
   )
 
@@ -230,13 +230,31 @@ test_that("lcol_vec works", {
 
   expect_equivalent(
     tibblify(recordlist, spec),
-    tibble::tibble(a = vec_c(x_rcrd, x_rcrd + 1)),
+    tibble::tibble(a = vec_c(!!!purrr::map(recordlist, "a"))),
+    ignore_attr = TRUE
+  )
+
+  now <- Sys.time()
+  past <- now - c(100, 200)
+
+  recordlist <- list(
+    list(timediff = now - past[1]),
+    list(timediff = now - past[2])
+  )
+
+  spec <- lcols(
+    lcol_vec("timediff", ptype = recordlist[[1]]$timediff)
+  )
+
+  expect_equivalent(
+    tibblify(recordlist, spec),
+    tibble::tibble(timediff = vec_c(!!!purrr::map(recordlist, "timediff"))),
     ignore_attr = TRUE
   )
 })
 
 test_that("records work", {
-  x_rcrd <- rep(as.POSIXlt(Sys.time()), 2)
+  x_rcrd <- rep(as.POSIXlt(Sys.time(), tz = "UTC"), 2)
   expect_equal(
     simplify_col(as.list(x_rcrd), ptype = x_rcrd[[1]]),
     x_rcrd

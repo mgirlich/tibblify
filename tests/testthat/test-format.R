@@ -66,6 +66,11 @@ test_that("format for vectors works", {
     "vector4"
   )
 
+  test_known_output(
+    lcol_vec("a", ptype = difftime(c(), c())),
+    "lcol_vec"
+  )
+
   skip("lcol_fct not yet implemented")
   test_known_output(
     lcol_fct("a"),

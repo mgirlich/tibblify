@@ -169,14 +169,20 @@ colourise_lcol <- function(f_name) {
       "lst_of" = crayon::yellow,
       "guess" = crayon::cyan,
       "skip" = crayon::cyan,
-      "df" = ,
-      "df_lst" = ,
+      "df" = crayon::magenta,
+      "df_lst" = crayon::magenta,
       "lst" = crayon::magenta,
       "vec" = crayon::black
     )(f_name)
   }
 
   f_name
+}
+
+
+#' @export
+format.lcollector_vec <- function(x, ...) {
+  format.lcollector(x, ptype = deparse(x$ptype), ...)
 }
 
 
