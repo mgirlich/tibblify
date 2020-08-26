@@ -167,7 +167,7 @@ spouses_tbl <- tibblify(
 spouses_tbl$spouses
 ```
 
-You can use [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/nest.html) or [`tidyr::unnest_longer()`][https://tidyr.tidyverse.org/reference/hoist.html] to flatten these columns to regular columns.
+You can use [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/nest.html) or [`tidyr::unnest_longer()`](https://tidyr.tidyverse.org/reference/hoist.html) to flatten these columns to regular columns.
 
 A list column is used when you have a field with mixed elements.
 
