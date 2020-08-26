@@ -274,23 +274,27 @@ test_that("known examples discog", {
 })
 
 test_that("gh_repos works", {
+  skip_on_cran()
   result <- tibblify(gh_repos)
   expect_known_value(result, test_path("data/gh_repos.rds"))
 })
 
 test_that("gh_users works", {
+  skip_on_cran()
   result <- tibblify(gh_users)
   expect_known_value(result, test_path("data/gh_users.rds"))
 })
 
 test_that("got_chars works", {
   skip_on_covr()
+  skip_on_cran()
   result <- tibblify(got_chars)
   expect_known_value(result, test_path("data/got_chars.rds"))
 })
 
 test_that("sw_films works", {
   skip_on_covr()
+  skip_on_cran()
   result <- tibblify(sw_films)
   expect_known_value(result, test_path("data/sw_films.rds"))
 })
