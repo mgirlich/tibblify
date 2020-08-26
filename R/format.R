@@ -5,8 +5,8 @@ print.lcollector <- function(x, ...) {
 
 
 #' @export
-print.lcol_spec <- function(x, n = Inf, condense = NULL, colour = has_colour(), ...) {
-  cat(format.lcol_spec(x, n = n, condense = condense, colour = colour, ...))
+print.lcol_spec <- function(x, width = NULL, ...) {
+  cat(format.lcol_spec(x, width = width, ...))
 
   invisible(x)
 }
@@ -31,27 +31,69 @@ name_exprs <- function(exprs, names, show_name) {
 }
 
 
-format_subtype <- function(x, f_name, npad = 0) {
-  body_parts <- lapply(x$.parser$cols, format, npad = npad + 2)
+format_subtype <- function(f_name, path, cols, default, width, ..., npad = 0) {
+  if (!is_skip_col(default)) {
+    default <- format_default(default)
+  } else {
+    default <- NULL
+  }
 
-  format.lcollector(
-    x,
-    body_parts,
-    parser = NULL,
-    npad = npad,
-    multi_line = TRUE
+  if (is_zap(path)) {
+    path <- "zap()"
+  } else if (!is.null(path)) {
+    path <- deparse(path)
+  }
+
+  cols_args <- purrr::map2(
+    cols,
+    # 3 -> " = "
+    # 1 -> trailing comma
+    nchar(names(cols)) + 3 + 1,
+    function(col, nchar_indent) {
+      format(
+        col,
+        nchar_indent = nchar_indent,
+        width = width
+      )
+    }
+  )
+
+  inner <- collapse_with_pad(
+    c(path, cols_args, default),
+    multi_line = TRUE,
+    width = width
+  )
+
+  paste0(
+    f_name, "(",
+    inner,
+    ")"
   )
 }
 
 
 #' @export
-format.lcollector_df <- function(x, ..., npad = 0) {
-  format_subtype(x, "lcol_df", npad)
+format.lcollector_df <- function(x, ..., width = NULL, npad = 0) {
+  format_subtype(
+    "lcol_df",
+    path = x$path,
+    cols = x$.parser$cols,
+    default = x$.parser$.default,
+    width = width,
+    npad = npad
+  )
 }
 
 #' @export
-format.lcollector_df_lst <- function(x, ..., npad = 0) {
-  format_subtype(x, "lcol_df_lst", npad)
+format.lcollector_df_lst <- function(x, ..., width = NULL, npad = 0) {
+  format_subtype(
+    "lcol_df_lst",
+    path = x$path,
+    cols = x$.parser$cols,
+    default = x$.parser$.default,
+    width = width,
+    npad = npad
+  )
 }
 
 
@@ -163,7 +205,7 @@ format.lcollector <- function(x, ...,
     path,
     ...,
     parser,
-    format_default(x)
+    format_default(x$.default)
   )
 
   nchar_prefix <- nchar_indent + nchar(f_name) + 2
@@ -196,7 +238,7 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
 }
 
 tibblify_width <- function(width = NULL) {
-  NULL %||% getOption("width")
+  width %||% getOption("width")
 }
 
 
@@ -205,50 +247,19 @@ format.lcollector_lst_of <- function(x, ...) {
   format.lcollector(x, .ptype = deparse(x$.ptype))
 }
 
-format_default <- function(x) {
-  c(.default = format(x$.default))
+format_default <- function(default) {
+  c(.default = format(default))
 }
 
 #' @export
 format.lcol_spec <- function(x, width = NULL, ...) {
-  cols <- x$cols
-
-  if (length(cols) == 0) {
-    out <- paste0("lcols(", format_default(x$.default), ")")
-  } else {
-    if (!is_skip_col(x$.default)) {
-      default <- format_default(x)
-    } else {
-      default <- NULL
-    }
-
-    cols_args <- purrr::map2(
-      cols,
-      nchar(names(cols)) + 3,
-      function(col, nchar_indent) {
-        format(
-          col,
-          nchar_indent = nchar_indent,
-          width = width
-        )
-      }
-    )
-
-    inner <- collapse_with_pad(
-      c(cols_args, default),
-      multi_line = TRUE,
-      width = width
-    )
-
-    out <- paste0(
-      "lcols(",
-      inner,
-      ")\n"
-    )
-  }
-
-
-  out
+  format_subtype(
+    "lcols",
+    path = NULL,
+    cols = x$cols,
+    default = x$.default,
+    width = width
+  )
 }
 
 

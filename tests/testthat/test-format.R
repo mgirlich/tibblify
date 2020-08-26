@@ -1,6 +1,6 @@
-test_known_output <- function(x, name) {
+test_known_output <- function(x, name, width = 80) {
   expect_known_output(
-    print(x),
+    print(x, width = width),
     test_path("data", paste0("format_", name, ".txt"))
   )
 }
@@ -76,12 +76,20 @@ test_that("format for vectors works", {
 
 test_that("format breaks long lines", {
   test_known_output(
-    lcols(
-      just_a_very_long_name = lcol_dbl(
-        list("this", "is", "just_a_very_long_name"),
-        .parser = ~ and_a_long_function_name(.x)
-      )
+    lcol_df(
+      "path",
+      a_long_name = lcol_dbl("a loooooooooooooooooooog name", .default = 1)
     ),
+    width = 70,
+    "does_not_break_short_lines"
+  )
+
+  test_known_output(
+    lcol_df(
+      "path",
+      a_long_name = lcol_dbl("a loooooooooooooooooooog name", .default = 1)
+    ),
+    width = 69,
     "breaks_long_lines"
   )
 })
@@ -117,7 +125,7 @@ test_that("format for lcol_df works", {
       entity_type_name = lcol_chr("entity_type_name")
     ),
     year = lcol_int("year"),
-    master_url = lcol_chr("master_url", .default = NA_character_),
+    master_url = lcol_chr("master_url", .default = NA),
     artists = lcol_df_lst(
       "artists",
       join = lcol_chr("join"),
@@ -139,7 +147,7 @@ test_that("format for lcol_df works", {
         .parser = ~ vec_c(!!!.x, .ptype = character()),
         .default = NULL
       ),
-      text = lcol_chr("text", .default = NA_character_),
+      text = lcol_chr("text", .default = NA),
       name = lcol_chr("name"),
       qty = lcol_chr("qty")
     ),
@@ -188,7 +196,7 @@ test_that("format lcols works", {
         entity_type_name = lcol_chr("entity_type_name")
       ),
       year = lcol_int("year"),
-      master_url = lcol_chr("master_url", .default = NA_character_),
+      master_url = lcol_chr("master_url", .default = NA),
       artists = lcol_df_lst(
         "artists",
         join = lcol_chr("join"),
@@ -210,7 +218,7 @@ test_that("format lcols works", {
           .parser = ~ vec_c(!!!.x, .ptype = character()),
           .default = NULL
         ),
-        text = lcol_chr("text", .default = NA_character_),
+        text = lcol_chr("text", .default = NA),
         name = lcol_chr("name"),
         qty = lcol_chr("qty")
       ),

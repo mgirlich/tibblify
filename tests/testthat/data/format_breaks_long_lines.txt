@@ -1,6 +1,7 @@
-lcols(
-  just_a_very_long_name = lcol_dbl(
-    list("this", "is", "just_a_very_long_name"),
-    .parser = ~and_a_long_function_name(.x)
+lcol_df(
+  "path",
+  a_long_name = lcol_dbl(
+    "a loooooooooooooooooooog name",
+    .default = 1
   )
 )
