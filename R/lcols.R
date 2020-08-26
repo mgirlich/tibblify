@@ -3,9 +3,6 @@
 #' @param ... Column specification objects created by `lcol_*()`.
 #' @param .default The default parser to use.
 #'
-#' @details
-#' compare to cols, cols_only, col_spec
-#' https://github.com/r-lib/vroom/blob/843e4a66510146120d734980e60cefa550d61ff6/R/col_types.R
 #' @export
 lcols <- function(..., .default = lcol_skip(zap())) {
   if (!is_lcollector(.default)) {
