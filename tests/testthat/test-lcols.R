@@ -32,4 +32,15 @@ test_that("lcollector checks default value", {
     lcol_chr("a", c("a", "b")),
     class = "vctrs_error_incompatible_size"
   )
+
+  skip("no good way to present error message yet")
+  expect_error(
+    lcols(
+      lcol_df(
+        "df_path",
+        lcol_chr(list("a", "b"), c("a", "b"))
+      )
+    ),
+    class = "vctrs_error_incompatible_size"
+  )
 })

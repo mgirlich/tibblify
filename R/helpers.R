@@ -70,9 +70,11 @@ find_list_type <- function(x) {
     }
   }
 
+  # nocov start
   if (is.na(type)) {
     stop("unknown type")
   }
+  # nocov end
 
   return(
     list(

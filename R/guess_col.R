@@ -7,6 +7,11 @@ guess_col <- function(x, path) {
   ptype_flat <- list_info$ptype_flat
   absent_or_empty <- list_info$absent_or_empty
 
+  if (absent_or_empty) {
+    .default <- NULL
+  } else {
+    .default <- zap()
+  }
 
   if (type == "unspecified") {
     return(
@@ -25,12 +30,6 @@ guess_col <- function(x, path) {
     )
     spec <- get_spec(result)
     result <- set_spec(result, NULL)
-
-    if (absent_or_empty) {
-      .default <- NULL
-    } else {
-      .default <- zap()
-    }
 
     return(
       list(
@@ -73,12 +72,6 @@ guess_col <- function(x, path) {
   if (type == "list_of") {
     result <- simplify_col(x, ptype = list_of(.ptype = ptype))
 
-    if (absent_or_empty) {
-      .default <- NULL
-    } else {
-      .default <- zap()
-    }
-
     spec <- lcol_lst_of(
       path = path,
       .ptype = ptype,
@@ -118,12 +111,6 @@ guess_col <- function(x, path) {
     result <- split_by_lengths(result_unlisted, lengths(x))
     result <- new_list_of(result, ptype = vec_ptype(result_unlisted))
 
-    if (absent_or_empty) {
-      .default <- NULL
-    } else {
-      .default <- zap()
-    }
-
     spec <- lcol_df_lst(
       path,
       !!!spec_unlisted$cols,
@@ -136,18 +123,15 @@ guess_col <- function(x, path) {
   if (type == "list") {
     result <- x
 
-    if (absent_or_empty) {
-      .default <- NULL
-    } else {
-      .default <- zap()
-    }
     spec <- lcol_lst(path, .default = .default)
     # attr(spec, "auto_name") <- TRUE
 
     return(list(result = result, spec = spec))
   }
 
+  # nocov start
   stop("something unexpected happened")
+  # nocov end
 }
 
 #' @noRd

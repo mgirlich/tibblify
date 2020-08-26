@@ -56,7 +56,7 @@ test_that("lists work", {
 })
 
 test_that("records work", {
-  x_rcrd <- rep(as.POSIXlt(Sys.time()), 2)
+  x_rcrd <- rep(as.POSIXlt(Sys.time(), tz = "UTC"), 2)
   expect_equal(
     simplify_col(as.list(x_rcrd), ptype = x_rcrd[[1]]),
     x_rcrd
@@ -74,7 +74,7 @@ test_that("list_of work", {
     new_list_of(x, ptype = character())
   )
 
-  x_rcrd <- as.list(rep(as.POSIXlt(Sys.time()), 2))
+  x_rcrd <- as.list(rep(as.POSIXlt(Sys.time(), tz = "UTC"), 2))
   expect_equal(
     simplify_col(x_rcrd, ptype = list_of(.ptype = x_rcrd[[1]])),
     new_list_of(x_rcrd, ptype = vec_ptype(x_rcrd[[1]]))

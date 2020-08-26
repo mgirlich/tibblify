@@ -36,9 +36,22 @@ test_that("works", {
       int = 1:3,
       chr_lst_of = list_of(!!!purrr::map(recordlist, "chr_lst"), .ptype = character()),
       chr_lst = purrr::map(recordlist, "chr_lst"),
-      datetime = as.POSIXct(purrr::map_chr(recordlist, "datetime"))
+      datetime = as.POSIXct(purrr::map_chr(recordlist, "datetime"), tz = "UTC")
     ),
     ignore_attr = TRUE
+  )
+})
+
+test_that("missing elements produce error", {
+  expect_error(
+    tibblify(
+      list(
+        list(a = 1),
+        list(b = 1)
+      ),
+      lcols(lcol_chr("a"))
+    ),
+    regexp = "empty or absent element at path a"
   )
 })
 
@@ -203,6 +216,36 @@ test_that("guess_col works", {
   )
 })
 
+
+test_that("lcol_vec works", {
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+  recordlist <- list(
+    list(a = x_rcrd),
+    list(a = x_rcrd + 1)
+  )
+
+  spec <- lcols(
+    lcol_vec("a", ptype = x_rcrd)
+  )
+
+  expect_equivalent(
+    tibblify(recordlist, spec),
+    tibble::tibble(a = vec_c(x_rcrd, x_rcrd + 1)),
+    ignore_attr = TRUE
+  )
+})
+
+test_that("records work", {
+  x_rcrd <- rep(as.POSIXlt(Sys.time()), 2)
+  expect_equal(
+    simplify_col(as.list(x_rcrd), ptype = x_rcrd[[1]]),
+    x_rcrd
+  )
+
+  expect_error(
+    simplify_col(list("2020-08-06 08:39:32 UTC"), ptype = x_rcrd[[1]])
+  )
+})
 
 test_that("known examples discog", {
   result <- tibblify(discog)

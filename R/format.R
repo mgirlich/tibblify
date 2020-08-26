@@ -20,9 +20,11 @@ pad <- function(x, n) {
 
 
 name_exprs <- function(exprs, names, show_name) {
+  # nocov start
   if (length(names) == 0 || length(exprs) == 0) {
-    return(character())
+    abort("something went wrong")
   }
+  # nocov end
 
   non_syntactic <- !is_syntactic(names)
   names[non_syntactic] <- paste0("`", gsub("`", "\\\\`", names[non_syntactic]), "`")
@@ -38,9 +40,7 @@ format_subtype <- function(f_name, path, cols, default, width, ..., npad = 0) {
     default <- NULL
   }
 
-  if (is_zap(path)) {
-    path <- "zap()"
-  } else if (!is.null(path)) {
+  if (!is.null(path)) {
     path <- deparse(path)
   }
 

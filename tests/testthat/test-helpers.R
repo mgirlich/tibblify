@@ -136,6 +136,17 @@ test_that("find_list_type works for df", {
   )
 })
 
+test_that("find_list_type use list as last ressort", {
+  expect_equal(
+    find_list_type(list(list(list("a")), list(1))),
+    make_list_info(
+      "list",
+      list(),
+      c(1, 1)
+    )
+  )
+})
+
 test_that("find_list_type checks input", {
   expect_error(
     find_list_type(1:3)

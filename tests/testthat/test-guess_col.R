@@ -39,6 +39,11 @@ test_that("lists work", {
       spec = lcol_lst("a")
     )
   )
+
+  expect_error(
+    guess_col(list(a = list(a = 1), list(a = 2)), "a"),
+    regexp = "all must be named"
+  )
 })
 
 test_that("recordlist work", {
@@ -64,5 +69,25 @@ test_that("recordlist work", {
   expect_equal(
     result$spec,
     spec_goal
+  )
+})
+
+test_that("empty cols work", {
+  expect_equal(
+    guess_col(list(NULL, NULL), "a"),
+    list(
+      result = list(NULL, NULL),
+      spec = lcol_guess("a")
+    )
+  )
+})
+
+test_that("default is found", {
+  expect_equal(
+    guess_col(list(1, NULL), "a"),
+    list(
+      result = c(1, NA),
+      spec = lcol_dbl("a", .default = NA_real_)
+    )
   )
 })
