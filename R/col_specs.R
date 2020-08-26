@@ -125,13 +125,25 @@ lcol_chr <- function(path, .default = zap(), .parser = NULL) {
 #' @export
 #' @rdname lcol_lgl
 lcol_dat <- function(path, .default = zap(), .parser = NULL) {
-  lcollector(path, "dat", ptype = new_date(), .default = .default, .parser = .parser)
+  lcollector(
+    path,
+    "dat",
+    ptype = new_date(),
+    .default = .default,
+    .parser = .parser
+  )
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_dtt <- function(path, .default = zap(), .parser = NULL) {
-  lcollector(path, "dtt", ptype = new_datetime(), .default = .default, .parser = .parser)
+  lcollector(
+    path,
+    "dtt",
+    ptype = new_datetime(tzone = "UTC"),
+    .default = .default,
+    .parser = .parser
+  )
 }
 
 #' @export
