@@ -71,7 +71,7 @@ test_that("find_list_type works for vectors", {
   )
 
   # record style objects
-  x_rcrd <- as.POSIXlt(Sys.time())
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
   expect_equal(
     find_list_type(list(x_rcrd, x_rcrd)),
     make_list_info("vector", new_datetime(tzone = "UTC"))
