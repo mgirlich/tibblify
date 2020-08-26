@@ -31,7 +31,7 @@ name_exprs <- function(exprs, names, show_name) {
 }
 
 
-format_subtype <- function(x, f_name, npad = 0, show_auto_names = FALSE) {
+format_subtype <- function(x, f_name, npad = 0) {
   body_parts <- lapply(x$.parser$cols, format, npad = npad + 2)
 
   format.lcollector(
@@ -142,8 +142,10 @@ colourise_lcol <- function(f_name) {
 format.lcollector <- function(x, ...,
                               parser = x[[".parser_expr"]],
                               npad = 0,
-                              multi_line = FALSE) {
-  f_name <- colourise_lcol(sub("^lcollector_", "lcol_", class(x)[1]))
+                              multi_line = FALSE,
+                              nchar_indent = 0,
+                              width = NULL) {
+  f_name <- sub("^lcollector_", "lcol_", class(x)[1])
 
   if (!is.null(parser)) {
     parser <- c(.parser = rlang::quo_name(parser))
@@ -164,23 +166,37 @@ format.lcollector <- function(x, ...,
     format_default(x)
   )
 
-  parts <- collapse_with_pad(parts, multi_line = multi_line)
+  nchar_prefix <- nchar_indent + nchar(f_name) + 2
 
-  paste0(f_name, "(", parts, ")")
+  parts <- collapse_with_pad(
+    parts,
+    multi_line = multi_line,
+    nchar_prefix = nchar_prefix,
+    width = width
+  )
+
+  paste0(colourise_lcol(f_name), "(", parts, ")")
 }
 
-collapse_with_pad <- function(x, multi_line) {
+collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   x_nms <- names2(x)
   x <- name_exprs(x, x_nms, x_nms != "")
 
   x_single_line <- paste0(x, collapse = ", ")
   x_multi_line <- paste0("\n", paste0(pad(x, 2), collapse = ",\n"), "\n")
+  line_length <- nchar(x_single_line) + nchar_prefix
 
-  if (multi_line || length(x) > 2 || nchar(x_single_line) > 70) {
+  if (multi_line ||
+      length(x) > 2 ||
+      line_length > tibblify_width(width)) {
     x_multi_line
   } else {
     x_single_line
   }
+}
+
+tibblify_width <- function(width = NULL) {
+  NULL %||% getOption("width")
 }
 
 
@@ -194,29 +210,35 @@ format_default <- function(x) {
 }
 
 #' @export
-format.lcol_spec <- function(x, n = Inf, show_auto_names = FALSE, ...) {
-  if (n == 0) {
-    return("")
-  }
-
-  # truncate to minumum of n or length
-  n_cols <- length(x$cols)
-  cols <- x$cols[seq_len(min(n_cols, n))]
-
-  cols_args <- c(vapply(cols, format, character(1)))
+format.lcol_spec <- function(x, width = NULL, ...) {
+  cols <- x$cols
 
   if (length(cols) == 0) {
     out <- paste0("lcols(", format_default(x$.default), ")")
   } else {
-    show_name <- !(attr(x$cols, "auto_name") %||% rlang::rep_along(cols, TRUE)) | show_auto_names
-
     if (!is_skip_col(x$.default)) {
       default <- format_default(x)
     } else {
       default <- NULL
     }
 
-    inner <- collapse_with_pad(c(cols_args, default), multi_line = TRUE)
+    cols_args <- purrr::map2(
+      cols,
+      nchar(names(cols)) + 3,
+      function(col, nchar_indent) {
+        format(
+          col,
+          nchar_indent = nchar_indent,
+          width = width
+        )
+      }
+    )
+
+    inner <- collapse_with_pad(
+      c(cols_args, default),
+      multi_line = TRUE,
+      width = width
+    )
 
     out <- paste0(
       "lcols(",
@@ -224,6 +246,7 @@ format.lcol_spec <- function(x, n = Inf, show_auto_names = FALSE, ...) {
       ")\n"
     )
   }
+
 
   out
 }
