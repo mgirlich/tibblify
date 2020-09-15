@@ -3,6 +3,7 @@ Codecov
 datetime
 github
 https
+JSON
 Lifecycle
 POV
 Rectange
@@ -12,4 +13,5 @@ tibble
 Tibble
 tidyr
 tidyverse
+vctrs
 vroom
