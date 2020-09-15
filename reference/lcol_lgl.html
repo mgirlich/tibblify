@@ -120,31 +120,31 @@
     <p><code><a href='lcols.html'>lcols()</a></code> includes all fields in the input data, skipping the column types as the default.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>lcol_lgl</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+    <pre class="usage"><span class='fu'>lcol_lgl</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_int</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_int</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_dbl</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_dbl</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_chr</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_chr</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_dat</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_dat</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_dtt</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_dtt</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_vec</span>(<span class='no'>path</span>, <span class='no'>ptype</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_vec</span>(<span class='kw'>path</span>, <span class='kw'>ptype</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_guess</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_guess</span>(<span class='kw'>path</span>, .default = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_skip</span>(<span class='no'>path</span>)
+<span class='fu'>lcol_skip</span>(<span class='kw'>path</span>)
 
-<span class='fu'>lcol_lst</span>(<span class='no'>path</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_lst</span>(<span class='kw'>path</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_lst_of</span>(<span class='no'>path</span>, <span class='no'>.ptype</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), <span class='kw'>.parser</span> <span class='kw'>=</span> <span class='kw'>NULL</span>)
+<span class='fu'>lcol_lst_of</span>(<span class='kw'>path</span>, <span class='kw'>.ptype</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>(), .parser = <span class='kw'>NULL</span>)
 
-<span class='fu'>lcol_df_lst</span>(<span class='no'>path</span>, <span class='no'>...</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())
+<span class='fu'>lcol_df_lst</span>(<span class='kw'>path</span>, <span class='kw'>...</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())
 
-<span class='fu'>lcol_df</span>(<span class='no'>path</span>, <span class='no'>...</span>, <span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())</pre>
+<span class='fu'>lcol_df</span>(<span class='kw'>path</span>, <span class='kw'>...</span>, .default = <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -191,7 +191,7 @@
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>

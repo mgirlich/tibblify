@@ -120,7 +120,7 @@
     <p>Rectange a nested list into a tidy tibble</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tibblify</span>(<span class='no'>recordlist</span>, <span class='kw'>col_specs</span> <span class='kw'>=</span> <span class='fu'><a href='lcols.html'>lcols</a></span>(<span class='kw'>.default</span> <span class='kw'>=</span> <span class='fu'><a href='lcol_lgl.html'>lcol_guess</a></span>(<span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())))</pre>
+    <pre class="usage"><span class='fu'>tibblify</span>(<span class='kw'>recordlist</span>, col_specs = <span class='fu'><a href='lcols.html'>lcols</a></span>(.default = <span class='fu'><a href='lcol_lgl.html'>lcol_guess</a></span>(<span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span>())))</pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,12 +141,13 @@ list into a tibble.</p></td>
     <p>The tibble generated according to the specification.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='no'>recordlist</span> <span class='kw'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
-  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>id</span> <span class='kw'>=</span> <span class='fl'>1</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>"Tyrion Lannister"</span>),
-  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(<span class='kw'>id</span> <span class='kw'>=</span> <span class='fl'>2</span>, <span class='kw'>name</span> <span class='kw'>=</span> <span class='st'>"Victarion Greyjoy"</span>)
+    <pre class="examples"><div class='input'><span class='kw'>recordlist</span> <span class='op'>&lt;-</span> <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(
+  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(id = <span class='fl'>1</span>, name = <span class='st'>"Tyrion Lannister"</span>),
+  <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span>(id = <span class='fl'>2</span>, name = <span class='st'>"Victarion Greyjoy"</span>)
 )
 
-<span class='fu'>tibblify</span>(<span class='no'>recordlist</span>)</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 2 x 2</span><span>
+<span class='fu'>tibblify</span>(<span class='kw'>recordlist</span>)
+</div><div class='output co'>#&gt; <span style='color: #555555;'># A tibble: 2 x 2</span><span>
 #&gt;      id name             
 #&gt;   </span><span style='color: #555555;font-style: italic;'>&lt;dbl&gt;</span><span> </span><span style='color: #555555;font-style: italic;'>&lt;chr&gt;</span><span>            
 #&gt; </span><span style='color: #555555;'>1</span><span>     1 Tyrion Lannister 
@@ -166,7 +167,7 @@ list into a tibble.</p></td>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.5.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
 </div>
 
       </footer>
