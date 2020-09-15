@@ -235,8 +235,8 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   line_length <- nchar(x_single_line) + nchar_prefix
 
   if (multi_line ||
-      length(x) > 2 ||
-      line_length > tibblify_width(width)) {
+    length(x) > 2 ||
+    line_length > tibblify_width(width)) {
     x_multi_line
   } else {
     x_single_line
