@@ -1,4 +1,6 @@
-This is a resubmission with more details in the package description.
+This is a resubmission with
+* undirected quotes in the description
+* and a fixed URL for the code of conduct.
 
 ## Test environments
 * local OS X install, R 3.6.1
