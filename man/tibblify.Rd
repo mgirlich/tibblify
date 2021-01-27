@@ -4,13 +4,20 @@
 \alias{tibblify}
 \title{Rectange a nested list into a tidy tibble}
 \usage{
-tibblify(recordlist, col_specs = lcols(.default = lcol_guess(zap())))
+tibblify(
+  recordlist,
+  col_specs = lcols(.default = lcol_guess(zap())),
+  names_to = NULL
+)
 }
 \arguments{
 \item{recordlist}{A nested list.}
 
 \item{col_specs}{A specification generated with \code{lcols()} how to turn the
 list into a tibble.}
+
+\item{names_to}{A string specifying the name of the column to create from
+the data stored in the column names of data.}
 }
 \value{
 The tibble generated according to the specification.

@@ -2,7 +2,9 @@
 #'
 #' @param recordlist A nested list.
 #' @param col_specs A specification generated with `lcols()` how to turn the
-#' list into a tibble.
+#'   list into a tibble.
+#' @param names_to A string specifying the name of the column to create from
+#'   the data stored in the column names of data.
 #'
 #' @return The tibble generated according to the specification.
 #' @export
@@ -14,12 +16,14 @@
 #' )
 #'
 #' tibblify(recordlist)
-tibblify <- function(recordlist, col_specs = lcols(.default = lcol_guess(zap()))) {
-  tibblify_impl(recordlist, col_specs, keep_spec = TRUE)
+tibblify <- function(recordlist,
+                     col_specs = lcols(.default = lcol_guess(zap())),
+                     names_to = NULL) {
+  tibblify_impl(recordlist, col_specs, keep_spec = TRUE, names_to = names_to)
 }
 
 
-tibblify_impl <- function(recordlist, col_specs, keep_spec) {
+tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
   default_collector <- col_specs$.default
   collectors <- col_specs$cols
 
@@ -98,6 +102,13 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec) {
     }
 
     result <- set_spec(result, col_specs)
+  }
+
+  if (!is_null(names_to)) {
+    result <- vec_cbind(
+      !!names_to := names2(recordlist),
+      result
+    )
   }
 
   result

@@ -265,6 +265,19 @@ test_that("records work", {
   )
 })
 
+test_that("`names_to` works", {
+  recordlist <- list(
+    a = list(x = 1),
+    b = list(x = 2)
+  )
+
+  expect_equivalent(
+    tibblify(recordlist, names_to = "name"),
+    tibble::tibble(name = c("a", "b"), x = 1:2),
+    ignore_attr = TRUE
+  )
+})
+
 test_that("known examples discog", {
   result <- tibblify(discog)
   # expect_snapshot_value doesn't work due to different environments
