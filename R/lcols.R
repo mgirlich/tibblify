@@ -4,6 +4,20 @@
 #' @param .default The default parser to use.
 #'
 #' @export
+#' @examples
+#' lcols(
+#'   lcol_int("id"),
+#'   lcol_chr("name"),
+#'   lcol_lst_of("aliases", character())
+#' )
+#'
+#' # To create multiple columns of the same type use the bang-bang-bang (!!!)
+#' # operator together with `purrr::map()`
+#' lcols(
+#'   !!!purrr::map(c("id", "age"), lcol_int),
+#'   !!!purrr::map(c("name", "title"), lcol_chr),
+#'   !!!purrr::map(c("aliases", "addresses"), lcol_guess)
+#' )
 lcols <- function(..., .default = lcol_skip(zap())) {
   if (!is_lcollector(.default)) {
     abort("`.default` must be a lcollector")
