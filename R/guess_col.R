@@ -103,7 +103,7 @@ guess_col <- function(x, path) {
     spec <- lcol_lst_of(
       path = path,
       .ptype = ptype_flat,
-      .parser = ~ vec_c(!!!.x, .ptype = character()),
+      .parser = ~ vctrs::vec_c(!!!.x, .ptype = character()),
       .default = NULL
     )
 
