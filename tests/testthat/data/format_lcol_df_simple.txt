@@ -1,4 +1,4 @@
 lcol_df(
   "formats",
-  text = [31mlcol_chr[39m("text", .default = NA)
+  text = [31mlcol_chr[39m("text", .default = NA_character_)
 )

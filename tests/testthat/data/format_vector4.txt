@@ -1,5 +1,5 @@
 [32mlcol_int[39m(
   "a",
   .parser = as.integer,
-  .default = NA
+  .default = NA_integer_
 )
