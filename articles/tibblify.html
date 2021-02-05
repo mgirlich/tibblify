@@ -115,10 +115,10 @@
 <code class="sourceCode R"><span class="va">politicians_tibble</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">politicians</span><span class="op">)</span>
 <span class="va">politicians_tibble</span>
 <span class="co">#&gt; # A tibble: 2 x 8</span>
-<span class="co">#&gt;      id name   surname dob    n_children parents$mother $father spouses  offices</span>
-<span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;list&lt;&gt; &lt;list&lt;t&gt;</span>
-<span class="co">#&gt; 1     1 Barack Obama   1961-…          2 Ann Dunham     Barack…     [1]  [2 × 2]</span>
-<span class="co">#&gt; 2     2 Boris  Johnson 1964-…         NA &lt;NA&gt;           Stanle…     [2]  [3 × 2]</span></code></pre></div>
+<span class="co">#&gt;      id name   surname dob    n_children parents$mother $father  spouses offices</span>
+<span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;    &lt;list&lt;&gt; &lt;list&lt;&gt;</span>
+<span class="co">#&gt; 1     1 Barack Obama   1961-…          2 Ann Dunham     Barack …     [1] [2 × 2]</span>
+<span class="co">#&gt; 2     2 Boris  Johnson 1964-…         NA &lt;NA&gt;           Stanley…     [2] [3 × 2]</span></code></pre></div>
 <p>The <code>parents</code> column is a tibble with the columns <code>mother</code> and <code>father</code> because in the original list <code>leader1</code> the field <code>parents</code> is a named list.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">politicians_tibble</span><span class="op">$</span><span class="va">parents</span>
@@ -156,16 +156,16 @@
 <span class="co">#&gt;   name = lcol_chr("name"),</span>
 <span class="co">#&gt;   surname = lcol_chr("surname"),</span>
 <span class="co">#&gt;   dob = lcol_chr("dob"),</span>
-<span class="co">#&gt;   n_children = lcol_dbl("n_children", .default = NA),</span>
+<span class="co">#&gt;   n_children = lcol_dbl("n_children", .default = NA_real_),</span>
 <span class="co">#&gt;   parents = lcol_df(</span>
 <span class="co">#&gt;     "parents",</span>
-<span class="co">#&gt;     mother = lcol_chr("mother", .default = NA),</span>
+<span class="co">#&gt;     mother = lcol_chr("mother", .default = NA_character_),</span>
 <span class="co">#&gt;     father = lcol_chr("father")</span>
 <span class="co">#&gt;   ),</span>
 <span class="co">#&gt;   spouses = lcol_lst_of(</span>
 <span class="co">#&gt;     "spouses",</span>
 <span class="co">#&gt;     .ptype = character(0),</span>
-<span class="co">#&gt;     .parser = ~vec_c(!!!.x, .ptype = character()),</span>
+<span class="co">#&gt;     .parser = ~vctrs::vec_c(!!!.x, .ptype = character()),</span>
 <span class="co">#&gt;     .default = NULL</span>
 <span class="co">#&gt;   ),</span>
 <span class="co">#&gt;   offices = lcol_df_lst(</span>

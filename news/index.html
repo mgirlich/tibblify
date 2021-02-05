@@ -124,7 +124,15 @@
 <ul>
 <li>
 <code><a href="../reference/tibblify.html">tibblify()</a></code> gains the argument <code>names_to</code> to store the names of a recordlist in a column.</li>
+<li>Guessed spec uses <code>vctrs</code> namespace so that <code>vctrs</code> doesn’t need to be loaded for the spec to work.</li>
 </ul>
+<div id="bugfixes" class="section level2">
+<h2 class="hasAnchor">
+<a href="#bugfixes" class="anchor"></a>Bugfixes</h2>
+<ul>
+<li>The <code>.default</code> argument of <code><a href="../reference/lcol_lgl.html">lcol_df()</a></code> and <code><a href="../reference/lcol_lgl.html">lcol_df_lst()</a></code> is now printed. This bug caused some copy-pasted specs, for example after guessing, to not work correctly and complain about missing paths.</li>
+</ul>
+</div>
 </div>
     <div id="tibblify-010" class="section level1">
 <h1 class="page-header" data-toc-text="0.1.0">
