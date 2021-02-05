@@ -1,1 +1,1 @@
-lcol_chr("a")
+[31mlcol_chr[39m("a")

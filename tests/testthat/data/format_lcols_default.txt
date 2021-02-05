@@ -1,5 +1,5 @@
 lcols(
-  instance_id = lcol_int("instance_id"),
-  date_added = lcol_chr("date_added"),
-  .default = lcol_chr(zap())
+  instance_id = [32mlcol_int[39m("instance_id"),
+  date_added = [31mlcol_chr[39m("date_added"),
+  .default = [31mlcol_chr[39m(zap())
 )

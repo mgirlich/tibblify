@@ -1,1 +1,1 @@
-lcol_int("a")
+[32mlcol_int[39m("a")

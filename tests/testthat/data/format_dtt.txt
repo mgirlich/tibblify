@@ -1,1 +1,1 @@
-lcol_dtt("a")
+[34mlcol_dtt[39m("a")

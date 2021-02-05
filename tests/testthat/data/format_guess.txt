@@ -1,1 +1,1 @@
-lcol_guess("a", .default = NULL)
+[36mlcol_guess[39m("a", .default = NULL)
