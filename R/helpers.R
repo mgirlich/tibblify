@@ -5,7 +5,7 @@ split_by_lengths <- function(x, lengths) {
 
   indices <- vector("list", length(lengths))
   index <- vec_rep_each(seq_along(lengths), lengths)
-  indices[lengths > 0] <- split(1:sum(lengths), index)
+  indices[lengths > 0] <- split(seq_len(sum(lengths)), index)
 
   vec_chop(x, indices)
 }

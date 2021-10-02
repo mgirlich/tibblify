@@ -261,6 +261,19 @@ test_that("df_lst_cols work", {
     ),
     ignore_attr = TRUE
   )
+
+  expect_equivalent(
+    tibblify(list(), col_specs),
+    tibble::tibble(
+      df = list_of(.ptype =
+        tibble::tibble(
+          chr = character(),
+          int = integer()
+        )
+      )
+    ),
+    ignore_attr = TRUE
+  )
 })
 
 
