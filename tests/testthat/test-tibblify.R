@@ -324,7 +324,7 @@ test_that("known examples discog", {
         descriptions = lcol_lst_of(
           "descriptions",
           .ptype = character(0),
-          .parser = ~ vec_c(!!!.x, .ptype = character()),
+          .parser = ~ vctrs::vec_c(!!!.x, .ptype = character()),
           .default = NULL
         ),
         text = lcol_chr("text", .default = NA_character_),
