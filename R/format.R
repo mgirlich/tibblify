@@ -78,7 +78,7 @@ format.lcollector_df <- function(x, ..., width = NULL, npad = 0) {
     "lcol_df",
     path = x$path,
     cols = x$.parser$cols,
-    default = x$.parser$.default,
+    default = x$.default,
     width = width,
     npad = npad
   )
@@ -90,7 +90,7 @@ format.lcollector_df_lst <- function(x, ..., width = NULL, npad = 0) {
     "lcol_df_lst",
     path = x$path,
     cols = x$.parser$cols,
-    default = x$.parser$.default,
+    default = x$.default,
     width = width,
     npad = npad
   )
@@ -254,7 +254,15 @@ format.lcollector_lst_of <- function(x, ...) {
 }
 
 format_default <- function(default) {
-  c(.default = format(default))
+  if (is_zap(default)) {
+    default_chr <- character()
+  } else if (is_lcollector(default)) {
+    default_chr <- format(default)
+  } else {
+    default_chr <- deparse(default)
+  }
+
+  c(.default = default_chr)
 }
 
 #' @export
