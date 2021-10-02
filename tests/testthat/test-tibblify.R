@@ -213,6 +213,56 @@ test_that("df_cols work", {
   )
 })
 
+test_that("df_lst_cols work", {
+  recordlist <- list(
+    list(
+      df = list(
+        list(
+          chr = "a",
+          int = 1
+        ),
+        list(
+          chr = "b",
+          int = 2
+        )
+      )
+    ),
+    list(
+      df = list(
+        list(
+          chr = "c"
+        )
+      )
+    )
+  )
+
+  col_specs <- lcols(
+    lcol_df_lst(
+      "df",
+      lcol_chr("chr"),
+      lcol_int("int", .default = NA_integer_),
+      .default = NULL
+    )
+  )
+
+  expect_equivalent(
+    tibblify(recordlist, col_specs),
+    tibble::tibble(
+      df = list(
+        tibble::tibble(
+          chr = c("a", "b"),
+          int = 1:2
+        ),
+        tibble::tibble(
+          chr = "c",
+          int = NA_integer_
+        )
+      )
+    ),
+    ignore_attr = TRUE
+  )
+})
+
 
 test_that("guess_col works", {
   recordlist <- list(
