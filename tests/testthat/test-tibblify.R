@@ -40,6 +40,18 @@ test_that("works", {
     ),
     ignore_attr = TRUE
   )
+
+  expect_equivalent(
+    tibblify(list(), col_specs),
+    tibble::tibble(
+      chr = character(),
+      int = integer(),
+      chr_lst_of = list_of(.ptype = character()),
+      chr_lst = list(),
+      datetime = structure(numeric(), class = c("POSIXct", "POSIXt"), tzone = "UTC")
+    ),
+    ignore_attr = TRUE
+  )
 })
 
 test_that("missing elements produce error", {
