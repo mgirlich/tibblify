@@ -155,10 +155,6 @@ test_that("find_list_type checks input", {
   expect_error(
     find_list_type(NULL)
   )
-
-  expect_error(
-    find_list_type(list())
-  )
 })
 
 test_that("find_list_type works for discog", {

@@ -17,10 +17,6 @@ find_list_type <- function(x) {
     stop("x must be a list.")
   }
 
-  if (vec_size(x) == 0) {
-    stop("x must have size > 0.")
-  }
-
   if (all(lengths(x) == 0)) {
     type <- "unspecified"
   }
