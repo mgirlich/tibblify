@@ -23,7 +23,7 @@ tibblify <- function(recordlist,
 }
 
 
-tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
+tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL, parent_paths = character()) {
   default_collector <- col_specs$.default
   collectors <- col_specs$cols
 
@@ -58,21 +58,23 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
         valueslist <- extract_index(recordlist, collector$path, collector$.default)
       },
       error = function(x) {
-        abort(paste0("empty or absent element at path ", collector$path))
+        abort(paste0("empty or absent element at path ", paste0(c(parent_paths, collector$path), collapse = "/")))
       }
     )
     if (inherits(collector, "lcollector_df")) {
       resultlist[[i]] <- tibblify_impl(
         recordlist = valueslist,
         col_specs = collector$.parser,
-        keep_spec = FALSE
+        keep_spec = FALSE,
+        parent_paths = c(parent_paths, collector$path)
       )
     } else if (inherits(collector, "lcollector_df_lst")) {
       sizes <- list_sizes(valueslist)
       result <- tibblify_impl(
         recordlist = purrr::flatten(valueslist),
         col_specs = collector$.parser,
-        keep_spec = FALSE
+        keep_spec = FALSE,
+        parent_paths = c(parent_paths, collector$path)
       )
 
       result_split <- split_by_lengths(result, sizes)
