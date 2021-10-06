@@ -1,4 +1,4 @@
-[32mlcol_int[39m(
+lcol_int(
   "a",
   .parser = as.integer,
   .default = NA_integer_

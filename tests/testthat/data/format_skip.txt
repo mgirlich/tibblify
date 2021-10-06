@@ -1,1 +1,1 @@
-[36mlcol_skip[39m("a", .parser = .parser)
+lcol_skip("a", .parser = .parser)

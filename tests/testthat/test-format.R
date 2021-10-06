@@ -1,4 +1,6 @@
 test_known_output <- function(x, name, width = 80) {
+  local_options(cli.num_colors = 1)
+
   expect_known_output(
     print(x, width = width),
     test_path("data", paste0("format_", name, ".txt"))

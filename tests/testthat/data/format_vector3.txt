@@ -1,1 +1,1 @@
-[32mlcol_int[39m("a", .parser = as.integer)
+lcol_int("a", .parser = as.integer)

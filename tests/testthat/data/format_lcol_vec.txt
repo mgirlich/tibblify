@@ -1,1 +1,1 @@
-[30mlcol_vec[39m("a", ptype = structure(numeric(0), class = "difftime", units = "mins"))
+lcol_vec("a", ptype = structure(numeric(0), class = "difftime", units = "mins"))

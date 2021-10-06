@@ -1,1 +1,1 @@
-[32mlcol_int[39m("a", .default = NA_integer_)
+lcol_int("a", .default = NA_integer_)

@@ -1,1 +1,1 @@
-[31mlcol_chr[39m("a")
+lcol_chr("a")

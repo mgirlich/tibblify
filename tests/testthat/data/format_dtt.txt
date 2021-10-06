@@ -1,1 +1,1 @@
-[34mlcol_dtt[39m("a")
+lcol_dtt("a")
