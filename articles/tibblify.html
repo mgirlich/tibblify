@@ -114,7 +114,7 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">politicians_tibble</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">politicians</span><span class="op">)</span>
 <span class="va">politicians_tibble</span>
-<span class="co">#&gt; # A tibble: 2 x 8</span>
+<span class="co">#&gt; # A tibble: 2 × 8</span>
 <span class="co">#&gt;      id name   surname dob    n_children parents$mother $father  spouses offices</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;    &lt;list&lt;&gt; &lt;list&lt;&gt;</span>
 <span class="co">#&gt; 1     1 Barack Obama   1961-…          2 Ann Dunham     Barack …     [1] [2 × 2]</span>
@@ -122,7 +122,7 @@
 <p>The <code>parents</code> column is a tibble with the columns <code>mother</code> and <code>father</code> because in the original list <code>leader1</code> the field <code>parents</code> is a named list.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">politicians_tibble</span><span class="op">$</span><span class="va">parents</span>
-<span class="co">#&gt; # A tibble: 2 x 2</span>
+<span class="co">#&gt; # A tibble: 2 × 2</span>
 <span class="co">#&gt;   mother     father          </span>
 <span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;           </span>
 <span class="co">#&gt; 1 Ann Dunham Barack Obama Sr.</span>
@@ -226,7 +226,7 @@
     `family name` <span class="op">=</span> <span class="fu"><a href="../reference/lcol_lgl.html">lcol_chr</a></span><span class="op">(</span><span class="st">"surname"</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
-<span class="co">#&gt; # A tibble: 2 x 3</span>
+<span class="co">#&gt; # A tibble: 2 × 3</span>
 <span class="co">#&gt;      id name   `family name`</span>
 <span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;        </span>
 <span class="co">#&gt; 1     1 Barack Obama        </span>
@@ -254,7 +254,7 @@
   <span class="va">list_default</span>,
   <span class="fu"><a href="../reference/lcols.html">lcols</a></span><span class="op">(</span><span class="fu"><a href="../reference/lcol_lgl.html">lcol_int</a></span><span class="op">(</span><span class="st">"a"</span>, .default <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span>
-<span class="co">#&gt; # A tibble: 4 x 1</span>
+<span class="co">#&gt; # A tibble: 4 × 1</span>
 <span class="co">#&gt;       a</span>
 <span class="co">#&gt;   &lt;int&gt;</span>
 <span class="co">#&gt; 1     1</span>
@@ -274,7 +274,7 @@
     <span class="fu"><a href="../reference/lcol_lgl.html">lcol_dat</a></span><span class="op">(</span><span class="st">"dob"</span>, .parser <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html">as.Date</a></span><span class="op">(</span><span class="va">.x</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
-<span class="co">#&gt; # A tibble: 2 x 2</span>
+<span class="co">#&gt; # A tibble: 2 × 2</span>
 <span class="co">#&gt;   surname dob       </span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;date&gt;    </span>
 <span class="co">#&gt; 1 Obama   1961-08-04</span>
@@ -329,7 +329,7 @@
 <span class="op">)</span>
 
 <span class="va">leaders_tibble</span>
-<span class="co">#&gt; # A tibble: 2 x 2</span>
+<span class="co">#&gt; # A tibble: 2 × 2</span>
 <span class="co">#&gt;   surname parents$mother $father         </span>
 <span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;           </span>
 <span class="co">#&gt; 1 Obama   Ann Dunham     Barack Obama Sr.</span>
@@ -371,7 +371,7 @@
     <span class="fu"><a href="../reference/lcol_lgl.html">lcol_vec</a></span><span class="op">(</span><span class="st">"timediff"</span>, ptype <span class="op">=</span> <span class="va">ptype</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
-<span class="co">#&gt; # A tibble: 2 x 1</span>
+<span class="co">#&gt; # A tibble: 2 × 1</span>
 <span class="co">#&gt;   timediff</span>
 <span class="co">#&gt;   &lt;drtn&gt;  </span>
 <span class="co">#&gt; 1 100 secs</span>
@@ -390,11 +390,11 @@
     .default <span class="op">=</span> <span class="fu"><a href="../reference/lcol_lgl.html">lcol_lst</a></span><span class="op">(</span>path <span class="op">=</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/zap.html">zap</a></span><span class="op">(</span><span class="op">)</span>, .default <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
-<span class="co">#&gt; # A tibble: 2 x 8</span>
-<span class="co">#&gt;   name   surname id       dob      n_children parents        spouses   offices  </span>
-<span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt;   &lt;list&gt;   &lt;list&gt;   &lt;list&gt;     &lt;list&gt;         &lt;list&gt;    &lt;list&gt;   </span>
-<span class="co">#&gt; 1 Barack Obama   &lt;int [1… &lt;chr [1… &lt;dbl [1]&gt;  &lt;named list [… &lt;list [1… &lt;list [2…</span>
-<span class="co">#&gt; 2 Boris  Johnson &lt;int [1… &lt;chr [1… &lt;NULL&gt;     &lt;named list [… &lt;list [2… &lt;list [3…</span></code></pre></div>
+<span class="co">#&gt; # A tibble: 2 × 8</span>
+<span class="co">#&gt;   name   surname id        dob       n_children parents          spouses offices</span>
+<span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt;   &lt;list&gt;    &lt;list&gt;    &lt;list&gt;     &lt;list&gt;           &lt;list&gt;  &lt;list&gt; </span>
+<span class="co">#&gt; 1 Barack Obama   &lt;int [1]&gt; &lt;chr [1]&gt; &lt;dbl [1]&gt;  &lt;named list [2]&gt; &lt;list … &lt;list …</span>
+<span class="co">#&gt; 2 Boris  Johnson &lt;int [1]&gt; &lt;chr [1]&gt; &lt;NULL&gt;     &lt;named list [1]&gt; &lt;list … &lt;list …</span></code></pre></div>
 </div>
   </div>
 
