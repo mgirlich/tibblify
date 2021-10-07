@@ -16,7 +16,7 @@ guess_col <- function(x, path) {
   if (type == "unspecified") {
     return(
       list(
-        result = x,
+        result = vctrs::unspecified(vctrs::vec_size(x)),
         spec = lcol_guess(path, .default = NULL)
       )
     )

@@ -40,6 +40,18 @@ test_that("works", {
     ),
     ignore_attr = TRUE
   )
+
+  expect_equivalent(
+    tibblify(list(), col_specs),
+    tibble::tibble(
+      chr = character(),
+      int = integer(),
+      chr_lst_of = list_of(.ptype = character()),
+      chr_lst = list(),
+      datetime = structure(numeric(), class = c("POSIXct", "POSIXt"), tzone = "UTC")
+    ),
+    ignore_attr = TRUE
+  )
 })
 
 test_that("missing elements produce error", {
@@ -188,6 +200,80 @@ test_that("df_cols work", {
     ),
     ignore_attr = TRUE
   )
+
+  expect_equivalent(
+    tibblify(list(), col_specs),
+    tibble::tibble(
+      df = tibble::tibble(
+        chr = character(),
+        int = integer()
+      )
+    ),
+    ignore_attr = TRUE
+  )
+})
+
+test_that("df_lst_cols work", {
+  recordlist <- list(
+    list(
+      df = list(
+        list(
+          chr = "a",
+          int = 1
+        ),
+        list(
+          chr = "b",
+          int = 2
+        )
+      )
+    ),
+    list(
+      df = list(
+        list(
+          chr = "c"
+        )
+      )
+    )
+  )
+
+  col_specs <- lcols(
+    lcol_df_lst(
+      "df",
+      lcol_chr("chr"),
+      lcol_int("int", .default = NA_integer_),
+      .default = NULL
+    )
+  )
+
+  expect_equivalent(
+    tibblify(recordlist, col_specs),
+    tibble::tibble(
+      df = list(
+        tibble::tibble(
+          chr = c("a", "b"),
+          int = 1:2
+        ),
+        tibble::tibble(
+          chr = "c",
+          int = NA_integer_
+        )
+      )
+    ),
+    ignore_attr = TRUE
+  )
+
+  expect_equivalent(
+    tibblify(list(), col_specs),
+    tibble::tibble(
+      df = list_of(.ptype =
+        tibble::tibble(
+          chr = character(),
+          int = integer()
+        )
+      )
+    ),
+    ignore_attr = TRUE
+  )
 })
 
 
@@ -208,10 +294,40 @@ test_that("guess_col works", {
     ignore_attr = TRUE
   )
 
-  skip("not yet testable")
   expect_equivalent(
     get_spec(result),
     lcols(lcol_dbl("a")),
+    ignore_attr = TRUE
+  )
+})
+
+
+test_that("guess_col works with default", {
+  recordlist <- list(
+    list(a = 1),
+    list(a = 2)
+  )
+
+  col_specs <- lcols(a = lcol_guess("a", .default = NULL))
+
+  result <- tibblify(recordlist, col_specs = col_specs)
+
+  expect_equivalent(
+    result,
+    tibble::tibble(a = 1:2),
+    ignore_attr = TRUE
+  )
+
+  expect_equivalent(
+    get_spec(result),
+    lcols(lcol_dbl("a")),
+    ignore_attr = TRUE
+  )
+
+  # Need expect_equal() because list() appears to be equivalent to unspecified()
+  expect_equal(
+    tibblify_impl(list(), col_specs, keep_spec = FALSE),
+    tibble::tibble(a = vctrs::unspecified()),
     ignore_attr = TRUE
   )
 })

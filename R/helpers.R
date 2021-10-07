@@ -5,7 +5,7 @@ split_by_lengths <- function(x, lengths) {
 
   indices <- vector("list", length(lengths))
   index <- vec_rep_each(seq_along(lengths), lengths)
-  indices[lengths > 0] <- split(1:sum(lengths), index)
+  indices[lengths > 0] <- split(seq_len(sum(lengths)), index)
 
   vec_chop(x, indices)
 }
@@ -15,10 +15,6 @@ find_list_type <- function(x) {
 
   if (!is.list(x)) {
     stop("x must be a list.")
-  }
-
-  if (vec_size(x) == 0) {
-    stop("x must have size > 0.")
   }
 
   if (all(lengths(x) == 0)) {

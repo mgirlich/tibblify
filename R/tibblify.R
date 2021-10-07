@@ -78,7 +78,7 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL, par
       )
 
       result_split <- split_by_lengths(result, sizes)
-      resultlist[[i]] <- new_list_of(result_split, vec_ptype(result_split[[1]]))
+      resultlist[[i]] <- new_list_of(result_split, vec_ptype(result))
     } else if (inherits(collector, "lcollector_guess")) {
       result <- guess_col(valueslist, collector$path)
       resultlist[[i]] <- result$result
