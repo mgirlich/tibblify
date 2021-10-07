@@ -160,7 +160,7 @@ spouses_tbl <- tibblify(
   politicians,
   lcols(
     lcol_chr("surname"),
-    lcol_lst_of("spouses", .ptype = character())
+    lcol_lst_of("spouses", .ptype = character(), .parser = ~vctrs::vec_c(!!!.x, .ptype = character()))
   )
 )
 

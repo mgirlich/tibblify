@@ -373,18 +373,6 @@ test_that("lcol_vec works", {
   )
 })
 
-test_that("records work", {
-  x_rcrd <- rep(as.POSIXlt(Sys.time(), tz = "UTC"), 2)
-  expect_equal(
-    simplify_col(as.list(x_rcrd), ptype = x_rcrd[[1]]),
-    x_rcrd
-  )
-
-  expect_error(
-    simplify_col(list("2020-08-06 08:39:32 UTC"), ptype = x_rcrd[[1]])
-  )
-})
-
 test_that("`names_to` works", {
   recordlist <- list(
     a = list(x = 1),
