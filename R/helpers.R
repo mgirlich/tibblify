@@ -1,13 +1,15 @@
 split_by_lengths <- function(x, lengths) {
   if (sum(lengths) != vctrs::vec_size(x)) {
-    abort("sum of lengths and the size of x must be the same")
+    abort("sum of `lengths` and the size of `x` must be the same")
   }
 
-  indices <- vector("list", length(lengths))
-  index <- vec_rep_each(seq_along(lengths), lengths)
-  indices[lengths > 0] <- split(seq_len(sum(lengths)), index)
+  out <- vec_init_along(list(), lengths)
+  out[lengths == 0] <- list(vec_ptype(x))
 
-  vec_chop(x, indices)
+  indices <- vec_rep_each(seq_along(lengths), lengths)
+  out[lengths > 0] <- vec_split(x, indices)$val
+
+  out
 }
 
 find_list_type <- function(x) {
