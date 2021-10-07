@@ -81,7 +81,7 @@ guess_col <- function(x, path) {
   }
 
   if (type == "list_of") {
-    result <- simplify_col(x, ptype = list_of(.ptype = ptype))
+    result <- simplify_list_of(x, ptype = ptype)
 
     spec <- lcol_lst_of(
       path = path,
@@ -94,9 +94,9 @@ guess_col <- function(x, path) {
   }
 
   if (type == "nested_list_of") {
-    result <- simplify_col(
+    result <- simplify_list_of(
       x,
-      ptype = list_of(.ptype = ptype_flat),
+      ptype = ptype_flat,
       ~ vec_c(!!!.x, .ptype = ptype_flat)
     )
 

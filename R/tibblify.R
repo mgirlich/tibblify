@@ -81,8 +81,14 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
       result <- guess_col(valueslist, collector$path)
       resultlist[[i]] <- result$result
       collectors[[i]] <- result$spec
+    } else if (inherits(collector, "lcollector_vector")) {
+      resultlist[[i]] <- simplify_vector(valueslist, ptype = collector$ptype, transform = collector$.parser)
+    } else if (inherits(collector, "lcollector_lst_of")) {
+      resultlist[[i]] <- simplify_list_of(valueslist, ptype = collector$ptype, transform = collector$.parser)
+    } else if (inherits(collector, "lcollector_lst")) {
+      resultlist[[i]] <- apply_transform(valueslist, transform = collector$.parser)
     } else {
-      resultlist[[i]] <- simplify_col(valueslist, ptype = collector$ptype, transform = collector$.parser)
+      abort("this should not happen")
     }
   }
 
