@@ -96,6 +96,8 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL, par
     nrow = length(recordlist)
   )
 
+  tibble::validate_tibble(result)
+
   if (is_true(keep_spec)) {
     col_specs$cols <- collectors
 
