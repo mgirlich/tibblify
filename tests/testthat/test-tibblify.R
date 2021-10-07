@@ -1,3 +1,8 @@
+remove_spec <- function(x) {
+  attr(x, "spec") <- NULL
+  x
+}
+
 test_that("works", {
   recordlist <- list(
     list(
@@ -395,8 +400,13 @@ test_that("`names_to` works", {
 })
 
 test_that("known examples discog", {
-  result <- tibblify(discog)
-  expect_snapshot(result)
+  result <- tibblify(discog[1:2])
+  expect_snapshot_value(
+    result %>% remove_spec(),
+    style = "json2",
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
+  )
 
   col_specs <- lcols(
     lcol_int("instance_id"),
@@ -449,7 +459,7 @@ test_that("known examples discog", {
 
   expect_equal(
     result,
-    tibblify(discog, col_specs),
+    tibblify(discog[1:2], col_specs),
     ignore_function_env = TRUE,
     ignore_formula_env = TRUE
   )
@@ -457,22 +467,42 @@ test_that("known examples discog", {
 
 test_that("gh_repos works", {
   skip_on_cran()
-  expect_snapshot(tibblify(gh_repos))
+  expect_snapshot_value(
+    tibblify(gh_repos[1:2]) %>% remove_spec(),
+    style = "json2",
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
+  )
 })
 
 test_that("gh_users works", {
   skip_on_cran()
-  expect_snapshot(tibblify(gh_users))
+  expect_snapshot_value(
+    tibblify(gh_users[1:2]) %>% remove_spec(),
+    style = "json2",
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
+  )
 })
 
 test_that("got_chars works", {
   skip_on_covr()
   skip_on_cran()
-  expect_snapshot(tibblify(got_chars))
+  expect_snapshot_value(
+    tibblify(got_chars[1:2]) %>% remove_spec(),
+    style = "json2",
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
+  )
 })
 
 test_that("sw_films works", {
   skip_on_covr()
   skip_on_cran()
-  expect_snapshot(tibblify(sw_films))
+  expect_snapshot_value(
+    tibblify(sw_films[1:2]) %>% remove_spec(),
+    style = "json2",
+    ignore_function_env = TRUE,
+    ignore_formula_env = TRUE
+  )
 })
