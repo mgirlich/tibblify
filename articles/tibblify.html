@@ -289,23 +289,17 @@
   <span class="va">politicians</span>,
   <span class="fu"><a href="../reference/lcols.html">lcols</a></span><span class="op">(</span>
     <span class="fu"><a href="../reference/lcol_lgl.html">lcol_chr</a></span><span class="op">(</span><span class="st">"surname"</span><span class="op">)</span>,
-    <span class="fu"><a href="../reference/lcol_lgl.html">lcol_lst_of</a></span><span class="op">(</span><span class="st">"spouses"</span>, .ptype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">character</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+    <span class="fu"><a href="../reference/lcol_lgl.html">lcol_lst_of</a></span><span class="op">(</span><span class="st">"spouses"</span>, .ptype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">character</a></span><span class="op">(</span><span class="op">)</span>, .parser <span class="op">=</span> <span class="op">~</span><span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/vec_c.html">vec_c</a></span><span class="op">(</span><span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="va">.x</span>, .ptype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html">character</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 
 <span class="va">spouses_tbl</span><span class="op">$</span><span class="va">spouses</span>
 <span class="co">#&gt; &lt;list_of&lt;character&gt;[2]&gt;</span>
 <span class="co">#&gt; [[1]]</span>
-<span class="co">#&gt; [[1]][[1]]</span>
 <span class="co">#&gt; [1] "Michelle Robinson"</span>
 <span class="co">#&gt; </span>
-<span class="co">#&gt; </span>
 <span class="co">#&gt; [[2]]</span>
-<span class="co">#&gt; [[2]][[1]]</span>
-<span class="co">#&gt; [1] "Allegra Mostyn-Owen"</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; [[2]][[2]]</span>
-<span class="co">#&gt; [1] "Marina Wheeler"</span></code></pre></div>
+<span class="co">#&gt; [1] "Allegra Mostyn-Owen" "Marina Wheeler"</span></code></pre></div>
 <p>You can use <a href="https://tidyr.tidyverse.org/reference/nest.html"><code>tidyr::unnest()</code></a> or <a href="https://tidyr.tidyverse.org/reference/hoist.html"><code>tidyr::unnest_longer()</code></a> to flatten these columns to regular columns.</p>
 <p>A list column is used when you have a field with mixed elements.</p>
 </div>
