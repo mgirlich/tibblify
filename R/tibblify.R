@@ -45,64 +45,27 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
     # attr(collectors, "auto_name") <- c(attr(collectors, "auto_name"), rep_along(fields_without_spec, TRUE))
   }
 
-  resultlist <- vector("list", length(collectors))
-
-  for (i in seq_along(collectors)) {
-    collector <- collectors[[i]]
-    if (is_skip_col(collector)) {
-      next
-    }
-
-    tryCatch(
-      {
-        valueslist <- extract_index(recordlist, collector$path, collector$.default)
-      },
-      error = function(x) {
-        abort(paste0("empty or absent element at path ", collector$path))
-      }
-    )
-    if (inherits(collector, "lcollector_df")) {
-      resultlist[[i]] <- tibblify_impl(
-        recordlist = valueslist,
-        col_specs = collector$.parser,
-        keep_spec = FALSE
-      )
-    } else if (inherits(collector, "lcollector_df_lst")) {
-      sizes <- list_sizes(valueslist)
-      result <- tibblify_impl(
-        recordlist = purrr::flatten(valueslist),
-        col_specs = collector$.parser,
-        keep_spec = FALSE
-      )
-
-      result_split <- split_by_lengths(result, sizes)
-      resultlist[[i]] <- new_list_of(result_split, vec_ptype(result))
-    } else if (inherits(collector, "lcollector_guess")) {
-      result <- guess_col(valueslist, collector$path)
-      resultlist[[i]] <- result$result
-      collectors[[i]] <- result$spec
-    } else if (inherits(collector, "lcollector_vector")) {
-      resultlist[[i]] <- simplify_vector(valueslist, ptype = collector$ptype, transform = collector$.parser)
-    } else if (inherits(collector, "lcollector_lst_of")) {
-      resultlist[[i]] <- simplify_list_of(valueslist, ptype = collector$ptype, transform = collector$.parser)
-    } else if (inherits(collector, "lcollector_lst")) {
-      resultlist[[i]] <- apply_transform(valueslist, transform = collector$.parser)
-    } else {
-      abort("this should not happen")
-    }
-  }
-
   flag_skipped <- purrr::map_lgl(collectors, is_skip_col)
+  collectors_non_skip <- purrr::discard(collectors, flag_skipped)
+
+  result_list <- purrr::map(
+    collectors_non_skip,
+    function(collector) {
+      valueslist <- extract_index(recordlist, collector$path, collector$.default)
+      apply_collector(collector, valueslist)
+    }
+  )
 
   result <- tibble::new_tibble(
-    resultlist[!flag_skipped],
-    names = names(collectors)[!flag_skipped],
+    purrr::map(result_list, ~ .x[["values"]]),
+    names = names(collectors_non_skip),
     nrow = length(recordlist)
   )
 
   tibble::validate_tibble(result)
 
   if (is_true(keep_spec)) {
+    collectors[!flag_skipped] <- purrr::map(result_list, "collector")
     col_specs$cols <- collectors
 
     if (is_guess_col(default_collector)) {
@@ -126,13 +89,94 @@ tibblify_impl <- function(recordlist, col_specs, keep_spec, names_to = NULL) {
 #' @importFrom purrr chuck
 #' @importFrom purrr pluck
 extract_index <- function(recordlist, index, default) {
-  if (is_zap(default)) {
-    purrr::map(recordlist, chuck, !!!index)
-  } else {
-    purrr::map(recordlist, pluck, !!!index, .default = default)
-  }
+  tryCatch(
+    expr = {
+      if (is_zap(default)) {
+        purrr::map(recordlist, chuck, !!!index)
+      } else {
+        purrr::map(recordlist, pluck, !!!index, .default = default)
+      }
+    },
+    error = function(x) {
+      abort(paste0("empty or absent element at path ", index))
+    }
+  )
 }
 
+apply_collector <- function(collector, valueslist) {
+  UseMethod("apply_collector")
+}
+
+#' @export
+apply_collector.lcollector_guess <- function(collector, valueslist) {
+  result <- guess_col(valueslist, collector$path)
+  list(
+    values = result$result,
+    collector = result$spec
+  )
+}
+
+#' @export
+apply_collector.lcollector_vector <- function(collector, valueslist) {
+  list(
+    values = simplify_vector(valueslist, ptype = collector$ptype, transform = collector$.parser),
+    collector = collector
+  )
+}
+
+#' @export
+apply_collector.lcollector_lst <- function(collector, valueslist) {
+  list(
+    values = apply_transform(valueslist, transform = collector$.parser),
+    collector = collector
+  )
+}
+
+#' @export
+apply_collector.lcollector_lst_of <- function(collector, valueslist) {
+  list(
+    values = simplify_list_of(valueslist, ptype = collector$ptype, transform = collector$.parser),
+    collector = collector
+  )
+}
+
+#' @export
+apply_collector.lcollector_df <- function(collector, valueslist) {
+  # `valueslist` is just a list of records so we can just apply `tibblify_impl()`
+  list(
+    values = tibblify_impl(
+      recordlist = valueslist,
+      col_specs = collector$.parser,
+      keep_spec = FALSE
+    ),
+    collector = collector
+  )
+}
+
+#' @export
+apply_collector.lcollector_df_lst <- function(collector, valueslist) {
+  # basically this would just be
+  #
+  # map(
+  #   valueslist,
+  #   ~ tibblify_impl(.x, collector$.parser, keep_spec = FALSE)
+  # )
+  #
+  # but it turned out to be faster to flatten `valueslist`, apply `tibblify_impl`
+  # and then split the result
+  sizes <- list_sizes(valueslist)
+  result <- tibblify_impl(
+    recordlist = purrr::flatten(valueslist),
+    col_specs = collector$.parser,
+    keep_spec = FALSE
+  )
+
+  result_split <- split_by_lengths(result, sizes)
+  list(
+    values = new_list_of(result_split, vec_ptype(result)),
+    collector = collector
+  )
+}
 
 #' Extract all fields of a recordlist
 #' @noRd
