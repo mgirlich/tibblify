@@ -59,7 +59,7 @@
     Code
       lcol_skip("a") %>% print()
     Output
-      lcol_skip("a", .parser = .parser)
+      lcol_skip("a")
 
 ---
 
