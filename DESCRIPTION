@@ -13,7 +13,7 @@ Description: A tool to rectangle a nested list, that is to convert it into a
     and therefore offers a wide support of vector types.
 License: GPL-3
 Suggests: 
-    testthat,
+    testthat (>= 3.0.0),
     knitr,
     rmarkdown,
     covr,
@@ -34,3 +34,4 @@ Depends:
 URL: https://github.com/mgirlich/tibblify
 BugReports: https://github.com/mgirlich/tibblify/issues
 Language: en-US
+Config/testthat/edition: 3

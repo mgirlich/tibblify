@@ -172,7 +172,7 @@ lcol_skip <- function(path) {
     abort("path must be a scalar character for `lcol_skip()`")
   }
 
-  lcollector(path, type = "skip", ptype = NULL, .default = zap())
+  lcollector(path, type = "skip", ptype = NULL, .default = zap(), .parser_expr = NULL)
 }
 
 #' @export
