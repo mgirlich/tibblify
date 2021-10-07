@@ -94,7 +94,7 @@ test_that("empty cols work", {
   expect_equal(
     guess_col(list(NULL, NULL), "a"),
     list(
-      result = list(NULL, NULL),
+      result = vctrs::unspecified(2),
       spec = lcol_guess("a")
     )
   )
