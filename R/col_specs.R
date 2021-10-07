@@ -1,7 +1,9 @@
 lcollector <- function(path, type, ptype, .default, .parser = NULL,
                        .parser_expr = substitute(.parser, parent.frame(1)),
                        ...) {
-  check_default(.default, ptype, path)
+  if (type != "lst_of") {
+    check_default(.default, ptype, path)
+  }
 
   if (type %in% c("df", "df_lst", "lst", "lst_of")) {
     type2 <- type
@@ -192,7 +194,7 @@ lcol_lst <- function(path, .default = zap(), .parser = NULL) {
 lcol_lst_of <- function(path, .ptype, .default = zap(), .parser = NULL) {
   lcollector(
     path, "lst_of",
-    ptype = list_of(.ptype = .ptype),
+    ptype = .ptype,
     .default = .default,
     .parser = .parser,
     .ptype = .ptype
