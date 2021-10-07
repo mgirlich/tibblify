@@ -1,191 +1,134 @@
-test_known_output <- function(x, name, width = 80) {
+test_known_output <- function(x, width = 80) {
   local_options(cli.num_colors = 1)
-
-  expect_known_output(
-    print(x, width = width),
-    test_path("data", paste0("format_", name, ".txt"))
-  )
+  expect_snapshot(print(x, width = width))
 }
 
 test_that("format for vectors works", {
-  test_known_output(
-    lcol_chr("a"),
-    "chr"
-  )
+  local_options(cli.num_colors = 1)
 
-  test_known_output(
-    lcol_dat("a"),
-    "dat"
-  )
+  expect_snapshot(lcol_chr("a") %>% print())
+  expect_snapshot(lcol_dat("a") %>% print())
+  expect_snapshot(lcol_dbl("a") %>% print())
+  expect_snapshot(lcol_dtt("a") %>% print())
+  expect_snapshot(lcol_guess("a") %>% print())
+  expect_snapshot(lcol_int("a") %>% print())
+  expect_snapshot(lcol_lgl("a") %>% print())
 
-  test_known_output(
-    lcol_dbl("a"),
-    "dbl"
-  )
+  expect_snapshot(lcol_lst("a") %>% print())
 
-  test_known_output(
-    lcol_dtt("a"),
-    "dtt"
-  )
+  expect_snapshot(lcol_skip("a") %>% print())
 
-  test_known_output(
-    lcol_guess("a"),
-    "guess"
-  )
-
-  test_known_output(
-    lcol_lgl("a"),
-    "lgl"
-  )
-
-  test_known_output(
-    lcol_lst("a"),
-    "lst"
-  )
-
-  test_known_output(
-    lcol_skip("a"),
-    "skip"
-  )
-
-  test_known_output(
-    lcol_int("a"),
-    "vector1"
-  )
-
-  test_known_output(
-    lcol_int("a", .default = NA_integer_),
-    "vector2"
-  )
-
-  test_known_output(
-    lcol_int("a", .parser = as.integer),
-    "vector3"
-  )
-
-  test_known_output(
-    lcol_int("a", .default = NA_integer_, .parser = as.integer),
-    "vector4"
-  )
-
-  test_known_output(
-    lcol_vec("a", ptype = new_difftime(units = "mins")),
-    "lcol_vec"
-  )
+  expect_snapshot(lcol_int("a", .default = NA_integer_) %>% print())
+  expect_snapshot(lcol_int("a", .parser = as.integer) %>% print())
+  expect_snapshot(lcol_int("a", .default = NA_integer_, .parser = as.integer) %>% print())
+  # TODO capture user provided ptype?
+  expect_snapshot(lcol_vec("a", ptype = new_difftime(units = "mins")) %>% print())
 
   skip("lcol_fct not yet implemented")
-  test_known_output(
-    lcol_fct("a"),
-    "fct"
-  )
+  expect_snapshot(lcol_fct("a"))
 })
 
 
 test_that("format breaks long lines", {
-  test_known_output(
+  local_options(cli.num_colors = 1)
+  expect_snapshot(
     lcol_df(
       "path",
       a_long_name = lcol_dbl("a loooooooooooooooooooog name", .default = 1)
-    ),
-    width = 70,
-    "does_not_break_short_lines"
+    ) %>%
+      print(width = 70)
   )
 
   test_known_output(
     lcol_df(
       "path",
       a_long_name = lcol_dbl("a loooooooooooooooooooog name", .default = 1)
-    ),
-    width = 69,
-    "breaks_long_lines"
+    ) %>%
+       print(width = 69)
   )
 })
 
 
 test_that("format for lst_of works", {
-  test_known_output(
-    lcol_lst_of("a", .ptype = character()),
-    "lst_of"
-  )
+  local_options(cli.num_colors = 1)
+  expect_snapshot(lcol_lst_of("a", .ptype = character()) %>% print())
 })
 
 test_that("format for lcol_df works", {
-  x <- lcol_df(
-    "formats",
-    text = lcol_chr("text", .default = NA_character_)
-  )
-
-  test_known_output(
-    x,
-    "lcol_df_simple"
-  )
-
-  x <- lcol_df(
-    "basic_information",
-    labels = lcol_df(
-      "labels",
-      name = lcol_chr("name"),
-      entity_type = lcol_chr("entity_type"),
-      catno = lcol_chr("catno"),
-      resource_url = lcol_chr("resource_url"),
-      id = lcol_int("id"),
-      entity_type_name = lcol_chr("entity_type_name")
-    ),
-    year = lcol_int("year"),
-    master_url = lcol_chr("master_url", .default = NA),
-    artists = lcol_df_lst(
-      "artists",
-      join = lcol_chr("join"),
-      name = lcol_chr("name"),
-      anv = lcol_chr("anv"),
-      tracks = lcol_chr("tracks"),
-      role = lcol_chr("role"),
-      resource_url = lcol_chr("resource_url"),
-      id = lcol_int("id")
-    ),
-    id = lcol_int("id"),
-    thumb = lcol_chr("thumb"),
-    title = lcol_chr("title"),
-    formats = lcol_df_lst(
+  local_options(cli.num_colors = 1)
+  expect_snapshot(
+    lcol_df(
       "formats",
-      descriptions = lcol_lst_of(
-        "descriptions",
-        .ptype = character(0),
-        .parser = ~ vec_c(!!!.x, .ptype = character()),
-        .default = NULL
-      ),
-      text = lcol_chr("text", .default = NA),
-      name = lcol_chr("name"),
-      qty = lcol_chr("qty")
-    ),
-    cover_image = lcol_chr("cover_image"),
-    resource_url = lcol_chr("resource_url"),
-    master_id = lcol_int("master_id")
+      text = lcol_chr("text", .default = NA_character_)
+    ) %>%
+      print()
   )
 
-  test_known_output(
-    x,
-    "lcol_df_complex"
+  expect_snapshot(
+    lcol_df(
+      "basic_information",
+      labels = lcol_df(
+        "labels",
+        name = lcol_chr("name"),
+        entity_type = lcol_chr("entity_type"),
+        catno = lcol_chr("catno"),
+        resource_url = lcol_chr("resource_url"),
+        id = lcol_int("id"),
+        entity_type_name = lcol_chr("entity_type_name")
+      ),
+      year = lcol_int("year"),
+      master_url = lcol_chr("master_url", .default = NA),
+      artists = lcol_df_lst(
+        "artists",
+        join = lcol_chr("join"),
+        name = lcol_chr("name"),
+        anv = lcol_chr("anv"),
+        tracks = lcol_chr("tracks"),
+        role = lcol_chr("role"),
+        resource_url = lcol_chr("resource_url"),
+        id = lcol_int("id")
+      ),
+      id = lcol_int("id"),
+      thumb = lcol_chr("thumb"),
+      title = lcol_chr("title"),
+      formats = lcol_df_lst(
+        "formats",
+        descriptions = lcol_lst_of(
+          "descriptions",
+          .ptype = character(0),
+          # TODO the `!!!` operator doesn't work in `expect_snapshot()`
+          # .parser = ~ vec_c(!!!.x, .ptype = character()),
+          .default = NULL
+        ),
+        text = lcol_chr("text", .default = NA),
+        name = lcol_chr("name"),
+        qty = lcol_chr("qty")
+      ),
+      cover_image = lcol_chr("cover_image"),
+      resource_url = lcol_chr("resource_url"),
+      master_id = lcol_int("master_id")
+    ) %>%
+      print()
   )
 })
 
 
 test_that("format lcols works", {
-  test_known_output(
+  expect_snapshot(
     lcols(
       lcol_int("instance_id"),
       lcol_chr("date_added")
-    ),
-    "lcols_simple"
+    ) %>%
+      print()
   )
 
-  test_known_output(
+  expect_snapshot(
     lcols(
       lcol_int("instance_id"),
       lcol_chr("date_added"),
       .default = lcol_chr(zap())
-    ),
-    "lcols_default"
+    ) %>%
+      print()
   )
 
   col_specs <- lcols(
@@ -237,8 +180,8 @@ test_that("format lcols works", {
     lcol_int("rating"),
   )
 
-  test_known_output(
-    col_specs,
-    "lcols_complex"
+  expect_snapshot(
+    col_specs %>%
+      print()
   )
 })
