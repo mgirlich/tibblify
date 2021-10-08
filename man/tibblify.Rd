@@ -2,34 +2,27 @@
 % Please edit documentation in R/tibblify.R
 \name{tibblify}
 \alias{tibblify}
-\title{Rectange a nested list into a tidy tibble}
+\title{Rectangle a nested list}
 \usage{
-tibblify(
-  recordlist,
-  col_specs = lcols(.default = lcol_guess(zap())),
-  names_to = NULL
-)
+tibblify(x, spec = NULL, names_to = NULL)
 }
 \arguments{
-\item{recordlist}{A nested list.}
+\item{x}{A nested list.}
 
-\item{col_specs}{A specification generated with \code{lcols()} how to turn the
-list into a tibble.}
-
-\item{names_to}{A string specifying the name of the column to create from
-the data stored in the column names of data.}
+\item{spec}{A specification how to convert \code{x}. Generated with \code{spec_row()}
+or \code{spec_df()}.}
 }
 \value{
-The tibble generated according to the specification.
+Either a tibble or a list, depending on the specification
 }
 \description{
-Rectange a nested list into a tidy tibble
+Rectangle a nested list
 }
 \examples{
-recordlist <- list(
+x <- list(
   list(id = 1, name = "Tyrion Lannister"),
   list(id = 2, name = "Victarion Greyjoy")
 )
 
-tibblify(recordlist)
+tibblify(x)
 }

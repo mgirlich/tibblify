@@ -4,7 +4,7 @@
 \alias{lcols}
 \title{Create list parser specification}
 \usage{
-lcols(..., .default = lcol_skip(zap()))
+lcols(..., .default = zap())
 }
 \arguments{
 \item{...}{Column specification objects created by \verb{lcol_*()}.}

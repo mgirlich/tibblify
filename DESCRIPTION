@@ -34,4 +34,9 @@ Depends:
 URL: https://github.com/mgirlich/tibblify
 BugReports: https://github.com/mgirlich/tibblify/issues
 Language: en-US
+NeedsCompilation: yes
 Config/testthat/edition: 3
+LinkingTo: 
+    cpp11,
+    vctrs (>= 0.3.6)
+SystemRequirements: C++11

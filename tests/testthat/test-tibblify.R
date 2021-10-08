@@ -1,496 +1,748 @@
-remove_spec <- function(x) {
-  attr(x, "spec") <- NULL
-  x
+tibble <- tibble::tibble
+
+tib <- function(x, col) {
+  tibblify(
+    list(x),
+    spec_df(x = col)
+  )
 }
 
-test_that("works", {
-  recordlist <- list(
-    list(
-      chr = "a",
-      int = 1,
-      chr_lst = c("a1", "a2"),
-      datetime = "2020-08-06 09:02:46 UTC",
-      skip_it = 1
-    ),
-    list(
-      chr = "b",
-      int = 2,
-      chr_lst = "b1",
-      datetime = "2021-09-07 11:02:46 UTC"
-    ),
-    list(
-      int = 3,
-      chr_lst = character(),
-      datetime = "2022-10-08 09:23:46 UTC"
-    )
-  )
+test_that("scalar column works", {
+  dtt <- vctrs::new_datetime(1)
 
-  col_specs <- lcols(
-    lcol_chr("chr", .default = NA_character_),
-    lcol_int("int"),
-    chr_lst_of = lcol_lst_of("chr_lst", .ptype = character()),
-    chr_lst = lcol_lst("chr_lst"),
-    lcol_dtt("datetime", .parser = ~ as.POSIXct(.x, tz = "UTC")),
-    lcol_skip("skip_it")
-  )
+  # can parse
+  expect_equal(tib(list(x = TRUE), tib_lgl("x")), tibble(x = TRUE))
+  expect_equal(tib(list(x = 1), tib_int("x")), tibble(x = 1L))
+  expect_equal(tib(list(x = 1.5), tib_dbl("x")), tibble(x = 1.5))
+  expect_equal(tib(list(x = "a"), tib_chr("x")), tibble(x = "a"))
+  expect_equal(tib(list(x = dtt), tib_scalar("x", dtt)), tibble(x = dtt))
 
+  # errors if required but absent
+  expect_snapshot_error(tib(list(), tib_lgl("x")))
+  expect_snapshot_error(tib(list(), tib_int("x")))
+  expect_snapshot_error(tib(list(), tib_dbl("x")))
+  expect_snapshot_error(tib(list(), tib_chr("x")))
+  expect_snapshot_error(tib(list(), tib_scalar("x", dtt)))
+
+  # errors if bad size
+  expect_snapshot_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x")))
+  expect_snapshot_error(tib(list(x = c(1, 1)), tib_int("x")))
+  expect_snapshot_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x")))
+  expect_snapshot_error(tib(list(x = c("a", "a")), tib_chr("x")))
+  expect_snapshot_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))
+
+  # errors if bad type
+  expect_snapshot_error(tib(list(x = "a"), tib_lgl("x")))
+  expect_snapshot_error(tib(list(x = "a"), tib_int("x")))
+  expect_snapshot_error(tib(list(x = "a"), tib_dbl("x")))
+  expect_snapshot_error(tib(list(x = 1), tib_chr("x")))
+  expect_snapshot_error(tib(list(x = 1), tib_scalar("x", dtt)))
+
+  # fallback default works
+  expect_equal(tib(list(), tib_lgl("x", FALSE)), tibble(x = NA))
+  expect_equal(tib(list(), tib_int("x", FALSE)), tibble(x = NA_integer_))
+  expect_equal(tib(list(), tib_dbl("x", FALSE)), tibble(x = NA_real_))
+  expect_equal(tib(list(), tib_chr("x", FALSE)), tibble(x = NA_character_))
+  expect_equal(tib(list(), tib_scalar("x", dtt, FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
+
+  # use default if empty element
+  expect_equal(tib(list(x = NULL), tib_lgl("x", FALSE, FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(x = NULL), tib_int("x", FALSE, 1)), tibble(x = 1))
+  expect_equal(tib(list(x = NULL), tib_dbl("x", FALSE, 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(x = NULL), tib_chr("x", FALSE, "a")), tibble(x = "a"))
+  expect_equal(tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), FALSE, dtt)), tibble(x = dtt))
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl("x", FALSE, FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(), tib_int("x", FALSE, 1)), tibble(x = 1))
+  expect_equal(tib(list(), tib_dbl("x", FALSE, 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(), tib_chr("x", FALSE, "a")), tibble(x = "a"))
+  expect_equal(tib(list(), tib_scalar("x", vec_ptype(dtt), FALSE, dtt)), tibble(x = dtt))
+
+  # transform works
   expect_equal(
-    tibblify(recordlist, col_specs),
-    tibble::tibble(
-      chr = purrr::map_chr(recordlist, "chr", .default = NA_character_),
-      int = 1:3,
-      chr_lst_of = list_of(!!!purrr::map(recordlist, "chr_lst"), .ptype = character()),
-      chr_lst = purrr::map(recordlist, "chr_lst"),
-      datetime = as.POSIXct(purrr::map_chr(recordlist, "datetime"), tz = "UTC")
-    ),
-    ignore_attr = "spec"
+    tib(list(x = TRUE), tib_lgl("x", transform = ~ !.x)),
+    tibble(x = FALSE)
   )
-
   expect_equal(
-    tibblify(list(), col_specs),
-    tibble::tibble(
-      chr = character(),
-      int = integer(),
-      chr_lst_of = list_of(.ptype = character()),
-      chr_lst = list(),
-      datetime = structure(numeric(), class = c("POSIXct", "POSIXt"), tzone = "UTC")
-    ),
-    ignore_attr = "spec"
+    tib(list(x = 1), tib_int("x", transform = ~ .x - 1)),
+    tibble(x = 0)
+  )
+  expect_equal(
+    tib(list(x = 1.5), tib_dbl("x", transform = ~ .x - 1)),
+    tibble(x = 0.5)
+  )
+  expect_equal(
+    tib(list(x = "a"), tib_chr("x", transform = ~ paste0(.x, "b"))),
+    tibble(x = "ab")
+  )
+  expect_equal(
+    tib(list(x = dtt), tib_scalar("x", dtt, transform = ~ .x + 1)),
+    tibble(x = vctrs::new_datetime(2))
   )
 })
 
-test_that("missing elements produce error", {
-  expect_snapshot_error(
+test_that("record objects work", {
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+
+  expect_equal(
     tibblify(
       list(
-        list(a = 1),
-        list(b = 1)
+        list(x = x_rcrd),
+        list(x = x_rcrd + 1)
       ),
-      lcols(lcol_chr("a"))
-    )
-  )
-})
-
-test_that("factors work", {
-  skip("lcol_fct not yet implemented")
-  x <- list(
-    list(a = "good"),
-    list(a = "bad"),
-    list(a = NA_character_)
-  )
-
-  make_spec <- function(levels = NULL,
-                        ordered = FALSE,
-                        include_na = FALSE) {
-    lcols(
-      lcol_fct(
-        "a",
-        levels = levels,
-        ordered = ordered,
-        include_na = include_na
-      )
-    )
-  }
-
-  make_factor <- function(ordered = FALSE,
-                          include_na = FALSE) {
-    factor(
-      x = c("good", "bad", NA_character_),
-      levels = c("good", "bad"),
-      ordered = ordered
-    )
-  }
-
-  expect_equal(
-    tibblify(x, make_spec())$a,
-    make_factor()
-  )
-
-  expect_equal(
-    tibblify(x, make_spec(ordered = TRUE))$a,
-    make_factor(ordered = TRUE)
-  )
-
-  expect_equal(
-    tibblify(x, make_spec(include_na = TRUE))$a,
-    make_factor(ordered = TRUE)
-  )
-})
-
-test_that("default works", {
-  recordlist <- list(
-    list(int = 1, chr = "a"),
-    list(int = 2, chr = "b")
-  )
-
-  # no default provided
-  expect_equal(
-    tibblify(
-      recordlist,
-      col_specs = lcols(
-        lcol_int("int")
+      spec_df(
+        x = tib_scalar("x", ptype = x_rcrd)
       )
     ),
-    tibble::tibble(int = 1:2),
-    ignore_attr = "spec"
-  )
-
-  # default: skip
-  expect_equal(
-    tibblify(
-      recordlist,
-      lcols(
-        lcol_int("int"),
-        .default = lcol_skip(zap())
-      )
-    ),
-    tibble::tibble(int = 1:2),
-    ignore_attr = "spec"
-  )
-
-  # default with transform
-  col_specs <- lcols(
-    lcol_chr("chr"),
-    .default = lcol_chr(
-      zap(),
-      .parser = as.character
-    )
-  )
-
-  expect_equal(
-    tibblify(
-      recordlist,
-      col_specs = col_specs
-    ),
-    tibble::tibble(
-      chr = c("a", "b"),
-      int = as.character(1:2)
-    ),
-    ignore_attr = "spec"
-  )
-})
-
-test_that("df_cols work", {
-  recordlist <- list(
-    list(
-      df = list(
-        chr = "a",
-        int = 1
-      )
-    ),
-    list(
-      df = list(
-        chr = "b",
-        int = 2
-      )
-    )
-  )
-
-  col_specs <- lcols(
-    lcol_df(
-      "df",
-      lcol_chr("chr", .default = NA_character_),
-      lcol_int("int")
-    )
-  )
-
-  expect_equal(
-    tibblify(recordlist, col_specs),
-    tibble::tibble(
-      df = tibble::tibble(
-        chr = c("a", "b"),
-        int = 1:2
-      )
-    ),
-    ignore_attr = "spec"
-  )
-
-  expect_equal(
-    tibblify(list(), col_specs),
-    tibble::tibble(
-      df = tibble::tibble(
-        chr = character(),
-        int = integer()
-      )
-    ),
-    ignore_attr = "spec"
-  )
-})
-
-test_that("df_lst_cols work", {
-  recordlist <- list(
-    list(
-      df = list(
-        list(
-          chr = "a",
-          int = 1
-        ),
-        list(
-          chr = "b",
-          int = 2
-        )
-      )
-    ),
-    list(
-      df = list(
-        list(
-          chr = "c"
-        )
-      )
-    )
-  )
-
-  col_specs <- lcols(
-    lcol_df_lst(
-      "df",
-      lcol_chr("chr"),
-      lcol_int("int", .default = NA_integer_),
-      .default = NULL
-    )
-  )
-
-  expect_equal(
-    tibblify(recordlist, col_specs),
-    tibble::tibble(
-      df = list_of(
-        tibble::tibble(
-          chr = c("a", "b"),
-          int = 1:2
-        ),
-        tibble::tibble(
-          chr = "c",
-          int = NA_integer_
-        )
-      )
-    ),
-    ignore_attr = "spec"
-  )
-
-  expect_equal(
-    tibblify(list(), col_specs),
-    tibble::tibble(
-      df = list_of(.ptype =
-        tibble::tibble(
-          chr = character(),
-          int = integer()
-        )
-      )
-    ),
-    ignore_attr = "spec"
-  )
-})
-
-
-test_that("guess_col works", {
-  recordlist <- list(
-    list(a = 1),
-    list(a = 2)
-  )
-
-  result <- tibblify(
-    recordlist,
-    col_specs = lcols(.default = lcol_guess(zap()))
-  )
-
-  expect_equal(
-    result,
-    tibble::tibble(a = 1:2),
-    ignore_attr = "spec"
-  )
-
-  expect_equal(
-    get_spec(result),
-    lcols(lcol_dbl("a")),
-    ignore_attr = "spec"
-  )
-})
-
-
-test_that("guess_col works with default", {
-  recordlist <- list(
-    list(a = 1),
-    list(a = 2)
-  )
-
-  col_specs <- lcols(a = lcol_guess("a", .default = NULL))
-
-  result <- tibblify(recordlist, col_specs = col_specs)
-
-  expect_equal(
-    result,
-    tibble::tibble(a = 1:2),
-    ignore_attr = "spec"
-  )
-
-  expect_equal(
-    get_spec(result),
-    lcols(lcol_dbl("a")),
-    ignore_attr = "spec"
-  )
-
-  # Need expect_equal() because list() appears to be equivalent to unspecified()
-  expect_equal(
-    tibblify_impl(list(), col_specs, keep_spec = FALSE),
-    tibble::tibble(a = vctrs::unspecified()),
-    ignore_attr = "spec"
-  )
-})
-
-
-test_that("lcol_vec works", {
-  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
-  recordlist <- list(
-    list(a = x_rcrd),
-    list(a = x_rcrd + 1)
-  )
-
-  spec <- lcols(
-    lcol_vec("a", ptype = x_rcrd)
-  )
-
-  expect_equal(
-    tibblify(recordlist, spec),
-    tibble::tibble(a = vec_c(!!!purrr::map(recordlist, "a"), .ptype = x_rcrd)),
-    ignore_attr = "spec"
+    tibble(x = c(x_rcrd, x_rcrd + 1))
   )
 
   now <- Sys.time()
-  past <- now - c(100, 200)
-
-  recordlist <- list(
-    list(timediff = now - past[1]),
-    list(timediff = now - past[2])
-  )
-
-  spec <- lcols(
-    lcol_vec("timediff", ptype = recordlist[[1]]$timediff)
-  )
+  td1 <- now - (now - 100)
+  td2 <- now - (now - 200)
 
   expect_equal(
-    tibblify(recordlist, spec),
-    tibble::tibble(timediff = vec_c(!!!purrr::map(recordlist, "timediff"))),
-    ignore_attr = "spec"
-  )
-})
-
-test_that("`names_to` works", {
-  recordlist <- list(
-    a = list(x = 1),
-    b = list(x = 2)
-  )
-
-  # TODO should `x` be named or not?
-  expect_equal(
-    tibblify(recordlist, names_to = "name"),
-    tibble::tibble(name = c("a", "b"), x = c(a = 1, b = 2)),
-    ignore_attr = "spec"
-  )
-})
-
-test_that("known examples discog", {
-  result <- tibblify(discog[1:2])
-  expect_snapshot_value(
-    result %>% remove_spec(),
-    style = "json2",
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
-  )
-
-  col_specs <- lcols(
-    lcol_int("instance_id"),
-    lcol_chr("date_added"),
-    lcol_df(
-      "basic_information",
-      labels = lcol_df_lst(
-        "labels",
-        name = lcol_chr("name"),
-        entity_type = lcol_chr("entity_type"),
-        catno = lcol_chr("catno"),
-        resource_url = lcol_chr("resource_url"),
-        id = lcol_int("id"),
-        entity_type_name = lcol_chr("entity_type_name")
+    tibblify(
+      list(
+        list(timediff = td1),
+        list(timediff = td2)
       ),
-      year = lcol_int("year"),
-      master_url = lcol_chr("master_url", .default = NA_character_),
-      artists = lcol_df_lst(
-        "artists",
-        join = lcol_chr("join"),
-        name = lcol_chr("name"),
-        anv = lcol_chr("anv"),
-        tracks = lcol_chr("tracks"),
-        role = lcol_chr("role"),
-        resource_url = lcol_chr("resource_url"),
-        id = lcol_int("id")
-      ),
-      id = lcol_int("id"),
-      thumb = lcol_chr("thumb"),
-      title = lcol_chr("title"),
-      formats = lcol_df_lst(
-        "formats",
-        descriptions = lcol_lst_of(
-          "descriptions",
-          .ptype = character(0),
-          .parser = ~ vctrs::vec_c(!!!.x, .ptype = character()),
-          .default = NULL
-        ),
-        text = lcol_chr("text", .default = NA_character_),
-        name = lcol_chr("name"),
-        qty = lcol_chr("qty")
-      ),
-      cover_image = lcol_chr("cover_image"),
-      resource_url = lcol_chr("resource_url"),
-      master_id = lcol_int("master_id")
+      spec_df(
+        timediff = tib_scalar("timediff", ptype = td1)
+      )
     ),
-    lcol_int("id"),
-    lcol_int("rating"),
+    tibble(timediff = c(td1, td2))
+  )
+})
+
+test_that("vector column works", {
+  dtt <- vctrs::new_datetime(1)
+
+  # can parse
+  expect_equal(tib(list(x = c(TRUE, FALSE)), tib_lgl_vec("x")), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(x = c(dtt, dtt + 1)), tib_vector("x", dtt)), tibble(x = list_of(c(dtt, dtt + 1))))
+
+  # errors if required but absent
+  expect_snapshot_error(tib(list(), tib_lgl_vec("x")))
+  expect_snapshot_error(tib(list(), tib_vector("x", dtt)))
+
+  # errors if bad type
+  expect_snapshot_error(tib(list(x = "a"), tib_lgl_vec("x")))
+
+  # fallback default works
+  expect_equal(tib(list(), tib_lgl_vec("x", FALSE)), tibble(x = list_of(logical())))
+  expect_equal(tib(list(), tib_vector("x", dtt, FALSE)), tibble(x = list_of(vctrs::new_datetime())))
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl_vec("x", FALSE, c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(), tib_vector("x", dtt, FALSE, c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+
+  # transform works
+  expect_equal(
+    tib(list(x = c(TRUE, FALSE)), tib_lgl_vec("x", transform = ~ !.x)),
+    tibble(x = list_of(c(FALSE, TRUE)))
+  )
+  expect_equal(
+    tib(list(x = c(dtt - 1, dtt)), tib_vector("x", dtt, transform = ~ .x + 1)),
+    tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+})
+
+test_that("list column works", {
+  # can parse
+  expect_equal(
+    tibblify(
+      list(list(x = TRUE), list(x = 1)),
+      spec_df(x = tib_list("x"))
+    ),
+    tibble(x = list(TRUE, 1))
+  )
+
+  # errors if required but absent
+  expect_snapshot_error(
+    tibblify(
+      list(list(x = TRUE), list(zzz = 1)),
+      spec_df(x = tib_list("x"))
+    )
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(list(), list(x = 1)),
+      spec_df(x = tib_list("x", FALSE))
+    ),
+    tibble(x = list(NULL, 1))
+  )
+
+  # specified default works
+  expect_equal(
+    tibblify(
+      list(list()),
+      spec_df(x = tib_list("x", FALSE, 1))
+    ),
+    tibble(x = list(1))
+  )
+
+  # transform works
+  expect_equal(
+    tibblify(
+      list(list(x = c(TRUE, FALSE)), list(x = 1)),
+      spec_df(x = tib_list("x", FALSE, transform = ~ length(.x)))
+    ),
+    tibble(x = list(2, 1))
+  )
+})
+
+test_that("df column works", {
+  # can parse
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list(x = list(a = FALSE))
+      ),
+      spec_df(x = tib_row("x", a = tib_lgl("a")))
+    ),
+    tibble(x = tibble(a = c(TRUE, FALSE)))
+  )
+
+  # errors if required but absent
+  expect_snapshot_error(
+    tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list()
+      ),
+      spec_df(x = tib_row("x", a = tib_lgl("a")))
+    )
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", FALSE)))
+    ),
+    tibble(x = tibble(a = c(TRUE, NA, NA)))
+  )
+})
+
+test_that("list of df column works", {
+  # can parse
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        ))
+      ),
+      spec_df(x = tib_df("x", a = tib_lgl("a")))
+    ),
+    tibble(x = list_of(tibble(a = c(TRUE, FALSE))))
+  )
+
+  # errors if required but absent
+  expect_snapshot_error(
+    tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list()
+      ),
+      spec_df(x = tib_df("x", a = tib_lgl("a")))
+    )
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", FALSE)))
+    ),
+    tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
+  )
+})
+
+test_that("names_to works", {
+  tib2 <- function(x, y, col) {
+    tibblify(
+      list(x, y),
+      spec_df(x = col)
+    )
+  }
+
+  # can parse
+  expect_equal(
+    tibblify(
+      list(
+        a = list(x = TRUE),
+        b = list(x = FALSE)
+      ),
+      spec_df(x = tib_lgl("x"), .names_to = "nms")
+    ),
+    tibble(nms = c("a", "b"), x = c(TRUE, FALSE))
+  )
+
+  # works with partial names
+  expect_equal(
+    tibblify(
+      list(
+        a = list(x = TRUE),
+        list(x = FALSE)
+      ),
+      spec_df(x = tib_lgl("x"), .names_to = "nms")
+    ),
+    tibble(nms = c("a", ""), x = c(TRUE, FALSE))
+  )
+
+  # works for missing names
+  expect_equal(
+    tibblify(
+      list(
+        list(x = TRUE),
+        list(x = FALSE)
+      ),
+      spec_df(x = tib_lgl("x"), .names_to = "nms")
+    ),
+    tibble(nms = c("", ""), x = c(TRUE, FALSE))
+  )
+})
+
+test_that("tibble input works", {
+  df <- tibble(x = 1:2, y = c("a", "b"))
+
+  expect_equal(
+    tibblify(
+      df,
+      spec_df(
+        x = tib_int("x"),
+        y = tib_chr("y")
+      )
+    ),
+    df
+  )
+
+  df2 <- tibble(x = 1:2, y = c("a", "b"), df = tibble(z = 3:4))
+
+  expect_equal(
+    tibblify(
+      df2,
+      spec_df(
+        x = tib_int("x"),
+        y = tib_chr("y"),
+        df = tib_row(
+          "df",
+          z = tib_int("z"),
+        )
+      )
+    ),
+    df2
+  )
+})
+
+test_that("nested keys work", {
+  expect_equal(
+    tibblify(
+      list(list(x = list(y = list(z = 1)))),
+      spec_df(xyz = tib_int(list("x", "y", "z")))
+    ),
+    tibble(xyz = 1)
+  )
+})
+
+test_that("empty spec works", {
+  expect_equal(
+    tibblify(
+      list(list(), list()),
+      spec_df()
+    ),
+    tibble(.rows = 2)
   )
 
   expect_equal(
-    result,
-    tibblify(discog[1:2], col_specs),
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
+    tibblify(
+      list(),
+      spec_df()
+    ),
+    tibble()
+  )
+
+  tibblify(
+    list(list(x = list()), list(x = list())),
+    spec_df(x = tib_row("x", a = tib_int("a", FALSE)))
+  )
+
+  expect_equal(
+    tibblify(
+      list(list(x = list()), list(x = list())),
+      spec_df(x = tib_row("x"))
+    ),
+    tibble(x = tibble(.rows = 2), .rows = 2)
+  )
+
+  expect_equal(
+    tibblify(
+      list(),
+      spec_df(x = tib_row("x", .required = FALSE))
+    ),
+    tibble(x = tibble())
   )
 })
 
-test_that("gh_repos works", {
-  skip_on_cran()
-  expect_snapshot_value(
-    tibblify(gh_repos[1:2]) %>% remove_spec(),
-    style = "json2",
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
+test_that("discog works", {
+  row1 <- tibble(
+    instance_id = 354823933L,
+    date_added = "2019-02-16T17:48:59-08:00",
+    basic_information = tibble(
+      labels = list_of(
+        tibble(
+          name             = "Tobi Records (2)",
+          entity_type      = "1",
+          catno            = "TOB-013",
+          resource_url     = "https://api.discogs.com/labels/633407",
+          id               = 633407L,
+          entity_type_name = "Label"
+        )
+      ),
+      year = 2015L,
+      master_url = NA_character_,
+      artists = list_of(
+        tibble(
+          join         = "",
+          name         = "Mollot",
+          anv          = "",
+          tracks       = "",
+          role         = "",
+          resource_url = "https://api.discogs.com/artists/4619796",
+          id           = 4619796L
+        )
+      ),
+      id = 7496378L,
+      thumb = "https://img.discogs.com/vEVegHrMNTsP6xG_K6OuFXz4h_U=/fit-in/150x150/filters:strip_icc():format(jpeg):mode_rgb():quality(40)/discogs-images/R-7496378-1442692247-1195.jpeg.jpg",
+      title = "Demo",
+      formats = list_of(
+        tibble(
+          descriptions = list_of("Numbered"),
+          text         = "Black",
+          name         = "Cassette",
+          qty          = "1"
+        )
+      ),
+      cover_image = "https://img.discogs.com/EmbMh7vsElksjRgoXLFSuY1sjRQ=/fit-in/500x499/filters:strip_icc():format(jpeg):mode_rgb():quality(90)/discogs-images/R-7496378-1442692247-1195.jpeg.jpg",
+      resource_url = "https://api.discogs.com/releases/7496378",
+      master_id = 0L
+    ),
+    id = 7496378L,
+    rating = 0L
+  )
+
+  spec_collection <- spec_df(
+    instance_id = tib_int("instance_id"),
+    date_added = tib_chr("date_added"),
+    basic_information = tib_row(
+      "basic_information",
+      labels = tib_df(
+        "labels",
+        name = tib_chr("name"),
+        entity_type = tib_chr("entity_type"),
+        catno = tib_chr("catno"),
+        resource_url = tib_chr("resource_url"),
+        id = tib_int("id"),
+        entity_type_name = tib_chr("entity_type_name")
+      ),
+      year = tib_int("year"),
+      master_url = tib_chr("master_url"),
+      artists = tib_df(
+        "artists",
+        join = tib_chr("join"),
+        name = tib_chr("name"),
+        anv = tib_chr("anv"),
+        tracks = tib_chr("tracks"),
+        role = tib_chr("role"),
+        resource_url = tib_chr("resource_url"),
+        id = tib_int("id")
+      ),
+      id = tib_int("id"),
+      thumb = tib_chr("thumb"),
+      title = tib_chr("title"),
+      formats = tib_df(
+        "formats",
+        descriptions = tib_chr_vec(
+          "descriptions",
+          transform = ~ vctrs::vec_c(!!!.x, .ptype = character())
+        ),
+        text = tib_chr("text", FALSE),
+        name = tib_chr("name"),
+        qty = tib_chr("qty")
+      ),
+      cover_image = tib_chr("cover_image"),
+      resource_url = tib_chr("resource_url"),
+      master_id = tib_int("master_id")
+    ),
+    id = tib_int("id"),
+    rating = tib_int("rating"),
+  )
+
+  expect_equal(tibblify(discog[1], spec_collection), row1)
+  expect_equal(tibblify(row1, spec_collection), row1)
+
+  specs_object <- spec_row(!!!spec_collection$fields)
+  expect_equal(tibblify(discog[[1]], specs_object), row1)
+  expect_equal(tibblify(row1, specs_object), row1)
+
+  # TODO
+  # expect_snapshot_error(tibblify(discog[[1]], spec_collection), row1)
+  # expect_snapshot_error(tibblify(discog[1], spec_object), row1)
+})
+
+test_that("spec_object() works", {
+  x <- list(a = 1, b = 1:3)
+  spec <- spec_row(a = tib_int("a"), b = tib_int_vec("b"))
+
+  expect_equal(
+    tibblify(x, spec),
+    tibble(a = 1L, b = list_of(1:3))
+  )
+  expect_equal(
+    tibblify(x, spec_object(spec)),
+    list(a = 1L, b = 1:3)
+  )
+
+  x2 <- list(
+    a = list(
+      x = 1,
+      y = list(a = 1),
+      z = list(
+        list(b = 1),
+        list(b = 2)
+      )
+    )
+  )
+
+  spec2 <- spec_row(
+    a = tib_row(
+      "a",
+      x = tib_int("x"),
+      y = tib_row("y", a = tib_int("a")),
+      z = tib_df("z", b = tib_int("b"))
+    )
+  )
+
+  expect_equal(
+    tibblify(x2, spec2),
+    tibble(
+      a = tibble(
+        x = 1L,
+        y = tibble(a = 1L),
+        z = list_of(tibble(b = 1:2))
+      )
+    )
+  )
+  expect_equal(
+    tibblify(x2, spec_object(spec2)),
+    list(
+      a = list(
+        x = 1L,
+        y = list(a = 1L),
+        z = tibble(b = 1:2)
+      )
+    )
   )
 })
 
-test_that("gh_users works", {
-  skip_on_cran()
-  expect_snapshot_value(
-    tibblify(gh_users[1:2]) %>% remove_spec(),
-    style = "json2",
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
-  )
-})
-
-test_that("got_chars works", {
-  skip_on_covr()
-  skip_on_cran()
-  expect_snapshot_value(
-    tibblify(got_chars[1:2]) %>% remove_spec(),
-    style = "json2",
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
-  )
-})
-
-test_that("sw_films works", {
-  skip_on_covr()
-  skip_on_cran()
-  expect_snapshot_value(
-    tibblify(sw_films[1:2]) %>% remove_spec(),
-    style = "json2",
-    ignore_function_env = TRUE,
-    ignore_formula_env = TRUE
-  )
-})
+# remove_spec <- function(x) {
+#   attr(x, "spec") <- NULL
+#   x
+# }
+#
+# test_that("default works", {
+#   recordlist <- list(
+#     list(int = 1, chr = "a"),
+#     list(int = 2, chr = "b")
+#   )
+#
+#   # no default provided
+#   expect_equal(
+#     tibblify(
+#       recordlist,
+#       spec = lcols(
+#         int = lcol_int("int")
+#       )
+#     ),
+#     tibble::tibble(int = 1:2),
+#     ignore_attr = "spec"
+#   )
+#
+#   # default: skip
+#   expect_equal(
+#     tibblify(
+#       recordlist,
+#       lcols(
+#         int = lcol_int("int")
+#       )
+#     ),
+#     tibble::tibble(int = 1:2),
+#     ignore_attr = "spec"
+#   )
+# })
+#
+# test_that("df_cols work", {
+#   recordlist <- list(
+#     list(
+#       df = list(
+#         chr = "a",
+#         int = 1
+#       )
+#     ),
+#     list(
+#       df = list(
+#         chr = "b",
+#         int = 2
+#       )
+#     )
+#   )
+#
+#   col_specs <- lcols(
+#     df = lcol_df(
+#       "df",
+#       chr = lcol_chr("chr", .default = NA_character_),
+#       int = lcol_int("int")
+#     )
+#   )
+#
+#   expect_equal(
+#     tibblify(recordlist, col_specs),
+#     tibble::tibble(
+#       df = tibble::tibble(
+#         chr = c("a", "b"),
+#         int = 1:2
+#       )
+#     ),
+#     ignore_attr = "spec"
+#   )
+#
+#   expect_equal(
+#     tibblify(list(), col_specs),
+#     tibble::tibble(
+#       df = tibble::tibble(
+#         chr = character(),
+#         int = integer()
+#       )
+#     ),
+#     ignore_attr = "spec"
+#   )
+# })
+#
+# test_that("df_lst_cols work", {
+#   recordlist <- list(
+#     list(
+#       df = list(
+#         list(
+#           chr = "a",
+#           int = 1
+#         ),
+#         list(
+#           chr = "b",
+#           int = 2
+#         )
+#       )
+#     ),
+#     list(
+#       df = list(
+#         list(
+#           chr = "c"
+#         )
+#       )
+#     )
+#   )
+#
+#   col_specs <- lcols(
+#     df = lcol_df_lst(
+#       "df",
+#       chr = lcol_chr("chr"),
+#       int = lcol_int("int", .default = NA_integer_)
+#     )
+#   )
+#
+#   expect_equal(
+#     tibblify(recordlist, col_specs),
+#     tibble::tibble(
+#       df = list_of(
+#         tibble::tibble(
+#           chr = c("a", "b"),
+#           int = 1:2
+#         ),
+#         tibble::tibble(
+#           chr = "c",
+#           int = NA_integer_
+#         )
+#       )
+#     ),
+#     ignore_attr = "spec"
+#   )
+#
+#   expect_equal(
+#     tibblify(list(), col_specs),
+#     tibble::tibble(
+#       df = list_of(.ptype =
+#         tibble::tibble(
+#           chr = character(),
+#           int = integer()
+#         )
+#       )
+#     ),
+#     ignore_attr = "spec"
+#   )
+# })
+#
+# test_that("old spec works", {
+#   x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+#   recordlist <- list(
+#     list(a = x_rcrd),
+#     list(a = x_rcrd + 1)
+#   )
+#
+#   spec <- lcols(
+#     a = lcol_vec("a", ptype = x_rcrd)
+#   )
+#
+#   expect_equal(
+#     tibblify(recordlist, spec),
+#     tibble::tibble(a = vec_c(!!!purrr::map(recordlist, "a"), .ptype = x_rcrd)),
+#     ignore_attr = "spec"
+#   )
+#
+#   now <- Sys.time()
+#   past <- now - c(100, 200)
+#
+#   recordlist <- list(
+#     list(timediff = now - past[1]),
+#     list(timediff = now - past[2])
+#   )
+#
+#   spec <- lcols(
+#     timediff = lcol_vec("timediff", ptype = recordlist[[1]]$timediff)
+#   )
+#
+#   expect_equal(
+#     tibblify(recordlist, spec),
+#     tibble::tibble(timediff = vec_c(!!!purrr::map(recordlist, "timediff"))),
+#     ignore_attr = "spec"
+#   )
+# })
