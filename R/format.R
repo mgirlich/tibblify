@@ -85,8 +85,8 @@ format.tib_vector <- function(x, ...) {
 }
 
 #' @export
-format.tib_scalar <- function(x, multi_line = FALSE,
-                              nchar_indent = 0, width = NULL) {
+format.tib_scalar <- function(x, ...,
+                              multi_line = FALSE, nchar_indent = 0, width = NULL) {
   default <- x$default_value
   parts <- list(
     deparse(x$key),

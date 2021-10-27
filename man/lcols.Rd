@@ -16,16 +16,18 @@ Create list parser specification
 }
 \examples{
 lcols(
-  lcol_int("id"),
-  lcol_chr("name"),
-  lcol_lst_of("aliases", character())
+  id = lcol_int("id"),
+  name = lcol_chr("name"),
+  aliases = lcol_lst_of("aliases", character())
 )
 
 # To create multiple columns of the same type use the bang-bang-bang (!!!)
 # operator together with `purrr::map()`
+int_cols <- purrr::set_names(c("id", "age"))
+chr_cols <- purrr::set_names(c("name", "title"))
+
 lcols(
-  !!!purrr::map(c("id", "age"), lcol_int),
-  !!!purrr::map(c("name", "title"), lcol_chr),
-  !!!purrr::map(c("aliases", "addresses"), lcol_guess)
+  !!!purrr::map(int_cols, lcol_int),
+  !!!purrr::map(chr_cols, lcol_chr)
 )
 }

@@ -1,7 +1,7 @@
 # can guess spec for discog
 
     Code
-      guess_shape(discog) %>% print()
+      guess_spec(discog) %>% print()
     Output
       spec_df(
         instance_id = tib_int("instance_id"),
@@ -50,7 +50,7 @@
 # can guess spec for gh_users
 
     Code
-      guess_shape(gh_users) %>% print()
+      guess_spec(gh_users) %>% print()
     Output
       spec_df(
         login = tib_chr("login"),

@@ -27,7 +27,8 @@ Imports:
     rlang,
     vctrs,
     purrr,
-    tibble
+    tibble,
+    lifecycle
 VignetteBuilder: knitr
 Depends: 
     R (>= 3.4.0)

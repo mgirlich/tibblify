@@ -53,7 +53,7 @@ tibblify(gh_users_small)
 We can now look at the specification `tibblify()` used for rectangling
 
 ```{r}
-guess_shape(gh_users_small)
+guess_spec(gh_users_small)
 ```
 
 
@@ -209,7 +209,7 @@ gh_repos_small[[1]]
 the field `owner` is an object itself. The specification to extract it uses `tib_row()`
 
 ```{r}
-spec <- guess_shape(gh_repos_small)
+spec <- guess_spec(gh_repos_small)
 spec
 ```
 

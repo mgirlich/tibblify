@@ -7,7 +7,7 @@ test_that("is_object() works", {
   expect_false(is_object(list(x = 1, 1)))
 
   # names must not be NA
-  expect_false(is_object(set_names(list(1, 1), c(NA, "x"))))
+  expect_false(is_object(purrr::set_names(list(1, 1), c(NA, "x"))))
 
   # must not have duplicate names
   expect_false(is_object(list(x = 1, x = 1)))

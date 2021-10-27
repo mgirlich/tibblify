@@ -1,31 +1,31 @@
 test_that("can guess spec for an object", {
   expect_equal(
-    guess_shape(list(int = 1L)),
+    guess_spec(list(int = 1L)),
     spec_object(int = tib_int("int"))
   )
 
   expect_equal(
-    guess_shape(list(chr = "a")),
+    guess_spec(list(chr = "a")),
     spec_object(chr = tib_chr("chr"))
   )
 
   expect_equal(
-    guess_shape(list(dtt = new_datetime())),
+    guess_spec(list(dtt = new_datetime())),
     spec_object(dtt = tib_scalar("dtt", new_datetime()))
   )
 
   expect_equal(
-    guess_shape(list(int_vec = 1:2)),
+    guess_spec(list(int_vec = 1:2)),
     spec_object(int_vec = tib_int_vec("int_vec"))
   )
 
   expect_equal(
-    guess_shape(list(dtt = new_datetime(1:2 + 0))),
+    guess_spec(list(dtt = new_datetime(1:2 + 0))),
     spec_object(dtt = tib_scalar("dtt", new_datetime()))
   )
 
   expect_equal(
-    guess_shape(list(list = list(1, "a"))),
+    guess_spec(list(list = list(1, "a"))),
     spec_object(list = tib_list("list"))
   )
 })
@@ -36,7 +36,7 @@ test_that("can guess spec for object_lists", {
       list(int = 1L, chr_maybe = "a", mixed = 1L, int_vec = 1:2),
       list(int = 2L, mixed = "a")
     ) %>%
-      guess_shape(),
+      guess_spec(),
     spec_df(
       int = tib_int("int"),
       chr_maybe = tib_chr("chr_maybe", FALSE),
@@ -48,7 +48,7 @@ test_that("can guess spec for object_lists", {
 
 test_that("can guess spec for data frames", {
   expect_equal(
-    guess_shape(
+    guess_spec(
       tibble::tibble(
         lgl = TRUE,
         int = 1L,
@@ -67,7 +67,7 @@ test_that("can guess spec for data frames", {
   )
 
   expect_equal(
-    guess_shape(
+    guess_spec(
       tibble::tibble(
         lgl_vec = list(TRUE),
         int_vec = list(1L),
@@ -86,12 +86,12 @@ test_that("can guess spec for data frames", {
   )
 
   expect_equal(
-    guess_shape(tibble::tibble(x = list(1, "a"))),
+    guess_spec(tibble::tibble(x = list(1, "a"))),
     spec_df(x = tib_list("x"))
   )
 
   expect_equal(
-    guess_shape(tibble::tibble(df = tibble::tibble(int = 1L, chr = "a"))),
+    guess_spec(tibble::tibble(df = tibble::tibble(int = 1L, chr = "a"))),
     spec_df(
       df = tib_row(
         "df",
@@ -103,39 +103,39 @@ test_that("can guess spec for data frames", {
 })
 
 test_that("can guess spec for discog", {
-  expect_snapshot(guess_shape(discog) %>% print())
+  expect_snapshot(guess_spec(discog) %>% print())
 })
 
 test_that("can guess spec for gh_users", {
-  expect_snapshot(guess_shape(gh_users) %>% print())
+  expect_snapshot(guess_spec(gh_users) %>% print())
 })
 
 test_that("can guess spec for discog", {
   skip("not yet decided")
   # mirror_url -> always `NULL`
   expect_equal(
-    tibblify(gh_repos, guess_shape(gh_repos)),
+    tibblify(gh_repos, guess_spec(gh_repos)),
     tibblify(gh_repos),
     ignore_attr = TRUE
   )
 
   expect_equal(
-    tibblify(gh_users, guess_shape(gh_users)),
+    tibblify(gh_users, guess_spec(gh_users)),
     tibblify(gh_users),
     ignore_attr = TRUE
   )
 
   # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot simplify to character
-  purrr::map(got_chars, ~ .x["aliases"]) %>% guess_shape
+  purrr::map(got_chars, ~ .x["aliases"]) %>% guess_spec
   expect_equal(
-    tibblify(got_chars, guess_shape(got_chars)),
+    tibblify(got_chars, guess_spec(got_chars)),
     tibblify(got_chars),
     ignore_attr = TRUE
   )
 
   # default for `list_of<character>` -> character() or NULL?
   expect_equal(
-    tibblify(sw_films, guess_shape(sw_films)),
+    tibblify(sw_films, guess_spec(sw_films)),
     tibblify(sw_films),
     ignore_attr = TRUE
   )

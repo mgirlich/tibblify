@@ -14,5 +14,4 @@ NULL
 #' @importFrom rlang zap
 #' @export zap
 #' @keywords internal
-#' @noRd
 rlang::zap

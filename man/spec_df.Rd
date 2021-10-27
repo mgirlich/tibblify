@@ -34,8 +34,8 @@ spec_df(
 # To create multiple columns of the same type use the bang-bang-bang (!!!)
 # operator together with `purrr::map()`
 spec_df(
-  !!!purrr::map(set_names(c("id", "age")), tib_int),
-  !!!purrr::map(set_names(c("name", "title")), tib_chr)
+  !!!purrr::map(purrr::set_names(c("id", "age")), tib_int),
+  !!!purrr::map(purrr::set_names(c("name", "title")), tib_chr)
 )
 
 # The `spec_*()` functions can also be nested

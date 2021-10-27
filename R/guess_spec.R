@@ -103,10 +103,10 @@ list_to_spec <- function(col, name, required) {
 }
 
 #' @export
-guess_spec.data.frame <- function(x) {
+guess_spec.data.frame <- function(object_list) {
   browser()
   spec_df(
-    !!!purrr::imap(x, col_to_spec)
+    !!!purrr::imap(object_list, col_to_spec)
   )
 }
 
@@ -227,9 +227,9 @@ vec_of_lcol_to_spec <- function(col, name, required = TRUE, ptype, f) {
 # data frame --------------------------------------------------------------
 
 #' @export
-guess_spec.data.frame <- function(object_list) {
+guess_spec.data.frame <- function(x) {
   spec_df(
-    !!!purrr::imap(object_list, col_to_spec)
+    !!!purrr::imap(x, col_to_spec)
   )
 }
 
