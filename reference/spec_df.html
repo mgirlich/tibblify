@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create list parser specification — lcols • tibblify</title>
+<title>Create a Tibblify Specification — spec_df • tibblify</title>
 
 
 <!-- jquery -->
@@ -39,8 +39,10 @@
 
 
 
-<meta property="og:title" content="Create list parser specification — lcols" />
-<meta property="og:description" content="Create list parser specification" />
+<meta property="og:title" content="Create a Tibblify Specification — spec_df" />
+<meta property="og:description" content="Use spec_df() to specify how to convert a list of objects to a tibble.
+Use spec_row() resp. spec_object() to specify how to convert an object
+to a one row tibble resp. a list." />
 
 
 
@@ -114,60 +116,78 @@
 <div class="row">
   <div class="col-md-9 contents">
     <div class="page-header">
-    <h1>Create list parser specification</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mgirlich/tibblify/blob/master/R/lcols.R'><code>R/lcols.R</code></a></small>
-    <div class="hidden name"><code>lcols.Rd</code></div>
+    <h1>Create a Tibblify Specification</h1>
+    <small class="dont-index">Source: <a href='https://github.com/mgirlich/tibblify/blob/master/R/tib_spec.R'><code>R/tib_spec.R</code></a></small>
+    <div class="hidden name"><code>spec_df.Rd</code></div>
     </div>
 
     <div class="ref-description">
-    <p>Create list parser specification</p>
+    <p>Use <code>spec_df()</code> to specify how to convert a list of objects to a tibble.
+Use <code>spec_row()</code> resp. <code>spec_object()</code> to specify how to convert an object
+to a one row tibble resp. a list.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>lcols</span><span class='op'>(</span><span class='va'>...</span>, .default <span class='op'>=</span> <span class='fu'><a href='https://rlang.r-lib.org/reference/zap.html'>zap</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>spec_df</span><span class='op'>(</span><span class='va'>...</span>, .names_to <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+
+<span class='fu'>spec_object</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span>
+
+<span class='fu'>spec_row</span><span class='op'>(</span><span class='va'>...</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
     <colgroup><col class="name" /><col class="desc" /></colgroup>
     <tr>
       <th>...</th>
-      <td><p>Column specification objects created by <code>lcol_*()</code>.</p></td>
+      <td><p>Column specification created by <code>tib_*()</code> or <code>spec_*()</code>.</p></td>
     </tr>
     <tr>
-      <th>.default</th>
-      <td><p>Deprecated.</p></td>
+      <th>.names_to</th>
+      <td><p>A string giving the name of the column which will contain
+the names of elements of the object list. If <code>NULL</code>, the default, no name
+column is created</p></td>
     </tr>
     </table>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>lcols</span><span class='op'>(</span>
-  id <span class='op'>=</span> <span class='fu'><a href='lcol_lgl.html'>lcol_int</a></span><span class='op'>(</span><span class='st'>"id"</span><span class='op'>)</span>,
-  name <span class='op'>=</span> <span class='fu'><a href='lcol_lgl.html'>lcol_chr</a></span><span class='op'>(</span><span class='st'>"name"</span><span class='op'>)</span>,
-  aliases <span class='op'>=</span> <span class='fu'><a href='lcol_lgl.html'>lcol_lst_of</a></span><span class='op'>(</span><span class='st'>"aliases"</span>, <span class='fu'><a href='https://rdrr.io/r/base/character.html'>character</a></span><span class='op'>(</span><span class='op'>)</span><span class='op'>)</span>
+    <pre class="examples"><div class='input'><span class='fu'>spec_df</span><span class='op'>(</span>
+  id <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_int</a></span><span class='op'>(</span><span class='st'>"id"</span><span class='op'>)</span>,
+  name <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_chr</a></span><span class='op'>(</span><span class='st'>"name"</span><span class='op'>)</span>,
+  aliases <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_chr_vec</a></span><span class='op'>(</span><span class='st'>"aliases"</span><span class='op'>)</span>
 <span class='op'>)</span>
-</div><div class='output co'>#&gt; <span class='warning'>Warning: `lcols()` was deprecated in tibblify 0.2.0.</span>
-#&gt; <span class='warning'>Please use `spec_df()` instead.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: `lcol_int()` was deprecated in tibblify 0.2.0.</span>
-#&gt; <span class='warning'>Please use `tib_int()` instead.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: `lcol_chr()` was deprecated in tibblify 0.2.0.</span>
-#&gt; <span class='warning'>Please use `tib_chr()` instead.</span></div><div class='output co'>#&gt; <span class='warning'>Warning: `lcol_lst_of()` was deprecated in tibblify 0.2.0.</span>
-#&gt; <span class='warning'>Please use `tib_vector()` instead.</span></div><div class='output co'>#&gt; spec_df(
+</div><div class='output co'>#&gt; spec_df(
 #&gt;   id = <span style='color: #00BB00;'>tib_int</span>("id"),
 #&gt;   name = <span style='color: #BB0000;'>tib_chr</span>("name"),
-#&gt;   aliases = <span style='color: #000000;'>tib_vector</span>("aliases", ptype = character(0))
+#&gt;   aliases = <span style='color: #BB0000;'>tib_chr_vec</span>("aliases")
 #&gt; )</div><div class='input'>
 <span class='co'># To create multiple columns of the same type use the bang-bang-bang (!!!)</span>
 <span class='co'># operator together with `purrr::map()`</span>
-<span class='va'>int_cols</span> <span class='op'>&lt;-</span> <span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/set_names.html'>set_names</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"age"</span><span class='op'>)</span><span class='op'>)</span>
-<span class='va'>chr_cols</span> <span class='op'>&lt;-</span> <span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/set_names.html'>set_names</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"name"</span>, <span class='st'>"title"</span><span class='op'>)</span><span class='op'>)</span>
-
-<span class='fu'>lcols</span><span class='op'>(</span>
-  <span class='op'>!</span><span class='op'>!</span><span class='op'>!</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='va'>int_cols</span>, <span class='va'>lcol_int</span><span class='op'>)</span>,
-  <span class='op'>!</span><span class='op'>!</span><span class='op'>!</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='va'>chr_cols</span>, <span class='va'>lcol_chr</span><span class='op'>)</span>
+<span class='fu'>spec_df</span><span class='op'>(</span>
+  <span class='op'>!</span><span class='op'>!</span><span class='op'>!</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/set_names.html'>set_names</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"id"</span>, <span class='st'>"age"</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>tib_int</span><span class='op'>)</span>,
+  <span class='op'>!</span><span class='op'>!</span><span class='op'>!</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/map.html'>map</a></span><span class='op'>(</span><span class='fu'>purrr</span><span class='fu'>::</span><span class='fu'><a href='https://purrr.tidyverse.org/reference/set_names.html'>set_names</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/c.html'>c</a></span><span class='op'>(</span><span class='st'>"name"</span>, <span class='st'>"title"</span><span class='op'>)</span><span class='op'>)</span>, <span class='va'>tib_chr</span><span class='op'>)</span>
 <span class='op'>)</span>
 </div><div class='output co'>#&gt; spec_df(
 #&gt;   id = <span style='color: #00BB00;'>tib_int</span>("id"),
 #&gt;   age = <span style='color: #00BB00;'>tib_int</span>("age"),
 #&gt;   name = <span style='color: #BB0000;'>tib_chr</span>("name"),
 #&gt;   title = <span style='color: #BB0000;'>tib_chr</span>("title")
+#&gt; )</div><div class='input'>
+<span class='co'># The `spec_*()` functions can also be nested</span>
+<span class='va'>spec1</span> <span class='op'>&lt;-</span> <span class='fu'>spec_object</span><span class='op'>(</span>
+  int <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_int</a></span><span class='op'>(</span><span class='st'>"int"</span><span class='op'>)</span>,
+  chr <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_chr</a></span><span class='op'>(</span><span class='st'>"chr"</span><span class='op'>)</span>
+<span class='op'>)</span>
+<span class='va'>spec2</span> <span class='op'>&lt;-</span> <span class='fu'>spec_object</span><span class='op'>(</span>
+  int2 <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_int</a></span><span class='op'>(</span><span class='st'>"int2"</span><span class='op'>)</span>,
+  chr2 <span class='op'>=</span> <span class='fu'><a href='tib_scalar.html'>tib_chr</a></span><span class='op'>(</span><span class='st'>"chr2"</span><span class='op'>)</span>
+<span class='op'>)</span>
+
+<span class='fu'>spec_df</span><span class='op'>(</span><span class='va'>spec1</span>, <span class='va'>spec2</span><span class='op'>)</span>
+</div><div class='output co'>#&gt; spec_df(
+#&gt;   int = <span style='color: #00BB00;'>tib_int</span>("int"),
+#&gt;   chr = <span style='color: #BB0000;'>tib_chr</span>("chr"),
+#&gt;   int2 = <span style='color: #00BB00;'>tib_int</span>("int2"),
+#&gt;   chr2 = <span style='color: #BB0000;'>tib_chr</span>("chr2")
 #&gt; )</div></pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
