@@ -17,209 +17,139 @@ knitr::opts_chunk$set(
 ```{r setup}
 ```
 
-## Usage
+## Introduction
 
-Let's convert the Leaders dataset into a tibble. It is a list with one element per character:
+With `tibblify()` you can rectangle deeply nested lists into a tidy tibble. These
+lists might come from an API in the form of JSON or from scraping XML. The reasons
+to use `tibblify()` over other tools like `jsonlite::fromJSON()` or `tidyr::hoist()`
+are:
 
-```{r usage_example}
+* It can guess the output format like `jsonlite::fromJSON()`.
+* You can also provide a specification how to rectangle.
+* The specification is easy to understand.
+* You can bring most inputs into the shape you want in a single step.
+* Rectangling is much faster than with `jsonlite::fromJSON()`.
+
+
+## Example
+
+Let's start with `gh_users`, which is a list containing information about six
+GitHub users.
+
+```{r}
 library(tibblify)
 
-str(politicians[1])
+gh_users_small <- purrr::map(gh_users, ~ .x[c("followers", "login", "url", "name", "location", "email", "public_gists")])
+
+names(gh_users_small[[1]])
 ```
 
-We can let `tibblify()` automatically recognize the structure of the list and find an appropriate presentation as a tibble:
+Quickly rectangling `gh_users` is as easy as applying `tibblify()` to it:
 
-```{r usage_leaders}
-politicians_tibble <- tibblify(politicians)
-politicians_tibble
+```{r}
+tibblify(gh_users_small)
 ```
 
-The `parents` column is a tibble with the columns `mother` and `father` because in the original list `leader1` the field `parents` is a named list.
+We can now look at the specification `tibblify()` used for rectangling
 
-```{r usage_tibble_column}
-politicians_tibble$parents
+```{r}
+guess_spec(gh_users_small)
 ```
 
-and the `spouses` column is a [`list_of`](https://vctrs.r-lib.org/reference/list_of.html) character because the `spouses` field is a list and all elements are characters
 
-```{r usage_list_of_column}
-politicians_tibble$spouses
+If we are only interested in some of the fields we can easily adapt the specification
+
+```{r}
+spec <- spec_df(
+  login = tib_chr("login"),
+  name = tib_chr("name"),
+  public_gists = tib_int("public_gists")
+)
+
+tibblify(gh_users_small, spec)
 ```
+
+
+## Objects
+
+We refer to lists like `gh_users_small` as _collection_ and _objects_ are the
+elements of such lists. Objects and collections are the typical input for
+`tibblify()`.
+
+Basically, an _object_ is simply something that can be converted to a one row tibble.
+This boils down to a condition on the names of the object:
+
+* the `object` must have names (the `names` attribute must not be `NULL`),
+* every element must be named (no name can be `NA` or `""`),
+* and the names must be unique.
+
+In other words, the names must fulfill `vec_as_names(repair = "check_unique")`.
+The name-value pairs of an object are the _fields_.
+
+For example `list(x = 1, y = "a")` is an object with the fields `(x, 1)` and
+`(y, "a")` but `list(1, z = 3)` is not an object because it is not fully named.
+
+A _collection_ is basically just a list of similar objects so that the fields can
+become the columns in a tibble.
 
 
 ## Specification
 
-In the above example we used `tibblify()` without any further specification on how to convert the list into a tibble. This is quite useful in an interactive session but often you want to provide a specification yourself. Some of the reasons are:
+Providing an explicit specification has a couple of advantages:
 
-* to ensure type and shape stability of the resulting tibble in automated scripts.
-* to use a different type of a column.
-* to use different names.
-* to parse only a subset of columns.
-* to specify what happens if a value is missing.
-
-First, we use `get_spec()` to view the specification used to convert our list to a tibble:
-
-```{r specification}
-get_spec(politicians_tibble)
-```
-
-A specification always starts with a call to `lcols()` (similar to [`readr::cols()`](https://readr.tidyverse.org/reference/cols.html)). Then you specify the columns you want with name-value pairs. The name is the name of the resulting column and the value is a specification created with one of the `lcol_*()` functions.
+* you can ensure type and shape stability of the resulting tibble in automated scripts.
+* you can give the columns different names.
+* you can restrict to parsing only the fields you need.
+* you can specify what happens if a value is missing.
 
 
-## Path
+As seen before the specification for a collection is done with `spec_df()`. The
+columns of the output tibble are describe with the `tib_*()` functions. They
+describe the path to the field to extract and the output type of the field. There
+are the following five types of functions:
 
-The first argument to `lcol_*()` is always a `path` which describes where to find the element. The syntax is the same as in `purrr::map()` used to extract fields. Some examples
+* `tib_scalar(ptype)`: a length one vector with type `ptype`
+* `tib_vector(ptype)`: a vector of arbitrary length with type `ptype`
+* `tib_list()`: a vector of arbitrary length and type; you should barely ever need this
+* `tib_row(...)`: an object with the fields `...`
+* `tib_df(...)`: a collection where the objects have the fields `...`
 
-```{r path_examples}
-leader <- politicians[[1]]
+For convenience there are shortcuts for `tib_scalar()` and `tib_vector()` for
+the most common prototypes:
 
-# get the element `id`
-path <- c("id")
-leader[["id"]]
-
-# get the element `father` in the element `parents`
-path <- c("parents", "father")
-leader[["parents"]][["mother"]]
-
-# get the first element in the element `spouses`
-path <- list("spouses", 1)
-leader[["spouses"]][[1]]
-```
-
-
-## Vector Columns
-
-A couple of typical vector types have a predefined extractor:
-
-* `lcol_chr()`: create a character column.
-* `lcol_lgl()`: create a logical column.
-* `lcol_int()`: create an integer column.
-* `lcol_dbl()`: create a double column.
-* `lcol_dat()`: create a date column.
-* `lcol_dtt()`: create a datetime column.
-
-See [parsing other types] to create a column of your own prototype.
-
-```{r vector_cols}
-tibblify(
-  politicians,
-  lcols(
-    lcol_int("id"),
-    lcol_chr("name"),
-    `family name` = lcol_chr("surname")
-  )
-)
-```
+* `logical()`: `tib_lgl()` and `tib_lgl_vec()`
+* `integer()`: `tib_int()` and `tib_int_vec()`
+* `double()`: `tib_dbl()` and `tib_dbl_vec()`
+* `character()`: `tib_chr()` and `tib_chr_vec()`
 
 
-## Missing Elements
+### Scalar Elements
 
-If an element doesn't exist an error is thrown as in `purrr::chuck()`. To use a default value instead of throwing an error use the `.default` argument. The `.default` value is also used in case the element at the path is empty:
-
-```{r missing_elements, error=TRUE}
-list_default <- list(
-  list(a = 1),
-  list(a = NULL),
-  list(a = integer()),
-  list()
-)
-
-tibblify(
-  list_default,
-  lcols(lcol_int("a"))
-)
-
-tibblify(
-  list_default,
-  lcols(lcol_int("a", .default = 0))
-)
-```
-
-
-## Parser
-
-When the cast is not possible with `vctrs::vec_cast()` you can use the `.parser` argument to supply a custom parser. It is passed to `rlang::as_function()` so you can use a function or a formula. A typical use case are dates stored as strings.
-
-```{r custom_parser}
-tibblify(
-  politicians,
-  lcols(
-    lcol_chr("surname"),
-    lcol_dat("dob", .parser = ~ as.Date(.x, format = "%Y-%m-%d"))
-  )
-)
-```
-
-
-## List and List Of Columns
-
-A `list_of` is a list where each element in the list has the same prototype. It is useful when you have fields with more than one element as in the `spouses` field.
+Scalar elements are the most common case and result in a normal vector column
 
 ```{r}
-spouses_tbl <- tibblify(
-  politicians,
-  lcols(
-    lcol_chr("surname"),
-    lcol_lst_of("spouses", .ptype = character(), .parser = ~vctrs::vec_c(!!!.x, .ptype = character()))
+tibblify(
+  list(
+    list(id = 1, name = "Peter"),
+    list(id = 2, name = "Lilly")
+  ),
+  spec_df(
+    id = tib_int("id"),
+    name = tib_chr("name")
   )
 )
-
-spouses_tbl$spouses
 ```
 
-You can use [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/nest.html) or [`tidyr::unnest_longer()`](https://tidyr.tidyverse.org/reference/hoist.html) to flatten these columns to regular columns.
+With `tib_scalar()` you can also provide your own prototype
 
-A list column is used when you have a field with mixed elements.
-
-
-## Guess and Skip
-
-Analogue to `readr::col_guess()` and `readr::col_skip()` you can specify that you want to guess the column type with `lcol_guess()` respectively skip a field with `lcol_skip()`. Skipping a column can be useful when you set a default column type or you want to make clear that you know about the field and intentionally skip it.
-
-Guessing a column is useful in interactive sessions but you shouldn't rely on it in automated scripts.
-
-
-## Tibble Columns and List Of Tibble Columns
-
-If a field contains is a named list where each element has length 1 or 0 the field is converted to a tibble column. This is for example the case for the `parents` field:
+Let's say you have a list with durations
 
 ```{r}
-leaders_tibble <- tibblify(
-  politicians,
-  lcols(
-    lcol_chr("surname"),
-    lcol_guess("parents")
-  )
-)
-
-leaders_tibble
-```
-
-Tibble columns are a relatively new concept in the tidyverse. You can unpack a tibble column into regular columns with `tidyr::unpack()`.
-
-
-
-## Parsing other types
-
-`tibblify` provides shortcuts for a couple of common types. To parse a vector or record type without a parser use `lcol_vec()`. Let's say you have a list with `difftimes`
-
-```{r}
-now <- Sys.time()
-past <- now - c(100, 200)
-
 x <- list(
-  list(timediff = now - past[1]),
-  list(timediff = now - past[2])
+  list(id = 1, duration = vctrs::new_duration(100)),
+  list(id = 2, duration = vctrs::new_duration(200))
 )
-
 x
-```
-
-You need to define a prototype
-
-```{r}
-ptype <- as.difftime(0, units = "secs")
-ptype
 ```
 
 and then use it in `lcol_vec()`
@@ -227,25 +157,182 @@ and then use it in `lcol_vec()`
 ```{r}
 tibblify(
   x,
-  lcols(
-    lcol_vec("timediff", ptype = ptype)
+  spec_df(
+    id = tib_int("id"),
+    duration = tib_scalar("duration", ptype = vctrs::new_duration())
   )
 )
 ```
 
 
-## Default Column Type
+### Vector Elements
 
-You can use the `.default` argument of `lcols()` to define a parser used for all unspecified fields.
+If an element does not always have size one then it is a vector element. If it
+still always has the same type `ptype` then it produces a list of `ptype` column:
 
 ```{r}
+x <- list(
+  list(id = 1, children = c("Peter", "Lilly")),
+  list(id = 2, children = "James"),
+  list(id = 3, children = c("Emma", "Noah", "Charlotte"))
+)
+
 tibblify(
-  politicians,
-  lcols(
-    lcol_chr("name"),
-    lcol_chr("surname"),
-    .default = lcol_lst(path = zap(), .default = NULL)
+  x,
+  spec_df(
+    id = tib_int("id"),
+    children = tib_chr_vec("children")
   )
 )
 ```
 
+You can use [`tidyr::unnest()`](https://tidyr.tidyverse.org/reference/nest.html) or [`tidyr::unnest_longer()`](https://tidyr.tidyverse.org/reference/hoist.html) to flatten these columns to regular columns.
+
+
+### Object Elements
+
+For example in `gh_repos_small`
+
+```{r}
+gh_repos_small <- purrr::map(gh_repos, ~ .x[c("id", "name", "owner")])
+gh_repos_small <- purrr::map(
+  gh_repos_small,
+  function(repo) {
+    repo$owner <- repo$owner[c("login", "id", "url")]
+    repo
+  }
+)
+
+gh_repos_small[[1]]
+```
+
+the field `owner` is an object itself. The specification to extract it uses `tib_row()`
+
+```{r}
+spec <- guess_spec(gh_repos_small)
+spec
+```
+
+and results in a tibble column
+
+```{r}
+tibblify(gh_repos_small, spec)
+```
+
+If you don't like the tibble column you can unpack it with `tidyr::unpack()`.
+Alternatively, if you only want to extract some of the fields in `owner` you
+can use a nested path
+
+```{r}
+spec2 <- spec_df(
+  id = tib_int("id"),
+  name = tib_chr("name"),
+  owner_id = tib_int(c("owner", "id")),
+  owner_login = tib_chr(c("owner", "login"))
+)
+spec2
+
+tibblify(gh_repos_small, spec2)
+```
+
+
+## Required and Optional Fields
+
+Objects usually have some fields that always exist and some that are optional.
+By default `tib_*()` demands that a field exists
+
+```{r error=TRUE}
+x <- list(
+  list(x = 1, y = "a"),
+  list(x = 2)
+)
+
+spec <- spec_df(
+  x = tib_int("x"),
+  y = tib_chr("y")
+)
+
+tibblify(x, spec)
+```
+
+You can mark a field as optional with the argument `required = FALSE`:
+
+```{r}
+spec <- spec_df(
+  x = tib_int("x"),
+  y = tib_chr("y", required = FALSE)
+)
+
+tibblify(x, spec)
+```
+
+You can specify the value to use with the `default` argument
+
+```{r}
+spec <- spec_df(
+  x = tib_int("x"),
+  y = tib_chr("y", FALSE, default = "missing")
+)
+
+tibblify(x, spec)
+```
+
+
+## Converting a Single Object
+
+To rectangle a single object you have two options: `spec_object()` which produces
+a list or `spec_row()` which produces a tibble with one row.
+
+While tibbles are great for a single object it often makes more sense to convert
+them to a list.
+
+For example a typical API response might be something like
+
+```{r}
+api_output <- list(
+  status = "success",
+  requested_at = "2021-10-26 09:17:12",
+  data = list(
+    list(x = 1),
+    list(x = 2)
+  )
+)
+```
+
+
+To convert to a one row tibble
+
+```{r}
+row_spec <- spec_row(
+  status = tib_chr("status"),
+  data = tib_df(
+    "data",
+    x = tib_int("x")
+  )
+)
+
+api_output_df <- tibblify(api_output, row_spec)
+api_output_df
+```
+
+it is necessary to wrap `data` in a list. To access `data` one has to use
+`api_output_df$data[[1]]` which is not very nice.
+
+```{r}
+object_spec <- spec_object(
+  status = tib_chr("status"),
+  data = tib_df(
+    "data",
+    x = tib_int("x")
+  )
+)
+
+api_output_list <- tibblify(api_output, object_spec)
+api_output_list
+```
+
+Now accessing `data` does not required an extra subsetting step
+
+```{r}
+api_output_list$data
+```

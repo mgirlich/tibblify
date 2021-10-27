@@ -7,3 +7,5 @@
 ^data-raw$
 ^CRAN-RELEASE$
 ^codecov\.yml$
+^doc$
+^Meta$

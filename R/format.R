@@ -1,54 +1,47 @@
-#' @export
-print.lcollector <- function(x, ...) {
-  cat(format(x, ...))
-}
 
+# collectors --------------------------------------------------------------
 
 #' @export
-print.lcol_spec <- function(x, width = NULL, ...) {
-  cat(format.lcol_spec(x, width = width, ...))
+print.spec_tib <- function(x, width = NULL, ...) {
+  cat(format(x, width = width, ...))
 
   invisible(x)
 }
 
-
-pad <- function(x, n) {
-  whitespaces <- paste0(rep(" ", n), collapse = "")
-  x <- gsub("\n", paste0("\n", whitespaces), x)
-  paste0(whitespaces, x)
+#' @export
+format.spec_df <- function(x, width = NULL, ...) {
+  format_fields(
+    "spec_df",
+    fields = x$fields,
+    width = width,
+    args = list(
+      .names_to = if (!is.null(x$names_col)) deparse(x$names_col)
+    )
+  )
 }
 
-
-name_exprs <- function(exprs, names, show_name) {
-  # nocov start
-  if (length(names) == 0 || length(exprs) == 0) {
-    abort("something went wrong")
-  }
-  # nocov end
-
-  non_syntactic <- !is_syntactic(names)
-  names[non_syntactic] <- paste0("`", gsub("`", "\\\\`", names[non_syntactic]), "`")
-
-  ifelse(show_name, paste0(names, " = ", exprs), exprs)
+#' @export
+format.spec_row <- function(x, width = NULL, ...) {
+  format_fields(
+    "spec_row",
+    fields = x$fields,
+    width = width
+  )
 }
 
+#' @export
+format.spec_object <- function(x, width = NULL, ...) {
+  format_fields(
+    "spec_object",
+    fields = x$fields,
+    width = width
+  )
+}
 
-format_subtype <- function(f_name, path, cols, default, width, ..., npad = 0) {
-  if (!is_skip_col(default)) {
-    default <- format_default(default)
-  } else {
-    default <- NULL
-  }
-
-  if (!is.null(path)) {
-    path <- deparse(path)
-  }
-
-  cols_args <- purrr::map2(
-    cols,
-    # 3 -> " = "
-    # 1 -> trailing comma
-    nchar(names(cols)) + 3 + 1,
+format_fields <- function(f_name, fields, width, args = NULL) {
+  fields_formatted <- purrr::map2(
+    fields,
+    nchar(paste0(names(fields), " = ", ",")),
     function(col, nchar_indent) {
       format(
         col,
@@ -58,8 +51,15 @@ format_subtype <- function(f_name, path, cols, default, width, ..., npad = 0) {
     }
   )
 
+  args <- purrr::compact(args)
+  if (is_empty(args)) {
+    parts <- fields_formatted
+  } else {
+    parts <- c(args, fields_formatted)
+  }
+
   inner <- collapse_with_pad(
-    c(path, cols_args, default),
+    parts,
     multi_line = TRUE,
     width = width
   )
@@ -72,150 +72,33 @@ format_subtype <- function(f_name, path, cols, default, width, ..., npad = 0) {
 }
 
 
+# format simple columns ---------------------------------------------------
+
 #' @export
-format.lcollector_df <- function(x, ..., width = NULL, npad = 0) {
-  format_subtype(
-    "lcol_df",
-    path = x$path,
-    cols = x$.parser$cols,
-    default = x$.default,
-    width = width,
-    npad = npad
+print.tib_collector <- function(x, ...) {
+  cat(format(x, ...))
+}
+
+#' @export
+format.tib_vector <- function(x, ...) {
+  format.tib_collector(x, ptype = deparse(x$ptype), ...)
+}
+
+#' @export
+format.tib_scalar <- function(x, ...,
+                              multi_line = FALSE, nchar_indent = 0, width = NULL) {
+  default <- x$default_value
+  parts <- list(
+    deparse(x$key),
+    ptype = if (class(x)[1] == "tib_scalar" || class(x)[1] == "tib_vector") format_ptype(x$ptype),
+    required = if (!x$required) FALSE,
+    default = if (!is_empty(default) && !is.na(default)) deparse(default),
+    transform = x$transform
   )
-}
+  parts <- purrr::discard(parts, is.null)
 
-#' @export
-format.lcollector_df_lst <- function(x, ..., width = NULL, npad = 0) {
-  format_subtype(
-    "lcol_df_lst",
-    path = x$path,
-    cols = x$.parser$cols,
-    default = x$.default,
-    width = width,
-    npad = npad
-  )
-}
-
-
-has_colour <- function() {
-  crayon::has_color() ||
-    identical(Sys.getenv("TESTTHAT"), "true")
-}
-
-
-# colourise_lcol <- function(x) {
-#   UseMethod("colourise_lcol")
-# }
-#
-# colourise_lcol.logical <- function(x) {
-#   crayon::yellow()
-# }
-#
-# colourise_lcol.integer <- function(x) {
-#   crayon::green()
-# }
-#
-# colourise_lcol.double <- function(x) {
-#   crayon::green()
-# }
-#
-# colourise_lcol.character <- function(x) {
-#   crayon::red()
-# }
-#
-# colourise_lcol.factor <- function(x) {
-#   crayon::red()
-# }
-#
-# colourise_lcol.Date <- function(x) {
-#   crayon::blue()
-# }
-#
-# colourise_lcol.POSIXct <- function(x) {
-#   crayon::blue()
-# }
-#
-# colourise_lcol.list <- function(x) {
-#   crayon::yellow()
-# }
-#
-# colourise_lcol.vctrs_list_of <- function(x) {
-#   crayon::yellow()
-# }
-#
-# colourise_lcol.vctrs_list_of <- function(x) {
-#   crayon::cyan()
-# }
-#
-# colourise_lcol.vctrs_list_of <- function(x) {
-#   crayon::cyan()
-# }
-
-
-colourise_lcol <- function(f_name) {
-  if (has_colour()) {
-    type <- sub(x = f_name, pattern = "^lcol_", replacement = "")
-
-    f_name <- switch(
-      type,
-      "lgl" = crayon::yellow,
-      "int" = crayon::green,
-      "dbl" = crayon::green,
-      "chr" = crayon::red,
-      "fct" = crayon::red,
-      "dat" = crayon::blue,
-      "dtt" = crayon::blue,
-      "lst" = crayon::yellow,
-      "lst_of" = crayon::yellow,
-      "guess" = crayon::cyan,
-      "skip" = crayon::cyan,
-      "df" = crayon::magenta,
-      "df_lst" = crayon::magenta,
-      "lst" = crayon::magenta,
-      "vec" = crayon::black
-    )(f_name)
-  }
-
-  f_name
-}
-
-
-#' @export
-format.lcollector_vec <- function(x, ...) {
-  format.lcollector(x, ptype = deparse(x$ptype), ...)
-}
-
-
-#' @export
-format.lcollector <- function(x, ...,
-                              parser = x[[".parser_expr"]],
-                              npad = 0,
-                              multi_line = FALSE,
-                              nchar_indent = 0,
-                              width = NULL) {
-  f_name <- sub("^lcollector_", "lcol_", class(x)[1])
-
-  if (!is.null(parser)) {
-    parser <- c(.parser = rlang::quo_name(parser))
-  } else {
-    parser <- c(.parser = NULL)
-  }
-
-  if (is_zap(x$path)) {
-    path <- "zap()"
-  } else {
-    path <- deparse(x$path)
-  }
-
-  parts <- c(
-    path,
-    ...,
-    parser,
-    format_default(x$.default)
-  )
-
+  f_name <- get_f_name(x)
   nchar_prefix <- nchar_indent + nchar(f_name) + 2
-
   parts <- collapse_with_pad(
     parts,
     multi_line = multi_line,
@@ -223,8 +106,149 @@ format.lcollector <- function(x, ...,
     width = width
   )
 
-  paste0(colourise_lcol(f_name), "(", parts, ")")
+  paste0(f_name_col(x), "(", parts, ")")
 }
+
+#' @export
+format.tib_list <- format.tib_scalar
+#' @export
+format.tib_vector <- format.tib_scalar
+
+
+# format nested columns ---------------------------------------------------
+
+#' @export
+format.tib_row <- function(x, ..., width = NULL) {
+  format_fields(
+    "tib_row",
+    fields = x$fields,
+    width = width,
+    args = list(
+      deparse(x$key),
+      `.required` = if (!x$required) FALSE
+    )
+  )
+}
+
+#' @export
+format.tib_df <- function(x, ..., width = NULL) {
+  format_fields(
+    "tib_df",
+    fields = x$fields,
+    width = width,
+    args = list(
+      deparse(x$key),
+      `.required` = if (!x$required) FALSE,
+      .names_to = if (!is.null(x$names_col)) paste0('"', x$names_col, '"')
+    )
+  )
+}
+
+
+# colours -----------------------------------------------------------------
+
+f_name_col <- function(x) {
+  if (!has_colour()) {
+    return(get_f_name(x))
+  }
+
+  colour_tib(x)(get_f_name(x))
+}
+
+has_colour <- function() {
+  crayon::has_color() ||
+    identical(Sys.getenv("TESTTHAT"), "true")
+}
+
+colour_tib <- function(x) {
+  UseMethod("colour_tib")
+}
+
+#' @export
+colour_tib.tib_scalar_lgl <- function(x) {crayon::yellow}
+#' @export
+colour_tib.tib_scalar_int <- function(x) {crayon::green}
+#' @export
+colour_tib.tib_scalar_dbl <- function(x) {crayon::green}
+#' @export
+colour_tib.tib_scalar_chr <- function(x) {crayon::red}
+
+#' @export
+colour_tib.tib_vector_lgl <- function(x) {crayon::yellow}
+#' @export
+colour_tib.tib_vector_int <- function(x) {crayon::green}
+#' @export
+colour_tib.tib_vector_dbl <- function(x) {crayon::green}
+#' @export
+colour_tib.tib_vector_chr <- function(x) {crayon::red}
+
+#' @export
+colour_tib.tib_row <- function(x) {crayon::magenta}
+#' @export
+colour_tib.tib_df <- function(x) {crayon::magenta}
+
+#' @export
+colour_tib.default <- function(x) {crayon::black}
+
+
+# get_f_name --------------------------------------------------------------
+
+get_f_name <- function(x) {
+  UseMethod("get_f_name")
+}
+
+#' @export
+get_f_name.tib_scalar_lgl <- function(x) {"tib_lgl"}
+#' @export
+get_f_name.tib_scalar_int <- function(x) {"tib_int"}
+#' @export
+get_f_name.tib_scalar_dbl <- function(x) {"tib_dbl"}
+#' @export
+get_f_name.tib_scalar_chr <- function(x) {"tib_chr"}
+#' @export
+get_f_name.tib_scalar<- function(x) {"tib_scalar"}
+
+#' @export
+get_f_name.tib_vector_lgl <- function(x) {"tib_lgl_vec"}
+#' @export
+get_f_name.tib_vector_int <- function(x) {"tib_int_vec"}
+#' @export
+get_f_name.tib_vector_dbl <- function(x) {"tib_dbl_vec"}
+#' @export
+get_f_name.tib_vector_chr <- function(x) {"tib_chr_vec"}
+#' @export
+get_f_name.tib_vector<- function(x) {"tib_vector"}
+
+#' @export
+get_f_name.tib_list <- function(x) {"tib_list"}
+
+
+# format ptype ------------------------------------------------------------
+
+format_ptype <- function(x) {
+  UseMethod("format_ptype")
+}
+
+#' @export
+format_ptype.default <- function(x) {deparse(x)}
+
+#' @export
+format_ptype.difftime <- function(x) {"vctrs::new_duration()"}
+#' @export
+format_ptype.Date <- function(x) {"vctrs::new_date()"}
+#' @export
+format_ptype.POSIXct <- function(x) {
+  tzone <- attr(x, "tzone")
+
+  paste0(
+    "vctrs::new_datetime(",
+    if (!is_null(tzone)) paste0("tzone = ", deparse(tzone)),
+    ")"
+  )
+}
+
+
+# helper functions --------------------------------------------------------
 
 collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   x_nms <- names2(x)
@@ -247,34 +271,25 @@ tibblify_width <- function(width = NULL) {
   width %||% getOption("width")
 }
 
-
-#' @export
-format.lcollector_lst_of <- function(x, ...) {
-  format.lcollector(x, .ptype = deparse(x$.ptype))
-}
-
-format_default <- function(default) {
-  if (is_zap(default)) {
-    default_chr <- character()
-  } else if (is_lcollector(default)) {
-    default_chr <- format(default)
-  } else {
-    default_chr <- deparse(default)
-  }
-
-  c(.default = default_chr)
-}
-
-#' @export
-format.lcol_spec <- function(x, width = NULL, ...) {
-  format_subtype(
-    "lcols",
-    path = NULL,
-    cols = x$cols,
-    default = x$.default,
-    width = width
-  )
-}
-
-
 is_syntactic <- function(x) make.names(x) == x
+
+
+pad <- function(x, n) {
+  whitespaces <- paste0(rep(" ", n), collapse = "")
+  x <- gsub("\n", paste0("\n", whitespaces), x)
+  paste0(whitespaces, x)
+}
+
+
+name_exprs <- function(exprs, names, show_name) {
+  # nocov start
+  if (length(names) == 0 || length(exprs) == 0) {
+    abort("something went wrong")
+  }
+  # nocov end
+
+  non_syntactic <- !is_syntactic(names)
+  names[non_syntactic] <- paste0("`", gsub("`", "\\\\`", names[non_syntactic]), "`")
+
+  ifelse(show_name, paste0(names, " = ", exprs), exprs)
+}

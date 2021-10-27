@@ -2,34 +2,38 @@
 % Please edit documentation in R/tibblify.R
 \name{tibblify}
 \alias{tibblify}
-\title{Rectange a nested list into a tidy tibble}
+\title{Rectangle a nested list}
 \usage{
-tibblify(
-  recordlist,
-  col_specs = lcols(.default = lcol_guess(zap())),
-  names_to = NULL
-)
+tibblify(x, spec = NULL, names_to = NULL)
 }
 \arguments{
-\item{recordlist}{A nested list.}
+\item{x}{A nested list.}
 
-\item{col_specs}{A specification generated with \code{lcols()} how to turn the
-list into a tibble.}
+\item{spec}{A specification how to convert \code{x}. Generated with \code{spec_row()}
+or \code{spec_df()}.}
 
-\item{names_to}{A string specifying the name of the column to create from
-the data stored in the column names of data.}
+\item{names_to}{Deprecated. Use \code{spec_df(.names_to)} instead.}
 }
 \value{
-The tibble generated according to the specification.
+Either a tibble or a list, depending on the specification
 }
 \description{
-Rectange a nested list into a tidy tibble
+Rectangle a nested list
 }
 \examples{
-recordlist <- list(
+x <- list(
   list(id = 1, name = "Tyrion Lannister"),
   list(id = 2, name = "Victarion Greyjoy")
 )
+tibblify(x)
 
-tibblify(recordlist)
+# Provide a specification
+spec <- spec_df(
+  id = tib_int("id"),
+  name = tib_chr("name")
+)
+tibblify(x, spec)
+
+# Provide a specification for a single object
+tibblify(x[[1]], spec_object(spec))
 }
