@@ -8,7 +8,8 @@ is_object <- function(x) {
     return(FALSE)
   }
 
-  if (!is_named2(x)) {
+  # TODO use `is_named2()` once new rlang version is released
+  if (!is_named(x) && !is_empty(x)) {
     return(FALSE)
   }
 
