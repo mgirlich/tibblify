@@ -159,6 +159,14 @@ test_that("list column works", {
     tibble(x = list(TRUE, 1))
   )
 
+  expect_equal(
+    tibblify(
+      list(list(x = TRUE), list(x = 1)),
+      spec_df(x = tib_list("x"))
+    ),
+    tibble(x = list(TRUE, 1))
+  )
+
   # errors if required but absent
   expect_snapshot_error(
     tibblify(
