@@ -123,6 +123,19 @@ test_that("vector column works", {
   expect_equal(tib(list(x = c(TRUE, FALSE)), tib_lgl_vec("x")), tibble(x = list_of(c(TRUE, FALSE))))
   expect_equal(tib(list(x = c(dtt, dtt + 1)), tib_vector("x", dtt)), tibble(x = list_of(c(dtt, dtt + 1))))
 
+  # can handle empty element
+  expect_equal(
+    tibblify(
+      list(
+        list(x = c(TRUE, FALSE)),
+        list(x = NULL),
+        list(x = list())
+      ),
+      spec_df(x = tib_lgl_vec("x"))
+    ),
+    tibble(x = list_of(c(TRUE, FALSE), NULL, NULL))
+  )
+
   # errors if required but absent
   expect_snapshot_error(tib(list(), tib_lgl_vec("x")))
   expect_snapshot_error(tib(list(), tib_vector("x", dtt)))
