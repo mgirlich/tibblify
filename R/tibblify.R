@@ -3,6 +3,7 @@
 #' @param x A nested list.
 #' @param spec A specification how to convert `x`. Generated with `spec_row()`
 #'   or `spec_df()`.
+#' @param names_to Deprecated. Use `spec_df(.names_to)` instead.
 #'
 #' @return Either a tibble or a list, depending on the specification
 #' @export
@@ -12,8 +13,17 @@
 #'   list(id = 1, name = "Tyrion Lannister"),
 #'   list(id = 2, name = "Victarion Greyjoy")
 #' )
-#'
 #' tibblify(x)
+#'
+#' # Provide a specification
+#' spec <- spec_df(
+#'   id = tib_int("id"),
+#'   name = tib_chr("name")
+#' )
+#' tibblify(x, spec)
+#'
+#' # Provide a specification for a single object
+#' tibblify(x[[1]], spec_object(spec))
 tibblify <- function(x, spec = NULL, names_to = NULL) {
   if (!is.null(names_to)) {
     lifecycle::deprecate_stop("0.2.0", "tibblify(names_to)")

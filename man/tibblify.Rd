@@ -11,6 +11,8 @@ tibblify(x, spec = NULL, names_to = NULL)
 
 \item{spec}{A specification how to convert \code{x}. Generated with \code{spec_row()}
 or \code{spec_df()}.}
+
+\item{names_to}{Deprecated. Use \code{spec_df(.names_to)} instead.}
 }
 \value{
 Either a tibble or a list, depending on the specification
@@ -23,6 +25,15 @@ x <- list(
   list(id = 1, name = "Tyrion Lannister"),
   list(id = 2, name = "Victarion Greyjoy")
 )
-
 tibblify(x)
+
+# Provide a specification
+spec <- spec_df(
+  id = tib_int("id"),
+  name = tib_chr("name")
+)
+tibblify(x, spec)
+
+# Provide a specification for a single object
+tibblify(x[[1]], spec_object(spec))
 }

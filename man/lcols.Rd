@@ -9,7 +9,7 @@ lcols(..., .default = zap())
 \arguments{
 \item{...}{Column specification objects created by \verb{lcol_*()}.}
 
-\item{.default}{The default parser to use.}
+\item{.default}{Deprecated.}
 }
 \description{
 Create list parser specification

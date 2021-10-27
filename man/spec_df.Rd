@@ -12,6 +12,41 @@ spec_object(...)
 
 spec_row(...)
 }
+\arguments{
+\item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
+
+\item{.names_to}{A string giving the name of the column which will contain
+the names of elements of the object list. If \code{NULL}, the default, no name
+column is created}
+}
 \description{
-Create a Tibblify Specification
+Use \code{spec_df()} to specify how to convert a list of objects to a tibble.
+Use \code{spec_row()} resp. \code{spec_object()} to specify how to convert an object
+to a one row tibble resp. a list.
+}
+\examples{
+spec_df(
+  id = tib_int("id"),
+  name = tib_chr("name"),
+  aliases = tib_chr_vec("aliases")
+)
+
+# To create multiple columns of the same type use the bang-bang-bang (!!!)
+# operator together with `purrr::map()`
+spec_df(
+  !!!purrr::map(set_names(c("id", "age")), tib_int),
+  !!!purrr::map(set_names(c("name", "title")), tib_chr)
+)
+
+# The `spec_*()` functions can also be nested
+spec1 <- spec_object(
+  int = tib_int("int"),
+  chr = tib_chr("chr")
+)
+spec2 <- spec_object(
+  int2 = tib_int("int2"),
+  chr2 = tib_chr("chr2")
+)
+
+spec_df(spec1, spec2)
 }

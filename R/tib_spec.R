@@ -1,7 +1,45 @@
 #' Create a Tibblify Specification
 #'
+#' Use `spec_df()` to specify how to convert a list of objects to a tibble.
+#' Use `spec_row()` resp. `spec_object()` to specify how to convert an object
+#' to a one row tibble resp. a list.
+#'
+#' @param ... Column specification created by `tib_*()` or `spec_*()`.
+#' @param .names_to A string giving the name of the column which will contain
+#'   the names of elements of the object list. If `NULL`, the default, no name
+#'   column is created
+#'
 #' @export
+#' @examples
+#' spec_df(
+#'   id = tib_int("id"),
+#'   name = tib_chr("name"),
+#'   aliases = tib_chr_vec("aliases")
+#' )
+#'
+#' # To create multiple columns of the same type use the bang-bang-bang (!!!)
+#' # operator together with `purrr::map()`
+#' spec_df(
+#'   !!!purrr::map(set_names(c("id", "age")), tib_int),
+#'   !!!purrr::map(set_names(c("name", "title")), tib_chr)
+#' )
+#'
+#' # The `spec_*()` functions can also be nested
+#' spec1 <- spec_object(
+#'   int = tib_int("int"),
+#'   chr = tib_chr("chr")
+#' )
+#' spec2 <- spec_object(
+#'   int2 = tib_int("int2"),
+#'   chr2 = tib_chr("chr2")
+#' )
+#'
+#' spec_df(spec1, spec2)
 spec_df <- function(..., .names_to = NULL) {
+  if (!is_null(.names_to)) {
+    vec_assert(.names_to, character(), 1L, arg = ".names_to")
+  }
+  # TODO check that `.names_to` and `...` have different names
   spec_tib(list2(...), "df", names_col = .names_to)
 }
 
@@ -44,7 +82,7 @@ flatten_fields <- function(fields) {
   fields_nested <- purrr::map(
     fields,
     function(x) {
-      if (inherits(x, "spec_row") || inherits(x, "spec_df")) {
+      if (inherits(x, "spec_tib")) {
         x$fields
       } else {
         list(x)
@@ -53,6 +91,9 @@ flatten_fields <- function(fields) {
   )
   vctrs::vec_c(!!!fields_nested, .name_spec = "{inner}")
 }
+
+
+# field specifiers --------------------------------------------------------
 
 tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
   check_key(key)
@@ -89,7 +130,47 @@ tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transfo
   )
 }
 
+#' Create a Field Specification
+#'
+#' Use these functions to specify how to convert the fields of an object.
+#'
+#' @param key,.key The path to the field in the object.
+#' @param ptype A prototype of the desired output type of the field.
+#' @param required,.required Throw an error if the field does not exist?
+#' @param default Default value to use if the field does not exist.
+#' @param transform A function to apply to the field before casting to `ptype`.
+#' @inheritParams spec_df
+#'
+#' @details There are basically five different `tib_*()` functions
+#'
+#' * `tib_scalar(ptype)`: Cast the field to a length one vector of type `ptype`.
+#' * `tib_vector(ptype)`: Cast the field to an arbitrary length vector of type `ptype`.
+#' * `tib_list()`: Cast the field to a list.
+#' * `tib_row()`: Cast the field to a named list.
+#' * `tib_df()`: Cast the field to a tibble.
+#'
+#' There are some special shortcuts of `tib_scalar()` resp. `tib_vector()` for
+#' the most common prototypes
+#'
+#' * `logical()`: `tib_lgl()` resp. `tib_lgl_vec()`
+#' * `integer()`: `tib_int()` resp. `tib_int_vec()`
+#' * `double()`: `tib_dbl()` resp. `tib_dbl_vec()`
+#' * `character()`: `tib_chr()` resp. `tib_chr_vec()`
+#'
 #' @export
+#'
+#' @examples
+#' tib_int("int")
+#' tib_int("int", FALSE, default = 0)
+#'
+#' tib_scalar("date", Sys.Date(), transform = function(x) as.Date(x, format = "%Y-%m-%d"))
+#'
+#' tib_df(
+#'   "data",
+#'   .names_to = "id",
+#'   age = tib_int("age"),
+#'   name = tib_chr("name")
+#' )
 tib_scalar <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   tib_scalar_impl(
     key = key,

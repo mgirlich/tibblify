@@ -11,7 +11,8 @@
 ## usethis namespace: end
 NULL
 
-#' @aliases zap
 #' @importFrom rlang zap
 #' @export zap
+#' @keywords internal
+#' @noRd
 rlang::zap
