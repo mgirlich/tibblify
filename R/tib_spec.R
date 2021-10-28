@@ -110,13 +110,31 @@ tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
   )
 }
 
-tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL, class = NULL) {
+#' @rdname tib_scalar
+#' @export
+tib_unspecified <- function(key, required = TRUE) {
+  tib_collector(
+    key = key,
+    type = "list",
+    required = required,
+    default_value = NULL,
+    transform = NULL,
+    class = "tib_unspecified"
+  )
+}
+
+tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
     default <- vec_init(ptype)
   } else {
     vec_assert(default, size = 1L)
     ptype <- vec_cast(default, ptype)
+  }
+
+  class <- NULL
+  if (tib_has_special_scalar(ptype)) {
+    class <- paste0("tib_scalar_", vec_ptype_full(ptype))
   }
 
   tib_collector(
@@ -129,6 +147,21 @@ tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transfo
     class = class
   )
 }
+
+tib_has_special_scalar <- function(ptype) {
+  UseMethod("tib_has_special_scalar")
+}
+
+#' @export
+tib_has_special_scalar.default <- function(ptype) FALSE
+#' @export
+tib_has_special_scalar.logical <- function(ptype) vec_is(ptype, logical())
+#' @export
+tib_has_special_scalar.integer <- function(ptype) vec_is(ptype, integer())
+#' @export
+tib_has_special_scalar.double <- function(ptype) vec_is(ptype, double())
+#' @export
+tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 
 #' Create a Field Specification
 #'
@@ -184,33 +217,38 @@ tib_scalar <- function(key, ptype, required = TRUE, default = NULL, transform = 
 #' @rdname tib_scalar
 #' @export
 tib_lgl <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_scalar_impl(key, ptype = logical(), required = required, default = default, transform = transform, class = "tib_scalar_lgl")
+  tib_scalar_impl(key, ptype = logical(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_int <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_scalar_impl(key, ptype = integer(), required = required, default = default, transform = transform, class = "tib_scalar_int")
+  tib_scalar_impl(key, ptype = integer(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_dbl <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_scalar_impl(key, ptype = double(), required = required, default = default, transform = transform, class = "tib_scalar_dbl")
+  tib_scalar_impl(key, ptype = double(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_chr <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_scalar_impl(key, ptype = character(), required = required, default = default, transform = transform, class = "tib_scalar_chr")
+  tib_scalar_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
-tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL, class = NULL) {
+tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
     default <- ptype
   } else {
     default <- vec_cast(default, ptype)
+  }
+
+  class <- NULL
+  if (tib_has_special_scalar(ptype)) {
+    class <- paste0("tib_vector_", vec_ptype_full(ptype))
   }
 
   tib_collector(
@@ -223,6 +261,21 @@ tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transfo
     class = class
   )
 }
+
+tib_has_special_vector <- function(ptype) {
+  UseMethod("tib_has_special_vector")
+}
+
+#' @export
+tib_has_special_vector.default <- function(ptype) FALSE
+#' @export
+tib_has_special_vector.logical <- function(ptype) vec_is(ptype, logical())
+#' @export
+tib_has_special_vector.integer <- function(ptype) vec_is(ptype, integer())
+#' @export
+tib_has_special_vector.double <- function(ptype) vec_is(ptype, double())
+#' @export
+tib_has_special_vector.character <- function(ptype) vec_is(ptype, character())
 
 #' @rdname tib_scalar
 #' @export
@@ -239,25 +292,25 @@ tib_vector <- function(key, ptype, required = TRUE, default = NULL, transform = 
 #' @rdname tib_scalar
 #' @export
 tib_lgl_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_vector_impl(key, ptype = logical(), required = required, default = default, transform = transform, class = "tib_vector_lgl")
+  tib_vector_impl(key, ptype = logical(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_int_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_vector_impl(key, ptype = integer(), required = required, default = default, transform = transform, class = "tib_vector_int")
+  tib_vector_impl(key, ptype = integer(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_dbl_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_vector_impl(key, ptype = double(), required = required, default = default, transform = transform, class = "tib_vector_dbl")
+  tib_vector_impl(key, ptype = double(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
 tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
-  tib_vector_impl(key, ptype = character(), required = required, default = default, transform = transform, class = "tib_vector_chr")
+  tib_vector_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar

@@ -165,22 +165,22 @@ colour_tib <- function(x) {
 }
 
 #' @export
-colour_tib.tib_scalar_lgl <- function(x) {crayon::yellow}
+colour_tib.tib_scalar_logical <- function(x) {crayon::yellow}
 #' @export
-colour_tib.tib_scalar_int <- function(x) {crayon::green}
+colour_tib.tib_scalar_integer <- function(x) {crayon::green}
 #' @export
-colour_tib.tib_scalar_dbl <- function(x) {crayon::green}
+colour_tib.tib_scalar_double <- function(x) {crayon::green}
 #' @export
-colour_tib.tib_scalar_chr <- function(x) {crayon::red}
+colour_tib.tib_scalar_character <- function(x) {crayon::red}
 
 #' @export
-colour_tib.tib_vector_lgl <- function(x) {crayon::yellow}
+colour_tib.tib_vector_logical <- function(x) {crayon::yellow}
 #' @export
-colour_tib.tib_vector_int <- function(x) {crayon::green}
+colour_tib.tib_vector_integer <- function(x) {crayon::green}
 #' @export
-colour_tib.tib_vector_dbl <- function(x) {crayon::green}
+colour_tib.tib_vector_double <- function(x) {crayon::green}
 #' @export
-colour_tib.tib_vector_chr <- function(x) {crayon::red}
+colour_tib.tib_vector_character <- function(x) {crayon::red}
 
 #' @export
 colour_tib.tib_row <- function(x) {crayon::magenta}
@@ -198,24 +198,30 @@ get_f_name <- function(x) {
 }
 
 #' @export
-get_f_name.tib_scalar_lgl <- function(x) {"tib_lgl"}
+get_f_name.default <- function(x) {class(x)[[1]]}
+
 #' @export
-get_f_name.tib_scalar_int <- function(x) {"tib_int"}
+get_f_name.tib_unspecified <- function(x) {"tib_unspecified"}
+
 #' @export
-get_f_name.tib_scalar_dbl <- function(x) {"tib_dbl"}
+get_f_name.tib_scalar_logical <- function(x) {"tib_lgl"}
 #' @export
-get_f_name.tib_scalar_chr <- function(x) {"tib_chr"}
+get_f_name.tib_scalar_integer <- function(x) {"tib_int"}
+#' @export
+get_f_name.tib_scalar_double <- function(x) {"tib_dbl"}
+#' @export
+get_f_name.tib_scalar_character <- function(x) {"tib_chr"}
 #' @export
 get_f_name.tib_scalar<- function(x) {"tib_scalar"}
 
 #' @export
-get_f_name.tib_vector_lgl <- function(x) {"tib_lgl_vec"}
+get_f_name.tib_vector_logical <- function(x) {"tib_lgl_vec"}
 #' @export
-get_f_name.tib_vector_int <- function(x) {"tib_int_vec"}
+get_f_name.tib_vector_integer <- function(x) {"tib_int_vec"}
 #' @export
-get_f_name.tib_vector_dbl <- function(x) {"tib_dbl_vec"}
+get_f_name.tib_vector_double <- function(x) {"tib_dbl_vec"}
 #' @export
-get_f_name.tib_vector_chr <- function(x) {"tib_chr_vec"}
+get_f_name.tib_vector_character <- function(x) {"tib_chr_vec"}
 #' @export
 get_f_name.tib_vector<- function(x) {"tib_vector"}
 

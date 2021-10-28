@@ -42,21 +42,3 @@ is_object_list <- function(x) {
 
   TRUE
 }
-
-get_type <- function(x) {
-  # TODO what about `list()`?
-  if (is_object(x)) {
-    return("object")
-  }
-
-  n_max <- 1e3
-  if (vec_size(x) > n_max) {
-    x <- vec_slice(x, seq(n_max))
-  }
-
-  if (is_object_list(x)) {
-    return("object_list")
-  }
-
-  "list"
-}

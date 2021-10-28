@@ -16,211 +16,10 @@ guess_spec <- function(x) {
 
 #' @export
 guess_spec.default <- function(x) {
-  type <- get_type(x)
-  if (type == "object") x <- list(x)
-
-  fields <- list_fields_to_spec(x)
-  if (type == "object") {
-    spec_object(!!!fields)
-  } else {
-    spec_df(!!!fields)
-  }
-}
-
-list_fields_to_spec <- function(x) {
-  n <- vec_size(x)
-  if (n > 10e3) {
-    x <- vec_slice(x, sample(n, 10e3))
-  }
-  all_names <- vec_c(!!!lapply(x, names), .ptype = character())
-  names_count <- vec_count(all_names, "location")
-
-  empty_loc <- lengths(x) == 0L
-  if (any(empty_loc)) {
-    required <- rep_along(names_count$count, FALSE)
-    x <- x[!empty_loc]
-  } else {
-    required <- names_count$count == length(x)
-  }
-  x_t <- purrr::transpose(x, names_count$key)
-
-  purrr::pmap(
-    tibble::tibble(
-      col = x_t,
-      name = names(x_t),
-      required
-    ),
-    list_to_spec
-  )
-}
-
-list_to_spec <- function(col, name, required) {
-  # TODO if all values in a column are NULL inform about this column?
-  # or simply return `tib_list()`?
-  ptype_safe <- safe_ptype_common2(col)
-  if (is_null(ptype_safe$error)) {
-    ptype <- ptype_safe$result
-    if (is.data.frame(ptype)) {
-      browser()
-    } else if (vec_is_list(ptype)) {
-      if (is_object(col)) {
-        browser()
-      } else if (is_object_list(col)) {
-        fields <- list_fields_to_spec(col)
-        if (is_empty(fields)) {
-          return(tib_list(name, required))
-        }
-        return(tib_row(name, !!!fields, .required = required))
-      }
-
-      list_of_lists <- all(purrr::map_lgl(col, is.list))
-      if (list_of_lists) {
-        col_flat <- purrr::flatten(col)
-        if (is_object_list(col_flat)) {
-          fields <- list_fields_to_spec(col_flat)
-          tib_df(name, !!!fields, .required = required)
-        } else {
-          tib_list(name, required)
-        }
-      } else {
-        tib_list(name, required)
-      }
-    } else {
-      if (vec_is(ptype)) {
-        scalar <- all(vctrs::list_sizes(col) <= 1L)
-        if (scalar) {
-          lcol_to_spec(ptype, name, required)
-        } else {
-          vec_lcol_to_spec(ptype, name, required)
-        }
-      } else {
-        tib_list(name, required)
-      }
-    }
-  } else {
-    tib_list(name, required)
-  }
-}
-
-#' @export
-guess_spec.data.frame <- function(object_list) {
-  browser()
-  spec_df(
-    !!!purrr::imap(object_list, col_to_spec)
-  )
-}
-
-lcol_to_spec <- function(col, name, required = TRUE) {
-  UseMethod("lcol_to_spec")
-}
-
-#' @export
-lcol_to_spec.data.frame <- function(col, name, required = TRUE) {
-  browser()
-  # tib_row(
-  #   name,
-  #   !!!purrr::pmpa(
-  #     tibble::tibble(col = col, name = colnames(col))
-  #   )
-  #   !!!purrr::imap(col, col_to_spec)
-  # )
-}
-
-#' @export
-lcol_to_spec.logical <- function(col, name, required) {
-  scalar_lcol_to_spec(col, name, required, logical(), tib_lgl)
-}
-
-#' @export
-lcol_to_spec.integer <- function(col, name, required) {
-  scalar_lcol_to_spec(col, name, required, integer(), tib_int)
-}
-
-#' @export
-lcol_to_spec.double <- function(col, name, required) {
-  scalar_lcol_to_spec(col, name, required, double(), tib_dbl)
-}
-
-#' @export
-lcol_to_spec.character <- function(col, name, required) {
-  scalar_lcol_to_spec(col, name, required, character(), tib_chr)
-}
-
-scalar_lcol_to_spec <- function(col, name, required, ptype, f) {
-  if (vec_is(col, ptype)) {
-    f(name, required)
-  } else {
-    tib_scalar(name, vec_ptype(col), required)
-  }
-}
-
-#' @export
-lcol_to_spec.default <- function(col, name, required = TRUE) {
-  tib_scalar(name, vec_ptype(col), required)
-}
-
-#' @export
-lcol_to_spec.list <- function(col, name, required = TRUE) {
-  ptype_safe <- safe_ptype_common2(col)
-
-  if (is_null(ptype_safe$error)) {
-    col_flat <- vec_c(!!!col)
-    vec_lcol_to_spec(col_flat, name, required)
-  } else {
-    tib_list(name, required)
-  }
-}
-
-vec_lcol_to_spec <- function(col, name, required = TRUE) {
-  UseMethod("vec_lcol_to_spec")
-}
-
-#' @export
-vec_lcol_to_spec.data.frame <- function(col, name, required = TRUE) {
-  browser()
-  tib_df(
-    name,
-    !!!purrr::imap(col, col_to_spec)
-  )
-}
-
-#' @export
-vec_lcol_to_spec.list <- function(col, name, required = TRUE) {
-  browser()
-}
-
-#' @export
-vec_lcol_to_spec.logical <- function(col, name, required = TRUE) {
-  vec_of_lcol_to_spec(col, name, required, logical(), tib_lgl_vec)
-}
-
-#' @export
-vec_lcol_to_spec.integer <- function(col, name, required = TRUE) {
-  vec_of_lcol_to_spec(col, name, required, integer(), tib_int_vec)
-}
-
-#' @export
-vec_lcol_to_spec.double <- function(col, name, required = TRUE) {
-  vec_of_lcol_to_spec(col, name, required, double(), tib_dbl_vec)
-}
-
-#' @export
-vec_lcol_to_spec.character <- function(col, name, required = TRUE) {
-  vec_of_lcol_to_spec(col, name, required, character(), tib_chr_vec)
-}
-
-#' @export
-vec_lcol_to_spec.default <- function(col, name, required = TRUE) {
-  # TODO not sure about this
-  tib_scalar(name, vec_ptype(col), required)
-}
-
-vec_of_lcol_to_spec <- function(col, name, required = TRUE, ptype, f) {
-  if (vec_is(col, ptype)) {
-    f(name, required)
-  } else {
-    tib_scalar(name, vec_ptype(col), required)
-  }
+  abort(paste0(
+    "Cannot guess the specification for type ",
+    vctrs::vec_ptype_full(x)
+  ))
 }
 
 
@@ -234,113 +33,213 @@ guess_spec.data.frame <- function(x) {
 }
 
 col_to_spec <- function(col, name) {
-  UseMethod("col_to_spec")
-}
-
-#' @export
-col_to_spec.data.frame <- function(col, name) {
-  tib_row(
-    name,
-    !!!purrr::imap(col, col_to_spec)
-  )
-}
-
-#' @export
-col_to_spec.logical <- function(col, name) {
-  scalar_col_to_spec(col, name, logical(), tib_lgl)
-}
-
-#' @export
-col_to_spec.integer <- function(col, name) {
-  scalar_col_to_spec(col, name, integer(), tib_int)
-}
-
-#' @export
-col_to_spec.double <- function(col, name) {
-  scalar_col_to_spec(col, name, double(), tib_dbl)
-}
-
-#' @export
-col_to_spec.character <- function(col, name) {
-  scalar_col_to_spec(col, name, character(), tib_chr)
-}
-
-scalar_col_to_spec <- function(col, name, ptype, f) {
-  if (vec_is(col, ptype)) {
-    f(name)
-  } else {
-    tib_scalar(name, vec_ptype(col))
+  if (is.data.frame(col)) {
+    return(tib_row(name, !!!purrr::imap(col, col_to_spec)))
   }
-}
 
-#' @export
-col_to_spec.default <- function(col, name) {
-  tib_scalar(name, vec_ptype(col))
-}
+  if (!is.list(col)) {
+    return(tib_scalar(name, vec_ptype(col)))
+  }
 
-#' @export
-col_to_spec.list <- function(col, name) {
   ptype_safe <- safe_ptype_common2(col)
-
-  if (is_null(ptype_safe$error)) {
-    col_flat <- vec_c(!!!col)
-    vec_col_to_spec(col_flat, name)
-  } else {
-    tib_list(name)
+  if (!is_null(ptype_safe$error)) {
+    return(tib_list(name))
   }
+
+  ptype <- ptype_safe$result
+  if (is_null(ptype)) {
+    return(tib_unspecified(name))
+  }
+
+  if (is.data.frame(ptype)) {
+    col_flat <- vec_unchop(col)
+    return(tib_df(name, !!!purrr::imap(col_flat, col_to_spec)))
+  }
+
+  return(tib_vector(name, ptype))
 }
 
 safe_ptype_common2 <- function(x) {
   purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
 }
 
-vec_col_to_spec <- function(col, name) {
-  UseMethod("vec_col_to_spec")
-}
+
+# list --------------------------------------------------------------------
 
 #' @export
-vec_col_to_spec.data.frame <- function(col, name) {
-  tib_df(
-    name,
-    !!!purrr::imap(col, col_to_spec)
+guess_spec.list <- function(x) {
+  valid_object_list <- is_object_list(x)
+  valid_object <- is_object(x)
+
+  if (valid_object_list && !valid_object) {
+    fields <- guess_object_list_spec(x)
+
+    names_to <- NULL
+    if (is_named(x)) {
+      names_to <- ".names"
+    }
+    return(spec_df(!!!fields, .names_to = names_to))
+  }
+
+  if (valid_object) {
+    fields <- guess_object_spec(x)
+    return(spec_object(!!!fields))
+  }
+
+  abort("Cannot guess spec")
+}
+
+
+# list - object -----------------------------------------------------------
+
+guess_object_spec <- function(x) {
+  purrr::pmap(
+    tibble::tibble(
+      values = x,
+      name = names(x)
+    ),
+    guess_object_field_spec
   )
 }
 
-#' @export
-vec_col_to_spec.list <- function(col, name) {
-  browser()
-}
+guess_object_field_spec <- function(values, name) {
+  if (is_null(values)) return(tib_unspecified(name))
 
-#' @export
-vec_col_to_spec.logical <- function(col, name) {
-  vec_of_col_to_spec(col, name, logical(), tib_lgl_vec)
-}
-
-#' @export
-vec_col_to_spec.integer <- function(col, name) {
-  vec_of_col_to_spec(col, name, integer(), tib_int_vec)
-}
-
-#' @export
-vec_col_to_spec.double <- function(col, name) {
-  vec_of_col_to_spec(col, name, double(), tib_dbl_vec)
-}
-
-#' @export
-vec_col_to_spec.character <- function(col, name) {
-  vec_of_col_to_spec(col, name, character(), tib_chr_vec)
-}
-
-#' @export
-vec_col_to_spec.default <- function(col, name) {
-  # TODO not sure about this
-  tib_scalar(name, vec_ptype(col))
-}
-
-vec_of_col_to_spec <- function(col, name, ptype, f) {
-  if (vec_is(col, ptype)) {
-    f(name)
-  } else {
-    tib_scalar(name, vec_ptype(col))
+  if (!vec_is_list(values)) {
+    if (vec_size(values) == 1) {
+      return(tib_scalar(name, vec_ptype(values)))
+    }
+    return(tib_vector(name, vec_ptype(values)))
   }
+
+  # `values` must be a list
+  if (is_object(values)) {
+    fields <- guess_object_spec(values)
+    return(maybe_tib_row(name, fields))
+  }
+
+  if (is_object_list(values)) {
+    fields <- guess_object_list_spec(values)
+    return(maybe_tib_df(name, fields, names_to = if (is_named(values)) ".names"))
+  }
+
+  # values2 <- vctrs::list_drop_empty(values)
+  ptype_result <- safe_ptype_common2(values)
+  has_no_common_ptype <- !is_null(ptype_result$error)
+  if (has_no_common_ptype) return(tib_list(name))
+
+  ptype <- ptype_result$result
+  # TODO inform
+  if (is_null(ptype)) return(tib_unspecified(name))
+
+  list_of_scalars <- all(list_sizes(values) == 1L)
+  if (list_of_scalars) return(tib_vector(name, ptype, transform = make_unchop(ptype)))
+
+  return(tib_list(name, transform = make_new_list_of(ptype)))
+}
+
+
+# list - df ---------------------------------------------------------------
+
+guess_object_list_spec <- function(x) {
+  required <- get_required(x)
+
+  # need to remove empty elements for `purrr::transpose()` to work...
+  non_empty_loc <- vctrs::list_sizes(x) != 0L
+  x <- vec_slice(x, non_empty_loc)
+
+  x_t <- purrr::transpose(unname(x), names(required))
+
+  purrr::pmap(
+    tibble::tibble(
+      values = x_t,
+      name = names(required),
+      required = unname(required)
+    ),
+    guess_object_list_field_spec
+  )
+}
+
+guess_object_list_field_spec <- function(values, name, required) {
+  ptype_result <- safe_ptype_common2(values)
+  no_common_ptype <- !is_null(ptype_result$error)
+  if (no_common_ptype) return(tib_list(name, required))
+
+  ptype <- ptype_result$result
+  # TODO inform
+  if (is_null(ptype)) return(tib_unspecified(name, required))
+
+  if (!is.list(ptype)) {
+    sizes <- list_sizes(values)
+    if (all(sizes <= 1)) {
+      return(tib_scalar(name, ptype, required))
+    } else {
+      return(tib_vector(name, ptype, required))
+    }
+  }
+
+  if (is_object_list(values)) {
+    fields <- guess_object_list_spec(values)
+    return(maybe_tib_row(name, fields, required = required))
+  }
+
+
+  values_flat <- vec_unchop(values, ptype = ptype)
+  if (is_object_list(values_flat)) {
+    fields <- guess_object_list_spec(values_flat)
+
+    return(maybe_tib_df(name, required = required, fields, names_to = if (is_named(values_flat)) ".names"))
+  }
+
+  return(tib_list(name, required))
+}
+
+get_required <- function(x, sample_size = 10e3) {
+  n <- vec_size(x)
+  x <- unname(x)
+  if (n > sample_size) {
+    n <- sample_size
+    x <- vec_slice(x, sample(n, sample_size))
+  }
+
+  all_names <- vec_c(!!!lapply(x, names), .ptype = character())
+  names_count <- vec_count(all_names, "location")
+
+  empty_loc <- lengths(x) == 0L
+  if (any(empty_loc)) {
+    rep_named(names_count$key, FALSE)
+  } else {
+    set_names(names_count$count == n, names_count$key)
+  }
+}
+
+
+# helpers -----------------------------------------------------------------
+
+make_unchop <- function(ptype) {
+  rlang::new_function(
+    pairlist2(x = ),
+    call2(sym("vec_unchop"), x = sym("x"), ptype = ptype)
+  )
+}
+
+make_new_list_of <- function(ptype) {
+  rlang::new_function(
+    pairlist2(x = ),
+    call2(sym("new_list_of"), x = sym("x"), ptype = ptype)
+  )
+}
+
+maybe_tib_row <- function(name, fields, required = TRUE) {
+  if (is_empty(fields)) return(tib_unspecified(name, required))
+
+  return(tib_row(name, !!!fields, .required = required))
+}
+
+maybe_tib_df <- function(name, fields, required = TRUE, names_to = NULL) {
+  if (is_empty(fields) && is_null(names_to)) {
+    return(tib_unspecified(name, required))
+  }
+
+  return(tib_df(name, !!!fields, .required = required, .names_to = names_to))
 }

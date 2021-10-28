@@ -1,97 +1,50 @@
-test_that("can guess spec for an object", {
-  expect_equal(
-    guess_spec(list(int = 1L)),
-    spec_object(int = tib_int("int"))
-  )
+tibble <- tibble::tibble
 
-  expect_equal(
-    guess_spec(list(chr = "a")),
-    spec_object(chr = tib_chr("chr"))
-  )
-
-  expect_equal(
-    guess_spec(list(dtt = new_datetime())),
-    spec_object(dtt = tib_scalar("dtt", new_datetime()))
-  )
-
-  expect_equal(
-    guess_spec(list(int_vec = 1:2)),
-    spec_object(int_vec = tib_int_vec("int_vec"))
-  )
-
-  expect_equal(
-    guess_spec(list(dtt = new_datetime(1:2 + 0))),
-    spec_object(dtt = tib_scalar("dtt", new_datetime()))
-  )
-
-  expect_equal(
-    guess_spec(list(list = list(1, "a"))),
-    spec_object(list = tib_list("list"))
-  )
-})
-
-test_that("can guess spec for object_lists", {
-  expect_equal(
-    list(
-      list(int = 1L, chr_maybe = "a", mixed = 1L, int_vec = 1:2),
-      list(int = 2L, mixed = "a")
-    ) %>%
-      guess_spec(),
-    spec_df(
-      int = tib_int("int"),
-      chr_maybe = tib_chr("chr_maybe", FALSE),
-      mixed = tib_list("mixed"),
-      int_vec = tib_int_vec("int_vec", FALSE)
-    )
-  )
-})
+# spec for data frames ----------------------------------------------------
 
 test_that("can guess spec for data frames", {
+  # scalar elements
   expect_equal(
     guess_spec(
-      tibble::tibble(
+      tibble(
         lgl = TRUE,
-        int = 1L,
-        dbl = 1.5,
-        chr = "a",
         dtt = vctrs::new_datetime()
       )
     ),
     spec_df(
       lgl = tib_lgl("lgl"),
-      int = tib_int("int"),
-      dbl = tib_dbl("dbl"),
-      chr = tib_chr("chr"),
       dtt = tib_scalar("dtt", ptype = vctrs::new_datetime())
     )
   )
 
+  # vector elements
   expect_equal(
     guess_spec(
-      tibble::tibble(
+      tibble(
         lgl_vec = list(TRUE),
-        int_vec = list(1L),
-        dbl_vec = list(1.5),
-        chr_vec = list("a"),
         dtt_vec = list(vctrs::new_datetime()),
       )
     ),
     spec_df(
       lgl_vec = tib_lgl_vec("lgl_vec"),
-      int_vec = tib_int_vec("int_vec"),
-      dbl_vec = tib_dbl_vec("dbl_vec"),
-      chr_vec = tib_chr_vec("chr_vec"),
-      dtt_vec = tib_scalar("dtt_vec", ptype = vctrs::new_datetime())
+      dtt_vec = tib_vector("dtt_vec", ptype = vctrs::new_datetime())
     )
   )
 
+  # list elements
   expect_equal(
-    guess_spec(tibble::tibble(x = list(1, "a"))),
+    guess_spec(tibble(x = list(1, "a"))),
     spec_df(x = tib_list("x"))
   )
 
   expect_equal(
-    guess_spec(tibble::tibble(df = tibble::tibble(int = 1L, chr = "a"))),
+    guess_spec(tibble(x = list(NULL, NULL))),
+    spec_df(x = tib_unspecified("x"))
+  )
+
+  # row elements
+  expect_equal(
+    guess_spec(tibble(df = tibble(int = 1L, chr = "a"))),
     spec_df(
       df = tib_row(
         "df",
@@ -100,7 +53,327 @@ test_that("can guess spec for data frames", {
       )
     )
   )
+
+  # df elements
+  expect_equal(
+    guess_spec(
+      tibble(
+        df_list = list(
+          tibble(dbl = 1:2),
+          tibble(dbl = 2.5, chr = "a")
+        )
+      )
+    ),
+    spec_df(
+      df_list = tib_df(
+        "df_list",
+        dbl = tib_dbl("dbl"),
+        chr = tib_chr("chr")
+      )
+    )
+  )
 })
+
+test_that("can guess spec for data frames with nested df columns", {
+  # row in row element
+  expect_equal(
+    guess_spec(
+      tibble(df = tibble(df2 = tibble(int2 = 1L, chr2 = "a")))
+    ),
+    spec_df(
+      df = tib_row(
+        "df",
+        df2 = tib_row(
+          "df2",
+          int2 = tib_int("int2"),
+          chr2 = tib_chr("chr2")
+        )
+      )
+    )
+  )
+
+  # df in row element
+  expect_equal(
+    guess_spec(
+      tibble(
+        df = tibble(
+          df2 = list(
+            tibble(dbl2 = 1L),
+            tibble(dbl2 = 2.5, chr2 = "a")
+          )
+        )
+      )
+    ),
+    spec_df(
+      df = tib_row(
+        "df",
+        df2 = tib_df(
+          "df2",
+          dbl2 = tib_dbl("dbl2"),
+          chr2 = tib_chr("chr2")
+        )
+      )
+    )
+  )
+})
+
+
+test_that("can guess spec for data frames with nested list of df columns", {
+  # row in df element
+  expect_equal(
+    guess_spec(
+      tibble(df = list(tibble(df2 = tibble(int2 = 1L, chr2 = "a"))))
+    ),
+    spec_df(
+      df = tib_df(
+        "df",
+        df2 = tib_row(
+          "df2",
+          int2 = tib_int("int2"),
+          chr2 = tib_chr("chr2")
+        )
+      )
+    )
+  )
+
+  # df in row element
+  expect_equal(
+    guess_spec(
+      tibble(
+        df = list(
+          tibble(
+            df2 = list(
+              tibble(dbl2 = 1L),
+              tibble(dbl2 = 2.5, chr2 = "a")
+            )
+          )
+        )
+      )
+    ),
+    spec_df(
+      df = tib_df(
+        "df",
+        df2 = tib_df(
+          "df2",
+          dbl2 = tib_dbl("dbl2"),
+          chr2 = tib_chr("chr2")
+        )
+      )
+    )
+  )
+})
+
+
+# spec_object -------------------------------------------------------------
+
+test_that("can guess tib_scalar in an object", {
+  expect_equal(guess_spec(list(x = TRUE)), spec_object(x = tib_lgl("x")))
+  expect_equal(
+    guess_spec(list(x = new_datetime(1))),
+    spec_object(x = tib_scalar("x", new_datetime()))
+  )
+})
+
+test_that("can guess tib_vector in an object", {
+  expect_equal(guess_spec(list(x = c(TRUE, FALSE))), spec_object(x = tib_lgl_vec("x")))
+  expect_equal(
+    guess_spec(list(x = c(new_datetime(1), new_datetime(2)))),
+    spec_object(x = tib_vector("x", new_datetime()))
+  )
+})
+
+test_that("can guess tib_vector for a scalar list in an object", {
+  expect_equal(
+    guess_spec(list(x = list(TRUE, TRUE))),
+    spec_object(x = tib_lgl_vec("x", transform = make_unchop(logical()))),
+    ignore_function_env = TRUE
+  )
+
+  expect_equal(
+    guess_spec(list(x = list(new_datetime(1)))),
+    spec_object(x = tib_vector("x", new_datetime(), transform = make_unchop(new_datetime()))),
+    ignore_function_env = TRUE
+  )
+})
+
+test_that("can guess tib_list in an object", {
+  expect_equal(guess_spec(list(x = list(TRUE, "a"))), spec_object(x = tib_list("x")))
+})
+
+test_that("can guess tib_row in an object", {
+  expect_equal(
+    guess_spec(list(x = list(a = 1L, b = "a"))),
+    spec_object(x = tib_row("x", a = tib_int("a"), b = tib_chr("b")))
+  )
+})
+
+test_that("can guess tib_row with a scalar list in an object", {
+  expect_equal(
+    guess_spec(list(x = list(a = list(1L, 2L), b = "a"))),
+    spec_object(
+      x = tib_row(
+        "x",
+        a = tib_int_vec("a", transform = make_unchop(integer())),
+        b = tib_chr("b")
+      )
+    ),
+    ignore_function_env = TRUE
+  )
+})
+
+test_that("can guess tib_df in an object", {
+  expect_equal(
+    guess_spec(
+      list(
+        x = list(
+          list(a = 1L),
+          list(a = 2L)
+        )
+      )
+    ),
+    spec_object(x = tib_df("x", a = tib_int("a")))
+  )
+})
+
+test_that("can guess tib_unspecified for an object", {
+  expect_equal(guess_spec(list(x = NULL)), spec_object(x = tib_unspecified("x")))
+  expect_equal(guess_spec(list(x = list(NULL, NULL))), spec_object(x = tib_unspecified("x")))
+
+  # in a row
+  expect_equal(
+    guess_spec(list(x = list(a = NULL))),
+    spec_object(x = tib_row("x", a = tib_unspecified("a")))
+  )
+
+  # in a df
+  expect_equal(
+    guess_spec(
+      list(
+        x = list(
+          list(a = NULL),
+          list(a = NULL)
+        )
+      )
+    ),
+    spec_object(x = tib_df("x", a = tib_unspecified("a")))
+  )
+})
+
+
+# spec_df -----------------------------------------------------------------
+
+test_that("can guess tib_scalar in an object_list", {
+  expect_equal(
+    guess_spec(list(list(x = TRUE), list(x = FALSE))),
+    spec_df(x = tib_lgl("x"))
+  )
+  expect_equal(
+    guess_spec(list(list(x = new_datetime(1)), list(x = new_datetime(2)))),
+    spec_df(x = tib_scalar("x", new_datetime()))
+  )
+})
+
+test_that("can guess tib_vector in an object_list", {
+  expect_equal(
+    guess_spec(list(list(x = c(TRUE, FALSE)), list(x = FALSE))),
+    spec_df(x = tib_lgl_vec("x"))
+  )
+  expect_equal(
+    guess_spec(list(list(x = "a"), list(x = c("b", "c")))),
+    spec_df(x = tib_chr_vec("x"))
+  )
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = new_datetime(1)),
+        list(x = c(new_datetime(2), new_datetime(3)))
+      )
+    ),
+    spec_df(x = tib_vector("x", new_datetime()))
+  )
+})
+
+test_that("can guess tib_list in an object_list", {
+  expect_equal(
+    guess_spec(list(list(x = list(TRUE, "a")))),
+    spec_df(x = tib_list("x"))
+  )
+
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = "a"),
+        list(x = 1)
+      )
+    ),
+    spec_df(x = tib_list("x"))
+  )
+})
+
+test_that("can guess tib_row in an object_list", {
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = list(a = 1L, b = "a")),
+        list(x = list(a = 2L, b = "b"))
+      )
+    ),
+    spec_df(x = tib_row("x", a = tib_int("a"), b = tib_chr("b")))
+  )
+})
+
+test_that("can guess tib_df in an object_list", {
+  expect_equal(
+    guess_spec(
+      list(
+        list(
+          x = list(
+            list(a = 1L),
+            list(a = 2L)
+          )
+        ),
+        list(
+          x = list(
+            list(a = 1.5)
+          )
+        )
+      )
+    ),
+    spec_df(x = tib_df("x", a = tib_dbl("a")))
+  )
+})
+
+test_that("can guess required in an object_list", {
+  # TODO
+})
+
+test_that("can guess tib_unspecified in an object_list", {
+  expect_equal(guess_spec(list(list(x = NULL))), spec_df(x = tib_unspecified("x")))
+  expect_equal(guess_spec(list(list(x = list(NULL, NULL)))), spec_df(x = tib_unspecified("x")))
+
+  # in a row
+  expect_equal(
+    guess_spec(list(list(x = list(a = NULL)))),
+    spec_df(x = tib_row("x", a = tib_unspecified("a")))
+  )
+
+  # in a df
+  expect_equal(
+    guess_spec(
+      list(
+        list(
+          x = list(
+            list(a = NULL),
+            list(a = NULL)
+          )
+        )
+      )
+    ),
+    spec_df(x = tib_df("x", a = tib_unspecified("a")))
+  )
+})
+
+# diverse -----------------------------------------------------------------
 
 test_that("can guess spec for discog", {
   expect_snapshot(guess_spec(discog) %>% print())

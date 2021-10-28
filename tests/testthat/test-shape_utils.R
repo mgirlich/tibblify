@@ -38,22 +38,3 @@ test_that("is_object_list() works", {
   # can handle NULL
   expect_true(is_object_list(list(list(x = 1), NULL)))
 })
-
-test_that("get_type() works for data frames", {
-  expect_equal(
-    get_type(mtcars),
-    "object_list"
-  )
-
-  expect_equal(
-    get_type(mtcars[1, ]),
-    "object_list"
-  )
-})
-
-test_that("get_type() works for lists", {
-  expect_equal(get_type(list(a = 1, b = "a")), "object")
-
-  expect_equal(get_type(discog), "object_list")
-  expect_equal(get_type(list(1, "a")), "list")
-})
