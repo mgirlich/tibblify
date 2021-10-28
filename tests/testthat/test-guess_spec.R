@@ -344,7 +344,15 @@ test_that("can guess tib_df in an object_list", {
 })
 
 test_that("can guess required in an object_list", {
-  # TODO
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = 1.5),
+        list()
+      )
+    ),
+    spec_df(x = tib_dbl("x", FALSE))
+  )
 })
 
 test_that("can guess tib_unspecified in an object_list", {
@@ -383,33 +391,12 @@ test_that("can guess spec for gh_users", {
   expect_snapshot(guess_spec(gh_users) %>% print())
 })
 
-test_that("can guess spec for discog", {
+test_that("can guess spec for gh_repos", {
+  expect_snapshot(guess_spec(gh_repos) %>% print())
+})
+
+test_that("can guess spec for got_chars", {
   skip("not yet decided")
-  # mirror_url -> always `NULL`
-  expect_equal(
-    tibblify(gh_repos, guess_spec(gh_repos)),
-    tibblify(gh_repos),
-    ignore_attr = TRUE
-  )
-
-  expect_equal(
-    tibblify(gh_users, guess_spec(gh_users)),
-    tibblify(gh_users),
-    ignore_attr = TRUE
-  )
-
-  # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot simplify to character
-  purrr::map(got_chars, ~ .x["aliases"]) %>% guess_spec
-  expect_equal(
-    tibblify(got_chars, guess_spec(got_chars)),
-    tibblify(got_chars),
-    ignore_attr = TRUE
-  )
-
-  # default for `list_of<character>` -> character() or NULL?
-  expect_equal(
-    tibblify(sw_films, guess_spec(sw_films)),
-    tibblify(sw_films),
-    ignore_attr = TRUE
-  )
+  # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot (yet?) simplify to character
+  expect_snapshot(guess_spec(got_chars) %>% print())
 })

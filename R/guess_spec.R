@@ -95,51 +95,14 @@ guess_spec.list <- function(x) {
 guess_object_spec <- function(x) {
   purrr::pmap(
     tibble::tibble(
-      values = x,
+      value = x,
       name = names(x)
     ),
-    guess_object_field_spec
+    guess_field_spec,
+    required = TRUE,
+    object_list = FALSE
   )
 }
-
-guess_object_field_spec <- function(values, name) {
-  if (is_null(values)) return(tib_unspecified(name))
-
-  if (!vec_is_list(values)) {
-    if (vec_size(values) == 1) {
-      return(tib_scalar(name, vec_ptype(values)))
-    }
-    return(tib_vector(name, vec_ptype(values)))
-  }
-
-  # `values` must be a list
-  if (is_object(values)) {
-    fields <- guess_object_spec(values)
-    return(maybe_tib_row(name, fields))
-  }
-
-  if (is_object_list(values)) {
-    fields <- guess_object_list_spec(values)
-    return(maybe_tib_df(name, fields, names_to = if (is_named(values)) ".names"))
-  }
-
-  # values2 <- vctrs::list_drop_empty(values)
-  ptype_result <- safe_ptype_common2(values)
-  has_no_common_ptype <- !is_null(ptype_result$error)
-  if (has_no_common_ptype) return(tib_list(name))
-
-  ptype <- ptype_result$result
-  # TODO inform
-  if (is_null(ptype)) return(tib_unspecified(name))
-
-  list_of_scalars <- all(list_sizes(values) == 1L)
-  if (list_of_scalars) return(tib_vector(name, ptype, transform = make_unchop(ptype)))
-
-  return(tib_list(name, transform = make_new_list_of(ptype)))
-}
-
-
-# list - df ---------------------------------------------------------------
 
 guess_object_list_spec <- function(x) {
   required <- get_required(x)
@@ -152,46 +115,13 @@ guess_object_list_spec <- function(x) {
 
   purrr::pmap(
     tibble::tibble(
-      values = x_t,
+      value = x_t,
       name = names(required),
       required = unname(required)
     ),
-    guess_object_list_field_spec
+    guess_field_spec,
+    object_list = TRUE
   )
-}
-
-guess_object_list_field_spec <- function(values, name, required) {
-  ptype_result <- safe_ptype_common2(values)
-  no_common_ptype <- !is_null(ptype_result$error)
-  if (no_common_ptype) return(tib_list(name, required))
-
-  ptype <- ptype_result$result
-  # TODO inform
-  if (is_null(ptype)) return(tib_unspecified(name, required))
-
-  if (!is.list(ptype)) {
-    sizes <- list_sizes(values)
-    if (all(sizes <= 1)) {
-      return(tib_scalar(name, ptype, required))
-    } else {
-      return(tib_vector(name, ptype, required))
-    }
-  }
-
-  if (is_object_list(values)) {
-    fields <- guess_object_list_spec(values)
-    return(maybe_tib_row(name, fields, required = required))
-  }
-
-
-  values_flat <- vec_unchop(values, ptype = ptype)
-  if (is_object_list(values_flat)) {
-    fields <- guess_object_list_spec(values_flat)
-
-    return(maybe_tib_df(name, required = required, fields, names_to = if (is_named(values_flat)) ".names"))
-  }
-
-  return(tib_list(name, required))
 }
 
 get_required <- function(x, sample_size = 10e3) {
@@ -211,6 +141,102 @@ get_required <- function(x, sample_size = 10e3) {
   } else {
     set_names(names_count$count == n, names_count$key)
   }
+}
+
+guess_field_spec <- function(value, name, required, object_list) {
+  if (object_list) {
+    ptype_result <- safe_ptype_common2(value)
+    no_common_ptype <- !is_null(ptype_result$error)
+
+    if (no_common_ptype) return(tib_list(name, required))
+    ptype <- ptype_result$result
+  } else {
+    ptype <- vec_ptype(value)
+  }
+
+  if (is_null(ptype)) return(tib_unspecified(name, required))
+
+  if (!vec_is_list(ptype)) {
+    if (guess_is_scalar(value, object_list)) {
+      return(tib_scalar(name, ptype, required))
+    } else {
+      return(tib_vector(name, ptype, required))
+    }
+  }
+
+  # `values` must be a list
+  if (field_is_row(value, object_list)) {
+    fields <- guess_get_field_spec(value, object_list)
+    return(maybe_tib_row(name, fields, required))
+  }
+
+  if (object_list) {
+    value_flat <- vec_unchop(value, ptype = ptype)
+  } else {
+    value_flat <- value
+  }
+
+  if (field_is_object_list(value_flat)) {
+    return(guess_make_tib_df(name, value_flat, required))
+  }
+
+  # values2 <- vctrs::list_drop_empty(values)
+  ptype_result <- safe_ptype_common2(value_flat)
+  has_no_common_ptype <- !is_null(ptype_result$error)
+  if (has_no_common_ptype) return(tib_list(name, required))
+
+  ptype <- ptype_result$result
+  # TODO inform?
+  if (is_null(ptype)) return(tib_unspecified(name, required))
+
+  list_of_scalars <- all(list_sizes(value_flat) == 1L)
+  if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
+
+  return(tib_list(name, required, transform = make_new_list_of(ptype)))
+}
+
+field_is_list <- function(value, ptype, object_list) {
+  if (object_list) {
+    vec_is_list(ptype)
+  } else {
+    vec_is_list(value)
+  }
+}
+
+guess_is_scalar <- function(value, object_list) {
+  if (object_list) {
+    # TODO not sure about this...
+    all(list_sizes(value) <= 1L)
+  } else {
+    vec_size(value) == 1L
+  }
+}
+
+field_is_row <- function(value, object_list) {
+  if (object_list) {
+    is_object_list(value)
+  } else {
+    is_object(value)
+  }
+}
+
+guess_get_field_spec <- function(value, object_list) {
+  if (object_list) {
+    fields <- guess_object_list_spec(value)
+  } else {
+    fields <- guess_object_spec(value)
+  }
+}
+
+field_is_object_list <- function(values_flat) {
+  is_object_list(values_flat)
+}
+
+guess_make_tib_df <- function(name, values_flat, required) {
+  fields <- guess_object_list_spec(values_flat)
+  names_to <- if (is_named(values_flat)) ".names"
+
+  return(maybe_tib_df(name, fields, required, names_to = names_to))
 }
 
 

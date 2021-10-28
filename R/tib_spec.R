@@ -123,6 +123,9 @@ tib_unspecified <- function(key, required = TRUE) {
   )
 }
 
+
+# scalar fields -----------------------------------------------------------
+
 tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
@@ -238,6 +241,9 @@ tib_chr <- function(key, required = TRUE, default = NULL, transform = NULL) {
   tib_scalar_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
+
+# vector fields -----------------------------------------------------------
+
 tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
@@ -313,6 +319,9 @@ tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) 
   tib_vector_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
+
+# other fields ------------------------------------------------------------
+
 #' @rdname tib_scalar
 #' @export
 tib_list <- function(key, required = TRUE, default = NULL, transform = NULL) {
@@ -347,6 +356,9 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     names_col = .names_to
   )
 }
+
+
+# helpers -----------------------------------------------------------------
 
 prep_transform <- function(f) {
   if (is_null(f)) {
