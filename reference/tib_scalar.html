@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Create a Field Specification — tib_scalar • tibblify</title>
+<title>Create a Field Specification — tib_unspecified • tibblify</title>
 
 
 <!-- jquery -->
@@ -39,7 +39,7 @@
 
 
 
-<meta property="og:title" content="Create a Field Specification — tib_scalar" />
+<meta property="og:title" content="Create a Field Specification — tib_unspecified" />
 <meta property="og:description" content="Use these functions to specify how to convert the fields of an object." />
 
 
@@ -123,7 +123,9 @@
     <p>Use these functions to specify how to convert the fields of an object.</p>
     </div>
 
-    <pre class="usage"><span class='fu'>tib_scalar</span><span class='op'>(</span><span class='va'>key</span>, <span class='va'>ptype</span>, required <span class='op'>=</span> <span class='cn'>TRUE</span>, default <span class='op'>=</span> <span class='cn'>NULL</span>, transform <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
+    <pre class="usage"><span class='fu'>tib_unspecified</span><span class='op'>(</span><span class='va'>key</span>, required <span class='op'>=</span> <span class='cn'>TRUE</span><span class='op'>)</span>
+
+<span class='fu'>tib_scalar</span><span class='op'>(</span><span class='va'>key</span>, <span class='va'>ptype</span>, required <span class='op'>=</span> <span class='cn'>TRUE</span>, default <span class='op'>=</span> <span class='cn'>NULL</span>, transform <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
 <span class='fu'>tib_lgl</span><span class='op'>(</span><span class='va'>key</span>, required <span class='op'>=</span> <span class='cn'>TRUE</span>, default <span class='op'>=</span> <span class='cn'>NULL</span>, transform <span class='op'>=</span> <span class='cn'>NULL</span><span class='op'>)</span>
 
@@ -157,12 +159,12 @@
       <td><p>The path to the field in the object.</p></td>
     </tr>
     <tr>
-      <th>ptype</th>
-      <td><p>A prototype of the desired output type of the field.</p></td>
-    </tr>
-    <tr>
       <th>required, .required</th>
       <td><p>Throw an error if the field does not exist?</p></td>
+    </tr>
+    <tr>
+      <th>ptype</th>
+      <td><p>A prototype of the desired output type of the field.</p></td>
     </tr>
     <tr>
       <th>default</th>

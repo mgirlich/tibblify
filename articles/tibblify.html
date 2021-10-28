@@ -134,9 +134,9 @@
 <p>If we are only interested in some of the fields we can easily adapt the specification</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-  login <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"login"</span><span class="op">)</span>,
-  name <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,
-  public_gists <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"public_gists"</span><span class="op">)</span>
+  login <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"login"</span><span class="op">)</span>,
+  name <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,
+  public_gists <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"public_gists"</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span>, <span class="va">spec</span><span class="op">)</span>
@@ -177,33 +177,33 @@
 <p>As seen before the specification for a collection is done with <code><a href="../reference/spec_df.html">spec_df()</a></code>. The columns of the output tibble are describe with the <code>tib_*()</code> functions. They describe the path to the field to extract and the output type of the field. There are the following five types of functions:</p>
 <ul>
 <li>
-<code><a href="../reference/tib_scalar.html">tib_scalar(ptype)</a></code>: a length one vector with type <code>ptype</code>
+<code><a href="../reference/tib_unspecified.html">tib_scalar(ptype)</a></code>: a length one vector with type <code>ptype</code>
 </li>
 <li>
-<code><a href="../reference/tib_scalar.html">tib_vector(ptype)</a></code>: a vector of arbitrary length with type <code>ptype</code>
+<code><a href="../reference/tib_unspecified.html">tib_vector(ptype)</a></code>: a vector of arbitrary length with type <code>ptype</code>
 </li>
 <li>
-<code><a href="../reference/tib_scalar.html">tib_list()</a></code>: a vector of arbitrary length and type; you should barely ever need this</li>
+<code><a href="../reference/tib_unspecified.html">tib_list()</a></code>: a vector of arbitrary length and type; you should barely ever need this</li>
 <li>
-<code><a href="../reference/tib_scalar.html">tib_row(...)</a></code>: an object with the fields <code>...</code>
+<code><a href="../reference/tib_unspecified.html">tib_row(...)</a></code>: an object with the fields <code>...</code>
 </li>
 <li>
-<code><a href="../reference/tib_scalar.html">tib_df(...)</a></code>: a collection where the objects have the fields <code>...</code>
+<code><a href="../reference/tib_unspecified.html">tib_df(...)</a></code>: a collection where the objects have the fields <code>...</code>
 </li>
 </ul>
-<p>For convenience there are shortcuts for <code><a href="../reference/tib_scalar.html">tib_scalar()</a></code> and <code><a href="../reference/tib_scalar.html">tib_vector()</a></code> for the most common prototypes:</p>
+<p>For convenience there are shortcuts for <code><a href="../reference/tib_unspecified.html">tib_scalar()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_vector()</a></code> for the most common prototypes:</p>
 <ul>
 <li>
-<code><a href="https://rdrr.io/r/base/logical.html">logical()</a></code>: <code><a href="../reference/tib_scalar.html">tib_lgl()</a></code> and <code><a href="../reference/tib_scalar.html">tib_lgl_vec()</a></code>
+<code><a href="https://rdrr.io/r/base/logical.html">logical()</a></code>: <code><a href="../reference/tib_unspecified.html">tib_lgl()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_lgl_vec()</a></code>
 </li>
 <li>
-<code><a href="https://rdrr.io/r/base/integer.html">integer()</a></code>: <code><a href="../reference/tib_scalar.html">tib_int()</a></code> and <code><a href="../reference/tib_scalar.html">tib_int_vec()</a></code>
+<code><a href="https://rdrr.io/r/base/integer.html">integer()</a></code>: <code><a href="../reference/tib_unspecified.html">tib_int()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_int_vec()</a></code>
 </li>
 <li>
-<code><a href="https://rdrr.io/r/base/double.html">double()</a></code>: <code><a href="../reference/tib_scalar.html">tib_dbl()</a></code> and <code><a href="../reference/tib_scalar.html">tib_dbl_vec()</a></code>
+<code><a href="https://rdrr.io/r/base/double.html">double()</a></code>: <code><a href="../reference/tib_unspecified.html">tib_dbl()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_dbl_vec()</a></code>
 </li>
 <li>
-<code><a href="https://rdrr.io/r/base/character.html">character()</a></code>: <code><a href="../reference/tib_scalar.html">tib_chr()</a></code> and <code><a href="../reference/tib_scalar.html">tib_chr_vec()</a></code>
+<code><a href="https://rdrr.io/r/base/character.html">character()</a></code>: <code><a href="../reference/tib_unspecified.html">tib_chr()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_chr_vec()</a></code>
 </li>
 </ul>
 <div id="scalar-elements" class="section level3">
@@ -217,8 +217,8 @@
     <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"Lilly"</span><span class="op">)</span>
   <span class="op">)</span>,
   <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
-    name <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>
+    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
+    name <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 <span class="co">#&gt; # A tibble: 2 × 2</span>
@@ -226,7 +226,7 @@
 <span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;</span>
 <span class="co">#&gt; 1     1 Peter</span>
 <span class="co">#&gt; 2     2 Lilly</span></code></pre></div>
-<p>With <code><a href="../reference/tib_scalar.html">tib_scalar()</a></code> you can also provide your own prototype</p>
+<p>With <code><a href="../reference/tib_unspecified.html">tib_scalar()</a></code> you can also provide your own prototype</p>
 <p>Let’s say you have a list with durations</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html">list</a></span><span class="op">(</span>
@@ -253,8 +253,8 @@
 <code class="sourceCode R"><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span>
   <span class="va">x</span>,
   <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
-    duration <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_scalar</a></span><span class="op">(</span><span class="st">"duration"</span>, ptype <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html">new_duration</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
+    duration <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_scalar</a></span><span class="op">(</span><span class="st">"duration"</span>, ptype <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html">new_duration</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 <span class="co">#&gt; # A tibble: 2 × 2</span>
@@ -277,8 +277,8 @@
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span>
   <span class="va">x</span>,
   <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
-    children <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr_vec</a></span><span class="op">(</span><span class="st">"children"</span><span class="op">)</span>
+    id <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
+    children <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr_vec</a></span><span class="op">(</span><span class="st">"children"</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 <span class="co">#&gt; # A tibble: 3 × 2</span>
@@ -319,7 +319,7 @@
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $owner$url</span>
 <span class="co">#&gt; [1] "https://api.github.com/users/gaborcsardi"</span></code></pre></div>
-<p>the field <code>owner</code> is an object itself. The specification to extract it uses <code><a href="../reference/tib_scalar.html">tib_row()</a></code></p>
+<p>the field <code>owner</code> is an object itself. The specification to extract it uses <code><a href="../reference/tib_unspecified.html">tib_row()</a></code></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/guess_spec.html">guess_spec</a></span><span class="op">(</span><span class="va">gh_repos_small</span><span class="op">)</span>
 <span class="va">spec</span>
@@ -353,10 +353,10 @@
 <p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-  id <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
-  name <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,
-  owner_id <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"id"</span><span class="op">)</span><span class="op">)</span>,
-  owner_login <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"login"</span><span class="op">)</span><span class="op">)</span>
+  id <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,
+  name <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,
+  owner_id <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"id"</span><span class="op">)</span><span class="op">)</span>,
+  owner_login <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"login"</span><span class="op">)</span><span class="op">)</span>
 <span class="op">)</span>
 <span class="va">spec2</span>
 <span class="co">#&gt; spec_df(</span>
@@ -394,8 +394,8 @@
 <span class="op">)</span>
 
 <span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
-  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span>
+  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
+  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span>
@@ -403,8 +403,8 @@
 <p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
-  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
+  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
+  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span>
@@ -416,8 +416,8 @@
 <p>You can specify the value to use with the <code>default</code> argument</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span>
-  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
-  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span>
+  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,
+  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span>
 <span class="op">)</span>
 
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span>
@@ -445,10 +445,10 @@
 <p>To convert to a one row tibble</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">row_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_row</a></span><span class="op">(</span>
-  status <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,
-  data <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_df</a></span><span class="op">(</span>
+  status <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,
+  data <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_df</a></span><span class="op">(</span>
     <span class="st">"data"</span>,
-    x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>
+    x <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 
@@ -461,10 +461,10 @@
 <p>it is necessary to wrap <code>data</code> in a list. To access <code>data</code> one has to use <code>api_output_df$data[[1]]</code> which is not very nice.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span class="va">object_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_object</a></span><span class="op">(</span>
-  status <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,
-  data <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_df</a></span><span class="op">(</span>
+  status <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,
+  data <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_df</a></span><span class="op">(</span>
     <span class="st">"data"</span>,
-    x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>
+    x <span class="op">=</span> <span class="fu"><a href="../reference/tib_unspecified.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>
   <span class="op">)</span>
 <span class="op">)</span>
 

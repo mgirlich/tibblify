@@ -40,8 +40,7 @@
 
 
 <meta property="og:title" content="Guess the tibblify() Specification — guess_spec" />
-<meta property="og:description" content="Guess the tibblify() Specification
-Guess the tibblify() Specification" />
+<meta property="og:description" content="Guess the tibblify() Specification" />
 
 
 
@@ -116,18 +115,15 @@ Guess the tibblify() Specification" />
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Guess the <code>tibblify()</code> Specification</h1>
-    <small class="dont-index">Source: <a href='https://github.com/mgirlich/tibblify/blob/master/R/guess_shape.R'><code>R/guess_shape.R</code></a>, <a href='https://github.com/mgirlich/tibblify/blob/master/R/guess_spec.R'><code>R/guess_spec.R</code></a></small>
+    <small class="dont-index">Source: <a href='https://github.com/mgirlich/tibblify/blob/master/R/guess_spec.R'><code>R/guess_spec.R</code></a></small>
     <div class="hidden name"><code>guess_spec.Rd</code></div>
     </div>
 
     <div class="ref-description">
     <p>Guess the <code><a href='tibblify.html'>tibblify()</a></code> Specification</p>
-<p>Guess the <code><a href='tibblify.html'>tibblify()</a></code> Specification</p>
     </div>
 
-    <pre class="usage"><span class='fu'>guess_spec</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span>
-
-<span class='fu'>guess_spec</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
+    <pre class="usage"><span class='fu'>guess_spec</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span></pre>
 
     <h2 class="hasAnchor" id="arguments"><a class="anchor" href="#arguments"></a>Arguments</h2>
     <table class="ref-arguments">
@@ -141,50 +137,9 @@ Guess the tibblify() Specification" />
     <h2 class="hasAnchor" id="value"><a class="anchor" href="#value"></a>Value</h2>
 
     <p>A specification object that can used in <code><a href='tibblify.html'>tibblify()</a></code>.</p>
-<p>A specification object that can used in <code><a href='tibblify.html'>tibblify()</a></code>.</p>
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
     <pre class="examples"><div class='input'><span class='fu'>guess_spec</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>1</span>, y <span class='op'>=</span> <span class='st'>"a"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; spec_object(
-#&gt;   x = <span style='color: #00BB00;'>tib_dbl</span>("x"),
-#&gt;   y = <span style='color: #BB0000;'>tib_chr</span>("y")
-#&gt; )</div><div class='input'><span class='fu'>guess_spec</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>1</span><span class='op'>)</span>, <span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>2</span><span class='op'>)</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; spec_df(
-#&gt;   x = <span style='color: #00BB00;'>tib_dbl</span>("x")
-#&gt; )</div><div class='input'>
-<span class='fu'>guess_spec</span><span class='op'>(</span><span class='va'>gh_users</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; spec_df(
-#&gt;   login = <span style='color: #BB0000;'>tib_chr</span>("login"),
-#&gt;   id = <span style='color: #00BB00;'>tib_int</span>("id"),
-#&gt;   avatar_url = <span style='color: #BB0000;'>tib_chr</span>("avatar_url"),
-#&gt;   gravatar_id = <span style='color: #BB0000;'>tib_chr</span>("gravatar_id"),
-#&gt;   url = <span style='color: #BB0000;'>tib_chr</span>("url"),
-#&gt;   html_url = <span style='color: #BB0000;'>tib_chr</span>("html_url"),
-#&gt;   followers_url = <span style='color: #BB0000;'>tib_chr</span>("followers_url"),
-#&gt;   following_url = <span style='color: #BB0000;'>tib_chr</span>("following_url"),
-#&gt;   gists_url = <span style='color: #BB0000;'>tib_chr</span>("gists_url"),
-#&gt;   starred_url = <span style='color: #BB0000;'>tib_chr</span>("starred_url"),
-#&gt;   subscriptions_url = <span style='color: #BB0000;'>tib_chr</span>("subscriptions_url"),
-#&gt;   organizations_url = <span style='color: #BB0000;'>tib_chr</span>("organizations_url"),
-#&gt;   repos_url = <span style='color: #BB0000;'>tib_chr</span>("repos_url"),
-#&gt;   events_url = <span style='color: #BB0000;'>tib_chr</span>("events_url"),
-#&gt;   received_events_url = <span style='color: #BB0000;'>tib_chr</span>("received_events_url"),
-#&gt;   type = <span style='color: #BB0000;'>tib_chr</span>("type"),
-#&gt;   site_admin = <span style='color: #BBBB00;'>tib_lgl</span>("site_admin"),
-#&gt;   name = <span style='color: #BB0000;'>tib_chr</span>("name"),
-#&gt;   company = <span style='color: #BB0000;'>tib_chr</span>("company"),
-#&gt;   blog = <span style='color: #BB0000;'>tib_chr</span>("blog"),
-#&gt;   location = <span style='color: #BB0000;'>tib_chr</span>("location"),
-#&gt;   email = <span style='color: #BB0000;'>tib_chr</span>("email"),
-#&gt;   hireable = <span style='color: #BBBB00;'>tib_lgl</span>("hireable"),
-#&gt;   bio = <span style='color: #BB0000;'>tib_chr</span>("bio"),
-#&gt;   public_repos = <span style='color: #00BB00;'>tib_int</span>("public_repos"),
-#&gt;   public_gists = <span style='color: #00BB00;'>tib_int</span>("public_gists"),
-#&gt;   followers = <span style='color: #00BB00;'>tib_int</span>("followers"),
-#&gt;   following = <span style='color: #00BB00;'>tib_int</span>("following"),
-#&gt;   created_at = <span style='color: #BB0000;'>tib_chr</span>("created_at"),
-#&gt;   updated_at = <span style='color: #BB0000;'>tib_chr</span>("updated_at")
-#&gt; )</div><div class='input'><span class='fu'>guess_spec</span><span class='op'>(</span><span class='fu'><a href='https://rdrr.io/r/base/list.html'>list</a></span><span class='op'>(</span>x <span class='op'>=</span> <span class='fl'>1</span>, y <span class='op'>=</span> <span class='st'>"a"</span><span class='op'>)</span><span class='op'>)</span>
 </div><div class='output co'>#&gt; spec_object(
 #&gt;   x = <span style='color: #00BB00;'>tib_dbl</span>("x"),
 #&gt;   y = <span style='color: #BB0000;'>tib_chr</span>("y")
