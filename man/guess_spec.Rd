@@ -4,10 +4,12 @@
 \alias{guess_spec}
 \title{Guess the \code{tibblify()} Specification}
 \usage{
-guess_spec(x)
+guess_spec(x, simplify_list = TRUE)
 }
 \arguments{
 \item{x}{A nested list.}
+
+\item{simplify_list}{Try to simplify lists if possible?}
 }
 \value{
 A specification object that can used in \code{tibblify()}.

@@ -344,6 +344,12 @@ public:
   inline void add_value(SEXP value, Path& path) {
     // TODO use `NULL` if `value` is empty?
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    // TODO should be controlled via an argument to `tibblify()`
+    if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
+      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+      return;
+    }
+
     SEXP value_casted = vec_cast(value, ptype);
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
   }
