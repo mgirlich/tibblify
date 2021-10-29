@@ -400,3 +400,16 @@ test_that("can guess spec for got_chars", {
   # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot (yet?) simplify to character
   expect_snapshot(guess_spec(got_chars) %>% print())
 })
+
+test_that("can guess spec for citm_catalog", {
+  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/citm_catalog.json")
+  x$areaNames <- x$areaNames[1:3]
+  x$events <- x$events[1:3]
+  x$performances <- x$performances[1:3]
+  x$seatCategoryNames <- x$seatCategoryNames[1:3]
+  x$subTopicNames <- x$subTopicNames[1:3]
+
+  expect_snapshot(guess_spec(x))
+
+  expect_snapshot(guess_spec(x, check_flatten = FALSE))
+})

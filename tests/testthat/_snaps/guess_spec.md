@@ -185,3 +185,172 @@
         default_branch = tib_chr("default_branch")
       )
 
+# can guess spec for citm_catalog
+
+    Code
+      guess_spec(x)
+    Output
+      spec_object(
+        areaNames = tib_chr_vec(
+          "areaNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        ),
+        audienceSubCategoryNames = tib_chr_vec(
+          "audienceSubCategoryNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        ),
+        blockNames = tib_unspecified("blockNames"),
+        events = tib_df(
+          "events",
+          .names_to = ".names",
+          description = tib_unspecified("description"),
+          id = tib_int("id"),
+          logo = tib_chr("logo"),
+          name = tib_chr("name"),
+          subTopicIds = tib_int_vec("subTopicIds"),
+          subjectCode = tib_unspecified("subjectCode"),
+          subtitle = tib_unspecified("subtitle"),
+          topicIds = tib_int_vec("topicIds")
+        ),
+        performances = tib_df(
+          "performances",
+          eventId = tib_int("eventId"),
+          id = tib_int("id"),
+          logo = tib_unspecified("logo"),
+          name = tib_unspecified("name"),
+          prices = tib_df(
+            "prices",
+            amount = tib_int("amount"),
+            audienceSubCategoryId = tib_int("audienceSubCategoryId"),
+            seatCategoryId = tib_int("seatCategoryId")
+          ),
+          seatCategories = tib_df(
+            "seatCategories",
+            areas = tib_df(
+              "areas",
+              areaId = tib_int("areaId"),
+              blockIds = tib_unspecified("blockIds")
+            ),
+            seatCategoryId = tib_int("seatCategoryId")
+          ),
+          seatMapImage = tib_unspecified("seatMapImage"),
+          start = tib_dbl("start"),
+          venueCode = tib_chr("venueCode")
+        ),
+        seatCategoryNames = tib_chr_vec(
+          "seatCategoryNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        ),
+        subTopicNames = tib_chr_vec(
+          "subTopicNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        ),
+        subjectNames = tib_unspecified("subjectNames"),
+        topicNames = tib_chr_vec(
+          "topicNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        ),
+        topicSubTopics = tib_list(
+          "topicSubTopics",
+          transform = function (x) 
+          new_list_of(x = x, ptype = integer(0))
+        ),
+        venueNames = tib_chr_vec(
+          "venueNames",
+          transform = function (x) 
+          vec_unchop(x = x, ptype = character(0))
+        )
+      )
+
+---
+
+    Code
+      guess_spec(x, check_flatten = FALSE)
+    Output
+      spec_object(
+        areaNames = tib_row(
+          "areaNames",
+          `205705993` = tib_chr("205705993"),
+          `205705994` = tib_chr("205705994"),
+          `205705995` = tib_chr("205705995")
+        ),
+        audienceSubCategoryNames = tib_row(
+          "audienceSubCategoryNames",
+          `337100890` = tib_chr("337100890")
+        ),
+        blockNames = tib_unspecified("blockNames"),
+        events = tib_df(
+          "events",
+          .names_to = ".names",
+          description = tib_unspecified("description"),
+          id = tib_int("id"),
+          logo = tib_chr("logo"),
+          name = tib_chr("name"),
+          subTopicIds = tib_int_vec("subTopicIds"),
+          subjectCode = tib_unspecified("subjectCode"),
+          subtitle = tib_unspecified("subtitle"),
+          topicIds = tib_int_vec("topicIds")
+        ),
+        performances = tib_df(
+          "performances",
+          eventId = tib_int("eventId"),
+          id = tib_int("id"),
+          logo = tib_unspecified("logo"),
+          name = tib_unspecified("name"),
+          prices = tib_df(
+            "prices",
+            amount = tib_int("amount"),
+            audienceSubCategoryId = tib_int("audienceSubCategoryId"),
+            seatCategoryId = tib_int("seatCategoryId")
+          ),
+          seatCategories = tib_df(
+            "seatCategories",
+            areas = tib_df(
+              "areas",
+              areaId = tib_int("areaId"),
+              blockIds = tib_unspecified("blockIds")
+            ),
+            seatCategoryId = tib_int("seatCategoryId")
+          ),
+          seatMapImage = tib_unspecified("seatMapImage"),
+          start = tib_dbl("start"),
+          venueCode = tib_chr("venueCode")
+        ),
+        seatCategoryNames = tib_row(
+          "seatCategoryNames",
+          `338937235` = tib_chr("338937235"),
+          `338937236` = tib_chr("338937236"),
+          `338937238` = tib_chr("338937238")
+        ),
+        subTopicNames = tib_row(
+          "subTopicNames",
+          `337184262` = tib_chr("337184262"),
+          `337184263` = tib_chr("337184263"),
+          `337184267` = tib_chr("337184267")
+        ),
+        subjectNames = tib_unspecified("subjectNames"),
+        topicNames = tib_row(
+          "topicNames",
+          `107888604` = tib_chr("107888604"),
+          `324846098` = tib_chr("324846098"),
+          `324846099` = tib_chr("324846099"),
+          `324846100` = tib_chr("324846100")
+        ),
+        topicSubTopics = tib_row(
+          "topicSubTopics",
+          `107888604` = tib_int_vec("107888604"),
+          `324846098` = tib_int("324846098"),
+          `324846099` = tib_int_vec("324846099"),
+          `324846100` = tib_int_vec("324846100")
+        ),
+        venueNames = tib_row(
+          "venueNames",
+          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL")
+        )
+      )
+
