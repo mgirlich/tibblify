@@ -176,6 +176,7 @@ guess_field_spec <- function(value, name, required, multi,
 
   # TODO what if `ptype` is not a vector?
   # TODO what if `ptype` is a data frame?
+  # TODO matrix
   if (!vec_is_list(ptype)) {
     # every element must be a non-list vector
     if (is_field_scalar(value, multi)) {
@@ -185,35 +186,14 @@ guess_field_spec <- function(value, name, required, multi,
     }
   }
 
-  if (!multi) {
-    list_of_null <- all(purrr::map_lgl(value, is_null))
-    if (list_of_null) {
-      if (is_named(value) && !is_empty(value)) {
-        fields <- purrr::map(set_names(names(value)), tib_unspecified)
-        return(maybe_tib_row(name, fields, TRUE))
-      }
-
-      return(tib_unspecified(name))
-    }
-
-    if (is_object_list(value) && !list_of_null) {
-      return(guess_make_tib_df(name, value, required, check_flatten))
-    }
+  value_flat <- get_flat_value(value, ptype, multi)
+  if (is_object_list(value_flat)) {
+    return(guess_make_tib_df(name, value_flat, required, check_flatten))
   }
 
   if (is_field_row(value, multi, check_flatten)) {
     fields <- guess_get_field_spec(value, multi, check_flatten)
     return(maybe_tib_row(name, fields, required))
-  }
-
-  if (multi) {
-    value_flat <- vec_unchop(value, ptype = ptype)
-  } else {
-    value_flat <- value
-  }
-
-  if (is_object_list(value_flat)) {
-    return(guess_make_tib_df(name, value_flat, required, check_flatten))
   }
 
   # values2 <- vctrs::list_drop_empty(values)
@@ -230,6 +210,12 @@ guess_field_spec <- function(value, name, required, multi,
   if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
 
   return(tib_list(name, required, transform = make_new_list_of(ptype)))
+}
+
+get_flat_value <- function(value, ptype, multi) {
+  if (!multi) return(value)
+
+  vec_unchop(value, ptype = ptype)
 }
 
 field_is_list <- function(value, ptype, object_list) {
@@ -277,6 +263,16 @@ guess_get_field_spec <- function(value, multi, check_flatten) {
 }
 
 guess_make_tib_df <- function(name, values_flat, required, check_flatten) {
+  list_of_null <- all(purrr::map_lgl(values_flat, is_null))
+  if (list_of_null) {
+    if (is_named(values_flat) && !is_empty(values_flat)) {
+        fields <- purrr::map(set_names(names(values_flat)), tib_unspecified)
+        return(maybe_tib_row(name, fields, required))
+      }
+
+      return(tib_unspecified(name, required))
+  }
+
   fields <- guess_object_list_spec(values_flat, check_flatten)
   names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
 

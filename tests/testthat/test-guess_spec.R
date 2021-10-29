@@ -413,3 +413,13 @@ test_that("can guess spec for citm_catalog", {
 
   expect_snapshot(guess_spec(x, check_flatten = FALSE))
 })
+
+test_that("can guess spec for gsoc-2018", {
+  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/gsoc-2018.json")
+  expect_snapshot(guess_spec(x))
+})
+
+test_that("can guess spec for twitter", {
+  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/twitter.json")
+  expect_snapshot(guess_spec(x))
+})

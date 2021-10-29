@@ -354,3 +354,317 @@
         )
       )
 
+# can guess spec for gsoc-2018
+
+    Code
+      guess_spec(x)
+    Output
+      spec_df(
+        .names_to = ".names",
+        `@context` = tib_chr("@context"),
+        `@type` = tib_chr("@type"),
+        name = tib_chr("name"),
+        description = tib_chr("description"),
+        sponsor = tib_row(
+          "sponsor",
+          `@type` = tib_chr("@type"),
+          name = tib_chr("name"),
+          disambiguatingDescription = tib_chr("disambiguatingDescription"),
+          description = tib_chr("description"),
+          url = tib_chr("url"),
+          logo = tib_chr("logo")
+        ),
+        author = tib_row(
+          "author",
+          `@type` = tib_chr("@type"),
+          name = tib_chr("name")
+        )
+      )
+
+# can guess spec for twitter
+
+    Code
+      guess_spec(x)
+    Output
+      spec_object(
+        statuses = tib_df(
+          "statuses",
+          metadata = tib_row(
+            "metadata",
+            result_type = tib_chr("result_type"),
+            iso_language_code = tib_chr("iso_language_code")
+          ),
+          created_at = tib_chr("created_at"),
+          id = tib_dbl("id"),
+          id_str = tib_chr("id_str"),
+          text = tib_chr("text"),
+          source = tib_chr("source"),
+          truncated = tib_lgl("truncated"),
+          in_reply_to_status_id = tib_dbl("in_reply_to_status_id"),
+          in_reply_to_status_id_str = tib_chr("in_reply_to_status_id_str"),
+          in_reply_to_user_id = tib_dbl("in_reply_to_user_id"),
+          in_reply_to_user_id_str = tib_chr("in_reply_to_user_id_str"),
+          in_reply_to_screen_name = tib_chr("in_reply_to_screen_name"),
+          user = tib_row(
+            "user",
+            id = tib_dbl("id"),
+            id_str = tib_chr("id_str"),
+            name = tib_chr("name"),
+            screen_name = tib_chr("screen_name"),
+            location = tib_chr("location"),
+            description = tib_chr("description"),
+            url = tib_chr("url"),
+            entities = tib_df(
+              "entities",
+              .names_to = ".names",
+              urls = tib_df(
+                "urls",
+                url = tib_chr("url"),
+                expanded_url = tib_chr("expanded_url"),
+                display_url = tib_chr("display_url"),
+                indices = tib_int_vec("indices")
+              )
+            ),
+            protected = tib_lgl("protected"),
+            followers_count = tib_int("followers_count"),
+            friends_count = tib_int("friends_count"),
+            listed_count = tib_int("listed_count"),
+            created_at = tib_chr("created_at"),
+            favourites_count = tib_int("favourites_count"),
+            utc_offset = tib_int("utc_offset"),
+            time_zone = tib_chr("time_zone"),
+            geo_enabled = tib_lgl("geo_enabled"),
+            verified = tib_lgl("verified"),
+            statuses_count = tib_int("statuses_count"),
+            lang = tib_chr("lang"),
+            contributors_enabled = tib_lgl("contributors_enabled"),
+            is_translator = tib_lgl("is_translator"),
+            is_translation_enabled = tib_lgl("is_translation_enabled"),
+            profile_background_color = tib_chr("profile_background_color"),
+            profile_background_image_url = tib_chr("profile_background_image_url"),
+            profile_background_image_url_https = tib_chr(
+              "profile_background_image_url_https"
+            ),
+            profile_background_tile = tib_lgl("profile_background_tile"),
+            profile_image_url = tib_chr("profile_image_url"),
+            profile_image_url_https = tib_chr("profile_image_url_https"),
+            profile_banner_url = tib_chr("profile_banner_url", required = FALSE),
+            profile_link_color = tib_chr("profile_link_color"),
+            profile_sidebar_border_color = tib_chr("profile_sidebar_border_color"),
+            profile_sidebar_fill_color = tib_chr("profile_sidebar_fill_color"),
+            profile_text_color = tib_chr("profile_text_color"),
+            profile_use_background_image = tib_lgl("profile_use_background_image"),
+            default_profile = tib_lgl("default_profile"),
+            default_profile_image = tib_lgl("default_profile_image"),
+            following = tib_lgl("following"),
+            follow_request_sent = tib_lgl("follow_request_sent"),
+            notifications = tib_lgl("notifications")
+          ),
+          geo = tib_unspecified("geo"),
+          coordinates = tib_unspecified("coordinates"),
+          place = tib_unspecified("place"),
+          contributors = tib_unspecified("contributors"),
+          retweet_count = tib_int("retweet_count"),
+          favorite_count = tib_int("favorite_count"),
+          entities = tib_row(
+            "entities",
+            hashtags = tib_df(
+              "hashtags",
+              text = tib_chr("text"),
+              indices = tib_int_vec("indices")
+            ),
+            symbols = tib_unspecified("symbols"),
+            urls = tib_df(
+              "urls",
+              url = tib_chr("url"),
+              expanded_url = tib_chr("expanded_url"),
+              display_url = tib_chr("display_url"),
+              indices = tib_int_vec("indices")
+            ),
+            user_mentions = tib_df(
+              "user_mentions",
+              screen_name = tib_chr("screen_name"),
+              name = tib_chr("name"),
+              id = tib_dbl("id"),
+              id_str = tib_chr("id_str"),
+              indices = tib_int_vec("indices")
+            ),
+            media = tib_df(
+              "media",
+              .required = FALSE,
+              id = tib_dbl("id"),
+              id_str = tib_chr("id_str"),
+              indices = tib_int_vec("indices"),
+              media_url = tib_chr("media_url"),
+              media_url_https = tib_chr("media_url_https"),
+              url = tib_chr("url"),
+              display_url = tib_chr("display_url"),
+              expanded_url = tib_chr("expanded_url"),
+              type = tib_chr("type"),
+              sizes = tib_df(
+                "sizes",
+                .names_to = ".names",
+                w = tib_int("w"),
+                h = tib_int("h"),
+                resize = tib_chr("resize")
+              ),
+              source_status_id = tib_dbl("source_status_id", required = FALSE),
+              source_status_id_str = tib_chr("source_status_id_str", required = FALSE)
+            )
+          ),
+          favorited = tib_lgl("favorited"),
+          retweeted = tib_lgl("retweeted"),
+          lang = tib_chr("lang"),
+          retweeted_status = tib_row(
+            "retweeted_status",
+            .required = FALSE,
+            metadata = tib_row(
+              "metadata",
+              .required = FALSE,
+              result_type = tib_chr("result_type"),
+              iso_language_code = tib_chr("iso_language_code")
+            ),
+            created_at = tib_chr("created_at", required = FALSE),
+            id = tib_dbl("id", required = FALSE),
+            id_str = tib_chr("id_str", required = FALSE),
+            text = tib_chr("text", required = FALSE),
+            source = tib_chr("source", required = FALSE),
+            truncated = tib_lgl("truncated", required = FALSE),
+            in_reply_to_status_id = tib_dbl("in_reply_to_status_id", required = FALSE),
+            in_reply_to_status_id_str = tib_chr(
+              "in_reply_to_status_id_str",
+              required = FALSE
+            ),
+            in_reply_to_user_id = tib_dbl("in_reply_to_user_id", required = FALSE),
+            in_reply_to_user_id_str = tib_chr("in_reply_to_user_id_str", required = FALSE),
+            in_reply_to_screen_name = tib_chr("in_reply_to_screen_name", required = FALSE),
+            user = tib_row(
+              "user",
+              .required = FALSE,
+              id = tib_dbl("id"),
+              id_str = tib_chr("id_str"),
+              name = tib_chr("name"),
+              screen_name = tib_chr("screen_name"),
+              location = tib_chr("location"),
+              description = tib_chr("description"),
+              url = tib_chr("url"),
+              entities = tib_df(
+                "entities",
+                .names_to = ".names",
+                urls = tib_df(
+                  "urls",
+                  url = tib_chr("url"),
+                  expanded_url = tib_chr("expanded_url"),
+                  display_url = tib_chr("display_url"),
+                  indices = tib_int_vec("indices")
+                )
+              ),
+              protected = tib_lgl("protected"),
+              followers_count = tib_int("followers_count"),
+              friends_count = tib_int("friends_count"),
+              listed_count = tib_int("listed_count"),
+              created_at = tib_chr("created_at"),
+              favourites_count = tib_int("favourites_count"),
+              utc_offset = tib_int("utc_offset"),
+              time_zone = tib_chr("time_zone"),
+              geo_enabled = tib_lgl("geo_enabled"),
+              verified = tib_lgl("verified"),
+              statuses_count = tib_int("statuses_count"),
+              lang = tib_chr("lang"),
+              contributors_enabled = tib_lgl("contributors_enabled"),
+              is_translator = tib_lgl("is_translator"),
+              is_translation_enabled = tib_lgl("is_translation_enabled"),
+              profile_background_color = tib_chr("profile_background_color"),
+              profile_background_image_url = tib_chr("profile_background_image_url"),
+              profile_background_image_url_https = tib_chr(
+                "profile_background_image_url_https"
+              ),
+              profile_background_tile = tib_lgl("profile_background_tile"),
+              profile_image_url = tib_chr("profile_image_url"),
+              profile_image_url_https = tib_chr("profile_image_url_https"),
+              profile_banner_url = tib_chr("profile_banner_url", required = FALSE),
+              profile_link_color = tib_chr("profile_link_color"),
+              profile_sidebar_border_color = tib_chr("profile_sidebar_border_color"),
+              profile_sidebar_fill_color = tib_chr("profile_sidebar_fill_color"),
+              profile_text_color = tib_chr("profile_text_color"),
+              profile_use_background_image = tib_lgl("profile_use_background_image"),
+              default_profile = tib_lgl("default_profile"),
+              default_profile_image = tib_lgl("default_profile_image"),
+              following = tib_lgl("following"),
+              follow_request_sent = tib_lgl("follow_request_sent"),
+              notifications = tib_lgl("notifications")
+            ),
+            geo = tib_unspecified("geo", required = FALSE),
+            coordinates = tib_unspecified("coordinates", required = FALSE),
+            place = tib_unspecified("place", required = FALSE),
+            contributors = tib_unspecified("contributors", required = FALSE),
+            retweet_count = tib_int("retweet_count", required = FALSE),
+            favorite_count = tib_int("favorite_count", required = FALSE),
+            entities = tib_row(
+              "entities",
+              .required = FALSE,
+              hashtags = tib_df(
+                "hashtags",
+                text = tib_chr("text"),
+                indices = tib_int_vec("indices")
+              ),
+              symbols = tib_unspecified("symbols"),
+              urls = tib_df(
+                "urls",
+                url = tib_chr("url"),
+                expanded_url = tib_chr("expanded_url"),
+                display_url = tib_chr("display_url"),
+                indices = tib_int_vec("indices")
+              ),
+              user_mentions = tib_df(
+                "user_mentions",
+                screen_name = tib_chr("screen_name"),
+                name = tib_chr("name"),
+                id = tib_dbl("id"),
+                id_str = tib_chr("id_str"),
+                indices = tib_int_vec("indices")
+              ),
+              media = tib_df(
+                "media",
+                .required = FALSE,
+                id = tib_dbl("id"),
+                id_str = tib_chr("id_str"),
+                indices = tib_int_vec("indices"),
+                media_url = tib_chr("media_url"),
+                media_url_https = tib_chr("media_url_https"),
+                url = tib_chr("url"),
+                display_url = tib_chr("display_url"),
+                expanded_url = tib_chr("expanded_url"),
+                type = tib_chr("type"),
+                sizes = tib_df(
+                  "sizes",
+                  .names_to = ".names",
+                  w = tib_int("w"),
+                  h = tib_int("h"),
+                  resize = tib_chr("resize")
+                ),
+                source_status_id = tib_dbl("source_status_id", required = FALSE),
+                source_status_id_str = tib_chr("source_status_id_str", required = FALSE)
+              )
+            ),
+            favorited = tib_lgl("favorited", required = FALSE),
+            retweeted = tib_lgl("retweeted", required = FALSE),
+            possibly_sensitive = tib_lgl("possibly_sensitive", required = FALSE),
+            lang = tib_chr("lang", required = FALSE)
+          ),
+          possibly_sensitive = tib_lgl("possibly_sensitive", required = FALSE)
+        ),
+        search_metadata = tib_row(
+          "search_metadata",
+          completed_in = tib_dbl("completed_in"),
+          max_id = tib_dbl("max_id"),
+          max_id_str = tib_chr("max_id_str"),
+          next_results = tib_chr("next_results"),
+          query = tib_chr("query"),
+          refresh_url = tib_chr("refresh_url"),
+          count = tib_int("count"),
+          since_id = tib_int("since_id"),
+          since_id_str = tib_chr("since_id_str")
+        )
+      )
+
