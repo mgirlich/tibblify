@@ -87,12 +87,11 @@ format.tib_vector <- function(x, ...) {
 #' @export
 format.tib_scalar <- function(x, ...,
                               multi_line = FALSE, nchar_indent = 0, width = NULL) {
-  default <- x$default_value
   parts <- list(
     deparse(x$key),
     ptype = if (class(x)[1] == "tib_scalar" || class(x)[1] == "tib_vector") format_ptype(x$ptype),
     required = if (!x$required) FALSE,
-    default = if (!is_empty(default) && !is.na(default)) deparse(default),
+    default = format_default(x$default_value, x$ptype),
     transform = x$transform
   )
   parts <- purrr::discard(parts, is.null)
@@ -255,6 +254,14 @@ format_ptype.POSIXct <- function(x) {
 
 
 # helper functions --------------------------------------------------------
+
+format_default <- function(default, ptype) {
+  if (vec_is_empty(default)) return(NULL)
+  canonical_default <- vec_init(ptype)
+  if (vec_equal(default, canonical_default, na_equal = TRUE)) return(NULL)
+
+  deparse(default)
+}
 
 collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   x_nms <- names2(x)
