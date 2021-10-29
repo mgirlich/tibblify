@@ -513,10 +513,6 @@ test_that("discog works", {
   specs_object <- spec_row(!!!spec_collection$fields)
   expect_equal(tibblify(discog[[1]], specs_object), row1)
   expect_equal(tibblify(row1, specs_object), row1)
-
-  # TODO
-  # expect_snapshot_error(tibblify(discog[[1]], spec_collection), row1)
-  # expect_snapshot_error(tibblify(discog[1], spec_object), row1)
 })
 
 test_that("spec_object() works", {

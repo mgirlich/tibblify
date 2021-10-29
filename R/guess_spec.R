@@ -1,6 +1,7 @@
 #' Guess the `tibblify()` Specification
 #'
 #' @param x A nested list.
+#' @param simplify_list Try to simplify lists if possible?
 #'
 #' @return A specification object that can used in `tibblify()`.
 #' @export
@@ -10,12 +11,12 @@
 #' guess_spec(list(list(x = 1), list(x = 2)))
 #'
 #' guess_spec(gh_users)
-guess_spec <- function(x, check_flatten = TRUE) {
+guess_spec <- function(x, simplify_list = TRUE) {
   UseMethod("guess_spec")
 }
 
 #' @export
-guess_spec.default <- function(x, check_flatten = TRUE) {
+guess_spec.default <- function(x, simplify_list = TRUE) {
   abort(paste0(
     "Cannot guess the specification for type ",
     vctrs::vec_ptype_full(x)
@@ -26,7 +27,7 @@ guess_spec.default <- function(x, check_flatten = TRUE) {
 # data frame --------------------------------------------------------------
 
 #' @export
-guess_spec.data.frame <- function(x, check_flatten = TRUE) {
+guess_spec.data.frame <- function(x, simplify_list = TRUE) {
   spec_df(
     !!!purrr::imap(x, col_to_spec)
   )
@@ -67,24 +68,24 @@ safe_ptype_common2 <- function(x) {
 # list --------------------------------------------------------------------
 
 #' @export
-guess_spec.list <- function(x, check_flatten = TRUE) {
+guess_spec.list <- function(x, simplify_list = TRUE) {
   valid_object_list <- is_object_list(x)
   valid_object <- is_object(x)
 
   if (valid_object_list && valid_object) {
-    if (is_object_list2(x)) return(guess_object_list(x, check_flatten))
+    if (is_object_list2(x)) return(guess_object_list(x, simplify_list))
 
-    return(guess_object(x, check_flatten))
+    return(guess_object(x, simplify_list))
   }
 
-  if (valid_object) return(guess_object(x, check_flatten))
-  if (valid_object_list) return(guess_object_list(x, check_flatten))
+  if (valid_object) return(guess_object(x, simplify_list))
+  if (valid_object_list) return(guess_object_list(x, simplify_list))
 
   abort("Cannot guess spec")
 }
 
-guess_object_list <- function(x, check_flatten) {
-  fields <- guess_object_list_spec(x, check_flatten)
+guess_object_list <- function(x, simplify_list) {
+  fields <- guess_object_list_spec(x, simplify_list)
 
   names_to <- NULL
   if (is_named(x)) {
@@ -93,15 +94,15 @@ guess_object_list <- function(x, check_flatten) {
   return(spec_df(!!!fields, .names_to = names_to))
 }
 
-guess_object <- function(x, check_flatten) {
-  fields <- guess_object_spec(x, check_flatten)
+guess_object <- function(x, simplify_list) {
+  fields <- guess_object_spec(x, simplify_list)
   return(spec_object(!!!fields))
 }
 
 
 # list - object -----------------------------------------------------------
 
-guess_object_spec <- function(x, check_flatten) {
+guess_object_spec <- function(x, simplify_list) {
   purrr::pmap(
     tibble::tibble(
       value = x,
@@ -110,11 +111,11 @@ guess_object_spec <- function(x, check_flatten) {
     guess_field_spec,
     required = TRUE,
     multi = FALSE,
-    check_flatten = check_flatten
+    simplify_list = simplify_list
   )
 }
 
-guess_object_list_spec <- function(x, check_flatten) {
+guess_object_list_spec <- function(x, simplify_list) {
   required <- get_required(x)
 
   # need to remove empty elements for `purrr::transpose()` to work...
@@ -131,7 +132,7 @@ guess_object_list_spec <- function(x, check_flatten) {
     ),
     guess_field_spec,
     multi = TRUE,
-    check_flatten = check_flatten
+    simplify_list = simplify_list
   )
 }
 
@@ -155,7 +156,7 @@ get_required <- function(x, sample_size = 10e3) {
 }
 
 guess_field_spec <- function(value, name, required, multi,
-                             check_flatten) {
+                             simplify_list) {
   if (multi) {
     ptype_result <- safe_ptype_common2(value)
     no_common_ptype <- !is_null(ptype_result$error)
@@ -188,11 +189,11 @@ guess_field_spec <- function(value, name, required, multi,
 
   value_flat <- get_flat_value(value, ptype, multi)
   if (is_object_list(value_flat)) {
-    return(guess_make_tib_df(name, value_flat, required, check_flatten))
+    return(guess_make_tib_df(name, value_flat, required, simplify_list))
   }
 
-  if (is_field_row(value, multi, check_flatten)) {
-    fields <- guess_get_field_spec(value, multi, check_flatten)
+  if (is_field_row(value, multi, simplify_list)) {
+    fields <- guess_get_field_spec(value, multi, simplify_list)
     return(maybe_tib_row(name, fields, required))
   }
 
@@ -204,7 +205,7 @@ guess_field_spec <- function(value, name, required, multi,
   ptype <- ptype_result$result
   if (is_null(ptype)) return(tib_unspecified(name, required))
 
-  if (!check_flatten) return(tib_list(name, required))
+  if (!simplify_list) return(tib_list(name, required))
 
   list_of_scalars <- all(list_sizes(value_flat) == 1L)
   if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
@@ -235,17 +236,17 @@ is_field_scalar <- function(value, multi) {
   }
 }
 
-is_field_row <- function(value, multi, check_flatten) {
+is_field_row <- function(value, multi, simplify_list) {
   if (multi) {
     is_object_list(value)
   } else {
-    if (can_flatten(value, check_flatten)) return(FALSE)
+    if (can_flatten(value, simplify_list)) return(FALSE)
     is_object(value)
   }
 }
 
-can_flatten <- function(value, check_flatten) {
-  if (!check_flatten) return(FALSE)
+can_flatten <- function(value, simplify_list) {
+  if (!simplify_list) return(FALSE)
 
   ptype_result <- safe_ptype_common2(value)
   if (!is_null(ptype_result$error)) return(FALSE)
@@ -254,15 +255,15 @@ can_flatten <- function(value, check_flatten) {
   !is_null(ptype) && !vec_is_list(ptype)
 }
 
-guess_get_field_spec <- function(value, multi, check_flatten) {
+guess_get_field_spec <- function(value, multi, simplify_list) {
   if (multi) {
-    fields <- guess_object_list_spec(value, check_flatten)
+    fields <- guess_object_list_spec(value, simplify_list)
   } else {
-    fields <- guess_object_spec(value, check_flatten)
+    fields <- guess_object_spec(value, simplify_list)
   }
 }
 
-guess_make_tib_df <- function(name, values_flat, required, check_flatten) {
+guess_make_tib_df <- function(name, values_flat, required, simplify_list) {
   list_of_null <- all(purrr::map_lgl(values_flat, is_null))
   if (list_of_null) {
     if (is_named(values_flat) && !is_empty(values_flat)) {
@@ -273,7 +274,7 @@ guess_make_tib_df <- function(name, values_flat, required, check_flatten) {
       return(tib_unspecified(name, required))
   }
 
-  fields <- guess_object_list_spec(values_flat, check_flatten)
+  fields <- guess_object_list_spec(values_flat, simplify_list)
   names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
 
   return(maybe_tib_df(name, fields, required, names_to = names_to))
