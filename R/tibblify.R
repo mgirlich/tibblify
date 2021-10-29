@@ -38,24 +38,39 @@ tibblify <- function(x, spec = NULL, names_to = NULL) {
 
   if (inherits(spec, "spec_object")) {
     # TODO need custom class so that `spec` attribute isn't always printed
-    out <- finalize_object(out)
+    out <- purrr::map2(spec$fields, out, finalize_spec_object)
   }
 
   out
 }
 
-finalize_object <- function(x) {
-  UseMethod("finalize_object")
+finalize_spec_object <- function(field_spec, field) {
+  UseMethod("finalize_spec_object")
 }
 
 #' @export
-finalize_object.default <- function(x) {
-  x[[1]]
+finalize_spec_object.tib_scalar <- function(field_spec, field) {
+  field
 }
 
 #' @export
-finalize_object.data.frame <- function(x) {
-  purrr::map(x, finalize_object)
+finalize_spec_object.tib_df <- function(field_spec, field) {
+  field[[1]]
+}
+
+#' @export
+finalize_spec_object.tib_row <- function(field_spec, field) {
+  purrr::map2(field_spec$fields, field, finalize_spec_object)
+}
+
+#' @export
+finalize_spec_object.tib_list <- function(field_spec, field) {
+  field[[1]]
+}
+
+#' @export
+finalize_spec_object.tib_vector <- function(field_spec, field) {
+  field[[1]]
 }
 
 spec_prep <- function(spec, shift = FALSE) {
