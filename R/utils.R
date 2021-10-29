@@ -30,5 +30,5 @@ stop_scalar <- function(path) {
 }
 
 vec_flatten <- function(x, ptype) {
-  vctrs::vec_c(!!!x, .ptype = ptype)
+  vctrs::vec_unchop(x, ptype = ptype)
 }
