@@ -402,7 +402,7 @@ test_that("can guess spec for got_chars", {
 })
 
 read_sample_json <- function(x) {
-  path <- testthat::test_path("../../inst/jsonexamples", x)
+  path <- system.file("jsonexamples", x, package = "tibblify")
   jsonlite::fromJSON(path, simplifyDataFrame = FALSE)
 }
 
