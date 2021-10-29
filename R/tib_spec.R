@@ -41,7 +41,7 @@ spec_df <- function(..., .names_to = NULL) {
   }
   # TODO check that `.names_to` and `...` have different names
   out <- spec_tib(list2(...), "df", names_col = .names_to)
-  if (.names_to %in% names(out$fields)) {
+  if (!is_null(.names_to) && .names_to %in% names(out$fields)) {
     abort("The column name of `.names_to` is already specified in `...`")
   }
 
