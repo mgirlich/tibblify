@@ -4,6 +4,10 @@ test_that("errors on invalid names", {
   expect_snapshot_error(spec_df(x = tib_int("x"), x = tib_int("y")))
 })
 
+test_that("errors if `.names_to` column name is not unique", {
+  expect_snapshot_error(spec_df(x = tib_int("x"), .names_to = "x"))
+})
+
 test_that("errors if element is not a tib collector", {
   expect_snapshot_error(spec_df(x = "a"))
   expect_snapshot_error(spec_df(x = tib_int("x"), y = "a"))
