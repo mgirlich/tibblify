@@ -401,8 +401,13 @@ test_that("can guess spec for got_chars", {
   expect_snapshot(guess_spec(got_chars) %>% print())
 })
 
+read_sample_json <- function(x) {
+  path <- testthat::test_path("../../inst/jsonexamples", x)
+  jsonlite::fromJSON(path, simplifyDataFrame = FALSE)
+}
+
 test_that("can guess spec for citm_catalog", {
-  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/citm_catalog.json")
+  x <- read_sample_json("citm_catalog.json")
   x$areaNames <- x$areaNames[1:3]
   x$events <- x$events[1:3]
   x$performances <- x$performances[1:3]
@@ -415,11 +420,11 @@ test_that("can guess spec for citm_catalog", {
 })
 
 test_that("can guess spec for gsoc-2018", {
-  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/gsoc-2018.json")
+  x <- read_sample_json("gsoc-2018.json")
   expect_snapshot(guess_spec(x))
 })
 
 test_that("can guess spec for twitter", {
-  x <- f("~/GitHub/rcppsimdjson/inst/jsonexamples/twitter.json")
+  x <- read_sample_json("twitter.json")
   expect_snapshot(guess_spec(x))
 })
