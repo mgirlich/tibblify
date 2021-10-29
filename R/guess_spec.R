@@ -71,22 +71,31 @@ guess_spec.list <- function(x, check_flatten = TRUE) {
   valid_object_list <- is_object_list(x)
   valid_object <- is_object(x)
 
-  if (valid_object_list && !valid_object) {
-    fields <- guess_object_list_spec(x, check_flatten)
+  if (valid_object_list && valid_object) {
+    if (is_object_list2(x)) return(guess_object_list(x, check_flatten))
 
-    names_to <- NULL
-    if (is_named(x)) {
-      names_to <- ".names"
-    }
-    return(spec_df(!!!fields, .names_to = names_to))
+    return(guess_object(x, check_flatten))
   }
 
-  if (valid_object) {
-    fields <- guess_object_spec(x, check_flatten)
-    return(spec_object(!!!fields))
-  }
+  if (valid_object) return(guess_object(x, check_flatten))
+  if (valid_object_list) return(guess_object_list(x, check_flatten))
 
   abort("Cannot guess spec")
+}
+
+guess_object_list <- function(x, check_flatten) {
+  fields <- guess_object_list_spec(x, check_flatten)
+
+  names_to <- NULL
+  if (is_named(x)) {
+    names_to <- ".names"
+  }
+  return(spec_df(!!!fields, .names_to = names_to))
+}
+
+guess_object <- function(x, check_flatten) {
+  fields <- guess_object_spec(x, check_flatten)
+  return(spec_object(!!!fields))
 }
 
 

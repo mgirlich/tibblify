@@ -42,3 +42,14 @@ is_object_list <- function(x) {
 
   TRUE
 }
+
+is_object_list2 <- function(x) {
+  n <- vec_size(x)
+  if (n == 1) return(FALSE)
+
+  x <- unname(x)
+  all_names <- vec_c(!!!lapply(x, names), .ptype = character())
+  names_count <- vec_count(all_names, "location")
+
+  any(names_count$count >= 0.9 * n)
+}
