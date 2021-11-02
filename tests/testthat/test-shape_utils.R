@@ -32,7 +32,7 @@ test_that("is_object_list() works", {
   expect_true(is_object_list(mtcars))
   expect_true(is_object_list(tibble::tibble()))
 
-  expect_true(is_object_list(list(list(x = 1))))
+  expect_true(is_object_list(list(list(x = 1), list(x = 2))))
   expect_true(is_object_list(list(list(x = 1), list(x = "a"))))
 
   # can handle NULL

@@ -295,7 +295,12 @@ test_that("can guess tib_vector in an object_list", {
 
 test_that("can guess tib_list in an object_list", {
   expect_equal(
-    guess_spec(list(list(x = list(TRUE, "a")))),
+    guess_spec(
+      list(
+        list(x = list(TRUE, "a")),
+        list(x = list(FALSE, "b"))
+      )
+    ),
     spec_df(x = tib_list("x"))
   )
 
@@ -348,6 +353,7 @@ test_that("can guess required in an object_list", {
     guess_spec(
       list(
         list(x = 1.5),
+        list(x = 1),
         list()
       )
     ),
@@ -356,12 +362,20 @@ test_that("can guess required in an object_list", {
 })
 
 test_that("can guess tib_unspecified in an object_list", {
-  expect_equal(guess_spec(list(list(x = NULL))), spec_df(x = tib_unspecified("x")))
-  expect_equal(guess_spec(list(list(x = list(NULL, NULL)))), spec_df(x = tib_unspecified("x")))
+  expect_equal(guess_spec(list(list(x = NULL), list(x = NULL))), spec_df(x = tib_unspecified("x")))
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = list(NULL, NULL)),
+        list(x = list(NULL))
+      )
+    ),
+    spec_df(x = tib_unspecified("x"))
+  )
 
   # in a row
   expect_equal(
-    guess_spec(list(list(x = list(a = NULL)))),
+    guess_spec(list(list(x = list(a = NULL)), list(x = list(a = NULL)))),
     spec_df(x = tib_row("x", a = tib_unspecified("a")))
   )
 
@@ -369,6 +383,12 @@ test_that("can guess tib_unspecified in an object_list", {
   expect_equal(
     guess_spec(
       list(
+        list(
+          x = list(
+            list(a = NULL),
+            list(a = NULL)
+          )
+        ),
         list(
           x = list(
             list(a = NULL),

@@ -40,16 +40,14 @@ is_object_list <- function(x) {
     return(FALSE)
   }
 
-  TRUE
-}
+  if (vec_size(x) == 1) return(FALSE)
 
-is_object_list2 <- function(x) {
-  n <- vec_size(x)
-  if (n == 1) return(FALSE)
-
-  x <- unname(x)
-  all_names <- vec_c(!!!lapply(x, names), .ptype = character())
+  names_list <- lapply(x, names)
+  names_list <- list_drop_empty(names_list)
+  n <- vec_size(names_list)
+  all_names <- vec_unchop(names_list, ptype = character(), name_spec = "{inner}")
   names_count <- vec_count(all_names, "location")
 
-  any(names_count$count >= 0.9 * n)
+  n_min <- floor(0.9 * n)
+  any(names_count$count >= n_min) && mean(names_count$count >= 0.5)
 }

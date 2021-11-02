@@ -69,17 +69,9 @@ safe_ptype_common2 <- function(x) {
 
 #' @export
 guess_spec.list <- function(x, simplify_list = TRUE) {
-  valid_object_list <- is_object_list(x)
-  valid_object <- is_object(x)
+  if (is_object_list(x)) return(guess_object_list(x, simplify_list))
 
-  if (valid_object_list && valid_object) {
-    if (is_object_list2(x)) return(guess_object_list(x, simplify_list))
-
-    return(guess_object(x, simplify_list))
-  }
-
-  if (valid_object) return(guess_object(x, simplify_list))
-  if (valid_object_list) return(guess_object_list(x, simplify_list))
+  if (is_object(x)) return(guess_object(x, simplify_list))
 
   abort("Cannot guess spec")
 }
