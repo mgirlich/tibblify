@@ -40,14 +40,22 @@ is_object_list <- function(x) {
     return(FALSE)
   }
 
-  if (vec_size(x) == 1) return(FALSE)
+  if (vec_size(x) <= 1) return(FALSE)
 
   names_list <- lapply(x, names)
   names_list <- list_drop_empty(names_list)
   n <- vec_size(names_list)
+
+  if (n == 0) return(FALSE)
+
   all_names <- vec_unchop(names_list, ptype = character(), name_spec = "{inner}")
   names_count <- vec_count(all_names, "location")
 
   n_min <- floor(0.9 * n)
   any(names_count$count >= n_min) && mean(names_count$count >= 0.5)
+}
+
+list_drop_empty <- function(x) {
+  # TODO when vctrs exports `list_drop_empty()`
+  vec_slice(x, list_sizes(x) > 0)
 }
