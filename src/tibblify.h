@@ -16,6 +16,8 @@ struct Parse_Spec;
 
 extern SEXP tibblify_ns_env;
 
+extern SEXP strings_empty;
+
 extern SEXP classes_tibble;
 extern SEXP classes_list_of;
 

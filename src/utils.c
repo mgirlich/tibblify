@@ -3,6 +3,7 @@
 SEXP tibblify_ns_env = NULL;
 
 SEXP strings = NULL;
+SEXP strings_empty = NULL;
 SEXP strings_tbl = NULL;
 SEXP strings_tbl_df = NULL;
 SEXP strings_data_frame = NULL;
@@ -47,8 +48,8 @@ void tibblify_init_utils(SEXP ns) {
 
   // Holds the CHARSXP objects because unlike symbols they can be
   // garbage collected
-  // strings = r_new_shared_vector(STRSXP, 1);
-  //
+  strings = r_new_shared_vector(STRSXP, 1);
+
   // strings_date = Rf_mkChar("Date");
   // SET_STRING_ELT(strings, 0, strings_date);
   //
@@ -56,6 +57,9 @@ void tibblify_init_utils(SEXP ns) {
   // SET_STRING_ELT(classes_date, 0, strings_date);
 
   classes_tibble = r_new_shared_vector(STRSXP, 3);
+
+  strings_empty = Rf_mkChar("");
+  SET_STRING_ELT(strings, 0, strings_empty);
 
   strings_tbl_df = Rf_mkChar("tbl_df");
   SET_STRING_ELT(classes_tibble, 0, strings_tbl_df);

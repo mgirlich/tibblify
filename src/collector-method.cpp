@@ -26,6 +26,16 @@ inline void stop_required(Path& path) {
   Rf_eval(call, tibblify_ns_env);
 }
 
+inline void stop_duplicate_name() {
+  // TODO better error message
+  cpp11::stop("Duplicate name");
+}
+
+inline void stop_empty_name() {
+  // TODO better error message
+  cpp11::stop("Empty name");
+}
+
 inline SEXP apply_transform(SEXP value, SEXP fn) {
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
@@ -410,6 +420,34 @@ public:
 
 
 class Multi_Collector {
+private:
+  SEXP field_names_prev = R_NilValue;
+  int n_fields_prev = 0;
+  const int INDEX_SIZE = 256;
+  int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
+  bool needs_unprotect = false;
+
+  inline bool is_order_update_required(SEXP field_names, const int& n_fields) const {
+    if (n_fields != this->n_fields_prev) return true;
+
+    if (n_fields > this->INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
+    const SEXP* nms_ptr = STRING_PTR_RO(field_names);
+    const SEXP* nms_ptr_prev = STRING_PTR_RO(this->field_names_prev);
+    for (int i = 0; i < n_fields; i++, nms_ptr++, nms_ptr_prev++)
+      if (*nms_ptr != *nms_ptr_prev) return true;
+
+    return false;
+  }
+
+  inline void update_order(SEXP field_names, const int& n_fields) {
+    // only update `ind` if necessary as `R_orderVector1()` is pretty slow
+    if (!is_order_update_required(field_names, n_fields)) return;
+
+    this->n_fields_prev = n_fields;
+    this->field_names_prev = field_names;
+    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
+  }
+
 protected:
   SEXP keys;
   std::vector<Collector_Ptr> collector_vec;
@@ -417,14 +455,29 @@ protected:
 
 public:
   Multi_Collector(SEXP keys_, std::vector<Collector_Ptr>& collector_vec_)
-    : keys(keys_)
-  , collector_vec(std::move(collector_vec_))
-  , n_keys(Rf_length(keys_))
-  { }
+    : n_keys(Rf_length(keys_))
+  {
+    int n_keys = Rf_length(keys_);
+    R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
+    this->n_fields_prev = Rf_length(keys_);
+    this->field_names_prev = keys_;
+
+    this->keys = PROTECT(Rf_allocVector(STRSXP, n_keys));
+    this->needs_unprotect = true;
+    for(int i = 0; i < n_keys; i++) {
+      int key_index = this->ind[i];
+      SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
+      this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
+    }
+  }
 
   inline void unprotect() {
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).unprotect();
+    }
+    if (this->needs_unprotect) {
+      UNPROTECT(1);
+      this->needs_unprotect = false;
     }
   }
 
@@ -436,8 +489,10 @@ public:
 
   inline void add_value(SEXP object, Path& path) {
     SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+
+    // No names -> call `add_default()` for every field
     if (field_names == R_NilValue) {
-      const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
         path.replace(key_names_ptr);
@@ -447,39 +502,53 @@ public:
       return;
     }
 
-    // using map.find() turned out to be relatively slow, ~ 180 ms more
-    // => double iteration over field names and keys is faster
-
-    // TODO check out if we can speed things up by sorting them first
-    // TODO alternatively sort the keys and check at the start of the loop if the
-    //   next key is the same as the previous one and if so use the same field index as before
-
     // TODO VECTOR_PTR_RO only works if object is a list
     const SEXP* values_ptr = VECTOR_PTR_RO(object);
+
     const int n_fields = Rf_length(field_names);
-    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    update_order(field_names, n_fields);
+
     path.down();
+    int key_index = 0;
+    SEXPREC* field_nm_prev = field_names_ptr[this->ind[0]];
+    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
     // The manual loop is quite a bit faster than the range based loop
-    for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-      path.replace(key_names_ptr);
-      const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-      int field_index = 0;
-      // TODO what happens if a field name occurs twice?
-      // => option to check for duplicates?
-      // TODO option to check if all elements are named?
-      for (field_index = 0; field_index < n_fields; field_index++, field_names_ptr++) {
-        if (*field_names_ptr == *key_names_ptr) {
-          // Note: This assumes the field names are unique!
-          break;
-        }
+    for (int field_index = 0; field_index < n_fields; ) {
+      field_nm_prev = field_nm;
+      field_nm = field_names_ptr[this->ind[field_index]];
+
+      if (field_index > 0 && field_nm == field_nm_prev) stop_duplicate_name();
+      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+
+      if (field_nm == *key_names_ptr) {
+        path.replace(key_names_ptr);
+        (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
+        key_names_ptr++; key_index++;
+        field_index++;
+        continue;
       }
 
-      if (field_index < n_fields) {
-        (*this->collector_vec[key_index]).add_value(values_ptr[field_index], path);
-      } else {
+      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* field_nm_char = CHAR(field_nm);
+      if (strcmp(key_char, field_nm_char) < 0) {
+        path.replace(key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
+        key_names_ptr++; key_index++;
+        continue;
       }
+
+      // field_name does not occur in keys
+      // TODO store field_name somewhere?
+      field_index++;
     }
+
+    for (; key_index < this->n_keys; key_index++) {
+      path.replace(key_names_ptr);
+      (*this->collector_vec[key_index]).add_default(path);
+      key_names_ptr++;
+    }
+
     path.up();
   }
 };
