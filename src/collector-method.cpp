@@ -36,6 +36,11 @@ inline void stop_empty_name() {
   cpp11::stop("Empty name");
 }
 
+inline void stop_names_is_null() {
+  // TODO better error message
+  cpp11::stop("Empty name");
+}
+
 inline SEXP apply_transform(SEXP value, SEXP fn) {
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
@@ -448,6 +453,21 @@ private:
     R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
   }
 
+  inline void check_names(const SEXP* field_names_ptr, const int n_fields) {
+    if (n_fields <= 1) return;
+
+    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
+    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+
+    for (int field_index = 1; field_index < n_fields; field_index++) {
+      SEXPREC* field_nm_prev = field_nm;
+      field_nm = field_names_ptr[this->ind[field_index]];
+      if (field_nm == field_nm_prev) stop_duplicate_name();
+
+      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+    }
+  }
+
 protected:
   SEXP keys;
   std::vector<Collector_Ptr> collector_vec;
@@ -488,11 +508,10 @@ public:
   }
 
   inline void add_value(SEXP object, Path& path) {
-    SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
     const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    const int n_fields = Rf_length(object);
 
-    // No names -> call `add_default()` for every field
-    if (field_names == R_NilValue) {
+    if (n_fields == 0) {
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
         path.replace(key_names_ptr);
@@ -502,24 +521,22 @@ public:
       return;
     }
 
+    SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
+    if (field_names == R_NilValue) stop_names_is_null();
+
+    this->update_order(field_names, n_fields);
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    this->check_names(field_names_ptr, n_fields);
+
     // TODO VECTOR_PTR_RO only works if object is a list
     const SEXP* values_ptr = VECTOR_PTR_RO(object);
 
-    const int n_fields = Rf_length(field_names);
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-    update_order(field_names, n_fields);
-
+    // The manual loop is quite a bit faster than the range based loop
     path.down();
     int key_index = 0;
-    SEXPREC* field_nm_prev = field_names_ptr[this->ind[0]];
-    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
-    // The manual loop is quite a bit faster than the range based loop
-    for (int field_index = 0; field_index < n_fields; ) {
-      field_nm_prev = field_nm;
-      field_nm = field_names_ptr[this->ind[field_index]];
-
-      if (field_index > 0 && field_nm == field_nm_prev) stop_duplicate_name();
-      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+    int field_index = 0;
+    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
 
       if (field_nm == *key_names_ptr) {
         path.replace(key_names_ptr);
@@ -539,7 +556,7 @@ public:
       }
 
       // field_name does not occur in keys
-      // TODO store field_name somewhere?
+      // TODO store unused field_name somewhere?
       field_index++;
     }
 

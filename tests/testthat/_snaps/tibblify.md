@@ -1,3 +1,23 @@
+# names are checked
+
+    Empty name
+
+---
+
+    Empty name
+
+---
+
+    Empty name
+
+---
+
+    Empty name
+
+---
+
+    Duplicate name
+
 # scalar column works
 
     Required element absent at path [[1]]$x
