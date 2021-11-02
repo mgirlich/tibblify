@@ -161,7 +161,7 @@
 <li>and the names must be unique.</li>
 </ul>
 <p>In other words, the names must fulfill <code>vec_as_names(repair = "check_unique")</code>. The name-value pairs of an object are the <em>fields</em>.</p>
-<p>For example <code><a href="https://rdrr.io/r/base/list.html">list(x = 1, y = "a")</a></code> is an object with the fields <code>(x, 1)</code> and <code>(y, "a")</code> but <code><a href="https://rdrr.io/r/base/list.html">list(1, z = 3)</a></code> is not an object because it is not fully named.</p>
+<p>For example <code>list(x = 1, y = "a")</code> is an object with the fields <code>(x, 1)</code> and <code>(y, "a")</code> but <code>list(1, z = 3)</code> is not an object because it is not fully named.</p>
 <p>A <em>collection</em> is basically just a list of similar objects so that the fields can become the columns in a tibble.</p>
 </div>
 <div id="specification" class="section level2">
@@ -177,18 +177,18 @@
 <p>As seen before the specification for a collection is done with <code><a href="../reference/spec_df.html">spec_df()</a></code>. The columns of the output tibble are describe with the <code>tib_*()</code> functions. They describe the path to the field to extract and the output type of the field. There are the following five types of functions:</p>
 <ul>
 <li>
-<code><a href="../reference/tib_unspecified.html">tib_scalar(ptype)</a></code>: a length one vector with type <code>ptype</code>
+<code>tib_scalar(ptype)</code>: a length one vector with type <code>ptype</code>
 </li>
 <li>
-<code><a href="../reference/tib_unspecified.html">tib_vector(ptype)</a></code>: a vector of arbitrary length with type <code>ptype</code>
+<code>tib_vector(ptype)</code>: a vector of arbitrary length with type <code>ptype</code>
 </li>
 <li>
 <code><a href="../reference/tib_unspecified.html">tib_list()</a></code>: a vector of arbitrary length and type; you should barely ever need this</li>
 <li>
-<code><a href="../reference/tib_unspecified.html">tib_row(...)</a></code>: an object with the fields <code>...</code>
+<code>tib_row(...)</code>: an object with the fields <code>...</code>
 </li>
 <li>
-<code><a href="../reference/tib_unspecified.html">tib_df(...)</a></code>: a collection where the objects have the fields <code>...</code>
+<code>tib_df(...)</code>: a collection where the objects have the fields <code>...</code>
 </li>
 </ul>
 <p>For convenience there are shortcuts for <code><a href="../reference/tib_unspecified.html">tib_scalar()</a></code> and <code><a href="../reference/tib_unspecified.html">tib_vector()</a></code> for the most common prototypes:</p>

@@ -206,32 +206,36 @@ the most common prototypes</p><ul>
 
 
     <h2 class="hasAnchor" id="examples"><a class="anchor" href="#examples"></a>Examples</h2>
-    <pre class="examples"><div class='input'><span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"int"</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span style='color: #00BB00;'>tib_int</span>("int")</div><div class='input'><span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"int"</span>, <span class='cn'>FALSE</span>, default <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span style='color: #00BB00;'>tib_int</span>(
-#&gt;   "int",
-#&gt;   required = FALSE,
-#&gt;   default = 0
-#&gt; )</div><div class='input'>
-<span class='fu'>tib_scalar</span><span class='op'>(</span><span class='st'>"date"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.Date</a></span><span class='op'>(</span><span class='op'>)</span>, transform <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/as.Date.html'>as.Date</a></span><span class='op'>(</span><span class='va'>x</span>, format <span class='op'>=</span> <span class='st'>"%Y-%m-%d"</span><span class='op'>)</span><span class='op'>)</span>
-</div><div class='output co'>#&gt; <span style='color: #000000;'>tib_scalar</span>(
-#&gt;   "date",
-#&gt;   ptype = vctrs::new_date(),
-#&gt;   transform = function (x) 
-#&gt;   as.Date(x, format = "%Y-%m-%d")
-#&gt; )</div><div class='input'>
-<span class='fu'>tib_df</span><span class='op'>(</span>
-  <span class='st'>"data"</span>,
-  .names_to <span class='op'>=</span> <span class='st'>"id"</span>,
-  age <span class='op'>=</span> <span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"age"</span><span class='op'>)</span>,
-  name <span class='op'>=</span> <span class='fu'>tib_chr</span><span class='op'>(</span><span class='st'>"name"</span><span class='op'>)</span>
-<span class='op'>)</span>
-</div><div class='output co'>#&gt; tib_df(
-#&gt;   "data",
-#&gt;   .names_to = "id",
-#&gt;   age = <span style='color: #00BB00;'>tib_int</span>("age"),
-#&gt;   name = <span style='color: #BB0000;'>tib_chr</span>("name")
-#&gt; )</div></pre>
+    <pre class="examples"><span class='r-in'><span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"int"</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> <span style='color: #00BB00;'>tib_int</span>("int")</span>
+<span class='r-in'><span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"int"</span>, <span class='cn'>FALSE</span>, default <span class='op'>=</span> <span class='fl'>0</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> <span style='color: #00BB00;'>tib_int</span>(</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   "int",</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   required = FALSE,</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   default = 0</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> )</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'>tib_scalar</span><span class='op'>(</span><span class='st'>"date"</span>, <span class='fu'><a href='https://rdrr.io/r/base/Sys.time.html'>Sys.Date</a></span><span class='op'>(</span><span class='op'>)</span>, transform <span class='op'>=</span> <span class='kw'>function</span><span class='op'>(</span><span class='va'>x</span><span class='op'>)</span> <span class='fu'><a href='https://rdrr.io/r/base/as.Date.html'>as.Date</a></span><span class='op'>(</span><span class='va'>x</span>, format <span class='op'>=</span> <span class='st'>"%Y-%m-%d"</span><span class='op'>)</span><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> <span style='color: #000000;'>tib_scalar</span>(</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   "date",</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   ptype = vctrs::new_date(),</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   transform = function (x) </span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   as.Date(x, format = "%Y-%m-%d")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> )</span>
+<span class='r-in'></span>
+<span class='r-in'><span class='fu'>tib_df</span><span class='op'>(</span></span>
+<span class='r-in'>  <span class='st'>"data"</span>,</span>
+<span class='r-in'>  .names_to <span class='op'>=</span> <span class='st'>"id"</span>,</span>
+<span class='r-in'>  age <span class='op'>=</span> <span class='fu'>tib_int</span><span class='op'>(</span><span class='st'>"age"</span><span class='op'>)</span>,</span>
+<span class='r-in'>  name <span class='op'>=</span> <span class='fu'>tib_chr</span><span class='op'>(</span><span class='st'>"name"</span><span class='op'>)</span></span>
+<span class='r-in'><span class='op'>)</span></span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> tib_df(</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   "data",</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   .names_to = "id",</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   age = <span style='color: #00BB00;'>tib_int</span>("age"),</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span>   name = <span style='color: #BB0000;'>tib_chr</span>("name")</span>
+<span class='r-out co'><span class='r-pr'>#&gt;</span> )</span>
+</pre>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top">
