@@ -1,10 +1,7 @@
 /* TODOs
  * [ ] heuristic to detect object vs list of object -> appropriate error message
- * [ ] extract guessing shape
  * [ ] support integer index
  * [ ] add other scalar types: complex, raw
- * [ ] support matrix??
- * [ ] natively support date, datetime from character?
  * [ ] natively support `id` column in `Collector_Tibble`?
  */
 
@@ -432,7 +429,7 @@ private:
   int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
   bool needs_unprotect = false;
 
-  inline bool is_order_update_required(SEXP field_names, const int& n_fields) const {
+  inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     if (n_fields != this->n_fields_prev) return true;
 
     if (n_fields > this->INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
@@ -445,9 +442,6 @@ private:
   }
 
   inline void update_order(SEXP field_names, const int& n_fields) {
-    // only update `ind` if necessary as `R_orderVector1()` is pretty slow
-    if (!is_order_update_required(field_names, n_fields)) return;
-
     this->n_fields_prev = n_fields;
     this->field_names_prev = field_names;
     R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
@@ -524,9 +518,13 @@ public:
     SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
     if (field_names == R_NilValue) stop_names_is_null();
 
-    this->update_order(field_names, n_fields);
+    const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
     const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-    this->check_names(field_names_ptr, n_fields);
+    // only update `ind` if necessary as `R_orderVector1()` is pretty slow
+    if (fields_have_changed) {
+      this->update_order(field_names, n_fields);
+      this->check_names(field_names_ptr, n_fields);
+    }
 
     // TODO VECTOR_PTR_RO only works if object is a list
     const SEXP* values_ptr = VECTOR_PTR_RO(object);
