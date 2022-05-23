@@ -785,14 +785,12 @@ public:
 
 class Collector_List_Of_Tibble : public Collector {
 private:
-  SEXP data;
+  cpp11::writable::list data;
   const bool required;
   const SEXP name;
   const int col_location;
   const std::unique_ptr<Parser_Object_List> parser_ptr;
   int current_row = 0;
-private:
-  bool needs_unprotect = false;
 
 public:
   Collector_List_Of_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_,
@@ -806,9 +804,8 @@ public:
   inline void init(R_xlen_t& length) {
     Path path;
     SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
-    this->data = PROTECT(init_list_of(length, ptype));
+    this->data = init_list_of(length, ptype);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
