@@ -3,19 +3,20 @@
 
 class Path {
 private:
-  SEXP path = PROTECT(Rf_allocVector(VECSXP, 20));
+  cpp11::writable::list path;
   int depth = 0;
   Path(const Path&);
   Path& operator=(const Path&);
 
 public:
-  Path() {}
-
-  ~ Path() {
-    UNPROTECT(1);
+  Path() {
+    path = Rf_allocVector(VECSXP, 20);
   }
 
+  ~ Path() {}
+
   inline void down() {
+    // FIXME: fail if diving too deep
     this->depth++;
   }
 
