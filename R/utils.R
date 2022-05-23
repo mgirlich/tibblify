@@ -1,4 +1,8 @@
 path_to_string <- function(path) {
+  if (length(path) == 0) {
+    return("<root>")
+  }
+
   path_elements <- purrr::map_chr(
     path,
     function(elt) {

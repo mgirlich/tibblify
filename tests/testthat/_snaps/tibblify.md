@@ -1,22 +1,22 @@
 # names are checked
 
-    Empty name
+    Element at path <root> has NULL names.
 
 ---
 
-    Empty name
+    Element at path <root> has empty name.
 
 ---
 
-    Empty name
+    Element at path <root> has empty name.
 
 ---
 
-    Empty name
+    Element at path <root> has empty name.
 
 ---
 
-    Duplicate name
+    Element at path <root> has duplicate name.
 
 # scalar column works
 
