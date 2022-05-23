@@ -100,8 +100,7 @@ protected:
   const SEXP ptype;
   int current_row = 0;
 private:
-  SEXP data;
-  bool needs_unprotect = false;
+  cpp11::writable::list data;
 
 public:
   Collector_Scalar(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
@@ -112,9 +111,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(VECSXP, length));
+    this->data = Rf_allocVector(VECSXP, length);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
