@@ -127,7 +127,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = vec_cast(value, ptype);
+    SEXP value_casted = vec_cast(PROTECT(value), ptype);
     R_len_t size = short_vec_size(value_casted);
     if (size == 0) {
       value_casted = this->default_value;
@@ -136,6 +136,7 @@ public:
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    UNPROTECT(1);
   }
 
   inline void add_default(Path& path) {
@@ -162,7 +163,7 @@ public:
 
 #define ADD_VALUE(F_SCALAR)                                    \
   if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = vec_cast(value, this->ptype);            \
+  SEXP value_casted = vec_cast(PROTECT(value), this->ptype);   \
   R_len_t size = short_vec_size(value_casted);                 \
   if (size == 0) {                                             \
     *this->data_ptr = this->default_value;                     \
@@ -172,7 +173,8 @@ public:
     stop_scalar(path);                                         \
   }                                                            \
                                                                \
-  ++this->data_ptr;
+  ++this->data_ptr;                                            \
+  UNPROTECT(1);
 
 #define ADD_DEFAULT()                                          \
   if (this->required) stop_required(path);                     \
@@ -362,8 +364,9 @@ public:
       return;
     }
 
-    SEXP value_casted = vec_cast(value, ptype);
+    SEXP value_casted = vec_cast(PROTECT(value), ptype);
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    UNPROTECT(1);
   }
 
   inline void add_default(Path& path) {
