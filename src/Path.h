@@ -25,11 +25,11 @@ public:
   }
 
   inline void replace(int index) {
-    // SET_VECTOR_ELT(this->path, this->depth, Rf_ScalarInteger(index));
+    SET_VECTOR_ELT(this->path, this->depth, Rf_ScalarInteger(index));
   }
 
-  inline void replace(const SEXP key) {
-    // SET_VECTOR_ELT(this->path, this->depth, key);
+  inline void replace(const SEXP* key) {
+    SET_VECTOR_ELT(this->path, this->depth, *key);
   }
 
   inline SEXP data() const {

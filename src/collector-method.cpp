@@ -11,9 +11,6 @@
 #include "utils.h"
 #include "Path.h"
 
-#define PLOGR_ENABLE
-#include <plogr.h>
-
 inline void stop_scalar(const Path& path) {
   SEXP call = PROTECT(Rf_lang2(Rf_install("stop_scalar"),
                                PROTECT(path.data())));
@@ -122,7 +119,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SEXP value_casted = vec_cast(PROTECT(value), ptype);
     R_len_t size = short_vec_size(value_casted);
@@ -146,8 +142,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SEXP call = PROTECT(Rf_lang3(Rf_install("vec_flatten"),
                                  this->data,
                                  this->ptype));
@@ -162,7 +156,7 @@ public:
 
 #define ADD_VALUE(F_SCALAR)                                    \
   if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
+  SEXP value_casted = vec_cast(PROTECT(value), this->ptype);   \
   R_len_t size = short_vec_size(value_casted);                 \
   if (size == 0) {                                             \
     *this->data_ptr = this->default_value;                     \
@@ -173,7 +167,7 @@ public:
   }                                                            \
                                                                \
   ++this->data_ptr;                                            \
-  UNPROTECT(2);
+  UNPROTECT(1);
 
 #define ADD_DEFAULT()                                          \
   if (this->required) stop_required(path);                     \
@@ -206,7 +200,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     ADD_VALUE(Rf_asLogical);
   }
 
@@ -219,8 +212,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -247,7 +238,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     ADD_VALUE(Rf_asInteger);
   }
 
@@ -260,8 +250,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -288,7 +276,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     ADD_VALUE(Rf_asReal);
   }
 
@@ -301,8 +288,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -341,8 +326,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -371,7 +354,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     // TODO use `NULL` if `value` is empty?
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     // TODO should be controlled via an argument to `tibblify()`
@@ -382,7 +364,6 @@ public:
 
     SEXP value_casted = vec_cast(PROTECT(value), ptype);
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
-    LOG_VERBOSE;
     UNPROTECT(1);
   }
 
@@ -396,8 +377,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -424,7 +403,6 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE;
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
@@ -439,8 +417,6 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -516,18 +492,13 @@ public:
   }
 
   inline void add_value(SEXP object, Path& path) {
-    //PROTECT(object);
-
-    LOG_VERBOSE << object;
-    LOG_VERBOSE << TYPEOF(object);
-    LOG_VERBOSE << Rf_xlength(object);
     const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     const int n_fields = Rf_length(object);
 
     if (n_fields == 0) {
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-        path.replace(*key_names_ptr);
+        path.replace(key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
       }
       path.up();
@@ -545,58 +516,28 @@ public:
       this->check_names(field_names_ptr, n_fields, path);
     }
 
-    for (int i = 0; i < n_fields; ++i) {
-      const SEXP* values_ptr = VECTOR_PTR_RO(object);
-      LOG_VERBOSE << values_ptr[i];
-      LOG_VERBOSE << Rf_xlength(values_ptr[i]);
-    }
+    // TODO VECTOR_PTR_RO only works if object is a list
+    const SEXP* values_ptr = VECTOR_PTR_RO(object);
 
     // The manual loop is quite a bit faster than the range based loop
     path.down();
     int key_index = 0;
     int field_index = 0;
     for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
-      // TODO VECTOR_PTR_RO only works if object is a list
-      const SEXP* values_ptr = VECTOR_PTR_RO(object);
-
-      LOG_VERBOSE;
       SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
 
       if (field_nm == *key_names_ptr) {
-        LOG_VERBOSE << field_index;
-        LOG_VERBOSE << this->ind[field_index];
-        LOG_VERBOSE << values_ptr[this->ind[field_index]];
-        LOG_VERBOSE << Rf_xlength(values_ptr[this->ind[field_index]]);
-
-        path.replace(*key_names_ptr);
-
-        LOG_VERBOSE << n_fields;
-        LOG_VERBOSE << object;
-        for (int i = 0; i < n_fields; ++i) {
-          const SEXP* values_ptr = VECTOR_PTR_RO(object);
-          LOG_VERBOSE << values_ptr[i];
-          LOG_VERBOSE << Rf_xlength(values_ptr[i]);
-        }
-
+        path.replace(key_names_ptr);
         (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
         key_names_ptr++; key_index++;
         field_index++;
-
-        LOG_VERBOSE << n_fields;
-        LOG_VERBOSE << object;
-        for (int i = 0; i < n_fields; ++i) {
-          const SEXP* values_ptr = VECTOR_PTR_RO(object);
-          LOG_VERBOSE << values_ptr[i];
-          LOG_VERBOSE << Rf_xlength(values_ptr[i]);
-        }
-
         continue;
       }
 
       const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
-        path.replace(*key_names_ptr);
+        path.replace(key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
         key_names_ptr++; key_index++;
         continue;
@@ -607,19 +548,13 @@ public:
       field_index++;
     }
 
-    LOG_VERBOSE;
-
     for (; key_index < this->n_keys; key_index++) {
-      LOG_VERBOSE;
-      path.replace(*key_names_ptr);
+      path.replace(key_names_ptr);
       (*this->collector_vec[key_index]).add_default(path);
       key_names_ptr++;
     }
 
     path.up();
-
-    LOG_VERBOSE;
-    //UNPROTECT(1);
   }
 };
 
@@ -648,9 +583,7 @@ public:
   }
 
   inline void add_value(SEXP object, Path& path) {
-    LOG_VERBOSE;
     Multi_Collector::add_value(object, path);
-    LOG_VERBOSE;
   }
 
   inline void add_default(Path& path) {
@@ -720,9 +653,7 @@ public:
   }
 
   inline void add_value(SEXP object, Path& path) {
-    LOG_VERBOSE;
     Multi_Collector::add_value(object, path);
-    LOG_VERBOSE;
   }
 
   inline void add_default(Path& path) {
@@ -761,7 +692,6 @@ private:
   }
 
   inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
-    LOG_VERBOSE;
     const int n_cols = this->get_n_cols();
     SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
 
@@ -774,7 +704,6 @@ private:
     }
 
     for (const Collector_Ptr& collector : this->collector_vec) {
-      LOG_VERBOSE;
       (*collector).assign_data(df, names);
     }
 
@@ -782,7 +711,6 @@ private:
     set_df_attributes(df, n_rows);
 
     UNPROTECT(2);
-    LOG_VERBOSE;
     return df;
   }
 
@@ -794,40 +722,28 @@ public:
   { }
 
   inline SEXP parse(SEXP object_list, Path& path) {
-    LOG_VERBOSE << object_list;
-    LOG_VERBOSE << Rf_xlength(object_list);
     R_xlen_t n_rows = short_vec_size(object_list);
-    LOG_VERBOSE;
     this->init(n_rows);
-    LOG_VERBOSE;
 
     if (vec_is_list(object_list)) {
-      LOG_VERBOSE;
       const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
       for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
-        LOG_VERBOSE << row_index;
         path.replace(row_index);
         this->add_value(ptr_row[row_index], path);
       }
     } else {
-      LOG_VERBOSE;
       SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
       int* slice_index_int_ptr = INTEGER(slice_index_int);
 
       for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
-        LOG_VERBOSE;
         path.replace(row_index);
         *slice_index_int_ptr = row_index + 1;
-        this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
-        UNPROTECT(1);
+        this->add_value(vec_slice_impl(object_list, slice_index_int), path);
       }
       UNPROTECT(1);
     }
 
-    LOG_VERBOSE;
-    SEXP out = this->get_data(object_list, n_rows);
-    LOG_VERBOSE;
-    return out;
+    return this->get_data(object_list, n_rows);
   }
 };
 
@@ -843,7 +759,6 @@ private:
   }
 
   inline SEXP get_data() {
-    LOG_VERBOSE;
     const int n_cols = this->get_n_cols();
     SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
     SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
@@ -894,16 +809,12 @@ public:
 
   inline void init(R_xlen_t& length) {
     Path path;
-
-    LOG_VERBOSE;
     SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
     this->data = init_list_of(length, ptype);
     this->current_row = 0;
   }
 
   inline void add_value(SEXP value, Path& path) {
-    LOG_VERBOSE << value;
-    LOG_VERBOSE << Rf_xlength(value);
     SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
   }
 
@@ -921,21 +832,16 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-        LOG_VERBOSE;
-
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
 
 std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_list) {
-  LOG_VERBOSE;
-
   cpp11::writable::strings keys;
   std::vector<Collector_Ptr> col_vec;
 
   for (const cpp11::list& elt : spec_list) {
-    LOG_VERBOSE;
     cpp11::r_string key =  cpp11::strings(elt["key"])[0];
     keys.push_back(key);
     cpp11::r_string type = cpp11::strings(elt["type"])[0];
@@ -1004,36 +910,24 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     }
   }
 
-  LOG_VERBOSE;
   return std::pair<SEXP, std::vector<Collector_Ptr>>({keys, std::move(col_vec)});
 }
 
 
 [[cpp11::register]]
 SEXP tibblify_impl(SEXP object_list, SEXP spec) {
-  plog::init_r(plog::verbose);
-
-  LOG_VERBOSE << object_list;
-  LOG_VERBOSE << Rf_xlength(object_list);
-
   Path path;
 
   cpp11::list spec_list = spec;
   cpp11::r_string type = cpp11::strings(spec_list["type"])[0];
   auto spec_pair = parse_fields_spec(spec_list["fields"]);
-
-  LOG_VERBOSE;
-
   if (type == "df") {
     cpp11::sexp names_col = spec_list["names_col"];
     if (!Rf_isNull(names_col)) {
       names_col = cpp11::strings(names_col)[0];
     }
 
-    LOG_VERBOSE;
-    SEXP out = Parser_Object_List(spec_pair.first, spec_pair.second, names_col).parse(object_list, path);
-    LOG_VERBOSE;
-    return out;
+    return Parser_Object_List(spec_pair.first, spec_pair.second, names_col).parse(object_list, path);
   } else if (type == "row" || type == "object") {
     // `path.up()` is needed because `parse()` assumes a list of objects and
     // directly uses `path.down()`

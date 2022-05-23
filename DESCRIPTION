@@ -40,6 +40,5 @@ NeedsCompilation: yes
 Config/testthat/edition: 3
 LinkingTo: 
     cpp11,
-    plogr,
     vctrs (>= 0.3.6)
 SystemRequirements: C++11

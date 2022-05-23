@@ -526,7 +526,7 @@ test_that("discog works", {
 
   expect_equal(tibblify(discog[1], spec_collection), row1)
 
-  gctorture2(11)
+  gctorture()
   on.exit(gctorture(FALSE))
 
   expect_equal(tibblify(row1, spec_collection), row1)
