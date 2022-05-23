@@ -53,12 +53,10 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
 
 
 class Collector {
-protected:
-  bool needs_unprotect = false;
 public:
   virtual ~ Collector() {};
 
-  // reserve space and mark as `needs_unprotect`
+  // reserve space and protect against garbage collection
   virtual inline void init(R_xlen_t& length) = 0;
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
@@ -71,7 +69,6 @@ public:
   virtual inline void add_default_df() = 0;
   // assign data to input `list` at correct location and update `names`
   virtual inline void assign_data(SEXP list, SEXP names) const = 0;
-  virtual inline void unprotect() = 0;
 };
 
 using Collector_Ptr = std::unique_ptr<Collector>;
@@ -93,13 +90,6 @@ public:
   , transform(transform_)
   { }
 
-  inline void unprotect() {
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
-    }
-  }
-
   inline int size() const {
     return 1;
   }
@@ -110,6 +100,8 @@ protected:
   const SEXP default_value;
   const SEXP ptype;
   int current_row = 0;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Scalar(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
@@ -189,6 +181,8 @@ private:
   const int default_value;
   const SEXP ptype = tibblify_shared_empty_lgl;
   int* data_ptr;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Scalar_Lgl(int default_value_, bool required_, int col_location_,
@@ -226,6 +220,8 @@ private:
   const int default_value;
   const SEXP ptype = tibblify_shared_empty_int;
   int* data_ptr;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Scalar_Int(int default_value_, bool required_, int col_location_,
@@ -263,6 +259,8 @@ private:
   const double default_value;
   const SEXP ptype = tibblify_shared_empty_dbl;
   double* data_ptr;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Scalar_Dbl(double default_value_, bool required_, int col_location_,
@@ -300,6 +298,8 @@ private:
   const SEXP default_value;
   const SEXP ptype = tibblify_shared_empty_chr;
   SEXP* data_ptr;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Scalar_Str(SEXP default_value_, bool required_, int col_location_,
@@ -338,6 +338,8 @@ protected:
   const SEXP default_value;
   const SEXP ptype;
   int current_row = 0;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
@@ -386,6 +388,8 @@ class Collector_List : public Collector_Scalar_Base {
 protected:
   const SEXP default_value;
   int current_row = 0;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_List(SEXP default_value_, bool required_, int col_location_, SEXP name_,
@@ -486,9 +490,6 @@ public:
   }
 
   inline void unprotect() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).unprotect();
-    }
     if (this->needs_unprotect) {
       UNPROTECT(1);
       this->needs_unprotect = false;
@@ -817,6 +818,8 @@ private:
   const int col_location;
   const std::unique_ptr<Parser_Object_List> parser_ptr;
   int current_row = 0;
+private:
+  bool needs_unprotect = false;
 
 public:
   Collector_List_Of_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_,
