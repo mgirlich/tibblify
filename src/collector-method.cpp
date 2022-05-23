@@ -76,7 +76,6 @@ using Collector_Ptr = std::unique_ptr<Collector>;
 
 class Collector_Scalar_Base : public Collector {
 protected:
-  SEXP data;
   const bool required;
   const int col_location;
   const SEXP name;
@@ -101,6 +100,7 @@ protected:
   const SEXP ptype;
   int current_row = 0;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -182,6 +182,7 @@ private:
   const SEXP ptype = tibblify_shared_empty_lgl;
   int* data_ptr;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -221,6 +222,7 @@ private:
   const SEXP ptype = tibblify_shared_empty_int;
   int* data_ptr;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -260,6 +262,7 @@ private:
   const SEXP ptype = tibblify_shared_empty_dbl;
   double* data_ptr;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -299,6 +302,7 @@ private:
   const SEXP ptype = tibblify_shared_empty_chr;
   SEXP* data_ptr;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -339,6 +343,7 @@ protected:
   const SEXP ptype;
   int current_row = 0;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
@@ -389,6 +394,7 @@ protected:
   const SEXP default_value;
   int current_row = 0;
 private:
+  SEXP data;
   bool needs_unprotect = false;
 
 public:
