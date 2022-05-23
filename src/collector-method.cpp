@@ -421,8 +421,8 @@ class Multi_Collector {
 private:
   SEXP field_names_prev = R_NilValue;
   int n_fields_prev = 0;
-  const int INDEX_SIZE = 256;
-  int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
+  static const int INDEX_SIZE = 256;
+  int ind[INDEX_SIZE];
 
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     if (n_fields != this->n_fields_prev) return true;
