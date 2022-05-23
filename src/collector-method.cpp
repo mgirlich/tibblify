@@ -163,7 +163,7 @@ public:
 
 #define ADD_VALUE(F_SCALAR)                                    \
   if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = vec_cast(PROTECT(value), this->ptype);   \
+  SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
   R_len_t size = short_vec_size(value_casted);                 \
   if (size == 0) {                                             \
     *this->data_ptr = this->default_value;                     \
@@ -174,7 +174,7 @@ public:
   }                                                            \
                                                                \
   ++this->data_ptr;                                            \
-  UNPROTECT(1);
+  UNPROTECT(2);
 
 #define ADD_DEFAULT()                                          \
   if (this->required) stop_required(path);                     \
@@ -760,7 +760,8 @@ public:
       for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
         path.replace(row_index);
         *slice_index_int_ptr = row_index + 1;
-        this->add_value(vec_slice_impl(object_list, slice_index_int), path);
+        this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
+        UNPROTECT(1);
       }
       UNPROTECT(1);
     }
