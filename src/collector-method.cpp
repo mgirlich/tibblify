@@ -508,7 +508,7 @@ public:
     if (n_fields == 0) {
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
       }
       path.up();
@@ -537,7 +537,7 @@ public:
       SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
 
       if (field_nm == *key_names_ptr) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
         key_names_ptr++; key_index++;
         field_index++;
@@ -547,7 +547,7 @@ public:
       const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
         key_names_ptr++; key_index++;
         continue;
@@ -559,7 +559,7 @@ public:
     }
 
     for (; key_index < this->n_keys; key_index++) {
-      path.replace(key_names_ptr);
+      path.replace(*key_names_ptr);
       (*this->collector_vec[key_index]).add_default(path);
       key_names_ptr++;
     }
