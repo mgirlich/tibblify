@@ -29,6 +29,30 @@ stop_scalar <- function(path) {
   abort(message)
 }
 
+stop_duplicate_name <- function(path) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has duplicate name.")
+  )
+  abort(message)
+}
+
+stop_empty_name <- function(path) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has empty name.")
+  )
+  abort(message)
+}
+
+stop_names_is_null <- function(path) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has NULL names.")
+  )
+  abort(message)
+}
+
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
 }

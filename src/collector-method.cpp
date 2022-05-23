@@ -11,31 +11,34 @@
 #include "utils.h"
 #include "Path.h"
 
-inline void stop_scalar(Path& path) {
+inline void stop_scalar(const Path& path) {
   SEXP call = PROTECT(Rf_lang2(Rf_install("stop_scalar"),
                                PROTECT(path.data())));
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_required(Path& path) {
+inline void stop_required(const Path& path) {
   SEXP call = PROTECT(Rf_lang2(Rf_install("stop_required"),
                                PROTECT(path.data())));
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_duplicate_name() {
-  // TODO better error message
-  cpp11::stop("Duplicate name");
+inline void stop_duplicate_name(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_duplicate_name"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_empty_name() {
-  // TODO better error message
-  cpp11::stop("Empty name");
+inline void stop_empty_name(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_empty_name"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_names_is_null() {
-  // TODO better error message
-  cpp11::stop("Empty name");
+inline void stop_names_is_null(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_names_is_null"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
 }
 
 inline SEXP apply_transform(SEXP value, SEXP fn) {
@@ -442,18 +445,18 @@ private:
     R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
   }
 
-  inline void check_names(const SEXP* field_names_ptr, const int n_fields) {
+  inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
     if (n_fields <= 1) return;
 
     SEXPREC* field_nm = field_names_ptr[this->ind[0]];
-    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path);
 
     for (int field_index = 1; field_index < n_fields; field_index++) {
       SEXPREC* field_nm_prev = field_nm;
       field_nm = field_names_ptr[this->ind[field_index]];
-      if (field_nm == field_nm_prev) stop_duplicate_name();
+      if (field_nm == field_nm_prev) stop_duplicate_name(path);
 
-      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path);
     }
   }
 
@@ -500,14 +503,14 @@ public:
     }
 
     SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
-    if (field_names == R_NilValue) stop_names_is_null();
+    if (field_names == R_NilValue) stop_names_is_null(path);
 
     const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
     const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
     // only update `ind` if necessary as `R_orderVector1()` is pretty slow
     if (fields_have_changed) {
       this->update_order(field_names, n_fields);
-      this->check_names(field_names_ptr, n_fields);
+      this->check_names(field_names_ptr, n_fields, path);
     }
 
     // TODO VECTOR_PTR_RO only works if object is a list
