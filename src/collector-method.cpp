@@ -423,7 +423,7 @@ public:
 
 class Multi_Collector {
 private:
-  SEXP field_names_prev = R_NilValue;
+  cpp11::strings field_names_prev;
   int n_fields_prev = 0;
   const int INDEX_SIZE = 256;
   int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
