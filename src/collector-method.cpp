@@ -481,13 +481,6 @@ public:
     }
   }
 
-  inline void unprotect() {
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
-    }
-  }
-
   inline void init(R_xlen_t& length) {
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).init(length);
@@ -572,10 +565,6 @@ public:
   , n_keys(Rf_length(keys_))
   { }
 
-  inline void unprotect() {
-    Multi_Collector::unprotect();
-  }
-
   inline int size() const {
     int size = 0;
     for (const Collector_Ptr& collector : this->collector_vec) {
@@ -650,10 +639,6 @@ public:
 
   ~ Collector_Tibble() {}
 
-  inline void unprotect() {
-    Multi_Collector::unprotect();
-  }
-
   inline int size() const {
     return 1;
   }
@@ -722,7 +707,6 @@ private:
     set_df_attributes(df, n_rows);
 
     UNPROTECT(2);
-    Multi_Collector::unprotect();
     return df;
   }
 
@@ -783,7 +767,6 @@ private:
     set_df_attributes(df, 1);
 
     UNPROTECT(2);
-    Multi_Collector::unprotect();
     return df;
   }
 
@@ -821,13 +804,6 @@ public:
   , col_location(col_location_)
   , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, names_col_)))
   { }
-
-  inline void unprotect() {
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
-    }
-  }
 
   inline void init(R_xlen_t& length) {
     Path path;
