@@ -423,7 +423,6 @@ private:
   int n_fields_prev = 0;
   const int INDEX_SIZE = 256;
   int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
-  bool needs_unprotect = false;
 
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     if (n_fields != this->n_fields_prev) return true;
@@ -459,7 +458,7 @@ private:
   }
 
 protected:
-  SEXP keys;
+  cpp11::writable::strings keys;
   std::vector<Collector_Ptr> collector_vec;
   const int n_keys;
 
@@ -472,8 +471,7 @@ public:
     this->n_fields_prev = Rf_length(keys_);
     this->field_names_prev = keys_;
 
-    this->keys = PROTECT(Rf_allocVector(STRSXP, n_keys));
-    this->needs_unprotect = true;
+    this->keys = Rf_allocVector(STRSXP, n_keys);
     for(int i = 0; i < n_keys; i++) {
       int key_index = this->ind[i];
       SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
