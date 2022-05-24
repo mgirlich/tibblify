@@ -432,7 +432,7 @@ private:
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     if (n_fields != this->n_fields_prev) return true;
 
-    if (n_fields > this->INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
+    if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
     const SEXP* nms_ptr = STRING_PTR_RO(field_names);
     const SEXP* nms_ptr_prev = STRING_PTR_RO(this->field_names_prev);
     for (int i = 0; i < n_fields; i++, nms_ptr++, nms_ptr_prev++)
