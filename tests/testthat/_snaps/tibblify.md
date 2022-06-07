@@ -16,7 +16,7 @@
 
 ---
 
-    Element at path <root> has duplicate name.
+    Element at path <root> has duplicate name x.
 
 # scalar column works
 

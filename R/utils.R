@@ -33,10 +33,10 @@ stop_scalar <- function(path) {
   abort(message)
 }
 
-stop_duplicate_name <- function(path) {
+stop_duplicate_name <- function(path, name) {
   path_str <- path_to_string(path)
   message <- c(
-    paste0("Element at path ", path_str, " has duplicate name.")
+    paste0("Element at path ", path_str, " has duplicate name ", name, ".")
   )
   abort(message)
 }
