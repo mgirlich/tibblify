@@ -23,6 +23,8 @@
 <![endif]-->
 </head>
 <body data-spy="scroll" data-target="#toc">
+    
+
     <div class="container template-home">
       <header><div class="navbar navbar-default navbar-fixed-top" role="navigation">
   <div class="container">
@@ -35,18 +37,12 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">tibblify</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="Released version">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9000</span>
       </span>
     </div>
 
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-<li>
-  <a href="index.html">
-    <span class="fas fa-home fa-lg"></span>
-     
-  </a>
-</li>
 <li>
   <a href="articles/tibblify.html">Get started</a>
 </li>
@@ -59,7 +55,7 @@
       </ul>
 <ul class="nav navbar-nav navbar-right">
 <li>
-  <a href="https://github.com/mgirlich/tibblify/">
+  <a href="https://github.com/mgirlich/tibblify/" class="external-link">
     <span class="fab fa-github fa-lg"></span>
      
   </a>
@@ -76,24 +72,23 @@
 
       </header><div class="row">
   <div class="contents col-md-9">
-<div id="tibblify" class="section level1">
-<div class="page-header"><h1 class="hasAnchor">
-<a href="#tibblify" class="anchor"></a>tibblify</h1></div>
+<div class="section level1">
+<div class="page-header"><h1 id="tibblify">tibblify<a class="anchor" aria-label="anchor" href="#tibblify"></a>
+</h1></div>
 <!-- badges: start -->
-
 <p>The goal of tibblify is to provide an easy way of converting a nested list into a tibble.</p>
-<div id="installation" class="section level2">
-<h2 class="hasAnchor">
-<a href="#installation" class="anchor"></a>Installation</h2>
-<p>You can install the released version of tibblify from <a href="https://CRAN.R-project.org">CRAN</a> with:</p>
+<div class="section level2">
+<h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
+</h2>
+<p>You can install the released version of tibblify from <a href="https://CRAN.R-project.org" class="external-link">CRAN</a> with:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">"tibblify"</span>)</span></code></pre></div>
 <p>Or install the development version from GitHub with:</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># install.packages("devtools")</span></span>
 <span id="cb2-2"><a href="#cb2-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"mgirlich/tibblify"</span>)</span></code></pre></div>
 </div>
-<div id="usage" class="section level2">
-<h2 class="hasAnchor">
-<a href="#usage" class="anchor"></a>Usage</h2>
+<div class="section level2">
+<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+</h2>
 <p>Let’s convert the Leaders dataset into a tibble. It is a list with one element per character:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(tibblify)</span>
 <span id="cb3-2"><a href="#cb3-2"></a></span>
@@ -132,7 +127,7 @@
 <span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;           </span></span>
 <span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt; 1 Ann Dunham Barack Obama Sr.</span></span>
 <span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt; 2 &lt;NA&gt;       Stanley Johnson</span></span></code></pre></div>
-<p>and the <code>spouses</code> column is a <a href="https://vctrs.r-lib.org/reference/list_of.html"><code>list_of</code></a> character because the <code>spouses</code> field is a list and all elements are characters</p>
+<p>and the <code>spouses</code> column is a <a href="https://vctrs.r-lib.org/reference/list_of.html" class="external-link"><code>list_of</code></a> character because the <code>spouses</code> field is a list and all elements are characters</p>
 <div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>politicians_tibble<span class="op">$</span>spouses</span>
 <span id="cb6-2"><a href="#cb6-2"></a><span class="co">#&gt; &lt;list_of&lt;character&gt;[2]&gt;</span></span>
 <span id="cb6-3"><a href="#cb6-3"></a><span class="co">#&gt; [[1]]</span></span>
@@ -141,9 +136,9 @@
 <span id="cb6-6"><a href="#cb6-6"></a><span class="co">#&gt; [[2]]</span></span>
 <span id="cb6-7"><a href="#cb6-7"></a><span class="co">#&gt; [1] "Allegra Mostyn-Owen" "Marina Wheeler"</span></span></code></pre></div>
 </div>
-<div id="specification" class="section level2">
-<h2 class="hasAnchor">
-<a href="#specification" class="anchor"></a>Specification</h2>
+<div class="section level2">
+<h2 id="specification">Specification<a class="anchor" aria-label="anchor" href="#specification"></a>
+</h2>
 <p>In the above example we used <code><a href="reference/tibblify.html">tibblify()</a></code> without any further specification on how to convert the list into a tibble. This is quite useful in an interactive session but often you want to provide a specification yourself. Some of the reasons are:</p>
 <ul>
 <li>to ensure type and shape stability of the resulting tibble in automated scripts.</li>
@@ -177,12 +172,12 @@
 <span id="cb7-22"><a href="#cb7-22"></a><span class="co">#&gt;     start = lcol_chr("start")</span></span>
 <span id="cb7-23"><a href="#cb7-23"></a><span class="co">#&gt;   )</span></span>
 <span id="cb7-24"><a href="#cb7-24"></a><span class="co">#&gt; )</span></span></code></pre></div>
-<p>A specification always starts with a call to <code><a href="reference/lcols.html">lcols()</a></code> (similar to <a href="https://readr.tidyverse.org/reference/cols.html"><code>readr::cols()</code></a>). Then you specify the columns you want with name-value pairs. The name is the name of the resulting column and the value is a specification created with one of the <code>lcol_*()</code> functions.</p>
+<p>A specification always starts with a call to <code><a href="reference/lcols.html">lcols()</a></code> (similar to <a href="https://readr.tidyverse.org/reference/cols.html" class="external-link"><code>readr::cols()</code></a>). Then you specify the columns you want with name-value pairs. The name is the name of the resulting column and the value is a specification created with one of the <code>lcol_*()</code> functions.</p>
 </div>
-<div id="path" class="section level2">
-<h2 class="hasAnchor">
-<a href="#path" class="anchor"></a>Path</h2>
-<p>The first argument to <code>lcol_*()</code> is always a <code>path</code> which describes where to find the element. The syntax is the same as in <code><a href="https://purrr.tidyverse.org/reference/map.html">purrr::map()</a></code> used to extract fields. Some examples</p>
+<div class="section level2">
+<h2 id="path">Path<a class="anchor" aria-label="anchor" href="#path"></a>
+</h2>
+<p>The first argument to <code>lcol_*()</code> is always a <code>path</code> which describes where to find the element. The syntax is the same as in <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">purrr::map()</a></code> used to extract fields. Some examples</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>leader &lt;-<span class="st"> </span>politicians[[<span class="dv">1</span>]]</span>
 <span id="cb8-2"><a href="#cb8-2"></a></span>
 <span id="cb8-3"><a href="#cb8-3"></a><span class="co"># get the element `id`</span></span>
@@ -200,9 +195,9 @@
 <span id="cb8-15"><a href="#cb8-15"></a>leader[[<span class="st">"spouses"</span>]][[<span class="dv">1</span>]]</span>
 <span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; [1] "Michelle Robinson"</span></span></code></pre></div>
 </div>
-<div id="vector-columns" class="section level2">
-<h2 class="hasAnchor">
-<a href="#vector-columns" class="anchor"></a>Vector Columns</h2>
+<div class="section level2">
+<h2 id="vector-columns">Vector Columns<a class="anchor" aria-label="anchor" href="#vector-columns"></a>
+</h2>
 <p>A couple of typical vector types have a predefined extractor:</p>
 <ul>
 <li>
@@ -233,10 +228,10 @@
 <span id="cb9-12"><a href="#cb9-12"></a><span class="co">#&gt; 1     1 Barack Obama        </span></span>
 <span id="cb9-13"><a href="#cb9-13"></a><span class="co">#&gt; 2     2 Boris  Johnson</span></span></code></pre></div>
 </div>
-<div id="missing-elements" class="section level2">
-<h2 class="hasAnchor">
-<a href="#missing-elements" class="anchor"></a>Missing Elements</h2>
-<p>If an element doesn’t exist an error is thrown as in <code><a href="https://purrr.tidyverse.org/reference/pluck.html">purrr::chuck()</a></code>. To use a default value instead of throwing an error use the <code>.default</code> argument. The <code>.default</code> value is also used in case the element at the path is empty:</p>
+<div class="section level2">
+<h2 id="missing-elements">Missing Elements<a class="anchor" aria-label="anchor" href="#missing-elements"></a>
+</h2>
+<p>If an element doesn’t exist an error is thrown as in <code><a href="https://purrr.tidyverse.org/reference/pluck.html" class="external-link">purrr::chuck()</a></code>. To use a default value instead of throwing an error use the <code>.default</code> argument. The <code>.default</code> value is also used in case the element at the path is empty:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>list_default &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
 <span id="cb10-2"><a href="#cb10-2"></a>  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>),</span>
 <span id="cb10-3"><a href="#cb10-3"></a>  <span class="kw">list</span>(<span class="dt">a =</span> <span class="ot">NULL</span>),</span>
@@ -262,10 +257,10 @@
 <span id="cb10-23"><a href="#cb10-23"></a><span class="co">#&gt; 3     0</span></span>
 <span id="cb10-24"><a href="#cb10-24"></a><span class="co">#&gt; 4     0</span></span></code></pre></div>
 </div>
-<div id="parser" class="section level2">
-<h2 class="hasAnchor">
-<a href="#parser" class="anchor"></a>Parser</h2>
-<p>When the cast is not possible with <code><a href="https://vctrs.r-lib.org/reference/vec_cast.html">vctrs::vec_cast()</a></code> you can use the <code>.parser</code> argument to supply a custom parser. It is passed to <code><a href="https://rlang.r-lib.org/reference/as_function.html">rlang::as_function()</a></code> so you can use a function or a formula. A typical use case are dates stored as strings.</p>
+<div class="section level2">
+<h2 id="parser">Parser<a class="anchor" aria-label="anchor" href="#parser"></a>
+</h2>
+<p>When the cast is not possible with <code><a href="https://vctrs.r-lib.org/reference/vec_cast.html" class="external-link">vctrs::vec_cast()</a></code> you can use the <code>.parser</code> argument to supply a custom parser. It is passed to <code><a href="https://rlang.r-lib.org/reference/as_function.html" class="external-link">rlang::as_function()</a></code> so you can use a function or a formula. A typical use case are dates stored as strings.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">tibblify</span>(</span>
 <span id="cb11-2"><a href="#cb11-2"></a>  politicians,</span>
 <span id="cb11-3"><a href="#cb11-3"></a>  <span class="kw">lcols</span>(</span>
@@ -279,9 +274,9 @@
 <span id="cb11-11"><a href="#cb11-11"></a><span class="co">#&gt; 1 Obama   1961-08-04</span></span>
 <span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt; 2 Johnson 1964-06-19</span></span></code></pre></div>
 </div>
-<div id="list-and-list-of-columns" class="section level2">
-<h2 class="hasAnchor">
-<a href="#list-and-list-of-columns" class="anchor"></a>List and List Of Columns</h2>
+<div class="section level2">
+<h2 id="list-and-list-of-columns">List and List Of Columns<a class="anchor" aria-label="anchor" href="#list-and-list-of-columns"></a>
+</h2>
 <p>A <code>list_of</code> is a list where each element in the list has the same prototype. It is useful when you have fields with more than one element as in the <code>spouses</code> field.</p>
 <div class="sourceCode" id="cb12"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>spouses_tbl &lt;-<span class="st"> </span><span class="kw">tibblify</span>(</span>
 <span id="cb12-2"><a href="#cb12-2"></a>  politicians,</span>
@@ -304,18 +299,18 @@
 <span id="cb12-19"><a href="#cb12-19"></a><span class="co">#&gt; </span></span>
 <span id="cb12-20"><a href="#cb12-20"></a><span class="co">#&gt; [[2]][[2]]</span></span>
 <span id="cb12-21"><a href="#cb12-21"></a><span class="co">#&gt; [1] "Marina Wheeler"</span></span></code></pre></div>
-<p>You can use <a href="https://tidyr.tidyverse.org/reference/nest.html"><code>tidyr::unnest()</code></a> or <a href="https://tidyr.tidyverse.org/reference/hoist.html"><code>tidyr::unnest_longer()</code></a> to flatten these columns to regular columns.</p>
+<p>You can use <a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link"><code>tidyr::unnest()</code></a> or <a href="https://tidyr.tidyverse.org/reference/hoist.html" class="external-link"><code>tidyr::unnest_longer()</code></a> to flatten these columns to regular columns.</p>
 <p>A list column is used when you have a field with mixed elements.</p>
 </div>
-<div id="guess-and-skip" class="section level2">
-<h2 class="hasAnchor">
-<a href="#guess-and-skip" class="anchor"></a>Guess and Skip</h2>
+<div class="section level2">
+<h2 id="guess-and-skip">Guess and Skip<a class="anchor" aria-label="anchor" href="#guess-and-skip"></a>
+</h2>
 <p>Analogue to <code>readr::col_guess()</code> and <code>readr::col_skip()</code> you can specify that you want to guess the column type with <code><a href="reference/lcol_lgl.html">lcol_guess()</a></code> respectively skip a field with <code><a href="reference/lcol_lgl.html">lcol_skip()</a></code>. Skipping a column can be useful when you set a default column type or you want to make clear that you know about the field and intentionally skip it.</p>
 <p>Guessing a column is useful in interactive sessions but you shouldn’t rely on it in automated scripts.</p>
 </div>
-<div id="tibble-columns-and-list-of-tibble-columns" class="section level2">
-<h2 class="hasAnchor">
-<a href="#tibble-columns-and-list-of-tibble-columns" class="anchor"></a>Tibble Columns and List Of Tibble Columns</h2>
+<div class="section level2">
+<h2 id="tibble-columns-and-list-of-tibble-columns">Tibble Columns and List Of Tibble Columns<a class="anchor" aria-label="anchor" href="#tibble-columns-and-list-of-tibble-columns"></a>
+</h2>
 <p>If a field contains is a named list where each element has length 1 or 0 the field is converted to a tibble column. This is for example the case for the <code>parents</code> field:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>leaders_tibble &lt;-<span class="st"> </span><span class="kw">tibblify</span>(</span>
 <span id="cb13-2"><a href="#cb13-2"></a>  politicians,</span>
@@ -333,9 +328,9 @@
 <span id="cb13-14"><a href="#cb13-14"></a><span class="co">#&gt; 2 Johnson &lt;NA&gt;           Stanley Johnson</span></span></code></pre></div>
 <p>Tibble columns are a relatively new concept in the tidyverse. You can unpack a tibble column into regular columns with <code>tidyr::unpack()</code>.</p>
 </div>
-<div id="parsing-other-types" class="section level2">
-<h2 class="hasAnchor">
-<a href="#parsing-other-types" class="anchor"></a>Parsing other types</h2>
+<div class="section level2">
+<h2 id="parsing-other-types">Parsing other types<a class="anchor" aria-label="anchor" href="#parsing-other-types"></a>
+</h2>
 <p><code>tibblify</code> provides shortcuts for a couple of common types. To parse a vector or record type without a parser use <code><a href="reference/lcol_lgl.html">lcol_vec()</a></code>. Let’s say you have a list with <code>difftimes</code></p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>now &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()</span>
 <span id="cb14-2"><a href="#cb14-2"></a>past &lt;-<span class="st"> </span>now <span class="op">-</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>)</span>
@@ -371,9 +366,9 @@
 <span id="cb16-10"><a href="#cb16-10"></a><span class="co">#&gt; 1 100 secs</span></span>
 <span id="cb16-11"><a href="#cb16-11"></a><span class="co">#&gt; 2 200 secs</span></span></code></pre></div>
 </div>
-<div id="default-column-type" class="section level2">
-<h2 class="hasAnchor">
-<a href="#default-column-type" class="anchor"></a>Default Column Type</h2>
+<div class="section level2">
+<h2 id="default-column-type">Default Column Type<a class="anchor" aria-label="anchor" href="#default-column-type"></a>
+</h2>
 <p>You can use the <code>.default</code> argument of <code><a href="reference/lcols.html">lcols()</a></code> to define a parser used for all unspecified fields.</p>
 <div class="sourceCode" id="cb17"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">tibblify</span>(</span>
 <span id="cb17-2"><a href="#cb17-2"></a>  politicians,</span>
@@ -389,66 +384,76 @@
 <span id="cb17-12"><a href="#cb17-12"></a><span class="co">#&gt; 1 Barack Obama   &lt;int [1… &lt;chr [1… &lt;dbl [1]&gt;  &lt;named list [… &lt;list [1… &lt;list [2…</span></span>
 <span id="cb17-13"><a href="#cb17-13"></a><span class="co">#&gt; 2 Boris  Johnson &lt;int [1… &lt;chr [1… &lt;NULL&gt;     &lt;named list [… &lt;list [2… &lt;list [3…</span></span></code></pre></div>
 </div>
-<div id="code-of-conduct" class="section level2">
-<h2 class="hasAnchor">
-<a href="#code-of-conduct" class="anchor"></a>Code of Conduct</h2>
-<p>Please note that the tibblify project is released with a <a href="https://www.contributor-covenant.org/version/2/0/code_of_conduct/">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
+<div class="section level2">
+<h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
+</h2>
+<p>Please note that the tibblify project is released with a <a href="https://www.contributor-covenant.org/version/2/0/code_of_conduct/" class="external-link">Contributor Code of Conduct</a>. By contributing to this project, you agree to abide by its terms.</p>
 </div>
 </div>
   </div>
 
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <div class="links">
-<h2>Links</h2>
+<h2 data-toc-skip>Links</h2>
 <ul class="list-unstyled">
-<li>Download from CRAN at <br><a href="https://cloud.r-project.org/package=tibblify">https://​cloud.r-project.org/​package=tibblify</a>
-</li>
-<li>Browse source code at <br><a href="https://github.com/mgirlich/tibblify/">https://​github.com/​mgirlich/​tibblify/​</a>
-</li>
-<li>Report a bug at <br><a href="https://github.com/mgirlich/tibblify/issues">https://​github.com/​mgirlich/​tibblify/​issues</a>
-</li>
+<li><a href="https://cloud.r-project.org/package=tibblify" class="external-link">View on CRAN</a></li>
+<li><a href="https://github.com/mgirlich/tibblify/" class="external-link">Browse source code</a></li>
+<li><a href="https://github.com/mgirlich/tibblify/issues" class="external-link">Report a bug</a></li>
 </ul>
 </div>
+
 <div class="license">
-<h2>License</h2>
+<h2 data-toc-skip>License</h2>
 <ul class="list-unstyled">
 <li><a href="LICENSE.html">Full license</a></li>
-<li><small><a href="https://www.r-project.org/Licenses/GPL-3">GPL-3</a></small></li>
+<li><small><a href="https://www.r-project.org/Licenses/GPL-3" class="external-link">GPL-3</a></small></li>
 </ul>
 </div>
+
 <div class="community">
-<h2>Community</h2>
+<h2 data-toc-skip>Community</h2>
 <ul class="list-unstyled">
 <li><a href="CONTRIBUTING.html">Contributing guide</a></li>
 <li><a href="CODE_OF_CONDUCT.html">Code of conduct</a></li>
 </ul>
 </div>
+
+<div class="citation">
+<h2 data-toc-skip>Citation</h2>
+<ul class="list-unstyled">
+<li><a href="authors.html#citation">Citing tibblify</a></li>
+</ul>
+</div>
+
 <div class="developers">
-<h2>Developers</h2>
+<h2 data-toc-skip>Developers</h2>
 <ul class="list-unstyled">
 <li>Maximilian Girlich <br><small class="roles"> Author, maintainer </small>  </li>
 </ul>
 </div>
 
-  <div class="dev-status">
-<h2>Dev status</h2>
+<div class="dev-status">
+<h2 data-toc-skip>Dev status</h2>
 <ul class="list-unstyled">
-<li><a href="https://www.tidyverse.org/lifecycle/#experimental"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
-<li><a href="https://CRAN.R-project.org/package=tibblify"><img src="https://www.r-pkg.org/badges/version/tibblify" alt="CRAN status"></a></li>
-<li><a href="https://codecov.io/gh/mgirlich/tibblify?branch=master"><img src="https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
-<li><a href="https://github.com/mgirlich/tibblify/actions"><img src="https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
+<li><a href="https://www.tidyverse.org/lifecycle/#experimental" class="external-link"><img src="https://img.shields.io/badge/lifecycle-experimental-orange.svg" alt="Lifecycle: experimental"></a></li>
+<li><a href="https://CRAN.R-project.org/package=tibblify" class="external-link"><img src="https://www.r-pkg.org/badges/version/tibblify" alt="CRAN status"></a></li>
+<li><a href="https://codecov.io/gh/mgirlich/tibblify?branch=master" class="external-link"><img src="https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
+<li><a href="https://github.com/mgirlich/tibblify/actions" class="external-link"><img src="https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
 </ul>
 </div>
-</div>
+
+  </div>
 </div>
 
 
       <footer><div class="copyright">
-  <p>Developed by Maximilian Girlich.</p>
+  <p></p>
+<p>Developed by Maximilian Girlich.</p>
 </div>
 
 <div class="pkgdown">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/">pkgdown</a> 1.6.1.</p>
+  <p></p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.3.</p>
 </div>
 
       </footer>
@@ -456,6 +461,8 @@
 
   
 
+
+  
 
   </body>
 </html>

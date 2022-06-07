@@ -1,7 +1,7 @@
 pandoc: 2.7.3
-pkgdown: 1.6.1
+pkgdown: 2.0.3
 pkgdown_sha: ~
 articles:
   tibblify: tibblify.html
-last_built: 2021-11-02T13:07Z
+last_built: 2022-06-07T08:54Z
 
