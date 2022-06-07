@@ -1,22 +1,41 @@
 # names are checked
 
-    Element at path <root> has NULL names.
-
----
-
-    Element at path <root> has empty name.
-
----
-
-    Element at path <root> has empty name.
-
----
-
-    Element at path <root> has empty name.
-
----
-
-    Element at path <root> has duplicate name x.
+    Code
+      (expect_error(tibblify(list(1, 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_names_is_null()`:
+      ! Element at path <root> has NULL names.
+    Code
+      (expect_error(tibblify(list(x = 1, 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path <root> has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path <root> has empty name at position 1.
+    Code
+      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path <root> has empty name at position 3.
+    Code
+      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path <root> has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(x = 1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_duplicate_name()`:
+      ! Element at path <root> has duplicate name x.
 
 # scalar column works
 

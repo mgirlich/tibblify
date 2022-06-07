@@ -41,10 +41,10 @@ stop_duplicate_name <- function(path, name) {
   abort(message)
 }
 
-stop_empty_name <- function(path) {
+stop_empty_name <- function(path, index) {
   path_str <- path_to_string(path)
   message <- c(
-    paste0("Element at path ", path_str, " has empty name.")
+    paste0("Element at path ", path_str, " has empty name at position ", index + 1, ".")
   )
   abort(message)
 }
