@@ -1,4 +1,8 @@
 path_to_string <- function(path) {
+  if (length(path) == 0) {
+    return("<root>")
+  }
+
   path_elements <- purrr::map_chr(
     path,
     function(elt) {
@@ -25,6 +29,30 @@ stop_scalar <- function(path) {
   path_str <- path_to_string(path)
   message <- c(
     paste0("Element at path ", path_str, " must have size 1.")
+  )
+  abort(message)
+}
+
+stop_duplicate_name <- function(path, name) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has duplicate name ", name, ".")
+  )
+  abort(message)
+}
+
+stop_empty_name <- function(path, index) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has empty name at position ", index + 1, ".")
+  )
+  abort(message)
+}
+
+stop_names_is_null <- function(path) {
+  path_str <- path_to_string(path)
+  message <- c(
+    paste0("Element at path ", path_str, " has NULL names.")
   )
   abort(message)
 }
