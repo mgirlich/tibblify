@@ -401,6 +401,20 @@ test_that("can guess tib_unspecified in an object_list", {
   )
 })
 
+test_that("can guess object_list of length one (#50)", {
+  expect_equal(
+    guess_spec(
+      list(
+        list(x = 1, y = 2)
+      )
+    ),
+    spec_df(
+      x = tib_dbl("x"),
+      y = tib_dbl("y"),
+    )
+  )
+})
+
 # diverse -----------------------------------------------------------------
 
 test_that("can guess spec for discog", {

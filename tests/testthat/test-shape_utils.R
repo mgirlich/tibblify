@@ -38,3 +38,7 @@ test_that("is_object_list() works", {
   # can handle NULL
   expect_true(is_object_list(list(list(x = 1), NULL)))
 })
+
+test_that("detect lists of length 1 (#50)", {
+  expect_true(is_object_list(list(list(x = 1, y = 2))))
+})
