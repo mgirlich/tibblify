@@ -11,31 +11,36 @@
 #include "utils.h"
 #include "Path.h"
 
-inline void stop_scalar(Path& path) {
+inline void stop_scalar(const Path& path) {
   SEXP call = PROTECT(Rf_lang2(Rf_install("stop_scalar"),
                                PROTECT(path.data())));
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_required(Path& path) {
+inline void stop_required(const Path& path) {
   SEXP call = PROTECT(Rf_lang2(Rf_install("stop_required"),
                                PROTECT(path.data())));
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_duplicate_name() {
-  // TODO better error message
-  cpp11::stop("Duplicate name");
+inline void stop_duplicate_name(const Path& path, SEXPREC* field_nm) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_duplicate_name"),
+                               PROTECT(path.data()),
+                               cpp11::as_sexp(cpp11::r_string(field_nm))));
+  Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_empty_name() {
-  // TODO better error message
-  cpp11::stop("Empty name");
+inline void stop_empty_name(const Path& path, const int& index) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_empty_name"),
+                               PROTECT(path.data()),
+                               cpp11::as_sexp(index)));
+  Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_names_is_null() {
-  // TODO better error message
-  cpp11::stop("Empty name");
+inline void stop_names_is_null(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_names_is_null"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
 }
 
 inline SEXP apply_transform(SEXP value, SEXP fn) {
@@ -442,18 +447,19 @@ private:
     R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
   }
 
-  inline void check_names(const SEXP* field_names_ptr, const int n_fields) {
+  inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
+    // this relies on the fields already being in order
     if (n_fields <= 1) return;
 
     SEXPREC* field_nm = field_names_ptr[this->ind[0]];
-    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[0]);
 
     for (int field_index = 1; field_index < n_fields; field_index++) {
       SEXPREC* field_nm_prev = field_nm;
       field_nm = field_names_ptr[this->ind[field_index]];
-      if (field_nm == field_nm_prev) stop_duplicate_name();
+      if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
 
-      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name();
+      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[field_index]);
     }
   }
 
@@ -492,7 +498,7 @@ public:
     if (n_fields == 0) {
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
       }
       path.up();
@@ -500,14 +506,14 @@ public:
     }
 
     SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
-    if (field_names == R_NilValue) stop_names_is_null();
+    if (field_names == R_NilValue) stop_names_is_null(path);
 
     const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
     const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
     // only update `ind` if necessary as `R_orderVector1()` is pretty slow
     if (fields_have_changed) {
       this->update_order(field_names, n_fields);
-      this->check_names(field_names_ptr, n_fields);
+      this->check_names(field_names_ptr, n_fields, path);
     }
 
     // TODO VECTOR_PTR_RO only works if object is a list
@@ -521,7 +527,7 @@ public:
       SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
 
       if (field_nm == *key_names_ptr) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
         key_names_ptr++; key_index++;
         field_index++;
@@ -531,7 +537,7 @@ public:
       const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
-        path.replace(key_names_ptr);
+        path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_default(path);
         key_names_ptr++; key_index++;
         continue;
@@ -543,7 +549,7 @@ public:
     }
 
     for (; key_index < this->n_keys; key_index++) {
-      path.replace(key_names_ptr);
+      path.replace(*key_names_ptr);
       (*this->collector_vec[key_index]).add_default(path);
       key_names_ptr++;
     }
