@@ -10,18 +10,21 @@ tib <- function(x, col) {
 test_that("names are checked", {
   spec <- spec_object(x = tib_int("x", FALSE))
 
-  # no names
-  expect_snapshot_error(tibblify(list(1, 2), spec))
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(1, 2), spec)))
 
-  # partial names
-  expect_snapshot_error(tibblify(list(x = 1, 2), spec))
-  expect_snapshot_error(tibblify(list(1, x = 2), spec))
+    # partial names
+    (expect_error(tibblify(list(x = 1, 2), spec)))
+    (expect_error(tibblify(list(1, x = 2), spec)))
+    (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
 
-  # `NA` name
-  expect_snapshot_error(tibblify(set_names(list(1, 2), c("x", NA)), spec))
+    # `NA` name
+    (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
 
-  # duplicate name
-  expect_snapshot_error(tibblify(list(x = 1, x = 2), spec))
+    # duplicate name
+    (expect_error(tibblify(list(x = 1, x = 2), spec)))
+  })
 })
 
 test_that("scalar column works", {
