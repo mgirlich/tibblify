@@ -40,7 +40,9 @@ is_object_list <- function(x) {
     return(FALSE)
   }
 
-  if (vec_size(x) <= 1) return(FALSE)
+  if (vec_size(x) <= 1 && is_object(x)) {
+    return(FALSE)
+  }
 
   names_list <- lapply(x, names)
   names_list <- list_drop_empty(names_list)
