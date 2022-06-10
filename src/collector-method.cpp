@@ -132,7 +132,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = vec_cast(value, ptype);
+    SEXP value_casted = vec_cast(PROTECT(value), ptype);
     R_len_t size = short_vec_size(value_casted);
     if (size == 0) {
       value_casted = this->default_value;
@@ -141,6 +141,7 @@ public:
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    UNPROTECT(1);
   }
 
   inline void add_default(Path& path) {
@@ -167,7 +168,7 @@ public:
 
 #define ADD_VALUE(F_SCALAR)                                    \
   if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = vec_cast(value, this->ptype);            \
+  SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
   R_len_t size = short_vec_size(value_casted);                 \
   if (size == 0) {                                             \
     *this->data_ptr = this->default_value;                     \
@@ -177,7 +178,8 @@ public:
     stop_scalar(path);                                         \
   }                                                            \
                                                                \
-  ++this->data_ptr;
+  ++this->data_ptr;                                            \
+  UNPROTECT(2);
 
 #define ADD_DEFAULT()                                          \
   if (this->required) stop_required(path);                     \
@@ -367,8 +369,9 @@ public:
       return;
     }
 
-    SEXP value_casted = vec_cast(value, ptype);
+    SEXP value_casted = vec_cast(PROTECT(value), ptype);
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    UNPROTECT(1);
   }
 
   inline void add_default(Path& path) {
@@ -428,7 +431,7 @@ public:
 
 class Multi_Collector {
 private:
-  SEXP field_names_prev = R_NilValue;
+  cpp11::strings field_names_prev;
   int n_fields_prev = 0;
   const int INDEX_SIZE = 256;
   int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
@@ -763,7 +766,8 @@ public:
       for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
         path.replace(row_index);
         *slice_index_int_ptr = row_index + 1;
-        this->add_value(vec_slice_impl(object_list, slice_index_int), path);
+        this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
+        UNPROTECT(1);
       }
       UNPROTECT(1);
     }
