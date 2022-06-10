@@ -58,12 +58,10 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
 
 
 class Collector {
-protected:
-  bool needs_unprotect = false;
 public:
   virtual ~ Collector() {};
 
-  // reserve space and mark as `needs_unprotect`
+  // reserve space and protect against garbage collection
   virtual inline void init(R_xlen_t& length) = 0;
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
@@ -76,7 +74,6 @@ public:
   virtual inline void add_default_df() = 0;
   // assign data to input `list` at correct location and update `names`
   virtual inline void assign_data(SEXP list, SEXP names) const = 0;
-  virtual inline void unprotect() = 0;
 };
 
 using Collector_Ptr = std::unique_ptr<Collector>;
@@ -84,7 +81,6 @@ using Collector_Ptr = std::unique_ptr<Collector>;
 
 class Collector_Scalar_Base : public Collector {
 protected:
-  SEXP data;
   const bool required;
   const int col_location;
   const SEXP name;
@@ -98,13 +94,6 @@ public:
   , transform(transform_)
   { }
 
-  inline void unprotect() {
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
-    }
-  }
-
   inline int size() const {
     return 1;
   }
@@ -115,6 +104,8 @@ protected:
   const SEXP default_value;
   const SEXP ptype;
   int current_row = 0;
+private:
+  cpp11::writable::list data;
 
 public:
   Collector_Scalar(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
@@ -125,9 +116,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(VECSXP, length));
+    this->data = Rf_allocVector(VECSXP, length);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -196,6 +186,8 @@ private:
   const int default_value;
   const SEXP ptype = tibblify_shared_empty_lgl;
   int* data_ptr;
+private:
+  cpp11::writable::logicals data;
 
 public:
   Collector_Scalar_Lgl(int default_value_, bool required_, int col_location_,
@@ -205,9 +197,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(LGLSXP, length));
+    this->data = Rf_allocVector(LGLSXP, length);
     this->data_ptr = LOGICAL(this->data);
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -233,6 +224,8 @@ private:
   const int default_value;
   const SEXP ptype = tibblify_shared_empty_int;
   int* data_ptr;
+private:
+  cpp11::writable::integers data;
 
 public:
   Collector_Scalar_Int(int default_value_, bool required_, int col_location_,
@@ -242,9 +235,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(INTSXP, length));
+    this->data = Rf_allocVector(INTSXP, length);
     this->data_ptr = INTEGER(this->data);
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -270,6 +262,8 @@ private:
   const double default_value;
   const SEXP ptype = tibblify_shared_empty_dbl;
   double* data_ptr;
+private:
+  cpp11::writable::doubles data;
 
 public:
   Collector_Scalar_Dbl(double default_value_, bool required_, int col_location_,
@@ -279,9 +273,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(REALSXP, length));
+    this->data = Rf_allocVector(REALSXP, length);
     this->data_ptr = REAL(this->data);
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -307,6 +300,8 @@ private:
   const SEXP default_value;
   const SEXP ptype = tibblify_shared_empty_chr;
   SEXP* data_ptr;
+private:
+  cpp11::writable::strings data;
 
 public:
   Collector_Scalar_Str(SEXP default_value_, bool required_, int col_location_,
@@ -316,9 +311,8 @@ public:
   { }
 
   void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(STRSXP, length));
+    this->data = Rf_allocVector(STRSXP, length);
     this->data_ptr = STRING_PTR(this->data);
-    this->needs_unprotect = true;
   }
 
   void add_value(SEXP value, Path& path) {
@@ -345,6 +339,8 @@ protected:
   const SEXP default_value;
   const SEXP ptype;
   int current_row = 0;
+private:
+  cpp11::writable::list data;
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
@@ -355,9 +351,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(init_list_of(length, this->ptype));
+    this->data = init_list_of(length, this->ptype);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -394,6 +389,8 @@ class Collector_List : public Collector_Scalar_Base {
 protected:
   const SEXP default_value;
   int current_row = 0;
+private:
+  cpp11::writable::list data;
 
 public:
   Collector_List(SEXP default_value_, bool required_, int col_location_, SEXP name_,
@@ -403,9 +400,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = PROTECT(Rf_allocVector(VECSXP, length));
+    this->data = Rf_allocVector(VECSXP, length);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -433,14 +429,13 @@ class Multi_Collector {
 private:
   cpp11::strings field_names_prev;
   int n_fields_prev = 0;
-  const int INDEX_SIZE = 256;
-  int *ind = (int *) R_alloc(this->INDEX_SIZE, sizeof(int));
-  bool needs_unprotect = false;
+  static const int INDEX_SIZE = 256;
+  int ind[INDEX_SIZE];
 
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     if (n_fields != this->n_fields_prev) return true;
 
-    if (n_fields > this->INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
+    if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
     const SEXP* nms_ptr = STRING_PTR_RO(field_names);
     const SEXP* nms_ptr_prev = STRING_PTR_RO(this->field_names_prev);
     for (int i = 0; i < n_fields; i++, nms_ptr++, nms_ptr_prev++)
@@ -472,7 +467,7 @@ private:
   }
 
 protected:
-  SEXP keys;
+  cpp11::writable::strings keys;
   std::vector<Collector_Ptr> collector_vec;
   const int n_keys;
 
@@ -485,22 +480,11 @@ public:
     this->n_fields_prev = Rf_length(keys_);
     this->field_names_prev = keys_;
 
-    this->keys = PROTECT(Rf_allocVector(STRSXP, n_keys));
-    this->needs_unprotect = true;
+    this->keys = Rf_allocVector(STRSXP, n_keys);
     for(int i = 0; i < n_keys; i++) {
       int key_index = this->ind[i];
       SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
       this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
-    }
-  }
-
-  inline void unprotect() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).unprotect();
-    }
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
     }
   }
 
@@ -588,10 +572,6 @@ public:
   , n_keys(Rf_length(keys_))
   { }
 
-  inline void unprotect() {
-    Multi_Collector::unprotect();
-  }
-
   inline int size() const {
     int size = 0;
     for (const Collector_Ptr& collector : this->collector_vec) {
@@ -666,10 +646,6 @@ public:
 
   ~ Collector_Tibble() {}
 
-  inline void unprotect() {
-    Multi_Collector::unprotect();
-  }
-
   inline int size() const {
     return 1;
   }
@@ -738,7 +714,6 @@ private:
     set_df_attributes(df, n_rows);
 
     UNPROTECT(2);
-    Multi_Collector::unprotect();
     return df;
   }
 
@@ -800,7 +775,6 @@ private:
     set_df_attributes(df, 1);
 
     UNPROTECT(2);
-    Multi_Collector::unprotect();
     return df;
   }
 
@@ -821,7 +795,7 @@ public:
 
 class Collector_List_Of_Tibble : public Collector {
 private:
-  SEXP data;
+  cpp11::writable::list data;
   const bool required;
   const SEXP name;
   const int col_location;
@@ -837,19 +811,11 @@ public:
   , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, names_col_)))
   { }
 
-  inline void unprotect() {
-    if (this->needs_unprotect) {
-      UNPROTECT(1);
-      this->needs_unprotect = false;
-    }
-  }
-
   inline void init(R_xlen_t& length) {
     Path path;
     SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
-    this->data = PROTECT(init_list_of(length, ptype));
+    this->data = init_list_of(length, ptype);
     this->current_row = 0;
-    this->needs_unprotect = true;
   }
 
   inline void add_value(SEXP value, Path& path) {
