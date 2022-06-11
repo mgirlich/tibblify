@@ -14,9 +14,9 @@ spec_guess_df(x)
 
 spec_guess_list(x, simplify_list = TRUE)
 
-spec_guess_object_list(x, simplify_list)
+spec_guess_object_list(x, simplify_list = TRUE)
 
-spec_guess_object(x, simplify_list)
+spec_guess_object(x, simplify_list = TRUE)
 }
 \arguments{
 \item{x}{A nested list.}

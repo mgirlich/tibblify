@@ -81,7 +81,7 @@ spec_guess_list <- function(x, simplify_list = TRUE) {
 
 #' @rdname spec_guess
 #' @export
-spec_guess_object_list <- function(x, simplify_list) {
+spec_guess_object_list <- function(x, simplify_list = TRUE) {
   fields <- guess_object_list_spec(x, simplify_list)
 
   names_to <- NULL
@@ -93,7 +93,7 @@ spec_guess_object_list <- function(x, simplify_list) {
 
 #' @rdname spec_guess
 #' @export
-spec_guess_object <- function(x, simplify_list) {
+spec_guess_object <- function(x, simplify_list = TRUE) {
   fields <- guess_object_spec(x, simplify_list)
   return(spec_object(!!!fields))
 }
