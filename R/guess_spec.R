@@ -11,23 +11,25 @@
 #' spec_guess(list(list(x = 1), list(x = 2)))
 #'
 #' spec_guess(gh_users)
-spec_guess <- function(x, simplify_list = TRUE) {
-  UseMethod("spec_guess")
-}
-
-#' @export
-spec_guess.default <- function(x, simplify_list = TRUE) {
-  abort(paste0(
-    "Cannot guess the specification for type ",
-    vctrs::vec_ptype_full(x)
-  ))
+spec_guess <- function(x) {
+  if (is.data.frame(x)) {
+    spec_guess_df(x)
+  } else if (is.list(x)) {
+    spec_guess_list(x)
+  } else {
+    abort(paste0(
+      "Cannot guess the specification for type ",
+      vctrs::vec_ptype_full(x)
+    ))
+  }
 }
 
 
 # data frame --------------------------------------------------------------
 
 #' @export
-spec_guess.data.frame <- function(x, simplify_list = TRUE) {
+#' @rdname spec_guess
+spec_guess_df <- function(x) {
   spec_df(
     !!!purrr::imap(x, col_to_spec)
   )
@@ -67,16 +69,19 @@ safe_ptype_common2 <- function(x) {
 
 # list --------------------------------------------------------------------
 
+#' @rdname spec_guess
 #' @export
-spec_guess.list <- function(x, simplify_list = TRUE) {
-  if (is_object_list(x)) return(guess_object_list(x, simplify_list))
+spec_guess_list <- function(x, simplify_list = TRUE) {
+  if (is_object_list(x)) return(spec_guess_object_list(x, simplify_list))
 
-  if (is_object(x)) return(guess_object(x, simplify_list))
+  if (is_object(x)) return(spec_guess_object(x, simplify_list))
 
   abort("Cannot guess spec")
 }
 
-guess_object_list <- function(x, simplify_list) {
+#' @rdname spec_guess
+#' @export
+spec_guess_object_list <- function(x, simplify_list) {
   fields <- guess_object_list_spec(x, simplify_list)
 
   names_to <- NULL
@@ -86,7 +91,9 @@ guess_object_list <- function(x, simplify_list) {
   return(spec_df(!!!fields, .names_to = names_to))
 }
 
-guess_object <- function(x, simplify_list) {
+#' @rdname spec_guess
+#' @export
+spec_guess_object <- function(x, simplify_list) {
   fields <- guess_object_spec(x, simplify_list)
   return(spec_object(!!!fields))
 }

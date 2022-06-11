@@ -450,7 +450,7 @@ test_that("can guess spec for citm_catalog", {
 
   expect_snapshot(spec_guess(x))
 
-  expect_snapshot(spec_guess(x, simplify_list = FALSE))
+  expect_snapshot(spec_guess_list(x, simplify_list = FALSE))
 })
 
 test_that("can guess spec for gsoc-2018", {

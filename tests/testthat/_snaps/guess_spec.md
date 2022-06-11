@@ -270,7 +270,7 @@
 ---
 
     Code
-      spec_guess(x, simplify_list = FALSE)
+      spec_guess_list(x, simplify_list = FALSE)
     Output
       spec_object(
         areaNames = tib_row(
