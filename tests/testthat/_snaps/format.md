@@ -78,7 +78,7 @@
         "a",
         x = tib_int("x"),
         y = tib_dbl("y"),
-        z = tib_chr("z", default = "abc")
+        z = tib_chr("z", default = "abc"),
       )
 
 # format breaks long lines
@@ -89,7 +89,7 @@
     Output
       tib_row(
         "path",
-        a_long_name = tib_dbl("a looooooooooooooooooooong name", default = 1)
+        a_long_name = tib_dbl("a looooooooooooooooooooong name", default = 1),
       )
 
 ---
@@ -102,8 +102,8 @@
         "path",
         a_long_name = tib_dbl(
           "a looooooooooooooooooooong name",
-          default = 1
-        )
+          default = 1,
+        ),
       )
 
 # format for tib_vector works
@@ -127,7 +127,7 @@
     Output
       tib_row(
         "formats",
-        text = tib_chr("text")
+        text = tib_chr("text"),
       )
 
 ---
@@ -138,7 +138,7 @@
       tib_row(
         "formats",
         .required = FALSE,
-        text = tib_chr("text")
+        text = tib_chr("text"),
       )
 
 ---
@@ -167,7 +167,7 @@
           catno = tib_chr("catno"),
           resource_url = tib_chr("resource_url"),
           id = tib_int("id"),
-          entity_type_name = tib_chr("entity_type_name")
+          entity_type_name = tib_chr("entity_type_name"),
         ),
         year = tib_int("year"),
         master_url = tib_chr("master_url"),
@@ -179,7 +179,7 @@
           tracks = tib_chr("tracks"),
           role = tib_chr("role"),
           resource_url = tib_chr("resource_url"),
-          id = tib_int("id")
+          id = tib_int("id"),
         ),
         id = tib_int("id"),
         thumb = tib_chr("thumb"),
@@ -189,11 +189,11 @@
           descriptions = tib_chr_vec("descriptions"),
           text = tib_chr("text"),
           name = tib_chr("name"),
-          qty = tib_chr("qty")
+          qty = tib_chr("qty"),
         ),
         cover_image = tib_chr("cover_image"),
         resource_url = tib_chr("resource_url"),
-        master_id = tib_int("master_id")
+        master_id = tib_int("master_id"),
       )
 
 # format for tib_df works
@@ -203,7 +203,7 @@
     Output
       tib_df(
         "formats",
-        text = tib_chr("text")
+        text = tib_chr("text"),
       )
 
 ---
@@ -214,7 +214,7 @@
       tib_df(
         "formats",
         .required = FALSE,
-        text = tib_chr("text")
+        text = tib_chr("text"),
       )
 
 ---
@@ -225,6 +225,6 @@
       tib_df(
         "formats",
         .names_to = "nms",
-        text = tib_chr("text")
+        text = tib_chr("text"),
       )
 
