@@ -30,7 +30,7 @@ tibblify <- function(x, spec = NULL, names_to = NULL) {
   }
 
   if (is_null(spec)) {
-    spec <- guess_spec(x)
+    spec <- spec_guess(x)
   }
 
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))

@@ -7,16 +7,16 @@
 #' @export
 #'
 #' @examples
-#' guess_spec(list(x = 1, y = "a"))
-#' guess_spec(list(list(x = 1), list(x = 2)))
+#' spec_guess(list(x = 1, y = "a"))
+#' spec_guess(list(list(x = 1), list(x = 2)))
 #'
-#' guess_spec(gh_users)
-guess_spec <- function(x, simplify_list = TRUE) {
-  UseMethod("guess_spec")
+#' spec_guess(gh_users)
+spec_guess <- function(x, simplify_list = TRUE) {
+  UseMethod("spec_guess")
 }
 
 #' @export
-guess_spec.default <- function(x, simplify_list = TRUE) {
+spec_guess.default <- function(x, simplify_list = TRUE) {
   abort(paste0(
     "Cannot guess the specification for type ",
     vctrs::vec_ptype_full(x)
@@ -27,7 +27,7 @@ guess_spec.default <- function(x, simplify_list = TRUE) {
 # data frame --------------------------------------------------------------
 
 #' @export
-guess_spec.data.frame <- function(x, simplify_list = TRUE) {
+spec_guess.data.frame <- function(x, simplify_list = TRUE) {
   spec_df(
     !!!purrr::imap(x, col_to_spec)
   )
@@ -68,7 +68,7 @@ safe_ptype_common2 <- function(x) {
 # list --------------------------------------------------------------------
 
 #' @export
-guess_spec.list <- function(x, simplify_list = TRUE) {
+spec_guess.list <- function(x, simplify_list = TRUE) {
   if (is_object_list(x)) return(guess_object_list(x, simplify_list))
 
   if (is_object(x)) return(guess_object(x, simplify_list))
