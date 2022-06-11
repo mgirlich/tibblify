@@ -185,6 +185,32 @@
         default_branch = tib_chr("default_branch")
       )
 
+# can guess spec for got_chars
+
+    Code
+      guess_spec(got_chars)
+    Output
+      spec_df(
+        url = tib_chr("url"),
+        id = tib_int("id"),
+        name = tib_chr("name"),
+        gender = tib_chr("gender"),
+        culture = tib_chr("culture"),
+        born = tib_chr("born"),
+        died = tib_chr("died"),
+        alive = tib_lgl("alive"),
+        titles = tib_chr_vec("titles"),
+        aliases = tib_list("aliases"),
+        father = tib_chr("father"),
+        mother = tib_chr("mother"),
+        spouse = tib_chr("spouse"),
+        allegiances = tib_list("allegiances"),
+        books = tib_list("books"),
+        povBooks = tib_chr_vec("povBooks"),
+        tvSeries = tib_chr_vec("tvSeries"),
+        playedBy = tib_chr_vec("playedBy")
+      )
+
 # can guess spec for citm_catalog
 
     Code

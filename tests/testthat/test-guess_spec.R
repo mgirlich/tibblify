@@ -430,9 +430,9 @@ test_that("can guess spec for gh_repos", {
 })
 
 test_that("can guess spec for got_chars", {
-  skip("not yet decided")
-  # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot (yet?) simplify to character
-  expect_snapshot(guess_spec(got_chars) %>% print())
+  expect_snapshot({
+    guess_spec(got_chars)
+  })
 })
 
 read_sample_json <- function(x) {
