@@ -155,7 +155,7 @@ f_name_col <- function(x) {
 }
 
 has_colour <- function() {
-  crayon::has_color() ||
+  cli::num_ansi_colors() > 1 ||
     identical(Sys.getenv("TESTTHAT"), "true")
 }
 
@@ -164,30 +164,30 @@ colour_tib <- function(x) {
 }
 
 #' @export
-colour_tib.tib_scalar_logical <- function(x) {crayon::yellow}
+colour_tib.tib_scalar_logical <- function(x) {cli::col_yellow}
 #' @export
-colour_tib.tib_scalar_integer <- function(x) {crayon::green}
+colour_tib.tib_scalar_integer <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_scalar_double <- function(x) {crayon::green}
+colour_tib.tib_scalar_double <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_scalar_character <- function(x) {crayon::red}
+colour_tib.tib_scalar_character <- function(x) {cli::col_red}
 
 #' @export
-colour_tib.tib_vector_logical <- function(x) {crayon::yellow}
+colour_tib.tib_vector_logical <- function(x) {cli::col_yellow}
 #' @export
-colour_tib.tib_vector_integer <- function(x) {crayon::green}
+colour_tib.tib_vector_integer <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_vector_double <- function(x) {crayon::green}
+colour_tib.tib_vector_double <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_vector_character <- function(x) {crayon::red}
+colour_tib.tib_vector_character <- function(x) {cli::col_red}
 
 #' @export
-colour_tib.tib_row <- function(x) {crayon::magenta}
+colour_tib.tib_row <- function(x) {cli::col_magenta}
 #' @export
-colour_tib.tib_df <- function(x) {crayon::magenta}
+colour_tib.tib_df <- function(x) {cli::col_magenta}
 
 #' @export
-colour_tib.default <- function(x) {crayon::black}
+colour_tib.default <- function(x) {cli::col_black}
 
 
 # get_f_name --------------------------------------------------------------

@@ -25,7 +25,6 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
 Imports: 
     cli,
-    crayon,
     rlang,
     vctrs,
     purrr,
