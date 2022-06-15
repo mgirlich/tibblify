@@ -15,7 +15,7 @@ BugReports: https://github.com/mgirlich/tibblify/issues
 Depends: 
     R (>= 3.4.0)
 Imports: 
-    crayon,
+    cli,
     lifecycle,
     purrr,
     rlang,
