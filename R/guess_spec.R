@@ -108,6 +108,11 @@ spec_guess_list <- function(x, simplify_list = TRUE) {
     cli::cli_abort("{.arg x} must be a list")
   }
 
+  if (is_empty(x)) {
+    # TODO not completely sure about this
+    return(spec_object())
+  }
+
   if (is_object_list(x)) return(spec_guess_object_list(x, simplify_list))
 
   if (is_object(x)) return(spec_guess_object(x, simplify_list))
