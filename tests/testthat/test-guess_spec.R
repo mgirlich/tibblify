@@ -17,6 +17,12 @@ test_that("can guess spec for data frames", {
     )
   )
 
+  x_posixlt <- as.POSIXlt(vctrs::new_date(0))
+  expect_equal(
+    spec_guess(tibble(x = x_posixlt)),
+    spec_df(x = tib_scalar("x", ptype = vec_ptype(x_posixlt)))
+  )
+
   # vector elements
   expect_equal(
     spec_guess(
@@ -29,6 +35,11 @@ test_that("can guess spec for data frames", {
       lgl_vec = tib_lgl_vec("lgl_vec"),
       dtt_vec = tib_vector("dtt_vec", ptype = vctrs::new_datetime())
     )
+  )
+
+  expect_equal(
+    spec_guess(tibble(x = list(x_posixlt))),
+    spec_df(x = tib_vector("x", ptype = vec_ptype(x_posixlt)))
   )
 
   # list elements
