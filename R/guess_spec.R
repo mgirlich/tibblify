@@ -76,7 +76,13 @@ spec_guess_list <- function(x, simplify_list = TRUE) {
 
   if (is_object(x)) return(spec_guess_object(x, simplify_list))
 
-  abort("Cannot guess spec")
+  cli::cli_abort(c(
+    "Cannot guess spec.",
+    "v" = "The object is a list.",
+    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object_list()}.",
+    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object()}.",
+    "i" = "Try to check the specs of the individual elements with {.code purrr::map(x, guess_spec)}."
+  ))
 }
 
 #' @rdname spec_guess
