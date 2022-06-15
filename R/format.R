@@ -58,11 +58,15 @@ format_fields <- function(f_name, fields, width, args = NULL) {
     parts <- c(args, fields_formatted)
   }
 
-  inner <- collapse_with_pad(
-    parts,
-    multi_line = TRUE,
-    width = width
-  )
+  if (is_empty(parts)) {
+    inner <- ""
+  } else {
+    inner <- collapse_with_pad(
+      parts,
+      multi_line = TRUE,
+      width = width
+    )
+  }
 
   paste0(
     f_name, "(",
