@@ -35,8 +35,8 @@ is_object_list <- function(x) {
     return(FALSE)
   }
 
-  has_non_object_elements <- any(purrr::map_lgl(x, ~ !is.null(.x) && !is_object(.x)))
-  if (has_non_object_elements) {
+  idx_non_object_elements <- purrr::detect_index(x, ~ !is.null(.x) && !is_object(.x))
+  if (idx_non_object_elements != 0) {
     return(FALSE)
   }
 
