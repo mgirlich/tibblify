@@ -2,43 +2,42 @@ Package: tibblify
 Title: Rectangle Nested Lists
 Version: 0.1.0.9000
 Authors@R: 
-    person(given = "Maximilian",
-           family = "Girlich",
-           role = c("aut", "cre"),
-           email = "maximilian.girlich@outlook.com")
-Description: A tool to rectangle a nested list, that is to convert it into a
-    tibble. This is done automatically or according to a given specification.
-    A common use case is for nested lists coming from parsing JSON files or
-    the JSON response of REST APIs. It is supported by the 'vctrs' package
-    and therefore offers a wide support of vector types.
+    person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre"))
+Description: A tool to rectangle a nested list, that is to convert it into
+    a tibble. This is done automatically or according to a given
+    specification.  A common use case is for nested lists coming from
+    parsing JSON files or the JSON response of REST APIs. It is supported
+    by the 'vctrs' package and therefore offers a wide support of vector
+    types.
 License: GPL-3
-Suggests: 
-    testthat (>= 3.0.0),
-    knitr,
-    rmarkdown,
-    covr,
-    spelling,
-    jsonlite
-Encoding: UTF-8
-LazyData: true
-Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
-Imports: 
-    cli,
-    rlang,
-    vctrs,
-    purrr,
-    tibble,
-    lifecycle
-VignetteBuilder: knitr
-Depends: 
-    R (>= 3.4.0)
 URL: https://github.com/mgirlich/tibblify
 BugReports: https://github.com/mgirlich/tibblify/issues
-Language: en-US
-NeedsCompilation: yes
-Config/testthat/edition: 3
+Depends: 
+    R (>= 3.4.0)
+Imports: 
+    cli,
+    lifecycle,
+    purrr,
+    rlang,
+    tibble,
+    vctrs
+Suggests: 
+    covr,
+    jsonlite,
+    knitr,
+    rmarkdown,
+    spelling,
+    testthat (>= 3.0.0)
 LinkingTo: 
     cpp11,
     vctrs (>= 0.3.6)
+VignetteBuilder: 
+    knitr
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+NeedsCompilation: yes
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.2
 SystemRequirements: C++11
