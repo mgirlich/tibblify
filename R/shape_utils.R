@@ -8,8 +8,7 @@ is_object <- function(x) {
     return(FALSE)
   }
 
-  # TODO use `is_named2()` once new rlang version is released
-  if (!is_named(x) && !is_empty(x)) {
+  if (!is_named2(x)) {
     return(FALSE)
   }
 
@@ -45,7 +44,7 @@ is_object_list <- function(x) {
   }
 
   names_list <- lapply(x, names)
-  names_list <- list_drop_empty(names_list)
+  names_list <- vctrs::list_drop_empty(names_list)
   n <- vec_size(names_list)
 
   if (n == 0) return(FALSE)
@@ -55,9 +54,4 @@ is_object_list <- function(x) {
 
   n_min <- floor(0.9 * n)
   any(names_count$count >= n_min) && mean(names_count$count >= 0.5)
-}
-
-list_drop_empty <- function(x) {
-  # TODO when vctrs exports `list_drop_empty()`
-  vec_slice(x, list_sizes(x) > 0)
 }

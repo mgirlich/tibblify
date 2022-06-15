@@ -124,8 +124,7 @@ guess_object_list_spec <- function(x, simplify_list) {
   required <- get_required(x)
 
   # need to remove empty elements for `purrr::transpose()` to work...
-  non_empty_loc <- vctrs::list_sizes(x) != 0L
-  x <- vec_slice(x, non_empty_loc)
+  x <- vctrs::list_drop_empty(x)
 
   x_t <- purrr::transpose(unname(x), names(required))
 
@@ -163,12 +162,11 @@ get_required <- function(x, sample_size = 10e3) {
 guess_field_spec <- function(value, name, required, multi,
                              simplify_list) {
   if (multi) {
-    ptype_result <- safe_ptype_common2(value)
-    no_common_ptype <- !is_null(ptype_result$error)
+    ptype_result <- get_ptype_common(value)
 
     # no common ptype -> it is a list of different types
-    if (no_common_ptype) return(tib_list(name, required))
-    ptype <- ptype_result$result
+    if (!ptype_result$has_common_ptype) return(tib_list(name, required))
+    ptype <- ptype_result$ptype
   } else {
     ptype <- vec_ptype(value)
   }
@@ -203,11 +201,10 @@ guess_field_spec <- function(value, name, required, multi,
   }
 
   # values2 <- vctrs::list_drop_empty(values)
-  ptype_result <- safe_ptype_common2(value_flat)
-  has_no_common_ptype <- !is_null(ptype_result$error)
-  if (has_no_common_ptype) return(tib_list(name, required))
+  ptype_result <- get_ptype_common(value_flat)
+  if (!ptype_result$has_common_ptype) return(tib_list(name, required))
 
-  ptype <- ptype_result$result
+  ptype <- ptype_result$ptype
   if (is_null(ptype)) return(tib_unspecified(name, required))
 
   if (!simplify_list) return(tib_list(name, required))
@@ -253,10 +250,10 @@ is_field_row <- function(value, multi, simplify_list) {
 can_flatten <- function(value, simplify_list) {
   if (!simplify_list) return(FALSE)
 
-  ptype_result <- safe_ptype_common2(value)
-  if (!is_null(ptype_result$error)) return(FALSE)
+  ptype_result <- get_ptype_common(value)
+  if (!ptype_result$has_common_ptype) return(FALSE)
 
-  ptype <- ptype_result$result
+  ptype <- ptype_result$ptype
   !is_null(ptype) && !vec_is_list(ptype)
 }
 
