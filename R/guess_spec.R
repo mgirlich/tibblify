@@ -97,6 +97,17 @@ get_ptype_common <- function(x) {
 #' @rdname spec_guess
 #' @export
 spec_guess_list <- function(x, simplify_list = TRUE) {
+  if (vec_is(x)) {
+    cli::cli_abort(c(
+      `!` = "{.arg x} must be a list.",
+      "Instead, it is a vector with type <{vctrs::vec_ptype_full(x)}>"
+    ))
+  }
+
+  if (!is.list(x)) {
+    cli::cli_abort("{.arg x} must be a list")
+  }
+
   if (is_object_list(x)) return(spec_guess_object_list(x, simplify_list))
 
   if (is_object(x)) return(spec_guess_object(x, simplify_list))
