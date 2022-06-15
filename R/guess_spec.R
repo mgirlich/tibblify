@@ -44,12 +44,12 @@ col_to_spec <- function(col, name) {
     return(tib_scalar(name, vec_ptype(col)))
   }
 
-  ptype_safe <- safe_ptype_common2(col)
-  if (!is_null(ptype_safe$error)) {
+  ptype_common <- get_ptype_common(col)
+  if (!ptype_common$has_common_ptype) {
     return(tib_list(name))
   }
 
-  ptype <- ptype_safe$result
+  ptype <- ptype_common$ptype
   if (is_null(ptype)) {
     return(tib_unspecified(name))
   }
@@ -62,8 +62,13 @@ col_to_spec <- function(col, name) {
   return(tib_vector(name, ptype))
 }
 
-safe_ptype_common2 <- function(x) {
-  purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
+get_ptype_common <- function(x) {
+  ptype_result <- purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
+
+  list(
+    has_common_ptype = is_null(ptype_result$error),
+    ptype = ptype_result$result
+  )
 }
 
 
