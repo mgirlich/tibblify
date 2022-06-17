@@ -885,7 +885,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     cpp11::sexp transform = elt["transform"];
     cpp11::sexp default_sexp = elt["default_value"];
-    if (type == "list") {
+    if (type == "list" || type == "unspecified") {
       col_vec.push_back(std::unique_ptr<Collector_List>(new Collector_List(default_sexp, required, location, name, transform)));
       continue;
     }

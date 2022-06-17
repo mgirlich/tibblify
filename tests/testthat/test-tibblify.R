@@ -169,6 +169,16 @@ test_that("vector column works", {
   )
 })
 
+test_that("tib_unspecified() works", {
+  expect_equal(
+    tibblify(
+      list(list(x = TRUE), list(x = 1)),
+      spec_df(x = tib_unspecified("x"))
+    ),
+    tibble(x = list(TRUE, 1))
+  )
+})
+
 test_that("list column works", {
   # can parse
   expect_equal(
@@ -181,10 +191,10 @@ test_that("list column works", {
 
   expect_equal(
     tibblify(
-      list(list(x = TRUE), list(x = 1)),
-      spec_df(x = tib_list("x"))
+      list(x = TRUE),
+      spec_row(x = tib_list("x"))
     ),
-    tibble(x = list(TRUE, 1))
+    tibble(x = list(TRUE))
   )
 
   # errors if required but absent

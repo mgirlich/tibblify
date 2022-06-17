@@ -116,6 +116,8 @@ format.tib_scalar <- function(x, ...,
 format.tib_list <- format.tib_scalar
 #' @export
 format.tib_vector <- format.tib_scalar
+#' @export
+format.tib_unspecified <- format.tib_scalar
 
 
 # format nested columns ---------------------------------------------------
