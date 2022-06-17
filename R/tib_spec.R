@@ -250,9 +250,7 @@ tib_chr <- function(key, required = TRUE, default = NULL, transform = NULL) {
 
 tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
-  if (is_null(default)) {
-    default <- ptype
-  } else {
+  if (!is_null(default)) {
     default <- vec_cast(default, ptype)
   }
 
