@@ -119,7 +119,7 @@ tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
 tib_unspecified <- function(key, required = TRUE) {
   tib_collector(
     key = key,
-    type = "list",
+    type = "unspecified",
     required = required,
     default_value = NULL,
     transform = NULL,

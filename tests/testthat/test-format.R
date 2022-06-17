@@ -1,3 +1,9 @@
+test_that("can format tib_unspecified()", {
+  local_options(cli.num_colors = 1)
+
+  expect_snapshot(tib_unspecified("a") %>% print())
+})
+
 test_that("format for vectors works", {
   local_options(cli.num_colors = 1)
 

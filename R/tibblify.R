@@ -69,6 +69,11 @@ finalize_spec_object.tib_list <- function(field_spec, field) {
 }
 
 #' @export
+finalize_spec_object.tib_unspecified<- function(field_spec, field) {
+  field[[1]]
+}
+
+#' @export
 finalize_spec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
