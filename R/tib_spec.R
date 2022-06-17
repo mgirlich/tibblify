@@ -63,7 +63,7 @@ spec_tib <- function(fields, type, ...) {
   structure(
     list(
       type = type,
-      fields = prep_spec_fields(fields),
+      fields = prep_spec_fields(fields) %||% list(),
       ...
     ),
     class = c(paste0("spec_", type), "spec_tib")
