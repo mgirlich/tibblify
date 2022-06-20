@@ -76,7 +76,6 @@ test_that("can guess list columns", {
     spec_df(x = tib_list("x"))
   )
 
-  skip("Unclear what to do about list columns with only NULL")
   expect_equal(
     spec_guess_df(tibble(x = list(NULL, NULL))),
     spec_df(x = tib_unspecified("x"))

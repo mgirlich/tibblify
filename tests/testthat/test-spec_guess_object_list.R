@@ -10,7 +10,7 @@ test_that("can guess tib_scalar", {
   )
 
   # also for record types
-  skip("Correct behaviour is unclear")
+  skip("Correct behaviour is unclear - #77")
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   # vec_ptype(x_posixlt) # -> lt
   # vec_ptype2(x_posixlt, x_posixlt) # -> ct
@@ -48,7 +48,7 @@ test_that("can guess tib_vector", {
     spec_df(x = tib_vector("x", new_datetime()))
   )
 
-  skip("Correct behaviour is unclear")
+  skip("Correct behaviour is unclear - #78")
   # should this be `tib_int()` or `tib_int_vec()`?
   expect_equal(
     spec_guess_object_list(list(list(x = 1L), list(x = integer()))),
