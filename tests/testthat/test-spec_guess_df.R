@@ -196,6 +196,27 @@ test_that("can guess list of tibble columns", {
   )
 })
 
+test_that("can guess required for list of tibble columns", {
+  skip("Not yet working - #70")
+  expect_equal(
+    spec_guess_df(
+      tibble(
+        x = list(
+          tibble(a = 1, b = "a"),
+          tibble(a = 2)
+        )
+      )
+    ),
+    spec_df(
+      x = tib_df(
+        "x",
+        a = tib_dbl("a"),
+        b = tib_chr("b", required = FALSE)
+      )
+    )
+  )
+})
+
 test_that("can guess spec for data frames with nested df columns", {
   # row in row element
   expect_equal(
