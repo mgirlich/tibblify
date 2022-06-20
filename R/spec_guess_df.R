@@ -1,10 +1,18 @@
 #' @export
 #' @rdname spec_guess
-spec_guess_df <- function(x) {
+spec_guess_df <- function(x, call = current_call()) {
   if (!is.data.frame(x)) {
+    if (is.list(x)) {
+      msg <- c(
+        "{.arg x} must be a {.cls data.frame}. Instead, it is a list.",
+        i = "Did you want to use {.fn spec_guess_list()} instead?"
+      )
+      cli::cli_abort(msg, call = call)
+    }
+
     cls <- class(x)[[1]]
-    # TODO should point to `spec_guess_list()`
-    cli::cli_abort("{.arg x} must be a {.cls data.frame}. Instead, it is a {.cls {cls}}.")
+    msg <- "{.arg x} must be a {.cls data.frame}. Instead, it is a {.cls {cls}}."
+    cli::cli_abort(msg, call = call)
   }
 
   spec_df(
