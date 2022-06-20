@@ -11,12 +11,12 @@
 #' guess_spec(list(list(x = 1), list(x = 2)))
 #'
 #' guess_spec(gh_users)
-guess_spec <- function(x, simplify_list = TRUE) {
+guess_spec <- function(x, simplify_list = TRUE, call = current_call()) {
   UseMethod("guess_spec")
 }
 
 #' @export
-guess_spec.default <- function(x, simplify_list = TRUE) {
+guess_spec.default <- function(x, simplify_list = TRUE, call = current_call()) {
   abort(paste0(
     "Cannot guess the specification for type ",
     vctrs::vec_ptype_full(x)
@@ -27,20 +27,31 @@ guess_spec.default <- function(x, simplify_list = TRUE) {
 # data frame --------------------------------------------------------------
 
 #' @export
-guess_spec.data.frame <- function(x, simplify_list = TRUE) {
+guess_spec.data.frame <- function(x, simplify_list = TRUE, call = current_call()) {
   spec_df(
-    !!!purrr::imap(x, col_to_spec)
+    !!!purrr::imap(x, col_to_spec, call)
   )
 }
 
-col_to_spec <- function(col, name) {
+col_to_spec <- function(col, name, call) {
   if (is.data.frame(col)) {
-    return(tib_row(name, !!!purrr::imap(col, col_to_spec)))
+    return(tib_row(name, !!!purrr::imap(col, col_to_spec, call)))
   }
 
   if (!is.list(col)) {
     return(tib_scalar(name, vec_ptype(col)))
   }
+
+  # browser()
+  # guess_spec(col)
+  specs <- purrr::map(col, tib_guess, name)
+  out <- try_fetch(
+    tib_combine(specs, call),
+    rlang_error = function(cnd) {
+      tib_list(name)
+    }
+  )
+  return(out)
 
   ptype_safe <- safe_ptype_common2(col)
   if (!is_null(ptype_safe$error)) {
@@ -54,10 +65,34 @@ col_to_spec <- function(col, name) {
 
   if (is.data.frame(ptype)) {
     col_flat <- vec_unchop(col)
-    return(tib_df(name, !!!purrr::imap(col_flat, col_to_spec)))
+    return(tib_df(name, !!!purrr::imap(col_flat, col_to_spec, call)))
   }
 
   return(tib_vector(name, ptype))
+}
+
+tib_guess <- function(x, key) {
+  # TODO does this need `required` as argument?
+  if (is_null(x)) {
+    return(tib_unspecified(key))
+  }
+
+  if (is.data.frame(x)) {
+    return(guess_spec(x))
+  }
+
+  if (vec_is_list(x)) {
+    browser()
+  }
+
+  if (vec_is(x)) {
+    return(tib_vector(key, x))
+    # if (vec_size(x) == 1) {
+    #   return(tib_scalar(key, x))
+    # } else {
+    #   return(tib_vector(key, x))
+    # }
+  }
 }
 
 safe_ptype_common2 <- function(x) {
@@ -68,7 +103,7 @@ safe_ptype_common2 <- function(x) {
 # list --------------------------------------------------------------------
 
 #' @export
-guess_spec.list <- function(x, simplify_list = TRUE) {
+guess_spec.list <- function(x, simplify_list = TRUE, call = current_call()) {
   if (is_object_list(x)) return(guess_object_list(x, simplify_list))
 
   if (is_object(x)) return(guess_object(x, simplify_list))
@@ -102,7 +137,7 @@ guess_object <- function(x, simplify_list) {
 
 guess_object_spec <- function(x, simplify_list) {
   purrr::pmap(
-    tibble::tibble(
+    tibble(
       value = x,
       name = names(x)
     ),
