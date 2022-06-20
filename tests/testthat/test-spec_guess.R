@@ -1,5 +1,3 @@
-# diverse -----------------------------------------------------------------
-
 test_that("can guess spec for discog", {
   expect_snapshot(spec_guess(discog) %>% print())
 })
