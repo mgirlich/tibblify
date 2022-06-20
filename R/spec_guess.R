@@ -2,6 +2,10 @@
 #'
 #' @param x A nested list.
 #' @param simplify_list Try to simplify lists if possible?
+#' @param call The execution environment of a currently running function, e.g.
+#'   `caller_env()`. The function will be mentioned in error messages as the
+#'   source of the error. See the `call` argument of [`abort()`] for more
+#'   information.
 #'
 #' @return A specification object that can used in `tibblify()`.
 #' @export
@@ -11,11 +15,11 @@
 #' spec_guess(list(list(x = 1), list(x = 2)))
 #'
 #' spec_guess(gh_users)
-spec_guess <- function(x) {
+spec_guess <- function(x, call = current_call()) {
   if (is.data.frame(x)) {
-    spec_guess_df(x)
+    spec_guess_df(x, call = call)
   } else if (is.list(x)) {
-    spec_guess_list(x)
+    spec_guess_list(x, call = call)
   } else {
     abort(paste0(
       "Cannot guess the specification for type ",

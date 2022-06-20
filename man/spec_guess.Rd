@@ -9,18 +9,23 @@
 \alias{spec_guess_object_list}
 \title{Guess the \code{tibblify()} Specification}
 \usage{
-spec_guess(x)
+spec_guess(x, call = current_call())
 
 spec_guess_df(x, call = current_call())
 
-spec_guess_list(x, simplify_list = TRUE)
+spec_guess_list(x, simplify_list = TRUE, call = current_call())
 
 spec_guess_object(x, simplify_list = TRUE, call = current_call())
 
-spec_guess_object_list(x, simplify_list = TRUE)
+spec_guess_object_list(x, simplify_list = TRUE, call = current_call())
 }
 \arguments{
 \item{x}{A nested list.}
+
+\item{call}{The execution environment of a currently running function, e.g.
+\code{caller_env()}. The function will be mentioned in error messages as the
+source of the error. See the \code{call} argument of \code{\link[=abort]{abort()}} for more
+information.}
 
 \item{simplify_list}{Try to simplify lists if possible?}
 }

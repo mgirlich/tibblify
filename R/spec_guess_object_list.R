@@ -1,6 +1,6 @@
 #' @rdname spec_guess
 #' @export
-spec_guess_object_list <- function(x, simplify_list = TRUE) {
+spec_guess_object_list <- function(x, simplify_list = TRUE, call = current_call()) {
   fields <- guess_object_list_spec(x, simplify_list)
 
   names_to <- NULL
