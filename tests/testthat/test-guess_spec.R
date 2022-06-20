@@ -1,5 +1,3 @@
-tibble <- tibble::tibble
-
 # spec for data frames ----------------------------------------------------
 
 test_that("can guess spec for data frames", {
