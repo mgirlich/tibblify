@@ -284,3 +284,9 @@ test_that("can guess spec for data frames with nested list of df columns", {
     )
   )
 })
+
+test_that("gives nice errors", {
+  expect_snapshot({
+    (expect_error(spec_guess_df(list(a = 1))))
+  })
+})

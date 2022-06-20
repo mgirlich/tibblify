@@ -1,6 +1,12 @@
 #' @export
 #' @rdname spec_guess
 spec_guess_df <- function(x) {
+  if (!is.data.frame(x)) {
+    cls <- class(x)[[1]]
+    # TODO should point to `spec_guess_list()`
+    cli::cli_abort("{.arg x} must be a {.cls data.frame}. Instead, it is a {.cls {cls}}.")
+  }
+
   spec_df(
     !!!purrr::imap(x, col_to_spec)
   )
