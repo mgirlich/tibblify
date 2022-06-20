@@ -10,6 +10,14 @@ test_that("cannot combine different types of spec", {
   })
 })
 
+test_that("nice error when combining non-specs", {
+  df_spec <- spec_df(a = tib_int("a"))
+
+  expect_snapshot({
+    (expect_error(spec_combine(df_spec, tib_int("a"))))
+  })
+})
+
 test_that("can combine simple spec with itself", {
   df_spec <- spec_df(a = tib_int("a"))
   row_spec <- spec_row(a = tib_int("a"))

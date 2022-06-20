@@ -19,6 +19,16 @@
       Error in `spec_combine()`:
       ! Can't combine specs `..1` <row> and `..2` <object>
 
+# nice error when combining non-specs
+
+    Code
+      (expect_error(spec_combine(df_spec, tib_int("a"))))
+    Output
+      <error/rlang_error>
+      Error in `check_spec_combine_dots()`:
+      ! Every element of `...` must be a tibblify spec.
+      x Element 2 has class <tib_scalar_integer>.
+
 # can combine type
 
     Code

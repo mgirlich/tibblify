@@ -1,15 +1,6 @@
 spec_combine <- function(...) {
-  spec_list <- list2(...)
-  # TODO check class of every element
-  types <- purrr::map_chr(spec_list, "type")
-  type_locs <- vec_unique_loc(types)
-
-  if (length(type_locs) > 1) {
-    type_infos <- loc_name_helper(type_locs, types)
-    cli::cli_abort("Can't combine specs {type_infos}")
-  }
-  type <- types[[type_locs]]
-
+  spec_list <- check_spec_combine_dots(...)
+  type <- check_spec_combine_type(spec_list)
   fields <- spec_combine_field_list(spec_list, call = current_env())
 
   if (type == "row") {
@@ -22,6 +13,32 @@ spec_combine <- function(...) {
   }
 
   cli::cli_abort("Unknown spec type", .internal = TRUE)
+}
+
+check_spec_combine_dots <- function(..., .call = caller_env()) {
+  spec_list <- list2(...)
+  bad_idx <- purrr::detect_index(spec_list, ~ !is(.x, "spec_tib"))
+  if (bad_idx != 0) {
+    cls1 <- class(spec_list[[bad_idx]])[[1]]
+    msg <- c(
+      "Every element of {.arg ...} must be a tibblify spec.",
+      x = "Element {bad_idx} has class {.cls {cls1}}."
+    )
+    cli::cli_abort(msg, .call = .call)
+  }
+
+  spec_list
+}
+
+check_spec_combine_type <- function(spec_list, call = caller_env()) {
+  types <- purrr::map_chr(spec_list, "type")
+  type_locs <- vec_unique_loc(types)
+
+  if (length(type_locs) > 1) {
+    type_infos <- loc_name_helper(type_locs, types)
+    cli::cli_abort("Can't combine specs {type_infos}", call = call)
+  }
+  types[[type_locs]]
 }
 
 spec_combine_field_list <- function(spec_list, call) {
