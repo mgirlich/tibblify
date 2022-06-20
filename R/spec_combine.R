@@ -92,13 +92,13 @@ tib_combine <- function(tib_list, call) {
   }
 
   if (type %in% c("row", "df")) {
-    # TODO names_col
     fields <- spec_combine_field_list(tib_list, call)
 
     if (type == "row") {
       return(tib_row(key, !!!fields, .required = required))
     } else if (type == "df") {
-      return(tib_df(key, !!!fields, .required = required))
+      names_col <- tib_combine_names_col(tib_list, call)
+      return(tib_df(key, !!!fields, .required = required, .names_to = names_col))
     }
   }
 
@@ -235,6 +235,25 @@ tib_combine_transform <- function(tib_list, call) {
   }
 
   transform_list[[transform_locs]]
+}
+
+tib_combine_names_col <- function(tib_list, call) {
+  names_col <- purrr::map_chr(tib_list, "names_col", .default = NA)
+  names_col_locs <- vec_unique_loc(names_col)
+  na_locs <- which(vec_equal_na(names_col))
+
+  names_col_locs <- names_col_locs[!names_col_locs %in% na_locs]
+
+  if (is_empty(names_col_locs)) {
+    return(NULL)
+  }
+
+  if (length(names_col_locs) > 1) {
+    # TODO better error message
+    cli::cli_abort("Cannot combine different {.arg names_col}", call = call)
+  }
+
+  names_col[[names_col_locs]]
 }
 
 loc_name_helper <- function(locs, types) {
