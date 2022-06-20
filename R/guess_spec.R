@@ -7,27 +7,29 @@
 #' @export
 #'
 #' @examples
-#' guess_spec(list(x = 1, y = "a"))
-#' guess_spec(list(list(x = 1), list(x = 2)))
+#' spec_guess(list(x = 1, y = "a"))
+#' spec_guess(list(list(x = 1), list(x = 2)))
 #'
-#' guess_spec(gh_users)
-guess_spec <- function(x, simplify_list = TRUE) {
-  UseMethod("guess_spec")
-}
-
-#' @export
-guess_spec.default <- function(x, simplify_list = TRUE) {
-  abort(paste0(
-    "Cannot guess the specification for type ",
-    vctrs::vec_ptype_full(x)
-  ))
+#' spec_guess(gh_users)
+spec_guess <- function(x) {
+  if (is.data.frame(x)) {
+    spec_guess_df(x)
+  } else if (is.list(x)) {
+    spec_guess_list(x)
+  } else {
+    abort(paste0(
+      "Cannot guess the specification for type ",
+      vctrs::vec_ptype_full(x)
+    ))
+  }
 }
 
 
 # data frame --------------------------------------------------------------
 
 #' @export
-guess_spec.data.frame <- function(x, simplify_list = TRUE) {
+#' @rdname spec_guess
+spec_guess_df <- function(x) {
   spec_df(
     !!!purrr::imap(x, col_to_spec)
   )
@@ -38,21 +40,32 @@ col_to_spec <- function(col, name) {
     return(tib_row(name, !!!purrr::imap(col, col_to_spec)))
   }
 
-  if (!is.list(col)) {
+  if (col_is_scalar(col)) {
     return(tib_scalar(name, vec_ptype(col)))
   }
 
-  ptype_safe <- safe_ptype_common2(col)
-  if (!is_null(ptype_safe$error)) {
+  if (!is.list(col)) {
+    cli::cli_abort("Column {name} is not a scalar but also not a list", .internal = TRUE)
+  }
+
+  # FIXME From here on this could use `spec_common()`
+  # FIXME could use sampling for performance
+  # * if `tib_unspecified()` it could use `vctrs::list_drop_empty()` to get
+  #   non-empty element
+
+  ptype_common <- get_ptype_common(col)
+  if (!ptype_common$has_common_ptype) {
     return(tib_list(name))
   }
 
-  ptype <- ptype_safe$result
+  ptype <- ptype_common$ptype
   if (is_null(ptype)) {
     return(tib_unspecified(name))
   }
 
   if (is.data.frame(ptype)) {
+    # TODO calculate `.required`
+    # see https://github.com/mgirlich/tibblify/issues/70
     col_flat <- vec_unchop(col)
     return(tib_df(name, !!!purrr::imap(col_flat, col_to_spec)))
   }
@@ -60,18 +73,49 @@ col_to_spec <- function(col, name) {
   return(tib_vector(name, ptype))
 }
 
-safe_ptype_common2 <- function(x) {
-  purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
+col_is_scalar <- function(x) {
+  # `vec_is()` considers `list()` to be a vector but we don't
+  if (vec_is_list(x)) {
+    return(FALSE)
+  }
+
+  vec_is(x)
+}
+
+get_ptype_common <- function(x) {
+  ptype_result <- purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
+
+  list(
+    has_common_ptype = is_null(ptype_result$error),
+    ptype = ptype_result$result
+  )
 }
 
 
 # list --------------------------------------------------------------------
 
+#' @rdname spec_guess
 #' @export
-guess_spec.list <- function(x, simplify_list = TRUE) {
-  if (is_object_list(x)) return(guess_object_list(x, simplify_list))
+spec_guess_list <- function(x, simplify_list = TRUE) {
+  if (vec_is(x) && !vec_is_list(x)) {
+    cli::cli_abort(c(
+      `!` = "{.arg x} must be a list.",
+      "Instead, it is a vector with type <{vctrs::vec_ptype_full(x)}>"
+    ))
+  }
 
-  if (is_object(x)) return(guess_object(x, simplify_list))
+  if (!is.list(x)) {
+    cli::cli_abort("{.arg x} must be a list")
+  }
+
+  if (is_empty(x)) {
+    # TODO not completely sure about this
+    return(spec_object())
+  }
+
+  if (is_object_list(x)) return(spec_guess_object_list(x, simplify_list))
+
+  if (is_object(x)) return(spec_guess_object(x, simplify_list))
 
   cli::cli_abort(c(
     "Cannot guess spec.",
@@ -82,7 +126,9 @@ guess_spec.list <- function(x, simplify_list = TRUE) {
   ))
 }
 
-guess_object_list <- function(x, simplify_list) {
+#' @rdname spec_guess
+#' @export
+spec_guess_object_list <- function(x, simplify_list = TRUE) {
   fields <- guess_object_list_spec(x, simplify_list)
 
   names_to <- NULL
@@ -92,7 +138,9 @@ guess_object_list <- function(x, simplify_list) {
   return(spec_df(!!!fields, .names_to = names_to))
 }
 
-guess_object <- function(x, simplify_list) {
+#' @rdname spec_guess
+#' @export
+spec_guess_object <- function(x, simplify_list = TRUE) {
   fields <- guess_object_spec(x, simplify_list)
   return(spec_object(!!!fields))
 }
@@ -117,8 +165,7 @@ guess_object_list_spec <- function(x, simplify_list) {
   required <- get_required(x)
 
   # need to remove empty elements for `purrr::transpose()` to work...
-  non_empty_loc <- vctrs::list_sizes(x) != 0L
-  x <- vec_slice(x, non_empty_loc)
+  x <- vctrs::list_drop_empty(x)
 
   x_t <- purrr::transpose(unname(x), names(required))
 
@@ -156,12 +203,11 @@ get_required <- function(x, sample_size = 10e3) {
 guess_field_spec <- function(value, name, required, multi,
                              simplify_list) {
   if (multi) {
-    ptype_result <- safe_ptype_common2(value)
-    no_common_ptype <- !is_null(ptype_result$error)
+    ptype_result <- get_ptype_common(value)
 
     # no common ptype -> it is a list of different types
-    if (no_common_ptype) return(tib_list(name, required))
-    ptype <- ptype_result$result
+    if (!ptype_result$has_common_ptype) return(tib_list(name, required))
+    ptype <- ptype_result$ptype
   } else {
     ptype <- vec_ptype(value)
   }
@@ -196,11 +242,10 @@ guess_field_spec <- function(value, name, required, multi,
   }
 
   # values2 <- vctrs::list_drop_empty(values)
-  ptype_result <- safe_ptype_common2(value_flat)
-  has_no_common_ptype <- !is_null(ptype_result$error)
-  if (has_no_common_ptype) return(tib_list(name, required))
+  ptype_result <- get_ptype_common(value_flat)
+  if (!ptype_result$has_common_ptype) return(tib_list(name, required))
 
-  ptype <- ptype_result$result
+  ptype <- ptype_result$ptype
   if (is_null(ptype)) return(tib_unspecified(name, required))
 
   if (!simplify_list) return(tib_list(name, required))
@@ -246,10 +291,10 @@ is_field_row <- function(value, multi, simplify_list) {
 can_flatten <- function(value, simplify_list) {
   if (!simplify_list) return(FALSE)
 
-  ptype_result <- safe_ptype_common2(value)
-  if (!is_null(ptype_result$error)) return(FALSE)
+  ptype_result <- get_ptype_common(value)
+  if (!ptype_result$has_common_ptype) return(FALSE)
 
-  ptype <- ptype_result$result
+  ptype <- ptype_result$ptype
   !is_null(ptype) && !vec_is_list(ptype)
 }
 
