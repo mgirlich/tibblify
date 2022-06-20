@@ -46,9 +46,6 @@
     <loc>/reference/got_chars.html</loc>
   </url>
   <url>
-    <loc>/reference/guess_spec.html</loc>
-  </url>
-  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
@@ -65,6 +62,9 @@
   </url>
   <url>
     <loc>/reference/spec_df.html</loc>
+  </url>
+  <url>
+    <loc>/reference/spec_guess.html</loc>
   </url>
   <url>
     <loc>/reference/tib_scalar.html</loc>

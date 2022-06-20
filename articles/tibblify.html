@@ -117,7 +117,7 @@
 <span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.co… Maël… Barcelo… <span style="color: #BB0000;">NA</span>               0</span></code></pre></div>
 <p>We can now look at the specification <code><a href="../reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="fu"><a href="../reference/guess_spec.html">guess_spec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span>
+<code class="sourceCode R"><span class="fu"><a href="../reference/spec_guess.html">spec_guess</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span>
 <span class="co">#&gt; spec_df(</span>
 <span class="co">#&gt;   followers = <span style="color: #00BB00;">tib_int</span>("followers"),</span>
 <span class="co">#&gt;   login = <span style="color: #BB0000;">tib_chr</span>("login"),</span>
@@ -317,7 +317,7 @@
 <span class="co">#&gt; [1] "https://api.github.com/users/gaborcsardi"</span></code></pre></div>
 <p>the field <code>owner</code> is an object itself. The specification to extract it uses <code><a href="../reference/tib_scalar.html">tib_row()</a></code></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/guess_spec.html">guess_spec</a></span><span class="op">(</span><span class="va">gh_repos_small</span><span class="op">)</span>
+<code class="sourceCode R"><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_guess.html">spec_guess</a></span><span class="op">(</span><span class="va">gh_repos_small</span><span class="op">)</span>
 <span class="va">spec</span>
 <span class="co">#&gt; spec_df(</span>
 <span class="co">#&gt;   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
