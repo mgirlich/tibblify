@@ -1,3 +1,10 @@
+# can format tib_unspecified()
+
+    Code
+      tib_unspecified("a") %>% print()
+    Output
+      tib_unspecified("a")
+
 # format for vectors works
 
     Code
