@@ -105,7 +105,10 @@ test_that("can guess required for tib_list", {
         list(y = "a")
       )
     ),
-    spec_df(x = tib_list("x", required = FALSE))
+    spec_df(
+      x = tib_list("x", required = FALSE),
+      y = tib_chr("y", required = FALSE)
+    )
   )
 })
 
