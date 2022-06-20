@@ -153,6 +153,27 @@ test_that("can guess required for tib_df", {
   )
 })
 
+test_that("order of fields for tib_df does not matter", {
+  expect_equal(
+    spec_guess_object(
+      list(
+        x = list(
+          list(a = 1L, b = "a"),
+          list(c = 1:3, b = "c", a = 2L)
+        )
+      )
+    ),
+    spec_object(
+      x = tib_df(
+        "x",
+        a = tib_int("a"),
+        b = tib_chr("b"),
+        c = tib_int_vec("c", required = FALSE)
+      )
+    )
+  )
+})
+
 test_that("can guess tib_unspecified for an object", {
   expect_equal(
     spec_guess_object(list(x = NULL)),

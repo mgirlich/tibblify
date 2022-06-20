@@ -15,7 +15,7 @@ spec_guess_df(x, call = current_call())
 
 spec_guess_list(x, simplify_list = TRUE)
 
-spec_guess_object(x, simplify_list = TRUE, call = current_env())
+spec_guess_object(x, simplify_list = TRUE, call = current_call())
 
 spec_guess_object_list(x, simplify_list = TRUE)
 }
