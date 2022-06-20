@@ -47,7 +47,7 @@
   <div class="col-md-9 contents">
     <div class="page-header">
     <h1>Guess the <code>tibblify()</code> Specification</h1>
-    <small class="dont-index">Source: <a href="https://github.com/mgirlich/tibblify/blob/HEAD/R/guess_spec.R" class="external-link"><code>R/guess_spec.R</code></a></small>
+    <small class="dont-index">Source: <a href="https://github.com/mgirlich/tibblify/blob/HEAD/R/spec_guess.R" class="external-link"><code>R/spec_guess.R</code></a>, <a href="https://github.com/mgirlich/tibblify/blob/HEAD/R/spec_guess_df.R" class="external-link"><code>R/spec_guess_df.R</code></a>, <a href="https://github.com/mgirlich/tibblify/blob/HEAD/R/spec_guess_list.R" class="external-link"><code>R/spec_guess_list.R</code></a>, and 2 more</small>
     <div class="hidden name"><code>spec_guess.Rd</code></div>
     </div>
 
@@ -56,21 +56,28 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_guess</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_guess</span><span class="op">(</span><span class="va">x</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_df</span><span class="op">(</span><span class="va">x</span><span class="op">)</span>
+<span class="fu">spec_guess_df</span><span class="op">(</span><span class="va">x</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">spec_guess_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_object_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+<span class="fu">spec_guess_object</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_object</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></code></pre></div>
+<span class="fu">spec_guess_object_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A nested list.</p></dd>
+
+
+<dt>call</dt>
+<dd><p>The execution environment of a currently running function, e.g.
+<code>caller_env()</code>. The function will be mentioned in error messages as the
+source of the error. See the <code>call</code> argument of <code>abort()</code> for more
+information.</p></dd>
 
 
 <dt>simplify_list</dt>
