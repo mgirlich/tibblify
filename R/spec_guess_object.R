@@ -1,6 +1,6 @@
 #' @rdname spec_guess
 #' @export
-spec_guess_object <- function(x, simplify_list = TRUE, call = current_env()) {
+spec_guess_object <- function(x, simplify_list = TRUE, call = current_call()) {
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
