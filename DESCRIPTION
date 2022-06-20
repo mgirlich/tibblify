@@ -15,12 +15,12 @@ BugReports: https://github.com/mgirlich/tibblify/issues
 Depends: 
     R (>= 3.4.0)
 Imports: 
-    cli,
+    cli (>= 3.3.0),
     lifecycle,
     purrr,
-    rlang,
+    rlang (>= 1.0.2),
     tibble,
-    vctrs
+    vctrs (>= 0.4.1)
 Suggests: 
     covr,
     jsonlite,
@@ -30,7 +30,7 @@ Suggests:
     testthat (>= 3.0.0)
 LinkingTo: 
     cpp11,
-    vctrs (>= 0.3.6)
+    vctrs (>= 0.4.1)
 VignetteBuilder: 
     knitr
 Config/testthat/edition: 3
