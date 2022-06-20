@@ -27,6 +27,11 @@ col_to_spec <- function(col, name) {
   }
 
   if (col_is_scalar(col)) {
+    ptype <- vec_ptype(col)
+    if (inherits(ptype, "vctrs_unspecified")) {
+      return(tib_unspecified(name))
+    }
+
     return(tib_scalar(name, vec_ptype(col)))
   }
 

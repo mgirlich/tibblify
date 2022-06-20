@@ -47,7 +47,9 @@ guess_field_spec <- function(value, name, required, multi,
   # multi: list_of<ptype>
 
   # only `NULL` -> no information about the actual type
-  if (is_null(ptype)) return(tib_unspecified(name, required))
+  if (is_null(ptype) || inherits(ptype, "vctrs_unspecified")) {
+    return(tib_unspecified(name, required))
+  }
 
   # TODO what if `ptype` is not a vector?
   # TODO what if `ptype` is a data frame?

@@ -32,9 +32,6 @@ test_that("can guess scalar NA columns", {
     spec_df(date = tib_scalar("date", ptype = vctrs::new_date()))
   )
 
-  skip("Unclear what to do about logical NA")
-  # this gives `tib_unspecified` because `vec_ptype(NA)` is `vctrs::unspecified()`
-  # probably this makes most sense
   expect_equal(
     spec_guess_df(tibble(lgl = NA)),
     spec_df(lgl = tib_unspecified("lgl"))
@@ -60,6 +57,13 @@ test_that("can guess vector columns", {
   expect_equal(
     spec_guess_df(tibble(x = list(x_posixlt))),
     spec_df(x = tib_vector("x", ptype = vec_ptype(x_posixlt)))
+  )
+
+  # unspecified works
+  skip("vec_ptype_common(NA) is not unspecified - vctrs#1575")
+  expect_equal(
+    spec_guess_df(tibble(x = list(NA, NA))),
+    spec_df(lgl = tib_unspecified("lgl"))
   )
 })
 

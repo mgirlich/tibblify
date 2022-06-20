@@ -181,6 +181,11 @@ test_that("can guess tib_unspecified for an object", {
   )
 
   expect_equal(
+    spec_guess_object(list(x = NA)),
+    spec_object(x = tib_unspecified("x"))
+  )
+
+  expect_equal(
     spec_guess_object(list(x = list(NULL, NULL))),
     spec_object(x = tib_unspecified("x"))
   )
