@@ -7,6 +7,7 @@ spec_guess_df <- function(x) {
 }
 
 col_to_spec <- function(col, name) {
+  # TODO add fast path for `list_of` columns?
   if (is.data.frame(col)) {
     return(tib_row(name, !!!purrr::imap(col, col_to_spec)))
   }
