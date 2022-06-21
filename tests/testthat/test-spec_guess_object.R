@@ -1,4 +1,4 @@
-test_that("can guess tib_scalar", {
+test_that("can guess scalar elements", {
   expect_equal(
     spec_guess_object(list(x = TRUE)),
     spec_object(x = tib_lgl("x"))
@@ -25,13 +25,26 @@ test_that("POSIXlt is converted to POSIXct", {
   )
 })
 
+test_that("respect empty_list_unspecified for scalar elements", {
+  x <- list(list(x = 1L), list(x = list()))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_list("x"))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_int("x"))
+  )
+})
+
 test_that("can handle non-vector elements", {
   skip("Not yet working - #76")
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   spec_guess_object(list(x = model))
 })
 
-test_that("can guess tib_vector", {
+test_that("can guess vector elements", {
   expect_equal(
     spec_guess_object(list(x = c(TRUE, FALSE))),
     spec_object(x = tib_lgl_vec("x"))
@@ -50,11 +63,24 @@ test_that("can guess tib_vector", {
   )
 })
 
-test_that("POSIXlt is converted to POSIXct for tib_vector", {
+test_that("POSIXlt is converted to POSIXct for vector elements", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
     spec_guess_object(list(x = c(x_posixlt, x_posixlt))),
     spec_object(x = tib_vector("x", ptype = vctrs::new_datetime()))
+  )
+})
+
+test_that("respect empty_list_unspecified for vector elements", {
+  x <- list(list(x = 1:2), list(x = list()))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_list("x"))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_int_vec("x"))
   )
 })
 
@@ -74,12 +100,16 @@ test_that("can guess tib_vector for a scalar list", {
   )
 })
 
-test_that("can guess tib_list", {
+test_that("can guess mixed elements", {
   expect_equal(
     spec_guess_object(list(x = list(TRUE, "a"))),
     spec_object(x = tib_list("x"))
   )
+})
 
+test_that("non-vector objects work", {
+  skip("handling of non-vector objects not yet decided - #84")
+  # TODO not yet decided
   # non-vector objects are okay in lists
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
@@ -92,6 +122,19 @@ test_that("can guess tib_row", {
   expect_equal(
     spec_guess_object(list(x = list(a = 1L, b = "a"))),
     spec_object(x = tib_row("x", a = tib_int("a"), b = tib_chr("b")))
+  )
+})
+
+test_that("respect empty_list_unspecified for object elements", {
+  x <- list(list(x = list(y = 1:2)), list(x = list(y = list())))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_row("x", y = tib_list("y")))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_row("x", y = tib_int_vec("y")))
   )
 })
 
@@ -146,6 +189,37 @@ test_that("can guess tib_df", {
       )
     ),
     spec_object(x = tib_df("x", a = tib_list("a")))
+  )
+})
+
+test_that("respect empty_list_unspecified for list of object elements", {
+  x <- list(
+    x = list(
+      list(a = 1L, b = 1:2),
+      list(a = list(), b = list())
+    )
+  )
+
+  expect_equal(
+    spec_guess_object(x, empty_list_unspecified = FALSE),
+    spec_object(
+      x = tib_df(
+        "x",
+        a = tib_list("a"),
+        b = tib_list("b")
+      )
+    )
+  )
+
+  expect_equal(
+    spec_guess_object(x, empty_list_unspecified = TRUE),
+    spec_object(
+      x = tib_df(
+        "x",
+        a = tib_int("a"),
+        b = tib_int_vec("b")
+      )
+    )
   )
 })
 

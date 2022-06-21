@@ -1,6 +1,9 @@
 #' @rdname spec_guess
 #' @export
-spec_guess_object <- function(x, simplify_list = TRUE, call = current_call()) {
+spec_guess_object <- function(x,
+                              empty_list_unspecified = TRUE,
+                              simplify_list = TRUE,
+                              call = current_call()) {
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
@@ -15,11 +18,16 @@ spec_guess_object <- function(x, simplify_list = TRUE, call = current_call()) {
     cli::cli_abort(msg, call = call)
   }
 
-  fields <- guess_object_spec(x, simplify_list)
-  return(spec_object(!!!fields))
+  fields <- guess_object_spec(
+    x,
+    empty_list_unspecified = empty_list_unspecified,
+    simplify_list = simplify_list
+  )
+
+  spec_object(!!!fields)
 }
 
-guess_object_spec <- function(x, simplify_list) {
+guess_object_spec <- function(x, empty_list_unspecified, simplify_list) {
   purrr::pmap(
     tibble::tibble(
       value = x,
@@ -28,6 +36,7 @@ guess_object_spec <- function(x, simplify_list) {
     guess_field_spec,
     required = TRUE,
     multi = FALSE,
+    empty_list_unspecified = empty_list_unspecified,
     simplify_list = simplify_list
   )
 }
