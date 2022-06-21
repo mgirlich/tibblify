@@ -52,7 +52,7 @@
     Code
       tib_int("a", default = 1) %>% print()
     Output
-      tib_int("a", default = 1)
+      tib_int("a", default = 1L)
 
 ---
 
