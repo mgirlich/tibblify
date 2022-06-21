@@ -56,21 +56,40 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_guess</span><span class="op">(</span><span class="va">x</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_guess</span><span class="op">(</span><span class="va">x</span>, empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_df</span><span class="op">(</span><span class="va">x</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">spec_guess_df</span><span class="op">(</span><span class="va">x</span>, empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
 
-<span class="fu">spec_guess_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">spec_guess_list</span><span class="op">(</span>
+  <span class="va">x</span>,
+  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,
+  simplify_list <span class="op">=</span> <span class="cn">TRUE</span>,
+  call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span>
 
-<span class="fu">spec_guess_object</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span>
+<span class="fu">spec_guess_object</span><span class="op">(</span>
+  <span class="va">x</span>,
+  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,
+  simplify_list <span class="op">=</span> <span class="cn">TRUE</span>,
+  call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span>
 
-<span class="fu">spec_guess_object_list</span><span class="op">(</span><span class="va">x</span>, simplify_list <span class="op">=</span> <span class="cn">TRUE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+<span class="fu">spec_guess_object_list</span><span class="op">(</span>
+  <span class="va">x</span>,
+  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,
+  simplify_list <span class="op">=</span> <span class="cn">TRUE</span>,
+  call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span>
+<span class="op">)</span></code></pre></div>
     </div>
 
     <div id="arguments">
     <h2>Arguments</h2>
     <dl><dt>x</dt>
 <dd><p>A nested list.</p></dd>
+
+
+<dt>empty_list_unspecified</dt>
+<dd><p>Treat empty lists as unspecified?</p></dd>
 
 
 <dt>call</dt>
