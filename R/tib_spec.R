@@ -63,7 +63,7 @@ spec_tib <- function(fields, type, ...) {
   structure(
     list(
       type = type,
-      fields = prep_spec_fields(fields),
+      fields = prep_spec_fields(fields) %||% list(),
       ...
     ),
     class = c(paste0("spec_", type), "spec_tib")
@@ -343,7 +343,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...))
+    fields = prep_spec_fields(list2(...)) %||% list()
   )
 }
 
@@ -354,7 +354,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...)),
+    fields = prep_spec_fields(list2(...)) %||% list(),
     names_col = .names_to
   )
 }
