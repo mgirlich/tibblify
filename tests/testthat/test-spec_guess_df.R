@@ -155,7 +155,7 @@ test_that("can guess list of tibble columns", {
       df_list = tib_df(
         "df_list",
         dbl = tib_dbl("dbl"),
-        chr = tib_chr("chr")
+        chr = tib_chr("chr", required = FALSE)
       )
     )
   )
@@ -271,7 +271,7 @@ test_that("can guess spec for data frames with nested df columns", {
         df2 = tib_df(
           "df2",
           dbl2 = tib_dbl("dbl2"),
-          chr2 = tib_chr("chr2")
+          chr2 = tib_chr("chr2", required = FALSE)
         )
       )
     )
@@ -297,7 +297,7 @@ test_that("can guess spec for data frames with nested list of df columns", {
     )
   )
 
-  # df in row element
+  # df in df element
   expect_equal(
     spec_guess_df(
       tibble(
@@ -317,7 +317,7 @@ test_that("can guess spec for data frames with nested list of df columns", {
         df2 = tib_df(
           "df2",
           dbl2 = tib_dbl("dbl2"),
-          chr2 = tib_chr("chr2")
+          chr2 = tib_chr("chr2", required = FALSE)
         )
       )
     )
