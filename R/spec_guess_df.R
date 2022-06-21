@@ -27,12 +27,12 @@ col_to_spec <- function(col, name) {
   }
 
   if (col_is_scalar(col)) {
-    ptype <- vec_ptype(col)
+    ptype <- special_ptype_handling(vec_ptype(col))
     if (inherits(ptype, "vctrs_unspecified")) {
       return(tib_unspecified(name))
     }
 
-    return(tib_scalar(name, vec_ptype(col)))
+    return(tib_scalar(name, ptype))
   }
 
   if (!is.list(col)) {
@@ -78,6 +78,16 @@ get_ptype_common <- function(x) {
 
   list(
     has_common_ptype = is_null(ptype_result$error),
-    ptype = ptype_result$result
+    ptype = special_ptype_handling(ptype_result$result)
   )
+}
+
+special_ptype_handling <- function(ptype) {
+  # convert POSIXlt to POSIXct to be in line with vctrs
+  # https://github.com/r-lib/vctrs/issues/1576
+  if (inherits(ptype, "POSIXlt")) {
+    return(vec_cast(ptype, vctrs::new_datetime()))
+  }
+
+  ptype
 }

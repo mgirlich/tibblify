@@ -41,6 +41,7 @@ guess_field_spec <- function(value, name, required, multi,
   } else {
     ptype <- vec_ptype(value)
   }
+  ptype <- special_ptype_handling(ptype)
 
   # now we know the shape of value
   # scalar: ptype
