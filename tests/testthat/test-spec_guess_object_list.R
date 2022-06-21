@@ -1,4 +1,4 @@
-test_that("can guess tib_scalar", {
+test_that("can guess scalar elements", {
   expect_equal(
     spec_guess_object_list(list(list(x = TRUE), list(x = FALSE))),
     spec_df(x = tib_lgl("x"))
@@ -37,7 +37,20 @@ test_that("can guess required for scalars", {
   )
 })
 
-test_that("can guess tib_vector", {
+test_that("respect empty_list_unspecified for scalar elements", {
+  x <- list(list(x = 1L), list(x = list()))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_list("x"))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_int("x"))
+  )
+})
+
+test_that("can guess vector elements", {
   expect_equal(
     spec_guess_object_list(list(list(x = c(TRUE, FALSE)), list(x = FALSE))),
     spec_df(x = tib_lgl_vec("x"))
@@ -61,10 +74,23 @@ test_that("can guess tib_vector", {
   )
 })
 
-test_that("can guess required for tib_vector", {
+test_that("can guess required for vector elements", {
   expect_equal(
     spec_guess_object_list(list(list(x = c(TRUE, FALSE)), list())),
     spec_df(x = tib_lgl_vec("x", FALSE))
+  )
+})
+
+test_that("respect empty_list_unspecified for vector elements", {
+  x <- list(list(x = 1:2), list(x = list()))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_list("x"))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_int_vec("x"))
   )
 })
 
@@ -117,7 +143,7 @@ test_that("can guess required for tib_list", {
   )
 })
 
-test_that("can guess tib_row", {
+test_that("can guess object elements", {
   expect_equal(
     spec_guess_object_list(
       list(
@@ -146,6 +172,19 @@ test_that("can guess tib_row", {
       )
     ),
     spec_df(x = tib_row("x", a = tib_list("a")))
+  )
+})
+
+test_that("respect empty_list_unspecified for object elements", {
+  x <- list(list(x = list(y = 1:2)), list(x = list(y = list())))
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_df(x = tib_row("x", y = tib_list("y")))
+  )
+
+  expect_equal(
+    spec_guess_object_list(x, empty_list_unspecified = TRUE),
+    spec_df(x = tib_row("x", y = tib_int_vec("y")))
   )
 })
 
