@@ -1,16 +1,26 @@
 #' @rdname spec_guess
 #' @export
-spec_guess_object_list <- function(x, simplify_list = TRUE, call = current_call()) {
-  fields <- guess_object_list_spec(x, simplify_list)
+spec_guess_object_list <- function(x,
+                                   empty_list_unspecified = FALSE,
+                                   simplify_list = TRUE,
+                                   call = current_call()) {
+  fields <- guess_object_list_spec(
+    x,
+    empty_list_unspecified = empty_list_unspecified,
+    simplify_list = simplify_list
+  )
 
   names_to <- NULL
   if (is_named(x)) {
     names_to <- ".names"
   }
-  return(spec_df(!!!fields, .names_to = names_to))
+
+  spec_df(!!!fields, .names_to = names_to)
 }
 
-guess_object_list_spec <- function(x, simplify_list) {
+guess_object_list_spec <- function(x,
+                                   empty_list_unspecified,
+                                   simplify_list) {
   required <- get_required(x)
 
   # need to remove empty elements for `purrr::transpose()` to work...
@@ -26,6 +36,7 @@ guess_object_list_spec <- function(x, simplify_list) {
     ),
     guess_field_spec,
     multi = TRUE,
+    empty_list_unspecified = empty_list_unspecified,
     simplify_list = simplify_list
   )
 }

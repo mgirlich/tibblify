@@ -1,6 +1,8 @@
 #' @export
 #' @rdname spec_guess
-spec_guess_df <- function(x, call = current_call()) {
+spec_guess_df <- function(x,
+                          empty_list_unspecified = FALSE,
+                          call = current_call()) {
   if (!is.data.frame(x)) {
     if (is.list(x)) {
       msg <- c(
@@ -16,14 +18,15 @@ spec_guess_df <- function(x, call = current_call()) {
   }
 
   spec_df(
-    !!!purrr::imap(x, col_to_spec)
+    !!!purrr::imap(x, col_to_spec, empty_list_unspecified)
   )
 }
 
-col_to_spec <- function(col, name) {
+col_to_spec <- function(col, name, empty_list_unspecified) {
   # TODO add fast path for `list_of` columns?
   if (is.data.frame(col)) {
-    return(tib_row(name, !!!purrr::imap(col, col_to_spec)))
+    fields_spec <- purrr::imap(col, col_to_spec, empty_list_unspecified)
+    return(tib_row(name, !!!fields_spec))
   }
 
   if (col_is_scalar(col)) {
@@ -44,7 +47,7 @@ col_to_spec <- function(col, name) {
   # * if `tib_unspecified()` it could use `vctrs::list_drop_empty()` to get
   #   non-empty element
 
-  ptype_common <- get_ptype_common(col)
+  ptype_common <- get_ptype_common(col, empty_list_unspecified)
   if (!ptype_common$has_common_ptype) {
     return(tib_list(name))
   }
@@ -57,14 +60,16 @@ col_to_spec <- function(col, name) {
   if (is.data.frame(ptype)) {
     col_required <- df_guess_required(col, colnames(ptype))
     col_flat <- vec_unchop(col, ptype = ptype)
-    spec <- tib_df(name, !!!purrr::imap(col_flat, col_to_spec))
+
+    fields_spec <- purrr::imap(col_flat, col_to_spec, empty_list_unspecified)
+    spec <- tib_df(name, !!!fields_spec)
     for (col in names(col_required)) {
       spec$fields[[col]]$required <- col_required[[col]]
     }
     return(spec)
   }
 
-  return(tib_vector(name, ptype))
+  tib_vector(name, ptype)
 }
 
 col_is_scalar <- function(x) {
@@ -76,13 +81,29 @@ col_is_scalar <- function(x) {
   vec_is(x)
 }
 
-get_ptype_common <- function(x) {
-  ptype_result <- purrr::safely(vec_ptype_common, quiet = TRUE)(!!!x)
+get_ptype_common <- function(x, empty_list_unspecified) {
+  if (empty_list_unspecified) {
+    list_sizes_result <- purrr::safely(list_sizes)(x)
+    if (inherits(list_sizes_result$error, "vctrs_error_scalar_type")) {
+      return(list(has_common_ptype = FALSE))
+    }
 
-  list(
-    has_common_ptype = is_null(ptype_result$error),
-    ptype = special_ptype_handling(ptype_result$result)
-  )
+    empty_flag <- list_sizes_result$result == 0
+    empty_list_flag <- purrr::map_lgl(x[empty_flag], ~ identical(.x, list()))
+    empty_flag[empty_flag] <- empty_list_flag
+    if (any(empty_flag)) {
+      x <- x[!empty_flag]
+    }
+  }
+
+  try_fetch({
+    ptype <- vec_ptype_common(!!!x)
+    list(has_common_ptype = TRUE, ptype = special_ptype_handling(ptype))
+  }, vctrs_error_incompatible_type = function(cnd) {
+    list(has_common_ptype = FALSE)
+  }, vctrs_error_scalar_type = function(cnd) {
+    list(has_common_ptype = FALSE)
+  })
 }
 
 special_ptype_handling <- function(ptype) {
