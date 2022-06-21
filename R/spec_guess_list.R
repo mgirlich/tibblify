@@ -114,6 +114,7 @@ guess_field_spec <- function(value,
 
   ptype <- ptype_result$ptype
   if (is_null(ptype)) return(tib_unspecified(name, required))
+  if (identical(ptype, list()) || identical(ptype, set_names(list()))) return(tib_unspecified(name, required))
 
   if (!simplify_list) return(tib_list(name, required))
 
