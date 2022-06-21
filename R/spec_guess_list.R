@@ -75,7 +75,6 @@ guess_field_spec <- function(value,
     return(tib_unspecified(name, required))
   }
 
-  # TODO what if `ptype` is not a vector?
   # TODO what if `ptype` is a data frame?
   # TODO matrix
   if (!vec_is_list(ptype)) {

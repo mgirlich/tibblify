@@ -83,7 +83,6 @@ test_that("can guess mixed elements", {
 
 test_that("non-vector objects work", {
   skip("handling of non-vector objects not yet decided - #84")
-  # TODO not yet decided
   # non-vector objects are okay in lists
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
@@ -226,23 +225,24 @@ test_that("order of fields for tib_df does not matter", {
 })
 
 test_that("can guess tib_unspecified for an object", {
+  # `NULL` is the missing element in lists
   expect_equal(
     spec_guess_object(list(x = NULL)),
     spec_object(x = tib_unspecified("x"))
   )
 
-  # TODO should this depend on `empty_list_unspecified`?
+  # empty lists could be object or list of object -> unspecified
   expect_equal(
-    spec_guess_object(list(x = list())),
+    spec_guess_object(list(x = list()), empty_list_unspecified = FALSE),
     spec_object(x = tib_unspecified("x"))
   )
 
+  # NA could be any scalar value
   expect_equal(
     spec_guess_object(list(x = NA)),
     spec_object(x = tib_unspecified("x"))
   )
 
-  # TODO should this be `tib_list()`?
   expect_equal(
     spec_guess_object(list(x = list(NULL, NULL))),
     spec_object(x = tib_unspecified("x"))
@@ -256,6 +256,11 @@ test_that("can guess tib_unspecified for an object", {
 
   expect_equal(
     spec_guess_object(list(x = list(a = list()))),
+    spec_object(x = tib_row("x", a = tib_unspecified("a")))
+  )
+
+  expect_equal(
+    spec_guess_object(list(x = list(a = list())), empty_list_unspecified = FALSE),
     spec_object(x = tib_row("x", a = tib_unspecified("a")))
   )
 
