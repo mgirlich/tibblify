@@ -55,10 +55,13 @@ col_to_spec <- function(col, name) {
   }
 
   if (is.data.frame(ptype)) {
-    # TODO calculate `.required`
-    # see https://github.com/mgirlich/tibblify/issues/70
-    col_flat <- vec_unchop(col)
-    return(tib_df(name, !!!purrr::imap(col_flat, col_to_spec)))
+    col_required <- df_guess_required(col, colnames(ptype))
+    col_flat <- vec_unchop(col, ptype = ptype)
+    spec <- tib_df(name, !!!purrr::imap(col_flat, col_to_spec))
+    for (col in names(col_required)) {
+      spec$fields[[col]]$required <- col_required[[col]]
+    }
+    return(spec)
   }
 
   return(tib_vector(name, ptype))
@@ -90,4 +93,16 @@ special_ptype_handling <- function(ptype) {
   }
 
   ptype
+}
+
+df_guess_required <- function(df_list, all_cols) {
+  cols_list <- purrr::map(df_list, colnames)
+
+  col_required <- rep_named(all_cols, TRUE)
+  for (col in all_cols) {
+    bad_idx <- purrr::detect_index(cols_list, ~ !col %in% .x)
+    col_required[[col]] <- bad_idx == 0
+  }
+
+  col_required
 }

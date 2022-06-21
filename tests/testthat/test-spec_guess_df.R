@@ -216,7 +216,6 @@ test_that("can guess list of tibble columns", {
 })
 
 test_that("can guess required for list of tibble columns", {
-  skip("Not yet working - #70")
   expect_equal(
     spec_guess_df(
       tibble(
