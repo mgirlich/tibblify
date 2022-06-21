@@ -88,10 +88,10 @@ get_ptype_common <- function(x, empty_list_unspecified) {
       return(list(has_common_ptype = FALSE))
     }
 
-    empty_flag_x <- list_sizes_result$result == 0
-    empty_list_flag <- purrr::map_lgl(x[empty_flag_x], ~ identical(.x, list()))
-    empty_flag <- empty_flag_x[empty_list_flag]
-    if (!is_empty(empty_flag)) {
+    empty_flag <- list_sizes_result$result == 0
+    empty_list_flag <- purrr::map_lgl(x[empty_flag], ~ identical(.x, list()))
+    empty_flag[empty_flag] <- empty_list_flag
+    if (any(empty_flag)) {
       x <- x[!empty_flag]
     }
   }
@@ -100,6 +100,8 @@ get_ptype_common <- function(x, empty_list_unspecified) {
     ptype <- vec_ptype_common(!!!x)
     list(has_common_ptype = TRUE, ptype = special_ptype_handling(ptype))
   }, vctrs_error_incompatible_type = function(cnd) {
+    list(has_common_ptype = FALSE)
+  }, vctrs_error_scalar_type = function(cnd) {
     list(has_common_ptype = FALSE)
   })
 }
