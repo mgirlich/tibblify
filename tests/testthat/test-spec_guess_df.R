@@ -13,10 +13,18 @@ test_that("can guess scalar columns", {
   )
 
   # also for record types
+  x_rat <- new_rational(1, 2)
+  expect_equal(
+    spec_guess_df(tibble(x = x_rat)),
+    spec_df(x = tib_scalar("x", x_rat))
+  )
+})
+
+test_that("POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
     spec_guess_df(tibble(x = x_posixlt)),
-    spec_df(x = tib_scalar("x", ptype = vec_ptype(x_posixlt)))
+    spec_df(x = tib_scalar("x", ptype = vctrs::new_datetime()))
   )
 })
 
@@ -53,10 +61,10 @@ test_that("can guess vector columns", {
   )
 
   # also for record types
-  x_posixlt <- as.POSIXlt(vctrs::new_date(0))
+  x_rat <- new_rational(1, 2)
   expect_equal(
-    spec_guess_df(tibble(x = list(x_posixlt))),
-    spec_df(x = tib_vector("x", ptype = vec_ptype(x_posixlt)))
+    spec_guess_df(tibble(x = list(x_rat))),
+    spec_df(x = tib_vector("x", x_rat))
   )
 
   # unspecified works
@@ -64,6 +72,14 @@ test_that("can guess vector columns", {
   expect_equal(
     spec_guess_df(tibble(x = list(NA, NA))),
     spec_df(lgl = tib_unspecified("lgl"))
+  )
+})
+
+test_that("POSIXlt vector columns are converted to POSIXct", {
+  x_posixlt <- as.POSIXlt(vctrs::new_date(0))
+  expect_equal(
+    spec_guess_df(tibble(x = list(x_posixlt))),
+    spec_df(x = tib_vector("x", ptype = vctrs::new_datetime()))
   )
 })
 

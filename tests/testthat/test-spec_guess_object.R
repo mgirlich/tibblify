@@ -10,10 +10,18 @@ test_that("can guess tib_scalar", {
   )
 
   # also for record types
+  x_rat <- new_rational(1, 2)
+  expect_equal(
+    spec_guess_object(list(x = x_rat)),
+    spec_object(x = tib_scalar("x", ptype = x_rat))
+  )
+})
+
+test_that("POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
-    spec_guess_object(list(x = x_posixlt)),
-    spec_object(x = tib_scalar("x", ptype = vec_ptype(x_posixlt)))
+    spec_guess_object_list(list(list(x = x_posixlt), list(x = x_posixlt))),
+    spec_df(x = tib_scalar("x", vctrs::new_datetime(tzone = "UTC")))
   )
 })
 
@@ -35,10 +43,18 @@ test_that("can guess tib_vector", {
   )
 
   # also for record types
+  x_rat <- new_rational(1, 2)
+  expect_equal(
+    spec_guess_object(list(x = c(x_rat, x_rat))),
+    spec_object(x = tib_vector("x", ptype = x_rat))
+  )
+})
+
+test_that("POSIXlt is converted to POSIXct for tib_vector", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
     spec_guess_object(list(x = c(x_posixlt, x_posixlt))),
-    spec_object(x = tib_vector("x", ptype = vec_ptype(x_posixlt)))
+    spec_object(x = tib_vector("x", ptype = vctrs::new_datetime()))
   )
 })
 
@@ -177,6 +193,11 @@ test_that("order of fields for tib_df does not matter", {
 test_that("can guess tib_unspecified for an object", {
   expect_equal(
     spec_guess_object(list(x = NULL)),
+    spec_object(x = tib_unspecified("x"))
+  )
+
+  expect_equal(
+    spec_guess_object(list(x = list())),
     spec_object(x = tib_unspecified("x"))
   )
 

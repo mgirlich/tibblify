@@ -15,14 +15,13 @@ test_that("can guess tib_scalar", {
     spec_guess_object_list(list(list(x = x_rat), list(x = x_rat))),
     spec_df(x = tib_scalar("x", x_rat))
   )
+})
 
-  skip("Correct handling of POSIXlt - #77 and vctrs#1576")
+test_that("POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
-  # vec_ptype(x_posixlt) # -> lt
-  # vec_ptype2(x_posixlt, x_posixlt) # -> ct
   expect_equal(
     spec_guess_object_list(list(list(x = x_posixlt), list(x = x_posixlt))),
-    spec_df(x = tib_scalar("x", x_posixlt))
+    spec_df(x = tib_scalar("x", vctrs::new_datetime(tzone = "UTC")))
   )
 })
 
