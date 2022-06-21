@@ -136,7 +136,7 @@ tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transfo
     default <- vec_init(ptype)
   } else {
     vec_assert(default, size = 1L)
-    ptype <- vec_cast(default, ptype)
+    default <- vec_cast(default, ptype)
   }
 
   class <- NULL
