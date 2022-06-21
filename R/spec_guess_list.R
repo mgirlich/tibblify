@@ -1,7 +1,7 @@
 #' @rdname spec_guess
 #' @export
 spec_guess_list <- function(x,
-                            empty_list_unspecified = TRUE,
+                            empty_list_unspecified = FALSE,
                             simplify_list = TRUE,
                             call = current_call()) {
   if (vec_is(x) && !vec_is_list(x)) {

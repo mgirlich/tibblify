@@ -1,7 +1,7 @@
 #' @rdname spec_guess
 #' @export
 spec_guess_object <- function(x,
-                              empty_list_unspecified = TRUE,
+                              empty_list_unspecified = FALSE,
                               simplify_list = TRUE,
                               call = current_call()) {
   if (is.data.frame(x)) {

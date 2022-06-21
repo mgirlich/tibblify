@@ -16,7 +16,7 @@
 #' spec_guess(list(list(x = 1), list(x = 2)))
 #'
 #' spec_guess(gh_users)
-spec_guess <- function(x, empty_list_unspecified = TRUE, call = current_call()) {
+spec_guess <- function(x, empty_list_unspecified = FALSE, call = current_call()) {
   if (is.data.frame(x)) {
     spec_guess_df(
       x,
