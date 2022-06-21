@@ -87,6 +87,19 @@ test_that("can guess vector NA columns", {
   )
 })
 
+test_that("respect empty_list_unspecified for vector columns", {
+  x <- tibble(int_vec = list(1:2, list()))
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = FALSE),
+    spec_df(int_vec = tib_list("int_vec"))
+  )
+
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = TRUE),
+    spec_df(int_vec = tib_int_vec("int_vec"))
+  )
+})
+
 test_that("can guess list of NULL columns", {
   expect_equal(
     spec_guess_df(tibble(x = list(NULL, NULL))),
@@ -143,6 +156,29 @@ test_that("can guess tibble columns", {
     spec_guess_df(tibble(df = tibble(x = tibble(y = 1L)))),
     spec_df(
       df = tib_row("df", x = tib_row("x", y = tib_int("y")))
+    )
+  )
+})
+
+test_that("respect empty_list_unspecified in tibble columns", {
+  x <- tibble(x = tibble(int_vec = list(1:2, list())))
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = FALSE),
+    spec_df(
+      x = tib_row(
+        "x",
+        int_vec = tib_list("int_vec")
+      )
+    )
+  )
+
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = TRUE),
+    spec_df(
+      x = tib_row(
+        "x",
+        int_vec = tib_int_vec("int_vec")
+      )
     )
   )
 })
@@ -217,6 +253,29 @@ test_that("can guess list of tibble columns", {
       df_list = tib_df(
         "df_list",
         x = tib_row("x", y = tib_int("y"))
+      )
+    )
+  )
+})
+
+test_that("respect empty_list_unspecified for list of tibble columns", {
+  x <- tibble(x = list(tibble(int_vec = list(1:2, list()))))
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = FALSE),
+    spec_df(
+      x = tib_df(
+        "x",
+        int_vec = tib_list("int_vec")
+      )
+    )
+  )
+
+  expect_equal(
+    spec_guess_df(x, empty_list_unspecified = TRUE),
+    spec_df(
+      x = tib_df(
+        "x",
+        int_vec = tib_int_vec("int_vec")
       )
     )
   )
@@ -326,65 +385,6 @@ test_that("can guess spec for nested list of df columns", {
           dbl2 = tib_dbl("dbl2"),
           chr2 = tib_chr("chr2", required = FALSE)
         )
-      )
-    )
-  )
-})
-
-test_that("respect empty_list_unspecified for vector columns", {
-  x <- tibble(int_vec = list(1:2, list()))
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = FALSE),
-    spec_df(int_vec = tib_list("int_vec"))
-  )
-
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = TRUE),
-    spec_df(int_vec = tib_int_vec("int_vec"))
-  )
-})
-
-test_that("respect empty_list_unspecified for nested vector columns", {
-  x <- tibble(x = tibble(int_vec = list(1:2, list())))
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = FALSE),
-    spec_df(
-      x = tib_row(
-        "x",
-        int_vec = tib_list("int_vec")
-      )
-    )
-  )
-
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = TRUE),
-    spec_df(
-      x = tib_row(
-        "x",
-        int_vec = tib_int_vec("int_vec")
-      )
-    )
-  )
-})
-
-test_that("respect empty_list_unspecified for vector columns in list of df", {
-  x <- tibble(x = list(tibble(int_vec = list(1:2, list()))))
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = FALSE),
-    spec_df(
-      x = tib_df(
-        "x",
-        int_vec = tib_list("int_vec")
-      )
-    )
-  )
-
-  expect_equal(
-    spec_guess_df(x, empty_list_unspecified = TRUE),
-    spec_df(
-      x = tib_df(
-        "x",
-        int_vec = tib_int_vec("int_vec")
       )
     )
   )
