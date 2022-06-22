@@ -44,6 +44,10 @@ tib_ptype <- function(x) {
   special_ptype_handling(ptype)
 }
 
+is_unspecified <- function(x) {
+  inherits(x, "vctrs_unspecified")
+}
+
 make_unchop <- function(ptype) {
   rlang::new_function(
     pairlist2(x = ),

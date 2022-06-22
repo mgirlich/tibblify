@@ -33,7 +33,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
 
   if (col_type == "vector") {
     ptype <- tib_ptype(col)
-    if (inherits(ptype, "vctrs_unspecified")) {
+    if (is_unspecified(ptype)) {
       return(tib_unspecified(name))
     }
 
@@ -41,7 +41,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   }
 
   if (col_type != "list") {
-    cli::cli_abort("{.fn get_col_type} returned an unexpected type", .internal = TRUE)
+    cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
   # TODO this could use sampling for performance
