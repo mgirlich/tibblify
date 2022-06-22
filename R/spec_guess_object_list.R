@@ -4,6 +4,20 @@ spec_guess_object_list <- function(x,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
                                    call = current_call()) {
+  if (is.data.frame(x)) {
+    msg <- c(
+      "{.arg x} must not be a dataframe.",
+      i = "Did you want to use {.fn spec_guess_df} instead?"
+    )
+    cli::cli_abort(msg, call = call)
+  }
+
+  if (!is.list(x)) {
+    cls <- class(x)[[1]]
+    msg <- "{.arg x} must be a list. Instead, it is a {.cls {cls}}."
+    cli::cli_abort(msg, call = call)
+  }
+
   fields <- guess_object_list_spec(
     x,
     empty_list_unspecified = empty_list_unspecified,
