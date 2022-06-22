@@ -63,7 +63,7 @@ spec_tib <- function(fields, type, ...) {
   structure(
     list(
       type = type,
-      fields = prep_spec_fields(fields),
+      fields = prep_spec_fields(fields) %||% list(),
       ...
     ),
     class = c(paste0("spec_", type), "spec_tib")
@@ -119,7 +119,7 @@ tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
 tib_unspecified <- function(key, required = TRUE) {
   tib_collector(
     key = key,
-    type = "list",
+    type = "unspecified",
     required = required,
     default_value = NULL,
     transform = NULL,
@@ -136,7 +136,7 @@ tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transfo
     default <- vec_init(ptype)
   } else {
     vec_assert(default, size = 1L)
-    ptype <- vec_cast(default, ptype)
+    default <- vec_cast(default, ptype)
   }
 
   class <- NULL
@@ -185,7 +185,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'
 #' * `tib_scalar(ptype)`: Cast the field to a length one vector of type `ptype`.
 #' * `tib_vector(ptype)`: Cast the field to an arbitrary length vector of type `ptype`.
-#' * `tib_list()`: Cast the field to a list.
+#' * `tib_variant()`: Cast the field to a list.
 #' * `tib_row()`: Cast the field to a named list.
 #' * `tib_df()`: Cast the field to a tibble.
 #'
@@ -250,9 +250,7 @@ tib_chr <- function(key, required = TRUE, default = NULL, transform = NULL) {
 
 tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
   ptype <- vec_ptype(ptype)
-  if (is_null(default)) {
-    default <- ptype
-  } else {
+  if (!is_null(default)) {
     default <- vec_cast(default, ptype)
   }
 
@@ -328,10 +326,10 @@ tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) 
 
 #' @rdname tib_scalar
 #' @export
-tib_list <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_variant <- function(key, required = TRUE, default = NULL, transform = NULL) {
   tib_collector(
     key = key,
-    type = "list",
+    type = "variant",
     required = required,
     default_value = default,
     transform = prep_transform(transform)
@@ -345,7 +343,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...))
+    fields = prep_spec_fields(list2(...)) %||% list()
   )
 }
 
@@ -356,7 +354,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...)),
+    fields = prep_spec_fields(list2(...)) %||% list(),
     names_col = .names_to
   )
 }

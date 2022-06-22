@@ -44,3 +44,12 @@ test_that("can nest specifications", {
 
   expect_snapshot_error(spec_df(spec1, spec1))
 })
+
+test_that("empty dots create empty list", {
+  expect_equal(spec_df()$fields, list())
+  expect_equal(spec_row()$fields, list())
+  expect_equal(spec_object()$fields, list())
+
+  expect_equal(tib_df("x")$fields, list())
+  expect_equal(tib_row("x")$fields, list())
+})

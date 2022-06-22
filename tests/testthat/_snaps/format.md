@@ -1,3 +1,10 @@
+# can format tib_unspecified()
+
+    Code
+      tib_unspecified("a") %>% print()
+    Output
+      tib_unspecified("a")
+
 # format for vectors works
 
     Code
@@ -29,9 +36,9 @@
 ---
 
     Code
-      tib_list("a") %>% print()
+      tib_variant("a") %>% print()
     Output
-      tib_list("a")
+      tib_variant("a")
 
 ---
 
@@ -45,7 +52,7 @@
     Code
       tib_int("a", default = 1) %>% print()
     Output
-      tib_int("a", default = 1)
+      tib_int("a", default = 1L)
 
 ---
 

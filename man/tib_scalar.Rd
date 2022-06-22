@@ -12,7 +12,7 @@
 \alias{tib_int_vec}
 \alias{tib_dbl_vec}
 \alias{tib_chr_vec}
-\alias{tib_list}
+\alias{tib_variant}
 \alias{tib_row}
 \alias{tib_df}
 \title{Create a Field Specification}
@@ -39,7 +39,7 @@ tib_dbl_vec(key, required = TRUE, default = NULL, transform = NULL)
 
 tib_chr_vec(key, required = TRUE, default = NULL, transform = NULL)
 
-tib_list(key, required = TRUE, default = NULL, transform = NULL)
+tib_variant(key, required = TRUE, default = NULL, transform = NULL)
 
 tib_row(.key, ..., .required = TRUE)
 
@@ -70,7 +70,7 @@ There are basically five different \verb{tib_*()} functions
 \itemize{
 \item \code{tib_scalar(ptype)}: Cast the field to a length one vector of type \code{ptype}.
 \item \code{tib_vector(ptype)}: Cast the field to an arbitrary length vector of type \code{ptype}.
-\item \code{tib_list()}: Cast the field to a list.
+\item \code{tib_variant()}: Cast the field to a list.
 \item \code{tib_row()}: Cast the field to a named list.
 \item \code{tib_df()}: Cast the field to a tibble.
 }

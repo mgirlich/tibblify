@@ -15,3 +15,8 @@ NULL
 #' @export zap
 #' @keywords internal
 rlang::zap
+
+#' @importFrom tibble tibble
+#' @export tibble
+#' @keywords internal
+tibble::tibble

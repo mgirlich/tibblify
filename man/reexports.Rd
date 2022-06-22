@@ -4,6 +4,7 @@
 \name{reexports}
 \alias{reexports}
 \alias{zap}
+\alias{tibble}
 \title{Objects exported from other packages}
 \keyword{internal}
 \description{
@@ -12,5 +13,7 @@ below to see their documentation.
 
 \describe{
   \item{rlang}{\code{\link[rlang]{zap}}}
+
+  \item{tibble}{\code{\link[tibble]{tibble}}}
 }}
 

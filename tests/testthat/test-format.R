@@ -1,3 +1,9 @@
+test_that("can format tib_unspecified()", {
+  local_options(cli.num_colors = 1)
+
+  expect_snapshot(tib_unspecified("a") %>% print())
+})
+
 test_that("format for vectors works", {
   local_options(cli.num_colors = 1)
 
@@ -8,7 +14,7 @@ test_that("format for vectors works", {
   expect_snapshot(tib_int("a") %>% print())
   expect_snapshot(tib_lgl("a") %>% print())
 
-  expect_snapshot(tib_list("a") %>% print())
+  expect_snapshot(tib_variant("a") %>% print())
 
   expect_snapshot(tib_int("a", default = NA_integer_) %>% print())
   expect_snapshot(tib_int("a", default = 1) %>% print())
@@ -146,4 +152,12 @@ test_that("format for tib_df works", {
     ) %>%
       print()
   )
+})
+
+test_that("format for empty tib_df works", {
+  expect_equal(format(spec_df()), "spec_df()")
+  expect_equal(format(spec_row()), "spec_row()")
+  expect_equal(format(spec_object()), "spec_object()")
+  expect_equal(format(tib_df("x")), "tib_df(\n  \"x\"\n)")
+  expect_equal(format(tib_row("x")), "tib_row(\n  \"x\"\n)")
 })

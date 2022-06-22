@@ -58,11 +58,15 @@ format_fields <- function(f_name, fields, width, args = NULL) {
     parts <- c(args, fields_formatted)
   }
 
-  inner <- collapse_with_pad(
-    parts,
-    multi_line = TRUE,
-    width = width
-  )
+  if (is_empty(parts)) {
+    inner <- ""
+  } else {
+    inner <- collapse_with_pad(
+      parts,
+      multi_line = TRUE,
+      width = width
+    )
+  }
 
   paste0(
     f_name, "(",
@@ -109,9 +113,11 @@ format.tib_scalar <- function(x, ...,
 }
 
 #' @export
-format.tib_list <- format.tib_scalar
+format.tib_variant <- format.tib_scalar
 #' @export
 format.tib_vector <- format.tib_scalar
+#' @export
+format.tib_unspecified <- format.tib_scalar
 
 
 # format nested columns ---------------------------------------------------
@@ -155,7 +161,7 @@ f_name_col <- function(x) {
 }
 
 has_colour <- function() {
-  crayon::has_color() ||
+  cli::num_ansi_colors() > 1 ||
     identical(Sys.getenv("TESTTHAT"), "true")
 }
 
@@ -164,30 +170,30 @@ colour_tib <- function(x) {
 }
 
 #' @export
-colour_tib.tib_scalar_logical <- function(x) {crayon::yellow}
+colour_tib.tib_scalar_logical <- function(x) {cli::col_yellow}
 #' @export
-colour_tib.tib_scalar_integer <- function(x) {crayon::green}
+colour_tib.tib_scalar_integer <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_scalar_double <- function(x) {crayon::green}
+colour_tib.tib_scalar_double <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_scalar_character <- function(x) {crayon::red}
+colour_tib.tib_scalar_character <- function(x) {cli::col_red}
 
 #' @export
-colour_tib.tib_vector_logical <- function(x) {crayon::yellow}
+colour_tib.tib_vector_logical <- function(x) {cli::col_yellow}
 #' @export
-colour_tib.tib_vector_integer <- function(x) {crayon::green}
+colour_tib.tib_vector_integer <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_vector_double <- function(x) {crayon::green}
+colour_tib.tib_vector_double <- function(x) {cli::col_green}
 #' @export
-colour_tib.tib_vector_character <- function(x) {crayon::red}
+colour_tib.tib_vector_character <- function(x) {cli::col_red}
 
 #' @export
-colour_tib.tib_row <- function(x) {crayon::magenta}
+colour_tib.tib_row <- function(x) {cli::col_magenta}
 #' @export
-colour_tib.tib_df <- function(x) {crayon::magenta}
+colour_tib.tib_df <- function(x) {cli::col_magenta}
 
 #' @export
-colour_tib.default <- function(x) {crayon::black}
+colour_tib.default <- function(x) {cli::col_black}
 
 
 # get_f_name --------------------------------------------------------------
@@ -225,7 +231,7 @@ get_f_name.tib_vector_character <- function(x) {"tib_chr_vec"}
 get_f_name.tib_vector<- function(x) {"tib_vector"}
 
 #' @export
-get_f_name.tib_list <- function(x) {"tib_list"}
+get_f_name.tib_variant <- function(x) {"tib_variant"}
 
 
 # format ptype ------------------------------------------------------------

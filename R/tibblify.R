@@ -30,7 +30,7 @@ tibblify <- function(x, spec = NULL, names_to = NULL) {
   }
 
   if (is_null(spec)) {
-    spec <- guess_spec(x)
+    spec <- spec_guess(x)
   }
 
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
@@ -64,7 +64,12 @@ finalize_spec_object.tib_row <- function(field_spec, field) {
 }
 
 #' @export
-finalize_spec_object.tib_list <- function(field_spec, field) {
+finalize_spec_object.tib_variant <- function(field_spec, field) {
+  field[[1]]
+}
+
+#' @export
+finalize_spec_object.tib_unspecified<- function(field_spec, field) {
   field[[1]]
 }
 
