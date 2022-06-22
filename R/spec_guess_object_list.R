@@ -2,7 +2,7 @@
 #' @export
 spec_guess_object_list <- function(x,
                                    empty_list_unspecified = FALSE,
-                                   simplify_list = TRUE,
+                                   simplify_list = FALSE,
                                    call = current_call()) {
   fields <- guess_object_list_spec(
     x,

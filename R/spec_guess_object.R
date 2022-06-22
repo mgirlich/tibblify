@@ -2,7 +2,7 @@
 #' @export
 spec_guess_object <- function(x,
                               empty_list_unspecified = FALSE,
-                              simplify_list = TRUE,
+                              simplify_list = FALSE,
                               call = current_call()) {
   if (is.data.frame(x)) {
     msg <- c(

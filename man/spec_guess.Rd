@@ -16,21 +16,21 @@ spec_guess_df(x, empty_list_unspecified = FALSE, call = current_call())
 spec_guess_list(
   x,
   empty_list_unspecified = FALSE,
-  simplify_list = TRUE,
+  simplify_list = FALSE,
   call = current_call()
 )
 
 spec_guess_object(
   x,
   empty_list_unspecified = FALSE,
-  simplify_list = TRUE,
+  simplify_list = FALSE,
   call = current_call()
 )
 
 spec_guess_object_list(
   x,
   empty_list_unspecified = FALSE,
-  simplify_list = TRUE,
+  simplify_list = FALSE,
   call = current_call()
 )
 }

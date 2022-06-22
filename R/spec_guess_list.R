@@ -2,7 +2,7 @@
 #' @export
 spec_guess_list <- function(x,
                             empty_list_unspecified = FALSE,
-                            simplify_list = TRUE,
+                            simplify_list = FALSE,
                             call = current_call()) {
   if (vec_is(x) && !vec_is_list(x)) {
     cli::cli_abort(c(
