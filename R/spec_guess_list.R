@@ -78,7 +78,10 @@ guess_field_spec <- function(value,
   # multi: list_of<ptype>
 
   # only `NULL` -> no information about the actual type
-  if (is_null(ptype) || inherits(ptype, "vctrs_unspecified")) {
+  if (is_null(ptype)) {
+    return(tib_unspecified(name, required))
+  }
+  if (inherits(ptype, "vctrs_unspecified")) {
     return(tib_unspecified(name, required))
   }
 
