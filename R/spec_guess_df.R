@@ -24,7 +24,7 @@ spec_guess_df <- function(x,
 
 col_to_spec <- function(col, name, empty_list_unspecified) {
   # TODO add fast path for `list_of` columns?
-  col_type <- get_col_type(col, name)
+  col_type <- tib_type_of(col, name, other = FALSE)
 
   if (col_type == "df") {
     fields_spec <- purrr::imap(col, col_to_spec, empty_list_unspecified)
@@ -60,7 +60,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   }
 
   # TODO this should use `spec_guess_`
-  ptype_type <- get_col_type(ptype, name)
+  ptype_type <- tib_type_of(ptype, name, other = FALSE)
 
   # TODO should this care about names?
   if (ptype_type == "vector") {
@@ -89,7 +89,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   }
 }
 
-get_col_type <- function(x, name) {
+tib_type_of <- function(x, name, other) {
   if (is.data.frame(x)) {
     "df"
   } else if (vec_is_list(x)) {
@@ -97,11 +97,14 @@ get_col_type <- function(x, name) {
   } else if (vec_is(x)) {
     "vector"
   } else {
-    msg <- c(
-      "Column {name} is not a dataframe, a list or a vector.",
-      i = "Instead it has classes {.cls class(x)}."
-    )
-    cli::cli_abort(msg, .internal = TRUE)
+    if (!other) {
+      msg <- c(
+        "Column {name} is not a dataframe, a list or a vector.",
+        i = "Instead it has classes {.cls class(x)}."
+      )
+      cli::cli_abort(msg, .internal = TRUE)
+    }
+    "other"
   }
 }
 
