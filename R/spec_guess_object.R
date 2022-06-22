@@ -18,6 +18,12 @@ spec_guess_object <- function(x,
     cli::cli_abort(msg, call = call)
   }
 
+  check_object_names(x, call)
+
+  if (is_empty(x)) {
+    return(spec_object())
+  }
+
   fields <- guess_object_spec(
     x,
     empty_list_unspecified = empty_list_unspecified,
@@ -39,4 +45,18 @@ guess_object_spec <- function(x, empty_list_unspecified, simplify_list) {
     empty_list_unspecified = empty_list_unspecified,
     simplify_list = simplify_list
   )
+}
+
+check_object_names <- function(x, call) {
+  # TODO should this be more strict and also expect names for an empty list?
+  if (!is_named2(x)) {
+    msg <- "{.arg x} must be fully named."
+    cli::cli_abort(msg, call = call)
+  }
+
+  x_nms <- names(x)
+  if (vec_duplicate_any(x_nms)) {
+    msg <- "Names of {.arg x} must be unique."
+    cli::cli_abort(msg, call = call)
+  }
 }
