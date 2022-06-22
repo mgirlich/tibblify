@@ -36,9 +36,9 @@
 ---
 
     Code
-      tib_list("a") %>% print()
+      tib_variant("a") %>% print()
     Output
-      tib_list("a")
+      tib_variant("a")
 
 ---
 

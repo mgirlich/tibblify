@@ -64,7 +64,7 @@ finalize_spec_object.tib_row <- function(field_spec, field) {
 }
 
 #' @export
-finalize_spec_object.tib_list <- function(field_spec, field) {
+finalize_spec_object.tib_variant <- function(field_spec, field) {
   field[[1]]
 }
 

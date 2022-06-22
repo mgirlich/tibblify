@@ -104,8 +104,8 @@ lcol_skip <- function(path) {
 #' @export
 #' @rdname lcol_lgl
 lcol_lst <- function(path, .default = zap(), .parser = NULL) {
-  lifecycle::deprecate_warn("0.2.0", "lcol_lst()", "tib_list()")
-  tib_list(path, is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  lifecycle::deprecate_warn("0.2.0", "lcol_lst()", "tib_variant()")
+  tib_variant(path, is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export

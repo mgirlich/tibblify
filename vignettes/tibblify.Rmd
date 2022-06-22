@@ -110,7 +110,7 @@ are the following five types of functions:
 
 * `tib_scalar(ptype)`: a length one vector with type `ptype`
 * `tib_vector(ptype)`: a vector of arbitrary length with type `ptype`
-* `tib_list()`: a vector of arbitrary length and type; you should barely ever need this
+* `tib_variant()`: a vector of arbitrary length and type; you should barely ever need this
 * `tib_row(...)`: an object with the fields `...`
 * `tib_df(...)`: a collection where the objects have the fields `...`
 

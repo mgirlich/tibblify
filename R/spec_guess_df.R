@@ -49,7 +49,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
 
   ptype_common <- get_ptype_common(col, empty_list_unspecified)
   if (!ptype_common$has_common_ptype) {
-    return(tib_list(name))
+    return(tib_variant(name))
   }
 
   ptype <- ptype_common$ptype

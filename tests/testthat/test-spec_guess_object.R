@@ -77,7 +77,7 @@ test_that("can guess tib_vector for a scalar list", {
 test_that("can guess mixed elements", {
   expect_equal(
     spec_guess_object(list(x = list(TRUE, "a"))),
-    spec_object(x = tib_list("x"))
+    spec_object(x = tib_variant("x"))
   )
 })
 
@@ -87,7 +87,7 @@ test_that("non-vector objects work", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
     spec_guess_object(list(x = list(TRUE, model))),
-    spec_object(x = tib_list("x"))
+    spec_object(x = tib_variant("x"))
   )
 })
 
@@ -148,7 +148,7 @@ test_that("can guess tib_df", {
         )
       )
     ),
-    spec_object(x = tib_df("x", a = tib_list("a")))
+    spec_object(x = tib_df("x", a = tib_variant("a")))
   )
 })
 
@@ -165,8 +165,8 @@ test_that("respect empty_list_unspecified for list of object elements", {
     spec_object(
       x = tib_df(
         "x",
-        a = tib_list("a"),
-        b = tib_list("b")
+        a = tib_variant("a"),
+        b = tib_variant("b")
       )
     )
   )

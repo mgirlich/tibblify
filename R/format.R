@@ -113,7 +113,7 @@ format.tib_scalar <- function(x, ...,
 }
 
 #' @export
-format.tib_list <- format.tib_scalar
+format.tib_variant <- format.tib_scalar
 #' @export
 format.tib_vector <- format.tib_scalar
 #' @export
@@ -231,7 +231,7 @@ get_f_name.tib_vector_character <- function(x) {"tib_chr_vec"}
 get_f_name.tib_vector<- function(x) {"tib_vector"}
 
 #' @export
-get_f_name.tib_list <- function(x) {"tib_list"}
+get_f_name.tib_variant <- function(x) {"tib_variant"}
 
 
 # format ptype ------------------------------------------------------------

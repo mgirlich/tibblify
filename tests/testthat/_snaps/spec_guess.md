@@ -255,7 +255,7 @@
           transform = function (x) 
           vec_unchop(x = x, ptype = character(0))
         ),
-        topicSubTopics = tib_list(
+        topicSubTopics = tib_variant(
           "topicSubTopics",
           transform = function (x) 
           new_list_of(x = x, ptype = integer(0))

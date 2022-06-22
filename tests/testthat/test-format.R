@@ -14,7 +14,7 @@ test_that("format for vectors works", {
   expect_snapshot(tib_int("a") %>% print())
   expect_snapshot(tib_lgl("a") %>% print())
 
-  expect_snapshot(tib_list("a") %>% print())
+  expect_snapshot(tib_variant("a") %>% print())
 
   expect_snapshot(tib_int("a", default = NA_integer_) %>% print())
   expect_snapshot(tib_int("a", default = 1) %>% print())
