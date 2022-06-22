@@ -62,11 +62,13 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   # TODO this should use `spec_guess_`
   ptype_type <- get_col_type(ptype, name)
 
+  # TODO should this care about names?
   if (ptype_type == "vector") {
     return(tib_vector(name, ptype))
   }
 
   if (ptype_type == "df") {
+    # TODO this could share code with other guessers
     col_required <- df_guess_required(col, colnames(ptype))
     col_flat <- vec_unchop(col, ptype = ptype)
 
