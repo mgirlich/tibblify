@@ -91,7 +91,7 @@ test_that("respect empty_list_unspecified for vector columns", {
   x <- tibble(int_vec = list(1:2, list()))
   expect_equal(
     spec_guess_df(x, empty_list_unspecified = FALSE),
-    spec_df(int_vec = tib_list("int_vec"))
+    spec_df(int_vec = tib_variant("int_vec"))
   )
 
   expect_equal(
@@ -110,7 +110,7 @@ test_that("can guess list of NULL columns", {
 test_that("can guess mixed columns", {
   expect_equal(
     spec_guess_df(tibble(x = list(1, "a"))),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 })
 
@@ -118,7 +118,7 @@ test_that("can guess non-vector objects", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
     spec_guess_df(tibble(x = list(model, 1))),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 })
 
@@ -147,7 +147,7 @@ test_that("can guess tibble columns", {
   expect_equal(
     spec_guess_df(tibble(df = tibble(x = list(1L, "a")))),
     spec_df(
-      df = tib_row("df", x = tib_list("x"))
+      df = tib_row("df", x = tib_variant("x"))
     )
   )
 
@@ -167,7 +167,7 @@ test_that("respect empty_list_unspecified in tibble columns", {
     spec_df(
       x = tib_row(
         "x",
-        int_vec = tib_list("int_vec")
+        int_vec = tib_variant("int_vec")
       )
     )
   )
@@ -234,7 +234,7 @@ test_that("can guess list of tibble columns", {
     spec_df(
       df_list = tib_df(
         "df_list",
-        x = tib_list("x")
+        x = tib_variant("x")
       )
     )
   )
@@ -265,7 +265,7 @@ test_that("respect empty_list_unspecified for list of tibble columns", {
     spec_df(
       x = tib_df(
         "x",
-        int_vec = tib_list("int_vec")
+        int_vec = tib_variant("int_vec")
       )
     )
   )

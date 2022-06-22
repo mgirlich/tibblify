@@ -59,7 +59,7 @@ guess_field_spec <- function(value,
     ptype_result <- get_ptype_common(value, empty_list_unspecified)
 
     # no common ptype -> it is a list of different types
-    if (!ptype_result$has_common_ptype) return(tib_list(name, required))
+    if (!ptype_result$has_common_ptype) return(tib_variant(name, required))
     ptype <- ptype_result$ptype
   } else {
     ptype <- vec_ptype(value)
@@ -110,18 +110,18 @@ guess_field_spec <- function(value,
 
   # values2 <- vctrs::list_drop_empty(values)
   ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
-  if (!ptype_result$has_common_ptype) return(tib_list(name, required))
+  if (!ptype_result$has_common_ptype) return(tib_variant(name, required))
 
   ptype <- ptype_result$ptype
   if (is_null(ptype)) return(tib_unspecified(name, required))
   if (identical(ptype, list()) || identical(ptype, set_names(list()))) return(tib_unspecified(name, required))
 
-  if (!simplify_list) return(tib_list(name, required))
+  if (!simplify_list) return(tib_variant(name, required))
 
   list_of_scalars <- all(list_sizes(value_flat) == 1L)
   if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
 
-  return(tib_list(name, required, transform = make_new_list_of(ptype)))
+  return(tib_variant(name, required, transform = make_new_list_of(ptype)))
 }
 
 get_flat_value <- function(value, ptype, multi) {

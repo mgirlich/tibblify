@@ -184,7 +184,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = TRUE), list(x = 1)),
-      spec_df(x = tib_list("x"))
+      spec_df(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE, 1))
   )
@@ -192,7 +192,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(x = TRUE),
-      spec_row(x = tib_list("x"))
+      spec_row(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE))
   )
@@ -201,7 +201,7 @@ test_that("list column works", {
   expect_snapshot_error(
     tibblify(
       list(list(x = TRUE), list(zzz = 1)),
-      spec_df(x = tib_list("x"))
+      spec_df(x = tib_variant("x"))
     )
   )
 
@@ -209,7 +209,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(), list(x = 1)),
-      spec_df(x = tib_list("x", FALSE))
+      spec_df(x = tib_variant("x", FALSE))
     ),
     tibble(x = list(NULL, 1))
   )
@@ -218,7 +218,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list()),
-      spec_df(x = tib_list("x", FALSE, 1))
+      spec_df(x = tib_variant("x", FALSE, 1))
     ),
     tibble(x = list(1))
   )
@@ -227,7 +227,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = c(TRUE, FALSE)), list(x = 1)),
-      spec_df(x = tib_list("x", FALSE, transform = ~ length(.x)))
+      spec_df(x = tib_variant("x", FALSE, transform = ~ length(.x)))
     ),
     tibble(x = list(2, 1))
   )

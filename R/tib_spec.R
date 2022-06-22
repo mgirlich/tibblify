@@ -185,7 +185,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'
 #' * `tib_scalar(ptype)`: Cast the field to a length one vector of type `ptype`.
 #' * `tib_vector(ptype)`: Cast the field to an arbitrary length vector of type `ptype`.
-#' * `tib_list()`: Cast the field to a list.
+#' * `tib_variant()`: Cast the field to a list.
 #' * `tib_row()`: Cast the field to a named list.
 #' * `tib_df()`: Cast the field to a tibble.
 #'
@@ -326,10 +326,10 @@ tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) 
 
 #' @rdname tib_scalar
 #' @export
-tib_list <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_variant <- function(key, required = TRUE, default = NULL, transform = NULL) {
   tib_collector(
     key = key,
-    type = "list",
+    type = "variant",
     required = required,
     default_value = default,
     transform = prep_transform(transform)
