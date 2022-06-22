@@ -114,8 +114,9 @@ test_that("can guess tib_variant", {
     ),
     spec_df(x = tib_variant("x"))
   )
+})
 
-  # non-vector objects are okay in lists
+test_that("can handle non-vector elements", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
     spec_guess_object_list(

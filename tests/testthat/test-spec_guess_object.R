@@ -26,9 +26,11 @@ test_that("POSIXlt is converted to POSIXct", {
 })
 
 test_that("can handle non-vector elements", {
-  skip("Not yet working - #76")
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
-  spec_guess_object(list(x = model))
+  expect_equal(
+    spec_guess_object(list(x = model)),
+    spec_object(x = tib_variant("x"))
+  )
 })
 
 test_that("can guess vector elements", {
@@ -81,12 +83,10 @@ test_that("can guess mixed elements", {
   )
 })
 
-test_that("non-vector objects work", {
-  skip("handling of non-vector objects not yet decided - #84")
-  # non-vector objects are okay in lists
+test_that("can handle non-vector elements in list", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
-    spec_guess_object(list(x = list(TRUE, model))),
+    spec_guess_object(list(x = list(model, model))),
     spec_object(x = tib_variant("x"))
   )
 })
