@@ -44,9 +44,10 @@ test_that("respect empty_list_unspecified for scalar elements", {
     spec_df(x = tib_variant("x"))
   )
 
+  # this should be `tib_vector` because a list cannot occur for a scalar
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = TRUE),
-    spec_df(x = tib_int("x"))
+    spec_df(x = tib_int_vec("x"))
   )
 })
 

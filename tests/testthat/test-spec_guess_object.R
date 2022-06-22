@@ -185,7 +185,7 @@ test_that("respect empty_list_unspecified for list of object elements", {
     spec_object(
       x = tib_df(
         "x",
-        a = tib_int("a"),
+        a = tib_int_vec("a"),
         b = tib_int_vec("b")
       )
     )
