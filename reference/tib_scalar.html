@@ -78,7 +78,7 @@
 
 <span class="fu">tib_chr_vec</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_list</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
 <span class="fu">tib_row</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
@@ -121,7 +121,7 @@ column is created</p></dd>
     <h2>Details</h2>
     <p>There are basically five different <code>tib_*()</code> functions</p><ul><li><p><code>tib_scalar(ptype)</code>: Cast the field to a length one vector of type <code>ptype</code>.</p></li>
 <li><p><code>tib_vector(ptype)</code>: Cast the field to an arbitrary length vector of type <code>ptype</code>.</p></li>
-<li><p><code>tib_list()</code>: Cast the field to a list.</p></li>
+<li><p><code>tib_variant()</code>: Cast the field to a list.</p></li>
 <li><p><code>tib_row()</code>: Cast the field to a named list.</p></li>
 <li><p><code>tib_df()</code>: Cast the field to a tibble.</p></li>
 </ul><p>There are some special shortcuts of <code>tib_scalar()</code> resp. <code>tib_vector()</code> for
