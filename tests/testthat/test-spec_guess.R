@@ -11,9 +11,16 @@ test_that("can guess spec for gh_repos", {
 })
 
 test_that("can guess spec for got_chars", {
-  skip("not yet decided")
-  # `got_chars[[19]]$aliases` is an empty list `list()` --> cannot (yet?) simplify to character
-  expect_snapshot(spec_guess(got_chars) %>% print())
+  spec <- spec_guess(got_chars)
+  expect_snapshot(spec)
+  expect_equal(spec$fields$aliases, tib_variant("aliases"))
+  expect_equal(spec$fields$allegiances, tib_variant("allegiances"))
+  expect_equal(spec$fields$books, tib_variant("books"))
+
+  spec2 <- spec_guess(got_chars, empty_list_unspecified = TRUE)
+  expect_equal(spec2$fields$aliases, tib_chr_vec("aliases"))
+  expect_equal(spec2$fields$allegiances, tib_chr_vec("allegiances"))
+  expect_equal(spec2$fields$books, tib_chr_vec("books"))
 })
 
 test_that("can guess spec for citm_catalog", {
