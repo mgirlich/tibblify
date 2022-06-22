@@ -62,6 +62,14 @@ guess_field_spec <- function(value,
     if (!ptype_result$has_common_ptype) return(tib_variant(name, required))
     ptype <- ptype_result$ptype
   } else {
+    if (is_null(value)) {
+      return(tib_unspecified(name, required))
+    }
+
+    if (!vec_is(value)) {
+      return(tib_variant(name, required))
+    }
+
     ptype <- vec_ptype(value)
     ptype <- special_ptype_handling(ptype)
   }
