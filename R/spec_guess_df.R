@@ -30,7 +30,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   }
 
   if (col_is_scalar(col)) {
-    ptype <- special_ptype_handling(vec_ptype(col))
+    ptype <- tib_ptype(col)
     if (inherits(ptype, "vctrs_unspecified")) {
       return(tib_unspecified(name))
     }

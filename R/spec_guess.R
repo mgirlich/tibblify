@@ -39,6 +39,11 @@ spec_guess <- function(x, empty_list_unspecified = FALSE, call = current_call())
 
 # helpers -----------------------------------------------------------------
 
+tib_ptype <- function(x) {
+  ptype <- vec_ptype(x)
+  special_ptype_handling(ptype)
+}
+
 make_unchop <- function(ptype) {
   rlang::new_function(
     pairlist2(x = ),

@@ -70,8 +70,7 @@ guess_field_spec <- function(value,
       return(tib_variant(name, required))
     }
 
-    ptype <- vec_ptype(value)
-    ptype <- special_ptype_handling(ptype)
+    ptype <- tib_ptype(value)
   }
 
   # now we know the shape of value
