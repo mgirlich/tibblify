@@ -90,6 +90,52 @@ test_that("can untibblify a list of tibble column", {
   )
 })
 
+test_that("can rename according to spec_df", {
+  spec <- spec_df(
+    x2 = tib_df(
+      "x",
+      int2 = tib_int("int"),
+      chr_vec2 = tib_chr("chr_vec"),
+      df2 = tib_row(
+        "df",
+        chr2 = tib_chr("chr")
+      )
+    )
+  )
+
+  x_tibbed <- tibble(
+    x2 = list(
+      tibble(
+        int2 = 1:2,
+        chr_vec2 = list("a", NULL),
+        df2 = tibble(chr2 = c("a", "b"))
+      ),
+      tibble(
+        int2 = 3,
+        chr_vec2 = list("c"),
+        df2 = tibble(chr2 = NA_character_)
+      )
+    )
+  )
+
+  expect_equal(
+    untibblify(x_tibbed, spec),
+    list(
+      list(
+        x = list(
+          list(int = 1L, chr_vec = "a", df = list(chr = "a")),
+          list(int = 2L, chr_vec = NULL, df = list(chr = "b"))
+        )
+      ),
+      list(
+        x = list(
+          list(int = 3L, chr_vec = "c", df = list(chr = NA_character_))
+        )
+      )
+    )
+  )
+})
+
 test_that("can untibblify object", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
 
@@ -111,6 +157,28 @@ test_that("can untibblify object", {
         list(x = 2, y = FALSE)
       )
     )
+  )
+})
+
+test_that("can rename according to spec", {
+  expect_equal(
+    untibblify(list(x = 1), spec_object(x = tib_int("a"))),
+    list(a = 1)
+  )
+
+  x <- list(x = list(a = 1, b = 2))
+  spec <- spec_object(
+    x2 = tib_row(
+      "x",
+      a2 = tib_dbl("a"),
+      b2 = tib_dbl("b")
+    )
+  )
+  x_tibbed <- list(x2 = list(a2 = 1, b2 = 2))
+
+  expect_equal(
+    untibblify(x_tibbed, spec),
+    x
   )
 })
 
