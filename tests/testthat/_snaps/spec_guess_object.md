@@ -14,3 +14,18 @@
       Error in `spec_guess_object()`:
       ! `x` must be a list. Instead, it is a <integer>.
 
+---
+
+    Code
+      (expect_error(spec_guess_object(list(1, a = 1))))
+    Output
+      <error/rlang_error>
+      Error in `spec_guess_object()`:
+      ! `x` must be fully named.
+    Code
+      (expect_error(spec_guess_object(list(a = 1, a = 1))))
+    Output
+      <error/rlang_error>
+      Error in `spec_guess_object()`:
+      ! Names of `x` must be unique.
+

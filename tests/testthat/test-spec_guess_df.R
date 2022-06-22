@@ -79,11 +79,10 @@ test_that("vector POSIXlt is converted to POSIXct", {
 })
 
 test_that("can guess vector NA columns", {
-  skip("vec_ptype_common(NA) is not unspecified - vctrs#1575")
-  # NA only creates tib_unspecified
+  # TODO maybe this could also be `tib_unspecified()`?
   expect_equal(
     spec_guess_df(tibble(x = list(c(NA, NA), NA))),
-    spec_df(lgl = tib_unspecified("lgl"))
+    spec_df(x = tib_lgl_vec("x"))
   )
 })
 

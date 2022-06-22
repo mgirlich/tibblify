@@ -34,12 +34,7 @@
           title = tib_chr("title"),
           formats = tib_df(
             "formats",
-            descriptions = tib_chr_vec(
-              "descriptions",
-              required = FALSE,
-              transform = function (x) 
-              vec_unchop(x = x, ptype = character(0))
-            ),
+            descriptions = tib_variant("descriptions", required = FALSE),
             text = tib_chr("text", required = FALSE),
             name = tib_chr("name"),
             qty = tib_chr("qty")
@@ -185,21 +180,47 @@
         default_branch = tib_chr("default_branch")
       )
 
+# can guess spec for got_chars
+
+    Code
+      spec
+    Output
+      spec_df(
+        url = tib_chr("url"),
+        id = tib_int("id"),
+        name = tib_chr("name"),
+        gender = tib_chr("gender"),
+        culture = tib_chr("culture"),
+        born = tib_chr("born"),
+        died = tib_chr("died"),
+        alive = tib_lgl("alive"),
+        titles = tib_chr_vec("titles"),
+        aliases = tib_variant("aliases"),
+        father = tib_chr("father"),
+        mother = tib_chr("mother"),
+        spouse = tib_chr("spouse"),
+        allegiances = tib_variant("allegiances"),
+        books = tib_variant("books"),
+        povBooks = tib_chr_vec("povBooks"),
+        tvSeries = tib_chr_vec("tvSeries"),
+        playedBy = tib_chr_vec("playedBy")
+      )
+
 # can guess spec for citm_catalog
 
     Code
       spec_guess(x)
     Output
       spec_object(
-        areaNames = tib_chr_vec(
+        areaNames = tib_row(
           "areaNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          `205705993` = tib_chr("205705993"),
+          `205705994` = tib_chr("205705994"),
+          `205705995` = tib_chr("205705995")
         ),
-        audienceSubCategoryNames = tib_chr_vec(
+        audienceSubCategoryNames = tib_row(
           "audienceSubCategoryNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          `337100890` = tib_chr("337100890")
         ),
         blockNames = tib_unspecified("blockNames"),
         events = tib_df(
@@ -239,31 +260,36 @@
           start = tib_dbl("start"),
           venueCode = tib_chr("venueCode")
         ),
-        seatCategoryNames = tib_chr_vec(
+        seatCategoryNames = tib_row(
           "seatCategoryNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          `338937235` = tib_chr("338937235"),
+          `338937236` = tib_chr("338937236"),
+          `338937238` = tib_chr("338937238")
         ),
-        subTopicNames = tib_chr_vec(
+        subTopicNames = tib_row(
           "subTopicNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          `337184262` = tib_chr("337184262"),
+          `337184263` = tib_chr("337184263"),
+          `337184267` = tib_chr("337184267")
         ),
         subjectNames = tib_unspecified("subjectNames"),
-        topicNames = tib_chr_vec(
+        topicNames = tib_row(
           "topicNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          `107888604` = tib_chr("107888604"),
+          `324846098` = tib_chr("324846098"),
+          `324846099` = tib_chr("324846099"),
+          `324846100` = tib_chr("324846100")
         ),
-        topicSubTopics = tib_variant(
+        topicSubTopics = tib_row(
           "topicSubTopics",
-          transform = function (x) 
-          new_list_of(x = x, ptype = integer(0))
+          `107888604` = tib_int_vec("107888604"),
+          `324846098` = tib_int("324846098"),
+          `324846099` = tib_int_vec("324846099"),
+          `324846100` = tib_int_vec("324846100")
         ),
-        venueNames = tib_chr_vec(
+        venueNames = tib_row(
           "venueNames",
-          transform = function (x) 
-          vec_unchop(x = x, ptype = character(0))
+          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL")
         )
       )
 

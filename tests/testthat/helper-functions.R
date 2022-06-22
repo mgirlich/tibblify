@@ -8,3 +8,8 @@ new_rational <- function(n = integer(), d = integer()) {
 
   new_rcrd(list(n = n, d = d), class = "vctrs_rational")
 }
+
+read_sample_json <- function(x) {
+  path <- system.file("jsonexamples", x, package = "tibblify")
+  jsonlite::fromJSON(path, simplifyDataFrame = FALSE)
+}
