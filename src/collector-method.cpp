@@ -474,6 +474,12 @@ public:
     SEXP value_casted = vec_cast(PROTECT(value), ptype);
 
     if (this->uses_values_col) {
+      if (Rf_isNull(value_casted)) {
+        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+        UNPROTECT(1);
+        return;
+      }
+
       R_len_t size = short_vec_size(value_casted);
       cpp11::writable::list df = init_out_df(size);
 
