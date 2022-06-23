@@ -95,8 +95,8 @@ format.tib_scalar <- function(x, ...,
     input_form = if (!is_null(x$input_form) && x$input_form != "vector") {
       paste0('"', x$input_form, '"')
     },
-    values_to = x$values_to,
-    names_to = x$names_to
+    values_to = if (!is_null(x$values_to)) paste0('"', x$values_to, '"'),
+    names_to = if (!is_null(x$names_to)) paste0('"', x$names_to, '"')
   )
   parts <- purrr::discard(parts, is.null)
 
