@@ -313,10 +313,6 @@ tib_vector_impl <- function(key,
     default <- vec_cast(default, ptype)
   }
   if (!is_null(values_to)) {
-    if (!input_form %in% c("scalar_list", "object")) {
-      msg <- "{.arg values_to} can only be used if {.arg input_form} is {.val scalar_list} or {.val object}."
-      cli::cli_abort(msg, call = call)
-    }
     values_to <- vec_cast(values_to, character())
     vec_assert(values_to, size = 1, call = call)
   }
@@ -325,6 +321,11 @@ tib_vector_impl <- function(key,
       msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
       cli::cli_abort(msg, call = call)
     }
+    if (input_form != "object") {
+      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
+      cli::cli_abort(msg, call = call)
+    }
+
     names_to <- vec_cast(names_to, character())
     vec_assert(names_to, size = 1, call = call)
   }
