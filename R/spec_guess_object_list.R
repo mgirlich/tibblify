@@ -1,9 +1,11 @@
 #' @rdname spec_guess
 #' @export
 spec_guess_object_list <- function(x,
+                                   ...,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
                                    call = current_call()) {
+  check_dots_empty()
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
@@ -66,21 +68,21 @@ guess_object_list_field_spec <- function(value,
   # * it contains incompatible types
   # in both cases `tib_variant()` is used
   if (!ptype_result$has_common_ptype) {
-    return(tib_variant(name, required))
+    return(tib_variant(name, required = required))
   }
 
   # now we know that every element essentially has type `ptype`
   ptype <- ptype_result$ptype
   if (is_null(ptype)) {
-    return(tib_unspecified(name, required))
+    return(tib_unspecified(name, required = required))
   }
 
   ptype_type <- tib_type_of(ptype, name, other = FALSE)
   if (ptype_type == "vector") {
     if (is_field_scalar(value)) {
-      return(tib_scalar(name, ptype, required))
+      return(tib_scalar(name, ptype, required = required))
     } else {
-      return(tib_vector(name, ptype, required))
+      return(tib_vector(name, ptype, required = required))
     }
   }
 
@@ -116,18 +118,28 @@ guess_object_list_field_spec <- function(value,
 
   # values2 <- vctrs::list_drop_empty(values)
   ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
-  if (!ptype_result$has_common_ptype) return(tib_variant(name, required))
+  if (!ptype_result$has_common_ptype) {
+    return(tib_variant(name, required = required))
+  }
 
   ptype <- ptype_result$ptype
-  if (is_null(ptype)) return(tib_unspecified(name, required))
-  if (identical(ptype, list()) || identical(ptype, set_names(list()))) return(tib_unspecified(name, required))
+  if (is_null(ptype)) {
+    return(tib_unspecified(name, required = required))
+  }
+  if (identical(ptype, list()) || identical(ptype, set_names(list()))) {
+    return(tib_unspecified(name, required = required))
+  }
 
-  if (!simplify_list) return(tib_variant(name, required))
+  if (!simplify_list) {
+    return(tib_variant(name, required = required))
+  }
 
   list_of_scalars <- all(list_sizes(value_flat) == 1L)
-  if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
+  if (list_of_scalars) {
+    return(tib_vector(name, ptype, required = required, transform = make_unchop(ptype)))
+  }
 
-  return(tib_variant(name, required, transform = make_new_list_of(ptype)))
+  tib_variant(name, required = required, transform = make_new_list_of(ptype))
 }
 
 get_required <- function(x, sample_size = 10e3) {

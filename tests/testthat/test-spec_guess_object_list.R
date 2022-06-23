@@ -33,7 +33,7 @@ test_that("can guess required for scalars", {
         list()
       )
     ),
-    spec_df(x = tib_dbl("x", FALSE))
+    spec_df(x = tib_dbl("x", required = FALSE))
   )
 })
 
@@ -76,7 +76,7 @@ test_that("can guess vector elements", {
 test_that("can guess required for vector elements", {
   expect_equal(
     spec_guess_object_list(list(list(x = c(TRUE, FALSE)), list())),
-    spec_df(x = tib_lgl_vec("x", FALSE))
+    spec_df(x = tib_lgl_vec("x", required = FALSE))
   )
 })
 
