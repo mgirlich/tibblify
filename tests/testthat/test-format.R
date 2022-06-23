@@ -59,6 +59,17 @@ test_that("format for tib_vector works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(tib_chr_vec("a") %>% print())
   expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
+
+  expect_snapshot(
+    tib_vector(
+      "a",
+      ptype = Sys.Date(),
+      input_form = "scalar_list",
+      values_to = "vals",
+      names_to = "names"
+    ) %>%
+      print()
+  )
 })
 
 test_that("format for tib_row works", {

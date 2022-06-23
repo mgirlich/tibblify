@@ -91,7 +91,12 @@ format.tib_scalar <- function(x, ...,
     ptype = if (class(x)[1] == "tib_scalar" || class(x)[1] == "tib_vector") format_ptype(x$ptype),
     required = if (!x$required) FALSE,
     default = format_default(x$default_value, x$ptype),
-    transform = x$transform
+    transform = x$transform,
+    input_form = if (!is_null(x$input_form) && x$input_form != "vector") {
+      paste0('"', x$input_form, '"')
+    },
+    values_to = x$values_to,
+    names_to = x$names_to
   )
   parts <- purrr::discard(parts, is.null)
 

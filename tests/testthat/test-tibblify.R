@@ -1,12 +1,3 @@
-tibble <- tibble::tibble
-
-tib <- function(x, col) {
-  tibblify(
-    list(x),
-    spec_df(x = col)
-  )
-}
-
 test_that("names are checked", {
   spec <- spec_object(x = tib_int("x", required = FALSE))
 

@@ -187,6 +187,20 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #' @param required,.required Throw an error if the field does not exist?
 #' @param default Default value to use if the field does not exist.
 #' @param transform A function to apply to the field before casting to `ptype`.
+#' @param input_form A string that describes what structure the field has. Can
+#'   be one of:
+#'   * `"vector"`: The field is a vector, e.g. `c(1, 2, 3)`.
+#'   * `"scalar_list"`: The field is a list of scalars, e.g. `list(1, 2, 3)`.
+#'   * `"object"`: The field is a named list of scalars, e.g. `list(a = 1, b = 2, c = 3)`.
+#' @param values_to Can be one of the following:
+#'   * `NULL`: the default. The field is converted to a `ptype` vector.
+#'   * A string: The field is converted to a tibble and the values go into the
+#'     specified column.
+#' @param names_to Can be one of the following:
+#'   * `NULL`: the default. The inner names of the field are not used.
+#'   * A string: This can only be used if 1) `input_form = "object"` and
+#'     2) `values_to` is a string. The inner names of the field go into the
+#'     specified column.
 #' @inheritParams spec_df
 #'
 #' @details There are basically five different `tib_*()` functions
@@ -287,11 +301,32 @@ tib_vector_impl <- function(key,
                             ...,
                             required = TRUE,
                             default = NULL,
-                            transform = NULL) {
+                            transform = NULL,
+                            input_form = c("vector", "scalar_list", "object"),
+                            values_to = NULL,
+                            names_to = NULL,
+                            call = caller_env()) {
   check_dots_empty()
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
   ptype <- vec_ptype(ptype)
   if (!is_null(default)) {
     default <- vec_cast(default, ptype)
+  }
+  if (!is_null(values_to)) {
+    if (!input_form %in% c("scalar_list", "object")) {
+      msg <- "{.arg values_to} can only be used if {.arg input_form} is {.val scalar_list} or {.val object}."
+      cli::cli_abort(msg, call = call)
+    }
+    values_to <- vec_cast(values_to, character())
+    vec_assert(values_to, size = 1, call = call)
+  }
+  if (!is_null(names_to)) {
+    if (is_null(values_to)) {
+      msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
+      cli::cli_abort(msg, call = call)
+    }
+    names_to <- vec_cast(names_to, character())
+    vec_assert(names_to, size = 1, call = call)
   }
 
   class <- NULL
@@ -306,6 +341,9 @@ tib_vector_impl <- function(key,
     ptype = ptype,
     default_value = default,
     transform = prep_transform(transform),
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to,
     class = class
   )
 }
@@ -332,14 +370,21 @@ tib_vector <- function(key,
                        ...,
                        required = TRUE,
                        default = NULL,
-                       transform = NULL) {
+                       transform = NULL,
+                       input_form = c("vector", "scalar_list", "object"),
+                       values_to = NULL,
+                       names_to = NULL) {
   check_dots_empty()
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
   tib_vector_impl(
     key = key,
     required = required,
     ptype = ptype,
     default = default,
-    transform = transform
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
   )
 }
 
@@ -349,9 +394,22 @@ tib_lgl_vec <- function(key,
                         ...,
                         required = TRUE,
                         default = NULL,
-                        transform = NULL) {
+                        transform = NULL,
+                        input_form = c("vector", "scalar_list", "object"),
+                        values_to = NULL,
+                        names_to = NULL) {
   check_dots_empty()
-  tib_vector_impl(key, ptype = logical(), required = required, default = default, transform = transform)
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = logical(),
+    required = required,
+    default = default,
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
+  )
 }
 
 #' @rdname tib_scalar
@@ -360,9 +418,22 @@ tib_int_vec <- function(key,
                         ...,
                         required = TRUE,
                         default = NULL,
-                        transform = NULL) {
+                        transform = NULL,
+                        input_form = c("vector", "scalar_list", "object"),
+                        values_to = NULL,
+                        names_to = NULL) {
   check_dots_empty()
-  tib_vector_impl(key, ptype = integer(), required = required, default = default, transform = transform)
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = integer(),
+    required = required,
+    default = default,
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
+  )
 }
 
 #' @rdname tib_scalar
@@ -371,9 +442,22 @@ tib_dbl_vec <- function(key,
                         ...,
                         required = TRUE,
                         default = NULL,
-                        transform = NULL) {
+                        transform = NULL,
+                        input_form = c("vector", "scalar_list", "object"),
+                        values_to = NULL,
+                        names_to = NULL) {
   check_dots_empty()
-  tib_vector_impl(key, ptype = double(), required = required, default = default, transform = transform)
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = double(),
+    required = required,
+    default = default,
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
+  )
 }
 
 #' @rdname tib_scalar
@@ -382,9 +466,22 @@ tib_chr_vec <- function(key,
                         ...,
                         required = TRUE,
                         default = NULL,
-                        transform = NULL) {
+                        transform = NULL,
+                        input_form = c("vector", "scalar_list", "object"),
+                        values_to = NULL,
+                        names_to = NULL) {
   check_dots_empty()
-  tib_vector_impl(key, ptype = character(), required = required, default = default, transform = transform)
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = character(),
+    required = required,
+    default = default,
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
+  )
 }
 
 

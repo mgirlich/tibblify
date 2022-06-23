@@ -127,6 +127,20 @@
     Output
       tib_vector("a", ptype = vctrs::new_date())
 
+---
+
+    Code
+      tib_vector("a", ptype = Sys.Date(), input_form = "scalar_list", values_to = "vals",
+      names_to = "names") %>% print()
+    Output
+      tib_vector(
+        "a",
+        ptype = vctrs::new_date(),
+        input_form = "scalar_list",
+        values_to = vals,
+        names_to = names,
+      )
+
 # format for tib_row works
 
     Code
