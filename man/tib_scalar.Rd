@@ -86,7 +86,7 @@ the most common prototypes
 }
 \examples{
 tib_int("int")
-tib_int("int", FALSE, default = 0)
+tib_int("int", required = FALSE, default = 0)
 
 tib_scalar("date", Sys.Date(), transform = function(x) as.Date(x, format = "\%Y-\%m-\%d"))
 

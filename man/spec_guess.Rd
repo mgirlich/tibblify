@@ -40,6 +40,8 @@ spec_guess_object_list(
 \arguments{
 \item{x}{A nested list.}
 
+\item{...}{These dots are for future extensions and must be empty.}
+
 \item{empty_list_unspecified}{Treat empty lists as unspecified?}
 
 \item{call}{The execution environment of a currently running function, e.g.

@@ -1,6 +1,7 @@
 #' Guess the `tibblify()` Specification
 #'
 #' @param x A nested list.
+#' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
 #' @param simplify_list Try to simplify lists if possible?
 #' @param call The execution environment of a currently running function, e.g.
