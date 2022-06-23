@@ -49,3 +49,58 @@
       * "a" at locations 1 and 3.
       * "b" at locations 2 and 4.
 
+# tib_vector checks arguments
+
+    Code
+      (expect_error(tib_int_vec("x", input_form = "v")))
+    Output
+      <error/rlang_error>
+      Error in `tib_int_vec()`:
+      ! `input_form` must be one of "vector", "scalar_list", or "object", not "v".
+      i Did you mean "vector"?
+    Code
+      (expect_error(tib_int_vec("x", values_to = 1)))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error in `tib_vector_impl()`:
+      ! Can't convert `values_to` <double> to <character>.
+    Code
+      (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
+    Output
+      <error/vctrs_error_assert_size>
+      Error in `tib_int_vec()`:
+      ! `values_to` must have size 1, not size 2.
+    Code
+      (expect_error(tib_int_vec("x", values_to = "val", names_to = "name")))
+    Output
+      <error/rlang_error>
+      Error in `tib_int_vec()`:
+      ! `names_to` can only be used if `input_form` is "object".
+    Code
+      (expect_error(tib_int_vec("x", input_form = "object", names_to = "name")))
+    Output
+      <error/rlang_error>
+      Error in `tib_int_vec()`:
+      ! `names_to` can only be used if `values_to` is not `NULL`.
+    Code
+      (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
+        names_to = "val")))
+    Output
+      <error/rlang_error>
+      Error in `tib_int_vec()`:
+      ! `names_to` must be different from `values_to`.
+    Code
+      (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
+        names_to = 1)))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error in `tib_vector_impl()`:
+      ! Can't convert `names_to` <double> to <character>.
+    Code
+      (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
+        names_to = c("a", "b"))))
+    Output
+      <error/vctrs_error_assert_size>
+      Error in `tib_int_vec()`:
+      ! `names_to` must have size 1, not size 2.
+

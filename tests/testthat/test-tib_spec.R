@@ -53,3 +53,22 @@ test_that("empty dots create empty list", {
   expect_equal(tib_df("x")$fields, list())
   expect_equal(tib_row("x")$fields, list())
 })
+
+test_that("tib_vector checks arguments", {
+  expect_snapshot({
+    (expect_error(tib_int_vec("x", input_form = "v")))
+
+    (expect_error(tib_int_vec("x", values_to = 1)))
+    (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
+
+    # input_form != "object"
+    (expect_error(tib_int_vec("x", values_to = "val", names_to = "name")))
+    # values_to = NULL
+    (expect_error(tib_int_vec("x", input_form = "object", names_to = "name")))
+    # values_to = names_to
+    (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = "val")))
+
+    (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = 1)))
+    (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = c("a", "b"))))
+  })
+})
