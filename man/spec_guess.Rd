@@ -9,12 +9,13 @@
 \alias{spec_guess_object_list}
 \title{Guess the \code{tibblify()} Specification}
 \usage{
-spec_guess(x, empty_list_unspecified = FALSE, call = current_call())
+spec_guess(x, ..., empty_list_unspecified = FALSE, call = current_call())
 
-spec_guess_df(x, empty_list_unspecified = FALSE, call = current_call())
+spec_guess_df(x, ..., empty_list_unspecified = FALSE, call = current_call())
 
 spec_guess_list(
   x,
+  ...,
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   call = current_call()
@@ -22,6 +23,7 @@ spec_guess_list(
 
 spec_guess_object(
   x,
+  ...,
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   call = current_call()
@@ -29,6 +31,7 @@ spec_guess_object(
 
 spec_guess_object_list(
   x,
+  ...,
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   call = current_call()
@@ -36,6 +39,8 @@ spec_guess_object_list(
 }
 \arguments{
 \item{x}{A nested list.}
+
+\item{...}{These dots are for future extensions and must be empty.}
 
 \item{empty_list_unspecified}{Treat empty lists as unspecified?}
 

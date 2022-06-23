@@ -1,9 +1,11 @@
 #' @rdname spec_guess
 #' @export
 spec_guess_list <- function(x,
+                            ...,
                             empty_list_unspecified = FALSE,
                             simplify_list = FALSE,
                             call = current_call()) {
+  check_dots_empty()
   if (vec_is(x) && !vec_is_list(x)) {
     cli::cli_abort(c(
       `!` = "{.arg x} must be a list.",
@@ -24,7 +26,7 @@ spec_guess_list <- function(x,
     spec <- spec_guess_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
-      simplify_list,
+      simplify_list = simplify_list,
       call = call
     )
     return(spec)
@@ -34,7 +36,7 @@ spec_guess_list <- function(x,
     spec <- spec_guess_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
-      simplify_list,
+      simplify_list = simplify_list,
       call = call
     )
     return(spec)
@@ -61,7 +63,7 @@ guess_make_tib_df <- function(name,
         return(maybe_tib_row(name, fields, required))
       }
 
-      return(tib_unspecified(name, required))
+      return(tib_unspecified(name, required = required))
   }
 
   fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)

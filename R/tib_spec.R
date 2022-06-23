@@ -116,7 +116,8 @@ tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
 
 #' @rdname tib_scalar
 #' @export
-tib_unspecified <- function(key, required = TRUE) {
+tib_unspecified <- function(key, ..., required = TRUE) {
+  check_dots_empty()
   tib_collector(
     key = key,
     type = "unspecified",
@@ -130,7 +131,13 @@ tib_unspecified <- function(key, required = TRUE) {
 
 # scalar fields -----------------------------------------------------------
 
-tib_scalar_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
+tib_scalar_impl <- function(key,
+                            ptype,
+                            ...,
+                            required = TRUE,
+                            default = NULL,
+                            transform = NULL) {
+  check_dots_empty()
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
     default <- vec_init(ptype)
@@ -176,6 +183,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'
 #' @param key,.key The path to the field in the object.
 #' @param ptype A prototype of the desired output type of the field.
+#' @param ... These dots are for future extensions and must be empty.
 #' @param required,.required Throw an error if the field does not exist?
 #' @param default Default value to use if the field does not exist.
 #' @param transform A function to apply to the field before casting to `ptype`.
@@ -201,7 +209,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'
 #' @examples
 #' tib_int("int")
-#' tib_int("int", FALSE, default = 0)
+#' tib_int("int", required = FALSE, default = 0)
 #'
 #' tib_scalar("date", Sys.Date(), transform = function(x) as.Date(x, format = "%Y-%m-%d"))
 #'
@@ -211,7 +219,13 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'   age = tib_int("age"),
 #'   name = tib_chr("name")
 #' )
-tib_scalar <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
+tib_scalar <- function(key,
+                       ptype,
+                       ...,
+                       required = TRUE,
+                       default = NULL,
+                       transform = NULL) {
+  check_dots_empty()
   tib_scalar_impl(
     key = key,
     required = required,
@@ -223,32 +237,58 @@ tib_scalar <- function(key, ptype, required = TRUE, default = NULL, transform = 
 
 #' @rdname tib_scalar
 #' @export
-tib_lgl <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_lgl <- function(key,
+                    ...,
+                    required = TRUE,
+                    default = NULL,
+                    transform = NULL) {
+  check_dots_empty()
   tib_scalar_impl(key, ptype = logical(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_int <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_int <- function(key,
+                    ...,
+                    required = TRUE,
+                    default = NULL,
+                    transform = NULL) {
+  check_dots_empty()
   tib_scalar_impl(key, ptype = integer(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_dbl <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_dbl <- function(key,
+                    ...,
+                    required = TRUE,
+                    default = NULL,
+                    transform = NULL) {
+  check_dots_empty()
   tib_scalar_impl(key, ptype = double(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_chr <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_chr <- function(key,
+                    ...,
+                    required = TRUE,
+                    default = NULL,
+                    transform = NULL) {
+  check_dots_empty()
   tib_scalar_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
 
 # vector fields -----------------------------------------------------------
 
-tib_vector_impl <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
+tib_vector_impl <- function(key,
+                            ptype,
+                            ...,
+                            required = TRUE,
+                            default = NULL,
+                            transform = NULL) {
+  check_dots_empty()
   ptype <- vec_ptype(ptype)
   if (!is_null(default)) {
     default <- vec_cast(default, ptype)
@@ -287,7 +327,13 @@ tib_has_special_vector.character <- function(ptype) vec_is(ptype, character())
 
 #' @rdname tib_scalar
 #' @export
-tib_vector <- function(key, ptype, required = TRUE, default = NULL, transform = NULL) {
+tib_vector <- function(key,
+                       ptype,
+                       ...,
+                       required = TRUE,
+                       default = NULL,
+                       transform = NULL) {
+  check_dots_empty()
   tib_vector_impl(
     key = key,
     required = required,
@@ -299,25 +345,45 @@ tib_vector <- function(key, ptype, required = TRUE, default = NULL, transform = 
 
 #' @rdname tib_scalar
 #' @export
-tib_lgl_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_lgl_vec <- function(key,
+                        ...,
+                        required = TRUE,
+                        default = NULL,
+                        transform = NULL) {
+  check_dots_empty()
   tib_vector_impl(key, ptype = logical(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_int_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_int_vec <- function(key,
+                        ...,
+                        required = TRUE,
+                        default = NULL,
+                        transform = NULL) {
+  check_dots_empty()
   tib_vector_impl(key, ptype = integer(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_dbl_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_dbl_vec <- function(key,
+                        ...,
+                        required = TRUE,
+                        default = NULL,
+                        transform = NULL) {
+  check_dots_empty()
   tib_vector_impl(key, ptype = double(), required = required, default = default, transform = transform)
 }
 
 #' @rdname tib_scalar
 #' @export
-tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_chr_vec <- function(key,
+                        ...,
+                        required = TRUE,
+                        default = NULL,
+                        transform = NULL) {
+  check_dots_empty()
   tib_vector_impl(key, ptype = character(), required = required, default = default, transform = transform)
 }
 
@@ -326,7 +392,12 @@ tib_chr_vec <- function(key, required = TRUE, default = NULL, transform = NULL) 
 
 #' @rdname tib_scalar
 #' @export
-tib_variant <- function(key, required = TRUE, default = NULL, transform = NULL) {
+tib_variant <- function(key,
+                        ...,
+                        required = TRUE,
+                        default = NULL,
+                        transform = NULL) {
+  check_dots_empty()
   tib_collector(
     key = key,
     type = "variant",

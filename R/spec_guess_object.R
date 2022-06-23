@@ -1,9 +1,11 @@
 #' @rdname spec_guess
 #' @export
 spec_guess_object <- function(x,
+                              ...,
                               empty_list_unspecified = FALSE,
                               simplify_list = FALSE,
                               call = current_call()) {
+  check_dots_empty()
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",

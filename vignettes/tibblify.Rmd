@@ -271,7 +271,7 @@ You can specify the value to use with the `default` argument
 ```{r}
 spec <- spec_df(
   x = tib_int("x"),
-  y = tib_chr("y", FALSE, default = "missing")
+  y = tib_chr("y", required = FALSE, default = "missing")
 )
 
 tibblify(x, spec)

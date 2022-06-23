@@ -1,8 +1,10 @@
 #' @export
 #' @rdname spec_guess
 spec_guess_df <- function(x,
+                          ...,
                           empty_list_unspecified = FALSE,
                           call = current_call()) {
+  check_dots_empty()
   if (!is.data.frame(x)) {
     if (is.list(x)) {
       msg <- c(
