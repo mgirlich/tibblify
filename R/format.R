@@ -84,11 +84,6 @@ print.tib_collector <- function(x, ...) {
 }
 
 #' @export
-format.tib_vector <- function(x, ...) {
-  format.tib_collector(x, ptype = deparse(x$ptype), ...)
-}
-
-#' @export
 format.tib_scalar <- function(x, ...,
                               multi_line = FALSE, nchar_indent = 0, width = NULL) {
   parts <- list(
