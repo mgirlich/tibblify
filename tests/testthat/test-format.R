@@ -158,6 +158,13 @@ test_that("format for empty tib_df works", {
   expect_equal(format(spec_df()), "spec_df()")
   expect_equal(format(spec_row()), "spec_row()")
   expect_equal(format(spec_object()), "spec_object()")
-  expect_equal(format(tib_df("x")), "tib_df(\n  \"x\"\n)")
-  expect_equal(format(tib_row("x")), "tib_row(\n  \"x\"\n)")
+  expect_equal(format(tib_df("x")), "tib_df(\n  \"x\",\n)")
+  expect_equal(format(tib_row("x")), "tib_row(\n  \"x\",\n)")
+})
+
+test_that("format uses trailing comma", {
+  expect_equal(
+    format(tib_df("x", a = tib_int("a"))),
+    'tib_df(\n  "x",\n  a = tib_int("a"),\n)'
+  )
 })

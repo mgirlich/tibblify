@@ -274,7 +274,7 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   x <- name_exprs(x, x_nms, x_nms != "")
 
   x_single_line <- paste0(x, collapse = ", ")
-  x_multi_line <- paste0("\n", paste0(pad(x, 2), collapse = ",\n"), "\n")
+  x_multi_line <- paste0("\n", paste0(pad(x, 2), ",", collapse = "\n"), "\n")
   line_length <- nchar(x_single_line) + nchar_prefix
 
   if (multi_line ||

@@ -15,7 +15,7 @@
             catno = tib_chr("catno"),
             resource_url = tib_chr("resource_url"),
             id = tib_int("id"),
-            entity_type_name = tib_chr("entity_type_name")
+            entity_type_name = tib_chr("entity_type_name"),
           ),
           year = tib_int("year"),
           master_url = tib_chr("master_url"),
@@ -27,7 +27,7 @@
             tracks = tib_chr("tracks"),
             role = tib_chr("role"),
             resource_url = tib_chr("resource_url"),
-            id = tib_int("id")
+            id = tib_int("id"),
           ),
           id = tib_int("id"),
           thumb = tib_chr("thumb"),
@@ -37,14 +37,14 @@
             descriptions = tib_variant("descriptions", required = FALSE),
             text = tib_chr("text", required = FALSE),
             name = tib_chr("name"),
-            qty = tib_chr("qty")
+            qty = tib_chr("qty"),
           ),
           cover_image = tib_chr("cover_image"),
           resource_url = tib_chr("resource_url"),
-          master_id = tib_int("master_id")
+          master_id = tib_int("master_id"),
         ),
         id = tib_int("id"),
-        rating = tib_int("rating")
+        rating = tib_int("rating"),
       )
 
 # can guess spec for gh_users
@@ -82,7 +82,7 @@
         followers = tib_int("followers"),
         following = tib_int("following"),
         created_at = tib_chr("created_at"),
-        updated_at = tib_chr("updated_at")
+        updated_at = tib_chr("updated_at"),
       )
 
 # can guess spec for gh_repos
@@ -112,7 +112,7 @@
           events_url = tib_chr("events_url"),
           received_events_url = tib_chr("received_events_url"),
           type = tib_chr("type"),
-          site_admin = tib_lgl("site_admin")
+          site_admin = tib_lgl("site_admin"),
         ),
         private = tib_lgl("private"),
         html_url = tib_chr("html_url"),
@@ -177,7 +177,7 @@
         forks = tib_int("forks"),
         open_issues = tib_int("open_issues"),
         watchers = tib_int("watchers"),
-        default_branch = tib_chr("default_branch")
+        default_branch = tib_chr("default_branch"),
       )
 
 # can guess spec for got_chars
@@ -203,7 +203,7 @@
         books = tib_variant("books"),
         povBooks = tib_chr_vec("povBooks"),
         tvSeries = tib_chr_vec("tvSeries"),
-        playedBy = tib_chr_vec("playedBy")
+        playedBy = tib_chr_vec("playedBy"),
       )
 
 # can guess spec for citm_catalog
@@ -216,11 +216,11 @@
           "areaNames",
           `205705993` = tib_chr("205705993"),
           `205705994` = tib_chr("205705994"),
-          `205705995` = tib_chr("205705995")
+          `205705995` = tib_chr("205705995"),
         ),
         audienceSubCategoryNames = tib_row(
           "audienceSubCategoryNames",
-          `337100890` = tib_chr("337100890")
+          `337100890` = tib_chr("337100890"),
         ),
         blockNames = tib_unspecified("blockNames"),
         events = tib_df(
@@ -233,7 +233,7 @@
           subTopicIds = tib_int_vec("subTopicIds"),
           subjectCode = tib_unspecified("subjectCode"),
           subtitle = tib_unspecified("subtitle"),
-          topicIds = tib_int_vec("topicIds")
+          topicIds = tib_int_vec("topicIds"),
         ),
         performances = tib_df(
           "performances",
@@ -245,32 +245,32 @@
             "prices",
             amount = tib_int("amount"),
             audienceSubCategoryId = tib_int("audienceSubCategoryId"),
-            seatCategoryId = tib_int("seatCategoryId")
+            seatCategoryId = tib_int("seatCategoryId"),
           ),
           seatCategories = tib_df(
             "seatCategories",
             areas = tib_df(
               "areas",
               areaId = tib_int("areaId"),
-              blockIds = tib_unspecified("blockIds")
+              blockIds = tib_unspecified("blockIds"),
             ),
-            seatCategoryId = tib_int("seatCategoryId")
+            seatCategoryId = tib_int("seatCategoryId"),
           ),
           seatMapImage = tib_unspecified("seatMapImage"),
           start = tib_dbl("start"),
-          venueCode = tib_chr("venueCode")
+          venueCode = tib_chr("venueCode"),
         ),
         seatCategoryNames = tib_row(
           "seatCategoryNames",
           `338937235` = tib_chr("338937235"),
           `338937236` = tib_chr("338937236"),
-          `338937238` = tib_chr("338937238")
+          `338937238` = tib_chr("338937238"),
         ),
         subTopicNames = tib_row(
           "subTopicNames",
           `337184262` = tib_chr("337184262"),
           `337184263` = tib_chr("337184263"),
-          `337184267` = tib_chr("337184267")
+          `337184267` = tib_chr("337184267"),
         ),
         subjectNames = tib_unspecified("subjectNames"),
         topicNames = tib_row(
@@ -278,19 +278,19 @@
           `107888604` = tib_chr("107888604"),
           `324846098` = tib_chr("324846098"),
           `324846099` = tib_chr("324846099"),
-          `324846100` = tib_chr("324846100")
+          `324846100` = tib_chr("324846100"),
         ),
         topicSubTopics = tib_row(
           "topicSubTopics",
           `107888604` = tib_int_vec("107888604"),
           `324846098` = tib_int("324846098"),
           `324846099` = tib_int_vec("324846099"),
-          `324846100` = tib_int_vec("324846100")
+          `324846100` = tib_int_vec("324846100"),
         ),
         venueNames = tib_row(
           "venueNames",
-          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL")
-        )
+          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL"),
+        ),
       )
 
 ---
@@ -303,11 +303,11 @@
           "areaNames",
           `205705993` = tib_chr("205705993"),
           `205705994` = tib_chr("205705994"),
-          `205705995` = tib_chr("205705995")
+          `205705995` = tib_chr("205705995"),
         ),
         audienceSubCategoryNames = tib_row(
           "audienceSubCategoryNames",
-          `337100890` = tib_chr("337100890")
+          `337100890` = tib_chr("337100890"),
         ),
         blockNames = tib_unspecified("blockNames"),
         events = tib_df(
@@ -320,7 +320,7 @@
           subTopicIds = tib_int_vec("subTopicIds"),
           subjectCode = tib_unspecified("subjectCode"),
           subtitle = tib_unspecified("subtitle"),
-          topicIds = tib_int_vec("topicIds")
+          topicIds = tib_int_vec("topicIds"),
         ),
         performances = tib_df(
           "performances",
@@ -332,32 +332,32 @@
             "prices",
             amount = tib_int("amount"),
             audienceSubCategoryId = tib_int("audienceSubCategoryId"),
-            seatCategoryId = tib_int("seatCategoryId")
+            seatCategoryId = tib_int("seatCategoryId"),
           ),
           seatCategories = tib_df(
             "seatCategories",
             areas = tib_df(
               "areas",
               areaId = tib_int("areaId"),
-              blockIds = tib_unspecified("blockIds")
+              blockIds = tib_unspecified("blockIds"),
             ),
-            seatCategoryId = tib_int("seatCategoryId")
+            seatCategoryId = tib_int("seatCategoryId"),
           ),
           seatMapImage = tib_unspecified("seatMapImage"),
           start = tib_dbl("start"),
-          venueCode = tib_chr("venueCode")
+          venueCode = tib_chr("venueCode"),
         ),
         seatCategoryNames = tib_row(
           "seatCategoryNames",
           `338937235` = tib_chr("338937235"),
           `338937236` = tib_chr("338937236"),
-          `338937238` = tib_chr("338937238")
+          `338937238` = tib_chr("338937238"),
         ),
         subTopicNames = tib_row(
           "subTopicNames",
           `337184262` = tib_chr("337184262"),
           `337184263` = tib_chr("337184263"),
-          `337184267` = tib_chr("337184267")
+          `337184267` = tib_chr("337184267"),
         ),
         subjectNames = tib_unspecified("subjectNames"),
         topicNames = tib_row(
@@ -365,19 +365,19 @@
           `107888604` = tib_chr("107888604"),
           `324846098` = tib_chr("324846098"),
           `324846099` = tib_chr("324846099"),
-          `324846100` = tib_chr("324846100")
+          `324846100` = tib_chr("324846100"),
         ),
         topicSubTopics = tib_row(
           "topicSubTopics",
           `107888604` = tib_int_vec("107888604"),
           `324846098` = tib_int("324846098"),
           `324846099` = tib_int_vec("324846099"),
-          `324846100` = tib_int_vec("324846100")
+          `324846100` = tib_int_vec("324846100"),
         ),
         venueNames = tib_row(
           "venueNames",
-          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL")
-        )
+          PLEYEL_PLEYEL = tib_chr("PLEYEL_PLEYEL"),
+        ),
       )
 
 # can guess spec for gsoc-2018
@@ -398,13 +398,13 @@
           disambiguatingDescription = tib_chr("disambiguatingDescription"),
           description = tib_chr("description"),
           url = tib_chr("url"),
-          logo = tib_chr("logo")
+          logo = tib_chr("logo"),
         ),
         author = tib_row(
           "author",
           `@type` = tib_chr("@type"),
-          name = tib_chr("name")
-        )
+          name = tib_chr("name"),
+        ),
       )
 
 # can guess spec for twitter
@@ -418,7 +418,7 @@
           metadata = tib_row(
             "metadata",
             result_type = tib_chr("result_type"),
-            iso_language_code = tib_chr("iso_language_code")
+            iso_language_code = tib_chr("iso_language_code"),
           ),
           created_at = tib_chr("created_at"),
           id = tib_dbl("id"),
@@ -448,8 +448,8 @@
                 url = tib_chr("url"),
                 expanded_url = tib_chr("expanded_url"),
                 display_url = tib_chr("display_url"),
-                indices = tib_int_vec("indices")
-              )
+                indices = tib_int_vec("indices"),
+              ),
             ),
             protected = tib_lgl("protected"),
             followers_count = tib_int("followers_count"),
@@ -469,7 +469,7 @@
             profile_background_color = tib_chr("profile_background_color"),
             profile_background_image_url = tib_chr("profile_background_image_url"),
             profile_background_image_url_https = tib_chr(
-              "profile_background_image_url_https"
+              "profile_background_image_url_https",
             ),
             profile_background_tile = tib_lgl("profile_background_tile"),
             profile_image_url = tib_chr("profile_image_url"),
@@ -484,7 +484,7 @@
             default_profile_image = tib_lgl("default_profile_image"),
             following = tib_lgl("following"),
             follow_request_sent = tib_lgl("follow_request_sent"),
-            notifications = tib_lgl("notifications")
+            notifications = tib_lgl("notifications"),
           ),
           geo = tib_unspecified("geo"),
           coordinates = tib_unspecified("coordinates"),
@@ -497,7 +497,7 @@
             hashtags = tib_df(
               "hashtags",
               text = tib_chr("text"),
-              indices = tib_int_vec("indices")
+              indices = tib_int_vec("indices"),
             ),
             symbols = tib_unspecified("symbols"),
             urls = tib_df(
@@ -505,7 +505,7 @@
               url = tib_chr("url"),
               expanded_url = tib_chr("expanded_url"),
               display_url = tib_chr("display_url"),
-              indices = tib_int_vec("indices")
+              indices = tib_int_vec("indices"),
             ),
             user_mentions = tib_df(
               "user_mentions",
@@ -513,7 +513,7 @@
               name = tib_chr("name"),
               id = tib_dbl("id"),
               id_str = tib_chr("id_str"),
-              indices = tib_int_vec("indices")
+              indices = tib_int_vec("indices"),
             ),
             media = tib_df(
               "media",
@@ -532,11 +532,11 @@
                 .names_to = ".names",
                 w = tib_int("w"),
                 h = tib_int("h"),
-                resize = tib_chr("resize")
+                resize = tib_chr("resize"),
               ),
               source_status_id = tib_dbl("source_status_id", required = FALSE),
-              source_status_id_str = tib_chr("source_status_id_str", required = FALSE)
-            )
+              source_status_id_str = tib_chr("source_status_id_str", required = FALSE),
+            ),
           ),
           favorited = tib_lgl("favorited"),
           retweeted = tib_lgl("retweeted"),
@@ -548,7 +548,7 @@
               "metadata",
               .required = FALSE,
               result_type = tib_chr("result_type"),
-              iso_language_code = tib_chr("iso_language_code")
+              iso_language_code = tib_chr("iso_language_code"),
             ),
             created_at = tib_chr("created_at", required = FALSE),
             id = tib_dbl("id", required = FALSE),
@@ -559,7 +559,7 @@
             in_reply_to_status_id = tib_dbl("in_reply_to_status_id", required = FALSE),
             in_reply_to_status_id_str = tib_chr(
               "in_reply_to_status_id_str",
-              required = FALSE
+              required = FALSE,
             ),
             in_reply_to_user_id = tib_dbl("in_reply_to_user_id", required = FALSE),
             in_reply_to_user_id_str = tib_chr("in_reply_to_user_id_str", required = FALSE),
@@ -582,8 +582,8 @@
                   url = tib_chr("url"),
                   expanded_url = tib_chr("expanded_url"),
                   display_url = tib_chr("display_url"),
-                  indices = tib_int_vec("indices")
-                )
+                  indices = tib_int_vec("indices"),
+                ),
               ),
               protected = tib_lgl("protected"),
               followers_count = tib_int("followers_count"),
@@ -603,7 +603,7 @@
               profile_background_color = tib_chr("profile_background_color"),
               profile_background_image_url = tib_chr("profile_background_image_url"),
               profile_background_image_url_https = tib_chr(
-                "profile_background_image_url_https"
+                "profile_background_image_url_https",
               ),
               profile_background_tile = tib_lgl("profile_background_tile"),
               profile_image_url = tib_chr("profile_image_url"),
@@ -618,7 +618,7 @@
               default_profile_image = tib_lgl("default_profile_image"),
               following = tib_lgl("following"),
               follow_request_sent = tib_lgl("follow_request_sent"),
-              notifications = tib_lgl("notifications")
+              notifications = tib_lgl("notifications"),
             ),
             geo = tib_unspecified("geo", required = FALSE),
             coordinates = tib_unspecified("coordinates", required = FALSE),
@@ -632,7 +632,7 @@
               hashtags = tib_df(
                 "hashtags",
                 text = tib_chr("text"),
-                indices = tib_int_vec("indices")
+                indices = tib_int_vec("indices"),
               ),
               symbols = tib_unspecified("symbols"),
               urls = tib_df(
@@ -640,7 +640,7 @@
                 url = tib_chr("url"),
                 expanded_url = tib_chr("expanded_url"),
                 display_url = tib_chr("display_url"),
-                indices = tib_int_vec("indices")
+                indices = tib_int_vec("indices"),
               ),
               user_mentions = tib_df(
                 "user_mentions",
@@ -648,7 +648,7 @@
                 name = tib_chr("name"),
                 id = tib_dbl("id"),
                 id_str = tib_chr("id_str"),
-                indices = tib_int_vec("indices")
+                indices = tib_int_vec("indices"),
               ),
               media = tib_df(
                 "media",
@@ -667,18 +667,18 @@
                   .names_to = ".names",
                   w = tib_int("w"),
                   h = tib_int("h"),
-                  resize = tib_chr("resize")
+                  resize = tib_chr("resize"),
                 ),
                 source_status_id = tib_dbl("source_status_id", required = FALSE),
-                source_status_id_str = tib_chr("source_status_id_str", required = FALSE)
-              )
+                source_status_id_str = tib_chr("source_status_id_str", required = FALSE),
+              ),
             ),
             favorited = tib_lgl("favorited", required = FALSE),
             retweeted = tib_lgl("retweeted", required = FALSE),
             possibly_sensitive = tib_lgl("possibly_sensitive", required = FALSE),
-            lang = tib_chr("lang", required = FALSE)
+            lang = tib_chr("lang", required = FALSE),
           ),
-          possibly_sensitive = tib_lgl("possibly_sensitive", required = FALSE)
+          possibly_sensitive = tib_lgl("possibly_sensitive", required = FALSE),
         ),
         search_metadata = tib_row(
           "search_metadata",
@@ -690,7 +690,7 @@
           refresh_url = tib_chr("refresh_url"),
           count = tib_int("count"),
           since_id = tib_int("since_id"),
-          since_id_str = tib_chr("since_id_str")
-        )
+          since_id_str = tib_chr("since_id_str"),
+        ),
       )
 
