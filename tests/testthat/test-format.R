@@ -64,7 +64,7 @@ test_that("format for tib_vector works", {
     tib_vector(
       "a",
       ptype = Sys.Date(),
-      input_form = "scalar_list",
+      input_form = "object",
       values_to = "vals",
       names_to = "names"
     ) %>%
