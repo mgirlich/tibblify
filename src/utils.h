@@ -1,6 +1,8 @@
 #include <cpp11.hpp>
 #include "tibblify.h"
 
+enum vector_input_form {vector, scalar_list, object};
+
 inline
 SEXP set_df_attributes(SEXP list, R_xlen_t n_rows) {
   Rf_setAttrib(list, R_ClassSymbol, classes_tibble);
