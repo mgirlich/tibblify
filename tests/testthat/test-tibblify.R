@@ -184,6 +184,13 @@ test_that("vector column creates tibble with values_to", {
     tib(list(x = integer()), spec),
     tibble(x = list_of(tibble(val = integer())))
   )
+
+  spec2 <- tib_int_vec("x", required = FALSE, default = c(1:2), values_to = "val")
+  # can use default
+  expect_equal(
+    tib(list(), spec2),
+    tibble(x = list_of(tibble(val = 1:2)))
+  )
 })
 
 test_that("vector column can parse scalar list", {
