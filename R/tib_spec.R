@@ -328,6 +328,10 @@ tib_vector_impl <- function(key,
 
     names_to <- vec_cast(names_to, character())
     vec_assert(names_to, size = 1, call = call)
+    if (names_to == values_to) {
+      msg <- "{.arg names_to} must be different from {.arg values_to}."
+      cli::cli_abort(msg, call = call)
+    }
   }
 
   class <- NULL
