@@ -139,7 +139,7 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">tib_int</span>(</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   "int",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   required = FALSE,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   default = 0L</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   default = 0L,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tib_scalar</span><span class="op">(</span><span class="st">"date"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>, transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">x</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span><span class="op">)</span></span>
@@ -147,7 +147,7 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
 <span class="r-out co"><span class="r-pr">#&gt;</span>   "date",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   ptype = vctrs::new_date(),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   transform = function (x) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   as.Date(x, format = "%Y-%m-%d")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   as.Date(x, format = "%Y-%m-%d"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 <span class="r-in"></span>
 <span class="r-in"><span class="fu">tib_df</span><span class="op">(</span></span>
@@ -160,7 +160,7 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
 <span class="r-out co"><span class="r-pr">#&gt;</span>   "data",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   .names_to = "id",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   age = <span style="color: #00BB00;">tib_int</span>("age"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name")</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 </code></pre></div>
     </div>

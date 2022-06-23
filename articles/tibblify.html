@@ -125,7 +125,7 @@
 <span class="co">#&gt;   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
 <span class="co">#&gt;   location = <span style="color: #BB0000;">tib_chr</span>("location"),</span>
 <span class="co">#&gt;   email = <span style="color: #BB0000;">tib_chr</span>("email"),</span>
-<span class="co">#&gt;   public_gists = <span style="color: #00BB00;">tib_int</span>("public_gists")</span>
+<span class="co">#&gt;   public_gists = <span style="color: #00BB00;">tib_int</span>("public_gists"),</span>
 <span class="co">#&gt; )</span></code></pre></div>
 <p>If we are only interested in some of the fields we can easily adapt the specification</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -326,8 +326,8 @@
 <span class="co">#&gt;     "owner",</span>
 <span class="co">#&gt;     login = <span style="color: #BB0000;">tib_chr</span>("login"),</span>
 <span class="co">#&gt;     id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
-<span class="co">#&gt;     url = <span style="color: #BB0000;">tib_chr</span>("url")</span>
-<span class="co">#&gt;   )</span>
+<span class="co">#&gt;     url = <span style="color: #BB0000;">tib_chr</span>("url"),</span>
+<span class="co">#&gt;   ),</span>
 <span class="co">#&gt; )</span></code></pre></div>
 <p>and results in a tibble column</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
@@ -359,7 +359,7 @@
 <span class="co">#&gt;   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
 <span class="co">#&gt;   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
 <span class="co">#&gt;   owner_id = <span style="color: #00BB00;">tib_int</span>(c("owner", "id")),</span>
-<span class="co">#&gt;   owner_login = <span style="color: #BB0000;">tib_chr</span>(c("owner", "login"))</span>
+<span class="co">#&gt;   owner_login = <span style="color: #BB0000;">tib_chr</span>(c("owner", "login")),</span>
 <span class="co">#&gt; )</span>
 
 <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_repos_small</span>, <span class="va">spec2</span><span class="op">)</span>
