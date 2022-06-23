@@ -485,7 +485,16 @@ public:
 
       if (this->uses_names_col) {
         // this can only be if `input_form == object` so no need to check
-        df[0] = names;
+        if (Rf_isNull(names)) {
+          // TODO unclear what to do in such a case
+          auto names2 = cpp11::writable::strings(size);
+          for (int i = 0; i < size; i++) {
+            names2[i] = cpp11::na<cpp11::r_string>();
+          }
+          df[0] = names2;
+        } else {
+          df[0] = names;
+        }
         df[1] = value_casted;
       } else {
         df[0] = value_casted;

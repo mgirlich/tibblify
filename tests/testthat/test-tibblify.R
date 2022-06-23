@@ -166,13 +166,96 @@ test_that("vector column works", {
   )
 })
 
-test_that("tib_unspecified() works", {
+test_that("vector column creates tibble with values_to", {
+  spec <- tib_int_vec("x", values_to = "val")
+  expect_equal(
+    tib(list(x = 1:2), spec),
+    tibble(x = list_of(tibble(val = 1:2)))
+  )
+
+  # can handle NULL
+  expect_equal(
+    tib(list(x = NULL), spec),
+    tibble(x = list_of(NULL, .ptype = tibble(val = 1:2)))
+  )
+
+  # can handle empty vector
+  expect_equal(
+    tib(list(x = integer()), spec),
+    tibble(x = list_of(tibble(val = integer())))
+  )
+})
+
+test_that("vector column can parse scalar list", {
+  spec <- tib_int_vec("x", input_form = "scalar_list")
+  expect_equal(
+    tib(list(x = list(1, NULL, 3)), spec),
+    tibble(x = list_of(c(1L, NA, 3L)))
+  )
+
+  # handles `NULL`
   expect_equal(
     tibblify(
-      list(list(x = TRUE), list(x = 1)),
-      spec_df(x = tib_unspecified("x"))
+      list(list(x = list(1, 2)), list(x = NULL)),
+      spec_df(x = spec)
     ),
-    tibble(x = list(TRUE, 1))
+    tibble(x = list_of(1:2, NULL))
+  )
+
+  # handles empty list
+  expect_equal(
+    tibblify(
+      list(list(x = list(1, 2)), list(x = list())),
+      spec_df(x = spec)
+    ),
+    tibble(x = list_of(1:2, integer()))
+  )
+})
+
+test_that("vector column can parse object", {
+  spec <- tib_int_vec("x", input_form = "object")
+  expect_equal(
+    tib(list(x = list(a = 1, b = NULL, c = 3)), spec),
+    tibble(x = list_of(c(1L, NA, 3L)))
+  )
+
+  skip("Unclear what tib_vector should do with missing names")
+  expect_equal(
+    tib(list(x = list(1, 2)), spec),
+    tibble(x = list_of(c(1L, 2L)))
+  )
+
+  skip("Unclear what tib_vector should do with partial names")
+  expect_equal(
+    tib(list(x = list(a = 1, 2)), spec),
+    tibble(x = list_of(c(1L, 2L)))
+  )
+
+  skip("Unclear what tib_vector should do with duplicate names")
+  expect_equal(
+    tib(list(x = list(a = 1, a = 2)), spec),
+    tibble(x = list_of(c(1L, 2L)))
+  )
+})
+
+test_that("vector column creates tibble with names_to", {
+  spec <- tib_int_vec("x", input_form = "object", values_to = "val", names_to = "name")
+  expect_equal(
+    tib(list(x = list(a = 1, b = NULL)), spec),
+    tibble(x = list_of(tibble(name = c("a", "b"), val = c(1L, NA))))
+  )
+
+  # currently not clear what to do about missing names but it should not crash
+  # and if no error is thrown it should at least produce both columns
+  expect_named(
+    tib(list(x = list(1, NULL)), spec)$x[[1]],
+    c("name", "val")
+  )
+
+  skip("Unclear what tib_vector should do with missing names")
+  expect_equal(
+    tib(list(x = list(1, NULL)), spec),
+    tibble(x = list_of(tibble(name = c(NA, NA), val = c(1L, NA))))
   )
 })
 
