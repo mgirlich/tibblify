@@ -17,29 +17,29 @@
 \alias{tib_df}
 \title{Create a Field Specification}
 \usage{
-tib_unspecified(key, required = TRUE)
+tib_unspecified(key, ..., required = TRUE)
 
-tib_scalar(key, ptype, required = TRUE, default = NULL, transform = NULL)
+tib_scalar(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_lgl(key, required = TRUE, default = NULL, transform = NULL)
+tib_lgl(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_int(key, required = TRUE, default = NULL, transform = NULL)
+tib_int(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_dbl(key, required = TRUE, default = NULL, transform = NULL)
+tib_dbl(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_chr(key, required = TRUE, default = NULL, transform = NULL)
+tib_chr(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_vector(key, ptype, required = TRUE, default = NULL, transform = NULL)
+tib_vector(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_lgl_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_lgl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_int_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_int_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_dbl_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_dbl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_chr_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_chr_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_variant(key, required = TRUE, default = NULL, transform = NULL)
+tib_variant(key, ..., required = TRUE, default = NULL, transform = NULL)
 
 tib_row(.key, ..., .required = TRUE)
 
@@ -48,6 +48,8 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 \arguments{
 \item{key, .key}{The path to the field in the object.}
 
+\item{...}{These dots are for future extensions and must be empty.}
+
 \item{required, .required}{Throw an error if the field does not exist?}
 
 \item{ptype}{A prototype of the desired output type of the field.}
@@ -55,8 +57,6 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 \item{default}{Default value to use if the field does not exist.}
 
 \item{transform}{A function to apply to the field before casting to \code{ptype}.}
-
-\item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
 
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name

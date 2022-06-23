@@ -183,6 +183,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'
 #' @param key,.key The path to the field in the object.
 #' @param ptype A prototype of the desired output type of the field.
+#' @param ... These dots are for future extensions and must be empty.
 #' @param required,.required Throw an error if the field does not exist?
 #' @param default Default value to use if the field does not exist.
 #' @param transform A function to apply to the field before casting to `ptype`.
