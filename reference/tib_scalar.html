@@ -56,29 +56,29 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tib_unspecified</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">tib_unspecified</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
-<span class="fu">tib_scalar</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_scalar</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_lgl</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_lgl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_int</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_int</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_dbl</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_dbl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_chr</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_chr</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_vector</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_vector</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_lgl_vec</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_lgl_vec</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_int_vec</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_int_vec</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_dbl_vec</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_dbl_vec</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_chr_vec</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_chr_vec</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
-<span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
+<span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
 
 <span class="fu">tib_row</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span>
 
@@ -89,6 +89,10 @@
     <h2>Arguments</h2>
     <dl><dt>key, .key</dt>
 <dd><p>The path to the field in the object.</p></dd>
+
+
+<dt>...</dt>
+<dd><p>These dots are for future extensions and must be empty.</p></dd>
 
 
 <dt>required, .required</dt>
@@ -105,10 +109,6 @@
 
 <dt>transform</dt>
 <dd><p>A function to apply to the field before casting to <code>ptype</code>.</p></dd>
-
-
-<dt>...</dt>
-<dd><p>Column specification created by <code>tib_*()</code> or <code>spec_*()</code>.</p></dd>
 
 
 <dt>.names_to</dt>
@@ -135,7 +135,7 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">tib_int</span>("int")</span>
-<span class="r-in"><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span>, <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
+<span class="r-in"><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">tib_int</span>(</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   "int",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   required = FALSE,</span>
