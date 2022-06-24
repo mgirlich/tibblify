@@ -12,34 +12,34 @@
 \alias{tib_int_vec}
 \alias{tib_dbl_vec}
 \alias{tib_chr_vec}
-\alias{tib_list}
+\alias{tib_variant}
 \alias{tib_row}
 \alias{tib_df}
 \title{Create a Field Specification}
 \usage{
-tib_unspecified(key, required = TRUE)
+tib_unspecified(key, ..., required = TRUE)
 
-tib_scalar(key, ptype, required = TRUE, default = NULL, transform = NULL)
+tib_scalar(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_lgl(key, required = TRUE, default = NULL, transform = NULL)
+tib_lgl(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_int(key, required = TRUE, default = NULL, transform = NULL)
+tib_int(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_dbl(key, required = TRUE, default = NULL, transform = NULL)
+tib_dbl(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_chr(key, required = TRUE, default = NULL, transform = NULL)
+tib_chr(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_vector(key, ptype, required = TRUE, default = NULL, transform = NULL)
+tib_vector(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_lgl_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_lgl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_int_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_int_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_dbl_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_dbl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_chr_vec(key, required = TRUE, default = NULL, transform = NULL)
+tib_chr_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_list(key, required = TRUE, default = NULL, transform = NULL)
+tib_variant(key, ..., required = TRUE, default = NULL, transform = NULL)
 
 tib_row(.key, ..., .required = TRUE)
 
@@ -48,6 +48,8 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 \arguments{
 \item{key, .key}{The path to the field in the object.}
 
+\item{...}{These dots are for future extensions and must be empty.}
+
 \item{required, .required}{Throw an error if the field does not exist?}
 
 \item{ptype}{A prototype of the desired output type of the field.}
@@ -55,8 +57,6 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 \item{default}{Default value to use if the field does not exist.}
 
 \item{transform}{A function to apply to the field before casting to \code{ptype}.}
-
-\item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
 
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name
@@ -70,7 +70,7 @@ There are basically five different \verb{tib_*()} functions
 \itemize{
 \item \code{tib_scalar(ptype)}: Cast the field to a length one vector of type \code{ptype}.
 \item \code{tib_vector(ptype)}: Cast the field to an arbitrary length vector of type \code{ptype}.
-\item \code{tib_list()}: Cast the field to a list.
+\item \code{tib_variant()}: Cast the field to a list.
 \item \code{tib_row()}: Cast the field to a named list.
 \item \code{tib_df()}: Cast the field to a tibble.
 }
@@ -86,7 +86,7 @@ the most common prototypes
 }
 \examples{
 tib_int("int")
-tib_int("int", FALSE, default = 0)
+tib_int("int", required = FALSE, default = 0)
 
 tib_scalar("date", Sys.Date(), transform = function(x) as.Date(x, format = "\%Y-\%m-\%d"))
 

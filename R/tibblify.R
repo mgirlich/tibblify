@@ -25,6 +25,8 @@
 #' # Provide a specification for a single object
 #' tibblify(x[[1]], spec_object(spec))
 tibblify <- function(x, spec = NULL, names_to = NULL) {
+  withr::local_locale(c(LC_COLLATE = "C"))
+
   if (!is.null(names_to)) {
     lifecycle::deprecate_stop("0.2.0", "tibblify(names_to)")
   }
@@ -64,7 +66,7 @@ finalize_spec_object.tib_row <- function(field_spec, field) {
 }
 
 #' @export
-finalize_spec_object.tib_list <- function(field_spec, field) {
+finalize_spec_object.tib_variant <- function(field_spec, field) {
   field[[1]]
 }
 

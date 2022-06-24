@@ -110,7 +110,7 @@ are the following five types of functions:
 
 * `tib_scalar(ptype)`: a length one vector with type `ptype`
 * `tib_vector(ptype)`: a vector of arbitrary length with type `ptype`
-* `tib_list()`: a vector of arbitrary length and type; you should barely ever need this
+* `tib_variant()`: a vector of arbitrary length and type; you should barely ever need this
 * `tib_row(...)`: an object with the fields `...`
 * `tib_df(...)`: a collection where the objects have the fields `...`
 
@@ -271,7 +271,7 @@ You can specify the value to use with the `default` argument
 ```{r}
 spec <- spec_df(
   x = tib_int("x"),
-  y = tib_chr("y", FALSE, default = "missing")
+  y = tib_chr("y", required = FALSE, default = "missing")
 )
 
 tibblify(x, spec)

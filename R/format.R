@@ -113,7 +113,7 @@ format.tib_scalar <- function(x, ...,
 }
 
 #' @export
-format.tib_list <- format.tib_scalar
+format.tib_variant <- format.tib_scalar
 #' @export
 format.tib_vector <- format.tib_scalar
 #' @export
@@ -231,7 +231,7 @@ get_f_name.tib_vector_character <- function(x) {"tib_chr_vec"}
 get_f_name.tib_vector<- function(x) {"tib_vector"}
 
 #' @export
-get_f_name.tib_list <- function(x) {"tib_list"}
+get_f_name.tib_variant <- function(x) {"tib_variant"}
 
 
 # format ptype ------------------------------------------------------------
@@ -263,8 +263,9 @@ format_ptype.POSIXct <- function(x) {
 
 format_default <- function(default, ptype) {
   if (vec_is_empty(default)) return(NULL)
+  if (is_null(ptype)) return(deparse(default))
   canonical_default <- vec_init(ptype)
-  if (vec_equal(default, canonical_default, na_equal = TRUE)) return(NULL)
+  if (vec_size(default) == 1 && vec_equal(default, canonical_default, na_equal = TRUE)) return(NULL)
 
   deparse(default)
 }
@@ -274,7 +275,7 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   x <- name_exprs(x, x_nms, x_nms != "")
 
   x_single_line <- paste0(x, collapse = ", ")
-  x_multi_line <- paste0("\n", paste0(pad(x, 2), collapse = ",\n"), "\n")
+  x_multi_line <- paste0("\n", paste0(pad(x, 2), ",", collapse = "\n"), "\n")
   line_length <- nchar(x_single_line) + nchar_prefix
 
   if (multi_line ||

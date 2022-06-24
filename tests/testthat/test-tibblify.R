@@ -8,7 +8,7 @@ tib <- function(x, col) {
 }
 
 test_that("names are checked", {
-  spec <- spec_object(x = tib_int("x", FALSE))
+  spec <- spec_object(x = tib_int("x", required = FALSE))
 
   expect_snapshot({
     # no names
@@ -59,25 +59,31 @@ test_that("scalar column works", {
   expect_snapshot_error(tib(list(x = 1), tib_scalar("x", dtt)))
 
   # fallback default works
-  expect_equal(tib(list(), tib_lgl("x", FALSE)), tibble(x = NA))
-  expect_equal(tib(list(), tib_int("x", FALSE)), tibble(x = NA_integer_))
-  expect_equal(tib(list(), tib_dbl("x", FALSE)), tibble(x = NA_real_))
-  expect_equal(tib(list(), tib_chr("x", FALSE)), tibble(x = NA_character_))
-  expect_equal(tib(list(), tib_scalar("x", dtt, FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
+  expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
+  expect_equal(tib(list(), tib_int("x", required = FALSE)), tibble(x = NA_integer_))
+  expect_equal(tib(list(), tib_dbl("x", required = FALSE)), tibble(x = NA_real_))
+  expect_equal(tib(list(), tib_chr("x", required = FALSE)), tibble(x = NA_character_))
+  expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
   # use default if empty element
-  expect_equal(tib(list(x = NULL), tib_lgl("x", FALSE, FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(x = NULL), tib_int("x", FALSE, 1)), tibble(x = 1))
-  expect_equal(tib(list(x = NULL), tib_dbl("x", FALSE, 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(x = NULL), tib_chr("x", FALSE, "a")), tibble(x = "a"))
-  expect_equal(tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), FALSE, dtt)), tibble(x = dtt))
+  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, default = 1)), tibble(x = 1))
+  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, default = 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, default = "a")), tibble(x = "a"))
+  expect_equal(
+    tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, default = dtt)),
+    tibble(x = dtt)
+  )
 
   # specified default works
-  expect_equal(tib(list(), tib_lgl("x", FALSE, FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(), tib_int("x", FALSE, 1)), tibble(x = 1))
-  expect_equal(tib(list(), tib_dbl("x", FALSE, 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(), tib_chr("x", FALSE, "a")), tibble(x = "a"))
-  expect_equal(tib(list(), tib_scalar("x", vec_ptype(dtt), FALSE, dtt)), tibble(x = dtt))
+  expect_equal(tib(list(), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(), tib_int("x", required = FALSE, default = 1)), tibble(x = 1))
+  expect_equal(tib(list(), tib_dbl("x", required = FALSE, default = 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(), tib_chr("x", required = FALSE, default = "a")), tibble(x = "a"))
+  expect_equal(
+    tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, default = dtt)),
+    tibble(x = dtt)
+  )
 
   # transform works
   expect_equal(
@@ -151,12 +157,12 @@ test_that("vector column works", {
   expect_snapshot_error(tib(list(x = "a"), tib_lgl_vec("x")))
 
   # fallback default works
-  expect_equal(tib(list(), tib_lgl_vec("x", FALSE)), tibble(x = list_of(NULL, .ptype = logical())))
-  expect_equal(tib(list(), tib_vector("x", dtt, FALSE)), tibble(x = list_of(NULL, .ptype = vctrs::new_datetime())))
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE)), tibble(x = list_of(NULL, .ptype = logical())))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE)), tibble(x = list_of(NULL, .ptype = vctrs::new_datetime())))
 
   # specified default works
-  expect_equal(tib(list(), tib_lgl_vec("x", FALSE, c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
-  expect_equal(tib(list(), tib_vector("x", dtt, FALSE, c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, default = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, default = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
 
   # transform works
   expect_equal(
@@ -184,7 +190,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = TRUE), list(x = 1)),
-      spec_df(x = tib_list("x"))
+      spec_df(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE, 1))
   )
@@ -192,7 +198,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(x = TRUE),
-      spec_row(x = tib_list("x"))
+      spec_row(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE))
   )
@@ -201,7 +207,7 @@ test_that("list column works", {
   expect_snapshot_error(
     tibblify(
       list(list(x = TRUE), list(zzz = 1)),
-      spec_df(x = tib_list("x"))
+      spec_df(x = tib_variant("x"))
     )
   )
 
@@ -209,7 +215,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(), list(x = 1)),
-      spec_df(x = tib_list("x", FALSE))
+      spec_df(x = tib_variant("x", required = FALSE))
     ),
     tibble(x = list(NULL, 1))
   )
@@ -218,7 +224,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list()),
-      spec_df(x = tib_list("x", FALSE, 1))
+      spec_df(x = tib_variant("x", required = FALSE, default = 1))
     ),
     tibble(x = list(1))
   )
@@ -227,7 +233,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = c(TRUE, FALSE)), list(x = 1)),
-      spec_df(x = tib_list("x", FALSE, transform = ~ length(.x)))
+      spec_df(x = tib_variant("x", required = FALSE, transform = ~ length(.x)))
     ),
     tibble(x = list(2, 1))
   )
@@ -265,7 +271,7 @@ test_that("df column works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", FALSE)))
+      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = tibble(a = c(TRUE, NA, NA)))
   )
@@ -311,7 +317,7 @@ test_that("list of df column works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", FALSE)))
+      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
   )
@@ -423,7 +429,7 @@ test_that("empty spec works", {
 
   tibblify(
     list(list(x = list()), list(x = list())),
-    spec_df(x = tib_row("x", a = tib_int("a", FALSE)))
+    spec_df(x = tib_row("x", a = tib_int("a", required = FALSE)))
   )
 
   expect_equal(
@@ -440,6 +446,19 @@ test_that("empty spec works", {
       spec_df(x = tib_row("x", .required = FALSE))
     ),
     tibble(x = tibble())
+  )
+})
+
+test_that("does not confuse key order due to case - #96", {
+  skip_on_cran()
+  withr::local_locale(c(LC_COLLATE = "en_US"))
+  spec <- spec_object(
+    B = tib_int("B", required = FALSE),
+    a = tib_int("a", required = FALSE),
+  )
+  expect_equal(
+    tibblify::tibblify(list(B = 1), spec),
+    list(B = 1, a = NA_integer_)
   )
 })
 
@@ -525,7 +544,7 @@ test_that("discog works", {
           "descriptions",
           transform = ~ vctrs::vec_c(!!!.x, .ptype = character())
         ),
-        text = tib_chr("text", FALSE),
+        text = tib_chr("text", required = FALSE),
         name = tib_chr("name"),
         qty = tib_chr("qty")
       ),

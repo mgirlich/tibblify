@@ -26,9 +26,11 @@ test_that("POSIXlt is converted to POSIXct", {
 })
 
 test_that("can handle non-vector elements", {
-  skip("Not yet working - #76")
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
-  spec_guess_object(list(x = model))
+  expect_equal(
+    spec_guess_object(list(x = model)),
+    spec_object(x = tib_variant("x"))
+  )
 })
 
 test_that("can guess vector elements", {
@@ -59,6 +61,7 @@ test_that("POSIXlt is converted to POSIXct for vector elements", {
 })
 
 test_that("can guess tib_vector for a scalar list", {
+  skip("Guessing enlisted vectors not yet supported")
   # FIXME this should get a different API
   # https://github.com/mgirlich/tibblify/pull/69
   expect_equal(
@@ -77,17 +80,22 @@ test_that("can guess tib_vector for a scalar list", {
 test_that("can guess mixed elements", {
   expect_equal(
     spec_guess_object(list(x = list(TRUE, "a"))),
-    spec_object(x = tib_list("x"))
+    spec_object(x = tib_variant("x"))
   )
 })
 
-test_that("non-vector objects work", {
-  skip("handling of non-vector objects not yet decided - #84")
-  # non-vector objects are okay in lists
+test_that("can handle non-vector elements in list", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
-    spec_guess_object(list(x = list(TRUE, model))),
-    spec_object(x = tib_list("x"))
+    spec_guess_object(list(x = list(model, model))),
+    spec_object(x = tib_variant("x"))
+  )
+})
+
+test_that("can guess df element", {
+  expect_equal(
+    spec_guess_object(list(x = tibble(a = 1L))),
+    spec_object(x = tib_df("x", a = tib_int("a")))
   )
 })
 
@@ -99,6 +107,7 @@ test_that("can guess tib_row", {
 })
 
 test_that("can guess tib_row with a scalar list", {
+  skip("Guessing enlisted vectors not yet supported")
   # FIXME this should get a different API
   # https://github.com/mgirlich/tibblify/pull/69
   expect_equal(
@@ -148,7 +157,7 @@ test_that("can guess tib_df", {
         )
       )
     ),
-    spec_object(x = tib_df("x", a = tib_list("a")))
+    spec_object(x = tib_df("x", a = tib_variant("a")))
   )
 })
 
@@ -165,8 +174,8 @@ test_that("respect empty_list_unspecified for list of object elements", {
     spec_object(
       x = tib_df(
         "x",
-        a = tib_list("a"),
-        b = tib_list("b")
+        a = tib_variant("a"),
+        b = tib_variant("b")
       )
     )
   )
@@ -176,7 +185,7 @@ test_that("respect empty_list_unspecified for list of object elements", {
     spec_object(
       x = tib_df(
         "x",
-        a = tib_int("a"),
+        a = tib_int_vec("a"),
         b = tib_int_vec("b")
       )
     )
@@ -243,10 +252,11 @@ test_that("can guess tib_unspecified for an object", {
     spec_object(x = tib_unspecified("x"))
   )
 
-  expect_equal(
-    spec_guess_object(list(x = list(NULL, NULL))),
-    spec_object(x = tib_unspecified("x"))
-  )
+  # TODO not yet decided
+  # expect_equal(
+  #   spec_guess_object(list(x = list(NULL, NULL))),
+  #   spec_object(x = tib_unspecified("x"))
+  # )
 
   # in a row
   expect_equal(
@@ -282,5 +292,10 @@ test_that("gives nice errors", {
   expect_snapshot({
     (expect_error(spec_guess_object(tibble(a = 1))))
     (expect_error(spec_guess_object(1:3)))
+  })
+
+  expect_snapshot({
+    (expect_error(spec_guess_object(list(1, a = 1))))
+    (expect_error(spec_guess_object(list(a = 1, a = 1))))
   })
 })

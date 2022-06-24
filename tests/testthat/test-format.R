@@ -4,7 +4,7 @@ test_that("can format tib_unspecified()", {
   expect_snapshot(tib_unspecified("a") %>% print())
 })
 
-test_that("format for vectors works", {
+test_that("format for scalars works", {
   local_options(cli.num_colors = 1)
 
   expect_snapshot(tib_chr("a") %>% print())
@@ -14,7 +14,7 @@ test_that("format for vectors works", {
   expect_snapshot(tib_int("a") %>% print())
   expect_snapshot(tib_lgl("a") %>% print())
 
-  expect_snapshot(tib_list("a") %>% print())
+  expect_snapshot(tib_variant("a") %>% print())
 
   expect_snapshot(tib_int("a", default = NA_integer_) %>% print())
   expect_snapshot(tib_int("a", default = 1) %>% print())
@@ -59,6 +59,9 @@ test_that("format for tib_vector works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(tib_chr_vec("a") %>% print())
   expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
+
+  # multi value default
+  expect_snapshot(tib_int_vec("a", default = 1:2) %>% print())
 })
 
 test_that("format for tib_row works", {
@@ -125,6 +128,11 @@ test_that("format for tib_row works", {
   )
 })
 
+test_that("format for tib_variant works", {
+  expect_snapshot(tib_variant("a"))
+  expect_snapshot(tib_variant("a", default = tibble(a = 1:2)))
+})
+
 test_that("format for tib_df works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(
@@ -158,6 +166,13 @@ test_that("format for empty tib_df works", {
   expect_equal(format(spec_df()), "spec_df()")
   expect_equal(format(spec_row()), "spec_row()")
   expect_equal(format(spec_object()), "spec_object()")
-  expect_equal(format(tib_df("x")), "tib_df(\n  \"x\"\n)")
-  expect_equal(format(tib_row("x")), "tib_row(\n  \"x\"\n)")
+  expect_equal(format(tib_df("x")), "tib_df(\n  \"x\",\n)")
+  expect_equal(format(tib_row("x")), "tib_row(\n  \"x\",\n)")
+})
+
+test_that("format uses trailing comma", {
+  expect_equal(
+    format(tib_df("x", a = tib_int("a"))),
+    'tib_df(\n  "x",\n  a = tib_int("a"),\n)'
+  )
 })

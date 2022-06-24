@@ -33,7 +33,7 @@ test_that("can guess required for scalars", {
         list()
       )
     ),
-    spec_df(x = tib_dbl("x", FALSE))
+    spec_df(x = tib_dbl("x", required = FALSE))
   )
 })
 
@@ -41,12 +41,13 @@ test_that("respect empty_list_unspecified for scalar elements", {
   x <- list(list(x = 1L), list(x = list()))
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = FALSE),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 
+  # this should be `tib_vector` because a list cannot occur for a scalar
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = TRUE),
-    spec_df(x = tib_int("x"))
+    spec_df(x = tib_int_vec("x"))
   )
 })
 
@@ -66,8 +67,6 @@ test_that("can guess vector elements", {
     spec_df(x = tib_vector("x", new_datetime()))
   )
 
-  skip("Unclear what to guess for empty vector - #78")
-  # should this be `tib_int()` or `tib_int_vec()`?
   expect_equal(
     spec_guess_object_list(list(list(x = 1L), list(x = integer()))),
     spec_df(x = tib_int_vec("x"))
@@ -77,7 +76,7 @@ test_that("can guess vector elements", {
 test_that("can guess required for vector elements", {
   expect_equal(
     spec_guess_object_list(list(list(x = c(TRUE, FALSE)), list())),
-    spec_df(x = tib_lgl_vec("x", FALSE))
+    spec_df(x = tib_lgl_vec("x", required = FALSE))
   )
 })
 
@@ -85,7 +84,7 @@ test_that("respect empty_list_unspecified for vector elements", {
   x <- list(list(x = 1:2), list(x = list()))
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = FALSE),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 
   expect_equal(
@@ -94,7 +93,7 @@ test_that("respect empty_list_unspecified for vector elements", {
   )
 })
 
-test_that("can guess tib_list", {
+test_that("can guess tib_variant", {
   expect_equal(
     spec_guess_object_list(
       list(
@@ -102,7 +101,7 @@ test_that("can guess tib_list", {
         list(x = list(FALSE, "b"))
       )
     ),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 
   expect_equal(
@@ -112,10 +111,11 @@ test_that("can guess tib_list", {
         list(x = 1)
       )
     ),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
+})
 
-  # non-vector objects are okay in lists
+test_that("can handle non-vector elements", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
     spec_guess_object_list(
@@ -124,11 +124,11 @@ test_that("can guess tib_list", {
         list(x = model)
       )
     ),
-    spec_df(x = tib_list("x"))
+    spec_df(x = tib_variant("x"))
   )
 })
 
-test_that("can guess required for tib_list", {
+test_that("can guess required for tib_variant", {
   expect_equal(
     spec_guess_object_list(
       list(
@@ -137,7 +137,7 @@ test_that("can guess required for tib_list", {
       )
     ),
     spec_df(
-      x = tib_list("x", required = FALSE),
+      x = tib_variant("x", required = FALSE),
       y = tib_chr("y", required = FALSE)
     )
   )
@@ -171,7 +171,7 @@ test_that("can guess object elements", {
         list(x = list(a = "a"))
       )
     ),
-    spec_df(x = tib_row("x", a = tib_list("a")))
+    spec_df(x = tib_row("x", a = tib_variant("a")))
   )
 })
 
@@ -179,7 +179,7 @@ test_that("respect empty_list_unspecified for object elements", {
   x <- list(list(x = list(y = 1:2)), list(x = list(y = list())))
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = FALSE),
-    spec_df(x = tib_row("x", y = tib_list("y")))
+    spec_df(x = tib_row("x", y = tib_variant("y")))
   )
 
   expect_equal(

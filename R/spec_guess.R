@@ -1,6 +1,7 @@
 #' Guess the `tibblify()` Specification
 #'
 #' @param x A nested list.
+#' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
 #' @param simplify_list Try to simplify lists if possible?
 #' @param call The execution environment of a currently running function, e.g.
@@ -16,7 +17,8 @@
 #' spec_guess(list(list(x = 1), list(x = 2)))
 #'
 #' spec_guess(gh_users)
-spec_guess <- function(x, empty_list_unspecified = FALSE, call = current_call()) {
+spec_guess <- function(x, ..., empty_list_unspecified = FALSE, call = current_call()) {
+  check_dots_empty()
   if (is.data.frame(x)) {
     spec_guess_df(
       x,
@@ -38,6 +40,15 @@ spec_guess <- function(x, empty_list_unspecified = FALSE, call = current_call())
 }
 
 # helpers -----------------------------------------------------------------
+
+tib_ptype <- function(x) {
+  ptype <- vec_ptype(x)
+  special_ptype_handling(ptype)
+}
+
+is_unspecified <- function(x) {
+  inherits(x, "vctrs_unspecified")
+}
 
 make_unchop <- function(ptype) {
   rlang::new_function(
