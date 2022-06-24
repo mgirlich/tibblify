@@ -116,7 +116,7 @@ prep_nested_keys <- function(spec, shift = FALSE) {
             c(x$names_to, x$values_to)
           )
         }
-        x$default_value <- as_tibble(default_value_list)
+        x$default_value <- tibble::as_tibble(default_value_list)
       }
 
       x
