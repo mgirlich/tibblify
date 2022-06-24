@@ -449,6 +449,19 @@ test_that("empty spec works", {
   )
 })
 
+test_that("does not confuse key order due to case - #96", {
+  skip_on_cran()
+  withr::local_locale(c(LC_COLLATE = "en_US"))
+  spec <- spec_object(
+    B = tib_int("B", required = FALSE),
+    a = tib_int("a", required = FALSE),
+  )
+  expect_equal(
+    tibblify::tibblify(list(B = 1), spec),
+    list(B = 1, a = NA_integer_)
+  )
+})
+
 test_that("discog works", {
   row1 <- tibble(
     instance_id = 354823933L,
