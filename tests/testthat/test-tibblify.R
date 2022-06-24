@@ -252,6 +252,20 @@ test_that("vector column creates tibble with names_to", {
     tibble(x = list_of(tibble(name = c("a", "b"), val = c(1L, NA))))
   )
 
+  # names of default value are used
+  spec2 <- tib_int_vec(
+    "x",
+    default = c(x = 1L, y = 2L),
+    required = FALSE,
+    input_form = "object",
+    values_to = "val",
+    names_to = "name"
+  )
+  expect_equal(
+    tib(list(a = 1), spec2),
+    tibble(x = list_of(tibble(name = c("x", "y"), val = c(1L, 2L))))
+  )
+
   # currently not clear what to do about missing names but it should not crash
   # and if no error is thrown it should at least produce both columns
   expect_named(

@@ -373,31 +373,6 @@ private:
     }
   }
 
-  SEXP get_default_value(SEXP default_value_, SEXP ptype_, SEXP names_to_, SEXP values_to_) {
-    // TODO first initialize `this->output_col_names`, `this->uses_values_col`, and `this->uses_names_col` to use it in here?
-    SEXP default_value_casted = vec_cast(default_value_, ptype_);
-    if (Rf_isNull(values_to_)) {
-      return(default_value_casted);
-    }
-
-    SEXP col_names = get_output_col_names(names_to_, values_to_);
-    R_len_t n_rows = vec_size(default_value_casted);
-    cpp11::writable::list out = init_df(n_rows, col_names);
-    if (Rf_isNull(names_to_)) {
-      out[0] = default_value_casted;
-    } else {
-      // TODO this could use the names of the default value?
-      auto names = cpp11::writable::strings(n_rows);
-      for (int i = 0; i < n_rows; i++) {
-        names[i] = cpp11::na<cpp11::r_string>();
-      }
-      out[0] = names;
-      out[1] = default_value_casted;
-    }
-
-    return(out);
-  }
-
   cpp11::writable::list init_out_df(R_xlen_t n_rows) {
     cpp11::writable::list ptype_out(init_df(n_rows, this->output_col_names));
 
@@ -453,7 +428,7 @@ public:
                    SEXP name_, SEXP transform_, cpp11::r_string input_form_,
                    SEXP names_to_, SEXP values_to_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(get_default_value(default_value_, ptype_, names_to_, values_to_))
+  , default_value(default_value_)
   , ptype(ptype_)
   , input_form(string_to_form_enum(input_form_))
   , uses_names_col(!Rf_isNull(names_to_))
