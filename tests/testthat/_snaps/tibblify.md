@@ -124,6 +124,21 @@
       Error in `stop_vector_non_list_element()`:
       ! Element at path [[1]]$x must be a list for `input_form = "object"`
 
+---
+
+    Code
+      (expect_error(tib(list(x = list(1, 1:2)), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_vector_wrong_size_element()`:
+      ! Each element in list at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = list(integer())), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_vector_wrong_size_element()`:
+      ! Each element in list at path [[1]]$x must have size 1.
+
 # list column works
 
     Required element absent at path [[2]]$x

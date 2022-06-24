@@ -57,6 +57,13 @@ inline void stop_vector_non_list_element(const Path& path, vector_input_form inp
   Rf_eval(call, tibblify_ns_env);
 }
 
+inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_wrong_size_element"),
+                               PROTECT(path.data()),
+                               vector_input_form_to_sexp(input_form)));
+  Rf_eval(call, tibblify_ns_env);
+}
+
 inline SEXP apply_transform(SEXP value, SEXP fn) {
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
@@ -421,8 +428,7 @@ private:
       }
 
       if (vec_size(*ptr_row) != 1) {
-        // TODO better error message
-        cpp11::stop("Each element must have size one.");
+        stop_vector_wrong_size_element(path, this->input_form);
       }
 
       out_list[i] = *ptr_row;

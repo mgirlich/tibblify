@@ -224,6 +224,11 @@ test_that("vector column can parse scalar list", {
     (expect_error(tib(list(x = 1), spec)))
     (expect_error(tib(list(x = 1), spec_object)))
   })
+
+  expect_snapshot({
+    (expect_error(tib(list(x = list(1, 1:2)), spec)))
+    (expect_error(tib(list(x = list(integer())), spec)))
+  })
 })
 
 test_that("vector column can parse object", {
