@@ -44,7 +44,7 @@ inline void stop_names_is_null(const Path& path) {
 }
 
 inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
-  std::string input_form_string;
+  cpp11::r_string input_form_string;
   switch (input_form) {
   case scalar_list: {input_form_string = "scalar_list";} break;
   case vector: {input_form_string = "vector";} break;
@@ -53,7 +53,7 @@ inline void stop_vector_non_list_element(const Path& path, vector_input_form inp
 
   SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_non_list_element"),
                                PROTECT(path.data()),
-                               cpp11::r_string(input_form_string)));
+                               cpp11::as_sexp(input_form_string)));
   Rf_eval(call, tibblify_ns_env);
 }
 

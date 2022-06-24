@@ -109,6 +109,21 @@
 
     Can't convert <character> to <logical>.
 
+# vector column can parse scalar list
+
+    Code
+      (expect_error(tib(list(x = 1), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_vector_non_list_element()`:
+      ! Element at path [[1]]$x must be a list for `input_form = "scalar_list"`
+    Code
+      (expect_error(tib(list(x = 1), spec_object)))
+    Output
+      <error/rlang_error>
+      Error in `stop_vector_non_list_element()`:
+      ! Element at path [[1]]$x must be a list for `input_form = "object"`
+
 # list column works
 
     Required element absent at path [[2]]$x

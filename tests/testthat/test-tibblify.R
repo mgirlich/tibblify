@@ -218,8 +218,11 @@ test_that("vector column can parse scalar list", {
     tibble(x = list_of(1:2, integer()))
   )
 
+  spec_object <- spec
+  spec_object$input_form <- "object"
   expect_snapshot({
     (expect_error(tib(list(x = 1), spec)))
+    (expect_error(tib(list(x = 1), spec_object)))
   })
 })
 
