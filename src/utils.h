@@ -3,6 +3,17 @@
 
 enum vector_input_form {vector, scalar_list, object};
 
+inline cpp11::sexp vector_input_form_to_sexp(vector_input_form input_form) {
+  cpp11::r_string input_form_string;
+  switch (input_form) {
+  case scalar_list: {input_form_string = "scalar_list";} break;
+  case vector: {input_form_string = "vector";} break;
+  case object: {input_form_string = "object";} break;
+  }
+
+  return(cpp11::as_sexp(input_form_string));
+}
+
 inline
 SEXP set_df_attributes(SEXP list, R_xlen_t n_rows) {
   Rf_setAttrib(list, R_ClassSymbol, classes_tibble);

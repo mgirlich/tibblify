@@ -401,8 +401,6 @@ private:
     // FIXME should check with `vec_is_list()`
     if (TYPEOF(value) != VECSXP) {
       stop_vector_non_list_element(path, this->input_form);
-      // TODO better error message
-      cpp11::stop("Field value must be a list for `scalar_list` or `object`");
     }
 
     cpp11::integers n1({1});
