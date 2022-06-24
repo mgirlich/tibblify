@@ -81,7 +81,7 @@ format_fields <- function(f_name, fields, width, args = NULL) {
 is_tib_name_canonical <- function(field, name) {
   key <- field$key
   if (vec_size(key) > 1 || !is.character(key)) {
-    FALSE
+    return(FALSE)
   }
 
   key == name
