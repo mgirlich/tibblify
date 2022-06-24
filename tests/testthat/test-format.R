@@ -59,6 +59,9 @@ test_that("format for tib_vector works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(tib_chr_vec("a") %>% print())
   expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
+
+  # multi value default
+  expect_snapshot(tib_int_vec("a", default = 1:2) %>% print())
 })
 
 test_that("format for tib_row works", {

@@ -127,6 +127,13 @@
     Output
       tib_vector("a", ptype = vctrs::new_date())
 
+---
+
+    Code
+      tib_int_vec("a", default = 1:2) %>% print()
+    Output
+      tib_int_vec("a", default = 1:2)
+
 # format for tib_row works
 
     Code

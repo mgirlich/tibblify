@@ -264,7 +264,7 @@ format_ptype.POSIXct <- function(x) {
 format_default <- function(default, ptype) {
   if (vec_is_empty(default)) return(NULL)
   canonical_default <- vec_init(ptype)
-  if (vec_equal(default, canonical_default, na_equal = TRUE)) return(NULL)
+  if (vec_size(default) == 1 && vec_equal(default, canonical_default, na_equal = TRUE)) return(NULL)
 
   deparse(default)
 }
