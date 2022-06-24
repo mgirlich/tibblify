@@ -4,7 +4,7 @@ test_that("can format tib_unspecified()", {
   expect_snapshot(tib_unspecified("a") %>% print())
 })
 
-test_that("format for vectors works", {
+test_that("format for scalars works", {
   local_options(cli.num_colors = 1)
 
   expect_snapshot(tib_chr("a") %>% print())
@@ -126,6 +126,11 @@ test_that("format for tib_row works", {
     ) %>%
       print()
   )
+})
+
+test_that("format for tib_variant works", {
+  expect_snapshot(tib_variant("a"))
+  expect_snapshot(tib_variant("a", default = tibble(a = 1:2)))
 })
 
 test_that("format for tib_df works", {
