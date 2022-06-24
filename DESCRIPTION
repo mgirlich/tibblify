@@ -20,7 +20,8 @@ Imports:
     purrr,
     rlang (>= 1.0.2),
     tibble,
-    vctrs (>= 0.4.1)
+    vctrs (>= 0.4.1),
+    withr (>= 2.5.0)
 Suggests: 
     covr,
     jsonlite,
