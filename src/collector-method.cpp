@@ -43,6 +43,20 @@ inline void stop_names_is_null(const Path& path) {
   Rf_eval(call, tibblify_ns_env);
 }
 
+inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
+  std::string input_form_string;
+  switch (input_form) {
+  case scalar_list: {input_form_string = "scalar_list";} break;
+  case vector: {input_form_string = "vector";} break;
+  case object: {input_form_string = "object";} break;
+  }
+
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_non_list_element"),
+                               PROTECT(path.data()),
+                               cpp11::r_string(input_form_string)));
+  Rf_eval(call, tibblify_ns_env);
+}
+
 inline SEXP apply_transform(SEXP value, SEXP fn) {
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
@@ -379,13 +393,14 @@ private:
     return(ptype_out);
   }
 
-  SEXP unchop_value(SEXP value) {
+  SEXP unchop_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
       return(value);
     }
 
     // FIXME should check with `vec_is_list()`
     if (TYPEOF(value) != VECSXP) {
+      stop_vector_non_list_element(path, this->input_form);
       // TODO better error message
       cpp11::stop("Field value must be a list for `scalar_list` or `object`");
     }
@@ -460,7 +475,7 @@ public:
     }
 
     if (this->input_form == scalar_list || this->input_form == object) {
-      value = unchop_value(value);
+      value = unchop_value(value, path);
     }
 
     // TODO use `NULL` if `value` is empty?
