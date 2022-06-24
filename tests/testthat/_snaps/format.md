@@ -130,6 +130,20 @@
 ---
 
     Code
+      tib_vector("a", ptype = Sys.Date(), input_form = "object", values_to = "vals",
+      names_to = "names") %>% print()
+    Output
+      tib_vector(
+        "a",
+        ptype = vctrs::new_date(),
+        input_form = "object",
+        values_to = "vals",
+        names_to = "names",
+      )
+
+---
+
+    Code
       tib_int_vec("a", default = 1:2) %>% print()
     Output
       tib_int_vec("a", default = 1:2)

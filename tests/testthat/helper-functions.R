@@ -17,3 +17,10 @@ read_sample_json <- function(x) {
   path <- system.file("jsonexamples", x, package = "tibblify")
   jsonlite::fromJSON(path, simplifyDataFrame = FALSE)
 }
+
+tib <- function(x, col) {
+  tibblify(
+    list(x),
+    spec_df(x = col)
+  )
+}

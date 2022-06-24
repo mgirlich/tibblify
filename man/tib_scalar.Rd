@@ -29,15 +29,61 @@ tib_dbl(key, ..., required = TRUE, default = NULL, transform = NULL)
 
 tib_chr(key, ..., required = TRUE, default = NULL, transform = NULL)
 
-tib_vector(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
+tib_vector(
+  key,
+  ptype,
+  ...,
+  required = TRUE,
+  default = NULL,
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
 
-tib_lgl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_lgl_vec(
+  key,
+  ...,
+  required = TRUE,
+  default = NULL,
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
 
-tib_int_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_int_vec(
+  key,
+  ...,
+  required = TRUE,
+  default = NULL,
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
 
-tib_dbl_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_dbl_vec(
+  key,
+  ...,
+  required = TRUE,
+  default = NULL,
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
 
-tib_chr_vec(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_chr_vec(
+  key,
+  ...,
+  required = TRUE,
+  default = NULL,
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
 
 tib_variant(key, ..., required = TRUE, default = NULL, transform = NULL)
 
@@ -57,6 +103,29 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 \item{default}{Default value to use if the field does not exist.}
 
 \item{transform}{A function to apply to the field before casting to \code{ptype}.}
+
+\item{input_form}{A string that describes what structure the field has. Can
+be one of:
+\itemize{
+\item \code{"vector"}: The field is a vector, e.g. \code{c(1, 2, 3)}.
+\item \code{"scalar_list"}: The field is a list of scalars, e.g. \code{list(1, 2, 3)}.
+\item \code{"object"}: The field is a named list of scalars, e.g. \code{list(a = 1, b = 2, c = 3)}.
+}}
+
+\item{values_to}{Can be one of the following:
+\itemize{
+\item \code{NULL}: the default. The field is converted to a \code{ptype} vector.
+\item A string: The field is converted to a tibble and the values go into the
+specified column.
+}}
+
+\item{names_to}{Can be one of the following:
+\itemize{
+\item \code{NULL}: the default. The inner names of the field are not used.
+\item A string: This can only be used if 1) \code{input_form = "object"} and
+2) \code{values_to} is a string. The inner names of the field go into the
+specified column.
+}}
 
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name

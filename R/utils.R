@@ -57,6 +57,19 @@ stop_names_is_null <- function(path) {
   abort(message)
 }
 
+stop_vector_non_list_element <- function(path, input_form) {
+  # FIXME {.code} cannot be interpolated correctly
+  path_str <- path_to_string(path)
+  msg <- 'Element at path {path_str} must be a list for `input_form = "{input_form}"`'
+  cli::cli_abort(msg)
+}
+
+stop_vector_wrong_size_element <- function(path, input_form) {
+  path_str <- path_to_string(path)
+  msg <- 'Each element in list at path {path_str} must have size 1.'
+  cli::cli_abort(msg)
+}
+
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
 }

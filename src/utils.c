@@ -22,6 +22,8 @@ SEXP tibblify_shared_empty_list = NULL;
 // SEXP tibblify_shared_empty_date = NULL;
 // SEXP tibblify_shared_empty_uns = NULL;
 
+SEXP tibblify_shared_int1 = NULL;
+
 // SEXP classes_date = NULL;
 SEXP classes_tibble = NULL;
 SEXP classes_list_of = NULL;
@@ -35,6 +37,7 @@ SEXP syms_vec_is_list = NULL;
 SEXP syms_vec_is = NULL;
 SEXP syms_vec_flatten = NULL;
 SEXP syms_vec_names2 = NULL;
+SEXP syms_vec_init = NULL;
 
 SEXP r_new_shared_vector(SEXPTYPE type, R_len_t n) {
   SEXP out = Rf_allocVector(type, n);
@@ -88,6 +91,9 @@ void tibblify_init_utils(SEXP ns) {
   // Rf_setAttrib(tibblify_shared_empty_date, R_ClassSymbol, classes_date);
   // tibblify_shared_empty_uns = r_new_shared_vector(LGLSXP, 0);
 
+  tibblify_shared_int1 = r_new_shared_vector(INTSXP, 1);
+  INTEGER(tibblify_shared_int1)[0] = 1;
+
   syms_ptype = Rf_install("ptype");
   syms_transform = Rf_install("transform");
   syms_value = Rf_install("value");
@@ -97,6 +103,7 @@ void tibblify_init_utils(SEXP ns) {
   syms_vec_is_list = Rf_findFun(Rf_install("vec_is_list"), vctrs_package);
   syms_vec_is = Rf_findFun(Rf_install("vec_is"), vctrs_package);
   syms_vec_names2 = Rf_findFun(Rf_install("vec_names2"), vctrs_package);
+  syms_vec_init = Rf_findFun(Rf_install("vec_init"), vctrs_package);
 
   SEXP tibblify_symbol = Rf_install("tibblify");
   SEXP tibblify_package = Rf_findVarInFrame(R_NamespaceRegistry, tibblify_symbol);

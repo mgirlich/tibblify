@@ -31,6 +31,8 @@ extern SEXP tibblify_shared_empty_list;
 // extern SEXP tibblify_shared_empty_date;
 // extern SEXP tibblify_shared_empty_uns;
 
+extern SEXP tibblify_shared_int1;
+
 extern SEXP syms_transform;
 extern SEXP syms_value;
 extern SEXP syms_x;
@@ -39,5 +41,7 @@ extern SEXP syms_ptype;
 extern SEXP syms_vec_is_list;
 extern SEXP syms_vec_is;
 extern SEXP syms_vec_names2;
+extern SEXP syms_vec_flatten;
+extern SEXP syms_vec_init;
 
 #endif

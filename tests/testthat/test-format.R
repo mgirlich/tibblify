@@ -60,6 +60,17 @@ test_that("format for tib_vector works", {
   expect_snapshot(tib_chr_vec("a") %>% print())
   expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
 
+  expect_snapshot(
+    tib_vector(
+      "a",
+      ptype = Sys.Date(),
+      input_form = "object",
+      values_to = "vals",
+      names_to = "names"
+    ) %>%
+      print()
+  )
+
   # multi value default
   expect_snapshot(tib_int_vec("a", default = 1:2) %>% print())
 })

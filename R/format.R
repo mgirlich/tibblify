@@ -84,11 +84,6 @@ print.tib_collector <- function(x, ...) {
 }
 
 #' @export
-format.tib_vector <- function(x, ...) {
-  format.tib_collector(x, ptype = deparse(x$ptype), ...)
-}
-
-#' @export
 format.tib_scalar <- function(x, ...,
                               multi_line = FALSE, nchar_indent = 0, width = NULL) {
   parts <- list(
@@ -96,7 +91,12 @@ format.tib_scalar <- function(x, ...,
     ptype = if (class(x)[1] == "tib_scalar" || class(x)[1] == "tib_vector") format_ptype(x$ptype),
     required = if (!x$required) FALSE,
     default = format_default(x$default_value, x$ptype),
-    transform = x$transform
+    transform = x$transform,
+    input_form = if (!is_null(x$input_form) && x$input_form != "vector") {
+      paste0('"', x$input_form, '"')
+    },
+    values_to = if (!is_null(x$values_to)) paste0('"', x$values_to, '"'),
+    names_to = if (!is_null(x$names_to)) paste0('"', x$names_to, '"')
   )
   parts <- purrr::discard(parts, is.null)
 

@@ -43,6 +43,27 @@ inline void stop_names_is_null(const Path& path) {
   Rf_eval(call, tibblify_ns_env);
 }
 
+inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
+  cpp11::r_string input_form_string;
+  switch (input_form) {
+  case scalar_list: {input_form_string = "scalar_list";} break;
+  case vector: {input_form_string = "vector";} break;
+  case object: {input_form_string = "object";} break;
+  }
+
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_non_list_element"),
+                               PROTECT(path.data()),
+                               cpp11::as_sexp(input_form_string)));
+  Rf_eval(call, tibblify_ns_env);
+}
+
+inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_wrong_size_element"),
+                               PROTECT(path.data()),
+                               vector_input_form_to_sexp(input_form)));
+  Rf_eval(call, tibblify_ns_env);
+}
+
 inline SEXP apply_transform(SEXP value, SEXP fn) {
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
@@ -144,7 +165,7 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SEXP call = PROTECT(Rf_lang3(Rf_install("vec_flatten"),
+    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
                                  this->data,
                                  this->ptype));
     SEXP value = R_tryEval(call, tibblify_ns_env, NULL);
@@ -341,21 +362,126 @@ protected:
   int current_row = 0;
 private:
   cpp11::writable::list data;
+  const vector_input_form input_form;
+  const bool uses_names_col;
+  const bool uses_values_col;
+  const SEXP output_col_names;
+
+  vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
+    if (input_form_ == "vector") {
+      return(vector);
+    } else if (input_form_ == "scalar_list") {
+      return(scalar_list);
+    } else if (input_form_ == "object") {
+      return(object);
+    } else{
+      cpp11::stop("Internal error.");
+    }
+  }
+
+  SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
+    if (Rf_isNull(values_to_)) {
+      return(NULL);
+    }
+
+    if (Rf_isNull(names_to_)) {
+      return(values_to_);
+    } else {
+      cpp11::writable::strings col_names_(2);
+      col_names_[0] = cpp11::strings(names_to_)[0];
+      col_names_[1] = cpp11::strings(values_to_)[0];
+      return(col_names_);
+    }
+  }
+
+  cpp11::writable::list init_out_df(R_xlen_t n_rows) {
+    cpp11::writable::list ptype_out(init_df(n_rows, this->output_col_names));
+
+    return(ptype_out);
+  }
+
+  SEXP unchop_value(SEXP value, Path& path) {
+    if (Rf_isNull(value)) {
+      return(value);
+    }
+
+    // FIXME should check with `vec_is_list()`
+    if (TYPEOF(value) != VECSXP) {
+      stop_vector_non_list_element(path, this->input_form);
+    }
+
+    cpp11::integers n1({1});
+    SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
+                                          this->ptype,
+                                          tibblify_shared_int1));
+    SEXP missing_value = R_tryEval(vec_init_call, tibblify_ns_env, NULL);
+
+    // FIXME if `vec_assign()` gets exported this should use
+    // `vec_init()` + `vec_assign()`
+    R_xlen_t n = Rf_length(value);
+    const SEXP* ptr_row = VECTOR_PTR_RO(value);
+    cpp11::writable::list out_list(n);
+    for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
+      if (Rf_isNull(*ptr_row)) {
+        out_list[i] = missing_value;
+        continue;
+      }
+
+      if (vec_size(*ptr_row) != 1) {
+        stop_vector_wrong_size_element(path, this->input_form);
+      }
+
+      out_list[i] = *ptr_row;
+    }
+
+    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
+                                 out_list,
+                                 this->ptype));
+    SEXP out = R_tryEval(call, tibblify_ns_env, NULL);
+    UNPROTECT(2);
+    return(out);
+  }
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
-                   SEXP name_, SEXP transform_)
+                   SEXP name_, SEXP transform_, cpp11::r_string input_form_,
+                   SEXP names_to_, SEXP values_to_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(vec_cast(default_value_, ptype_))
+  , default_value(default_value_)
   , ptype(ptype_)
+  , input_form(string_to_form_enum(input_form_))
+  , uses_names_col(!Rf_isNull(names_to_))
+  , uses_values_col(!Rf_isNull(values_to_))
+  , output_col_names(get_output_col_names(names_to_, values_to_))
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = init_list_of(length, this->ptype);
+    if (this->uses_values_col) {
+      auto ptype_df = init_out_df(0);
+      if (this->uses_names_col) {
+        ptype_df[0] = tibblify_shared_empty_chr;
+        ptype_df[1] = this->ptype;
+      } else {
+        ptype_df[0] = this->ptype;
+      }
+      this->data = init_list_of(length, ptype_df);
+    } else {
+      this->data = init_list_of(length, this->ptype);
+    }
+
     this->current_row = 0;
   }
 
   inline void add_value(SEXP value, Path& path) {
+    SEXP names;
+    if (this->uses_names_col) {
+      names = Rf_getAttrib(value, R_NamesSymbol);
+    }
+
+    if (this->input_form == scalar_list || this->input_form == object) {
+      value = unchop_value(value, path);
+    }
+
     // TODO use `NULL` if `value` is empty?
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     // TODO should be controlled via an argument to `tibblify()`
@@ -365,16 +491,49 @@ public:
     }
 
     SEXP value_casted = vec_cast(PROTECT(value), ptype);
-    SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+
+    if (this->uses_values_col) {
+      if (Rf_isNull(value_casted)) {
+        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+        UNPROTECT(1);
+        return;
+      }
+
+      R_len_t size = short_vec_size(value_casted);
+      cpp11::writable::list df = init_out_df(size);
+
+      if (this->uses_names_col) {
+        // this can only be if `input_form == object` so no need to check
+        if (Rf_isNull(names)) {
+          // TODO unclear what to do in such a case
+          auto names2 = cpp11::writable::strings(size);
+          for (int i = 0; i < size; i++) {
+            names2[i] = cpp11::na<cpp11::r_string>();
+          }
+          df[0] = names2;
+        } else {
+          df[0] = names;
+        }
+        df[1] = value_casted;
+      } else {
+        df[0] = value_casted;
+      }
+
+      SET_VECTOR_ELT(this->data, this->current_row++, df);
+    } else {
+      SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    }
     UNPROTECT(1);
   }
 
   inline void add_default(Path& path) {
     if (required) stop_required(path);
+    // TODO what if output form is a tibble and names_to?
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
   inline void add_default_df() {
+    // TODO what if output form is a tibble and names_to?
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -908,7 +1067,20 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
         col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, required, ptype, location, name, transform)));
       }
     } else if (type == "vector") {
-      col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(default_sexp, required, ptype, location, name, transform)));
+      cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
+      cpp11::sexp names_to = elt["names_to"];
+      cpp11::sexp values_to = elt["values_to"];
+      col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(
+          default_sexp,
+          required,
+          ptype,
+          location,
+          name,
+          transform,
+          input_form,
+          names_to,
+          values_to))
+      );
     } else {
       cpp11::stop("Internal Error: Unsupported type");
     }
