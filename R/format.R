@@ -39,9 +39,12 @@ format.spec_object <- function(x, width = NULL, ...) {
 }
 
 format_fields <- function(f_name, fields, width, args = NULL) {
+  canonical_name <- purrr::map2_lgl(fields, names2(fields), is_tib_name_canonical)
+  names2(fields)[canonical_name] <- ""
+
   fields_formatted <- purrr::map2(
     fields,
-    nchar(paste0(names(fields), " = ", ",")),
+    ifelse(canonical_name, 0, nchar(paste0(names(fields), " = ", ","))),
     function(col, nchar_indent) {
       format(
         col,
@@ -73,6 +76,15 @@ format_fields <- function(f_name, fields, width, args = NULL) {
     inner,
     ")"
   )
+}
+
+is_tib_name_canonical <- function(field, name) {
+  key <- field$key
+  if (vec_size(key) > 1 || !is.character(key)) {
+    FALSE
+  }
+
+  key == name
 }
 
 

@@ -184,6 +184,6 @@ test_that("format for empty tib_df works", {
 test_that("format uses trailing comma", {
   expect_equal(
     format(tib_df("x", a = tib_int("a"))),
-    'tib_df(\n  "x",\n  a = tib_int("a"),\n)'
+    'tib_df(\n  "x",\n  tib_int("a"),\n)'
   )
 })

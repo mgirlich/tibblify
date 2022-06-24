@@ -1,18 +1,22 @@
 # errors on invalid names
 
-    Names can't be empty.
-    x Empty name found at location 1.
+    Names must be unique.
+    x These names are duplicated:
+      * "x" at locations 1 and 2.
+
+# can infer name from key
+
+    Can only infer name if key is a string
 
 ---
 
-    Names can't be empty.
-    x Empty name found at location 2.
+    Can only infer name if key is a string
 
 ---
 
     Names must be unique.
     x These names are duplicated:
-      * "x" at locations 1 and 2.
+      * "y" at locations 1 and 2.
 
 # errors if `.names_to` column name is not unique
 

@@ -1,7 +1,19 @@
 test_that("errors on invalid names", {
-  expect_snapshot_error(spec_df(tib_int("x")))
-  expect_snapshot_error(spec_df(x = tib_int("x"), tib_int("y")))
   expect_snapshot_error(spec_df(x = tib_int("x"), x = tib_int("y")))
+})
+
+test_that("can infer name from key", {
+  expect_equal(spec_df(tib_int("x")), spec_df(x = tib_int("x")))
+
+  expect_equal(
+    spec_df(tib_row("x", tib_int("a"))),
+    spec_df(x = tib_row("x", a = tib_int("a")))
+  )
+
+  expect_snapshot_error(spec_df(tib_int(1L)))
+  expect_snapshot_error(spec_df(tib_int(c("a", "b"))))
+  # auto name creates duplicated name
+  expect_snapshot_error(spec_df(y = tib_int("x"), tib_int("y")))
 })
 
 test_that("errors if `.names_to` column name is not unique", {
