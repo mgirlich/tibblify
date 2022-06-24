@@ -5,7 +5,7 @@
     Output
       tib_unspecified("a")
 
-# format for vectors works
+# format for scalars works
 
     Code
       tib_chr("a") %>% print()
@@ -141,6 +141,13 @@
         names_to = "names",
       )
 
+---
+
+    Code
+      tib_int_vec("a", default = 1:2) %>% print()
+    Output
+      tib_int_vec("a", default = 1:2)
+
 # format for tib_row works
 
     Code
@@ -215,6 +222,23 @@
         cover_image = tib_chr("cover_image"),
         resource_url = tib_chr("resource_url"),
         master_id = tib_int("master_id"),
+      )
+
+# format for tib_variant works
+
+    Code
+      tib_variant("a")
+    Output
+      tib_variant("a")
+
+---
+
+    Code
+      tib_variant("a", default = tibble(a = 1:2))
+    Output
+      tib_variant(
+        "a",
+        default = c("structure(list(a = 1:2), class = c(\"tbl_df\", \"tbl\", \"data.frame\"", "), row.names = c(NA, -2L))"),
       )
 
 # format for tib_df works
