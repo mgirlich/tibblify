@@ -3,7 +3,7 @@
 spec_guess_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
-                                   simplify_list = FALSE,
+                                   simplify_list = TRUE,
                                    call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
@@ -116,7 +116,6 @@ guess_object_list_field_spec <- function(value,
     return(maybe_tib_row(name, fields, required))
   }
 
-  # values2 <- vctrs::list_drop_empty(values)
   ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
   if (!ptype_result$has_common_ptype) {
     return(tib_variant(name, required = required))
@@ -134,12 +133,15 @@ guess_object_list_field_spec <- function(value,
     return(tib_variant(name, required = required))
   }
 
-  list_of_scalars <- all(list_sizes(value_flat) == 1L)
-  if (list_of_scalars) {
-    return(tib_vector(name, ptype, required = required, transform = make_unchop(ptype)))
+  if (is_field_scalar(value_flat)) {
+    if (is_named(value_flat)) {
+      return(tib_vector(name, ptype, required = required, input_form = "object"))
+    } else {
+      return(tib_vector(name, ptype, required = required, input_form = "scalar_list"))
+    }
   }
 
-  tib_variant(name, required = required, transform = make_new_list_of(ptype))
+  tib_variant(name, required = required)
 }
 
 get_required <- function(x, sample_size = 10e3) {
