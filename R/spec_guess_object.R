@@ -6,6 +6,7 @@ spec_guess_object <- function(x,
                               simplify_list = TRUE,
                               call = current_call()) {
   check_dots_empty()
+  withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
@@ -33,7 +34,10 @@ spec_guess_object <- function(x,
     simplify_list = simplify_list
   )
 
-  spec_object(!!!fields)
+  spec_object(
+    vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg")),
+    !!!fields
+  )
 }
 
 guess_object_field_spec <- function(value,

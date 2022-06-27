@@ -192,6 +192,7 @@ test_that("respect empty_list_unspecified for list of object elements", {
   expect_equal(
     spec_guess_object(x, empty_list_unspecified = TRUE),
     spec_object(
+      vector_allows_empty_list = TRUE,
       x = tib_df(
         "x",
         a = tib_int_vec("a"),
