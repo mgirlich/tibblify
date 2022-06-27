@@ -93,3 +93,18 @@ SEXP my_vec_names2(SEXP x) {
   UNPROTECT(3);
   return out;
 }
+
+inline
+SEXP vec_slice_impl2(SEXP x, SEXP index) {
+  SEXP row = vec_slice_impl(x, index);
+
+  R_xlen_t n_cols = Rf_length(row);
+  for (R_xlen_t i = 0; i < n_cols; i++) {
+    SEXP col = VECTOR_ELT(row, i);
+    if (TYPEOF(col) == VECSXP && !Rf_inherits(col, "data.frame")) {
+      SET_VECTOR_ELT(row, i, VECTOR_ELT(col, 0));
+    }
+  }
+
+  return(row);
+}

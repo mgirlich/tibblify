@@ -891,7 +891,18 @@ public:
     R_xlen_t n_rows = short_vec_size(object_list);
     this->init(n_rows);
 
-    if (vec_is_list(object_list)) {
+    if (Rf_inherits(object_list, "data.frame")) {
+      SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
+      int* slice_index_int_ptr = INTEGER(slice_index_int);
+
+      for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+        path.replace(row_index);
+        *slice_index_int_ptr = row_index + 1;
+        this->add_value(PROTECT(vec_slice_impl2(object_list, slice_index_int)), path);
+        UNPROTECT(1);
+      }
+      UNPROTECT(1);
+    } else if (vec_is_list(object_list)) {
       const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
       for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
         path.replace(row_index);

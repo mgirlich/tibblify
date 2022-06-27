@@ -524,6 +524,22 @@ test_that("tibble input works", {
   )
 })
 
+test_that("tibble with list columns work - #43", {
+  x <- tibble::tibble(x = list(1:3, NULL, 1:2))
+  expect_equal(
+    tibblify(x, spec_df(x = tib_int_vec("x"))),
+    tibble(x = list_of(1:3, NULL, 1:2))
+  )
+
+  y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
+  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
+  # TODO the second element should be `NULL`
+  expect_equal(
+    tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
+    tibble(x = list_of(tibble(a = 1:2), tibble(a = integer()), tibble(a = 1)))
+  )
+})
+
 test_that("nested keys work", {
   expect_equal(
     tibblify(
