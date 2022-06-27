@@ -86,6 +86,7 @@ tib_combine <- function(tib_list, call) {
     if (type == "scalar") {
       return(exec(tib_scalar, !!!args))
     } else {
+      args$input_form <- tib_combine_input_form(tib_list, call)
       return(exec(tib_vector, !!!args))
     }
   }
@@ -234,6 +235,29 @@ tib_combine_transform <- function(tib_list, call) {
   }
 
   transform_list[[transform_locs]]
+}
+
+tib_combine_input_form <- function(tib_list, call) {
+  types <- purrr::map_chr(tib_list, "type")
+  if (any(types != "vector")) {
+    tib_list <- tib_list[types == "vector"]
+  }
+
+  input_forms <- purrr::map_chr(tib_list, "input_form")
+  input_form_locs <- vec_unique_loc(input_forms)
+
+  if (length(input_form_locs) > 1) {
+    input_form_infos <- loc_name_helper(input_form_locs, input_forms)
+    cli::cli_abort("Cannot combine input forms {input_form_infos}", call = call)
+  }
+
+  input_form <- input_forms[[input_form_locs]]
+  if (any(types == "scalar") && input_form != "vector") {
+    msg <- "Cannot combine input form {.val {input_form}} with {.code tib_scalar()}."
+    cli::cli_abort(msg, call = call)
+  }
+
+  input_form
 }
 
 tib_combine_names_col <- function(tib_list, call) {

@@ -117,3 +117,20 @@ test_that("can't combine different transforms", {
     (expect_error(spec_combine(spec_f1, spec_f2)))
   })
 })
+
+test_that("can't combine different input forms", {
+  spec_scalar <- spec_df(a = tib_int("a"))
+  spec_vec <- spec_df(a = tib_int_vec("a"))
+  spec_vec_scalar <- spec_df(a = tib_int_vec("a", input_form = "scalar_list"))
+  spec_vec_object <- spec_df(a = tib_int_vec("a", input_form = "object"))
+
+  expect_equal(spec_combine(spec_vec_object, spec_vec_object), spec_vec_object)
+
+  expect_snapshot({
+    (expect_error(spec_combine(spec_vec, spec_vec_scalar)))
+    (expect_error(spec_combine(spec_vec, spec_vec_object)))
+    (expect_error(spec_combine(spec_vec_scalar, spec_vec_object)))
+
+    (expect_error(spec_combine(spec_scalar, spec_vec_object)))
+  })
+})
