@@ -1,5 +1,9 @@
 #' Guess the `tibblify()` Specification
 #'
+#' Use `spec_guess()` if you don't know the input type.
+#' Use `spec_guess_df()` if the input is a data frame or an object list.
+#' Use `spec_guess_objecte()` is the input is an object.
+#'
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
