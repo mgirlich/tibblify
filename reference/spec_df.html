@@ -60,11 +60,11 @@ to a one row tibble resp. a list.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">spec_df</span><span class="op">(</span><span class="va">...</span>, .names_to <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span>
-
-<span class="fu">spec_object</span><span class="op">(</span><span class="va">...</span><span class="op">)</span>
-
-<span class="fu">spec_row</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_df</span><span class="op">(</span><span class="va">...</span>, .names_to <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">spec_object</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">spec_row</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -82,46 +82,46 @@ column is created</p></dd>
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">spec_df</span><span class="op">(</span></span>
-<span class="r-in">  id <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
-<span class="r-in">  name <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span>
-<span class="r-in">  aliases <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr_vec</a></span><span class="op">(</span><span class="st">"aliases"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">spec_df</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  id <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  name <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  aliases <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr_vec</a></span><span class="op">(</span><span class="st">"aliases"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> spec_df(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   aliases = <span style="color: #BB0000;">tib_chr_vec</span>("aliases"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("id"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("name"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr_vec</span>("aliases"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To create multiple columns of the same type use the bang-bang-bang (!!!)</span></span>
-<span class="r-in"><span class="co"># operator together with `purrr::map()`</span></span>
-<span class="r-in"><span class="fu">spec_df</span><span class="op">(</span></span>
-<span class="r-in">  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">)</span>, <span class="va">tib_int</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"title"</span><span class="op">)</span><span class="op">)</span>, <span class="va">tib_chr</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To create multiple columns of the same type use the bang-bang-bang (!!!)</span></span></span>
+<span class="r-in"><span><span class="co"># operator together with `purrr::map()`</span></span></span>
+<span class="r-in"><span><span class="fu">spec_df</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">)</span>, <span class="va">tib_int</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"title"</span><span class="op">)</span><span class="op">)</span>, <span class="va">tib_chr</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> spec_df(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   age = <span style="color: #00BB00;">tib_int</span>("age"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   title = <span style="color: #BB0000;">tib_chr</span>("title"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("id"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("age"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("name"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("title"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># The `spec_*()` functions can also be nested</span></span>
-<span class="r-in"><span class="va">spec1</span> <span class="op">&lt;-</span> <span class="fu">spec_object</span><span class="op">(</span></span>
-<span class="r-in">  int <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"int"</span><span class="op">)</span>,</span>
-<span class="r-in">  chr <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"chr"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu">spec_object</span><span class="op">(</span></span>
-<span class="r-in">  int2 <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"int2"</span><span class="op">)</span>,</span>
-<span class="r-in">  chr2 <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"chr2"</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">spec_df</span><span class="op">(</span><span class="va">spec1</span>, <span class="va">spec2</span><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># The `spec_*()` functions can also be nested</span></span></span>
+<span class="r-in"><span><span class="va">spec1</span> <span class="op">&lt;-</span> <span class="fu">spec_object</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  int <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"int"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  chr <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"chr"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu">spec_object</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  int2 <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"int2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  chr2 <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"chr2"</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">spec_df</span><span class="op">(</span><span class="va">spec1</span>, <span class="va">spec2</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> spec_df(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   int = <span style="color: #00BB00;">tib_int</span>("int"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   chr = <span style="color: #BB0000;">tib_chr</span>("chr"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   int2 = <span style="color: #00BB00;">tib_int</span>("int2"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   chr2 = <span style="color: #BB0000;">tib_chr</span>("chr2"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("int"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("chr"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("int2"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("chr2"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 </code></pre></div>
     </div>

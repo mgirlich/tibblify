@@ -56,7 +56,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="fu">lcols</span><span class="op">(</span><span class="va">...</span>, .default <span class="op">=</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/zap.html" class="external-link">zap</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">lcols</span><span class="op">(</span><span class="va">...</span>, .default <span class="op">=</span> <span class="fu"><a href="https://rlang.r-lib.org/reference/zap.html" class="external-link">zap</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -72,11 +72,11 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span class="fu">lcols</span><span class="op">(</span></span>
-<span class="r-in">  id <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
-<span class="r-in">  name <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span>
-<span class="r-in">  aliases <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_lst_of</a></span><span class="op">(</span><span class="st">"aliases"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">lcols</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  id <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  name <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  aliases <span class="op">=</span> <span class="fu"><a href="lcol_lgl.html">lcol_lst_of</a></span><span class="op">(</span><span class="st">"aliases"</span>, <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>`lcols()` was deprecated in tibblify 0.2.0.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> Please use `spec_df()` instead.</span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span>
@@ -94,25 +94,25 @@
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">This warning is displayed once every 8 hours.</span></span>
 <span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #555555;">Call `lifecycle::last_lifecycle_warnings()` to see where this warning was generated.</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> spec_df(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   aliases = <span style="color: #BB0000;">tib_chr_vec</span>("aliases"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("id"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("name"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr_vec</span>("aliases"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
-<span class="r-in"></span>
-<span class="r-in"><span class="co"># To create multiple columns of the same type use the bang-bang-bang (!!!)</span></span>
-<span class="r-in"><span class="co"># operator together with `purrr::map()`</span></span>
-<span class="r-in"><span class="va">int_cols</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"><span class="va">chr_cols</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"title"</span><span class="op">)</span><span class="op">)</span></span>
-<span class="r-in"></span>
-<span class="r-in"><span class="fu">lcols</span><span class="op">(</span></span>
-<span class="r-in">  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">int_cols</span>, <span class="va">lcol_int</span><span class="op">)</span>,</span>
-<span class="r-in">  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">chr_cols</span>, <span class="va">lcol_chr</span><span class="op">)</span></span>
-<span class="r-in"><span class="op">)</span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># To create multiple columns of the same type use the bang-bang-bang (!!!)</span></span></span>
+<span class="r-in"><span><span class="co"># operator together with `purrr::map()`</span></span></span>
+<span class="r-in"><span><span class="va">int_cols</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"age"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">chr_cols</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/set_names.html" class="external-link">set_names</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"name"</span>, <span class="st">"title"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="fu">lcols</span><span class="op">(</span></span></span>
+<span class="r-in"><span>  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">int_cols</span>, <span class="va">lcol_int</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>  <span class="op">!</span><span class="op">!</span><span class="op">!</span><span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">chr_cols</span>, <span class="va">lcol_chr</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> spec_df(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   id = <span style="color: #00BB00;">tib_int</span>("id"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   age = <span style="color: #00BB00;">tib_int</span>("age"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   name = <span style="color: #BB0000;">tib_chr</span>("name"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   title = <span style="color: #BB0000;">tib_chr</span>("title"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("id"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #00BB00;">tib_int</span>("age"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("name"),</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #BB0000;">tib_chr</span>("title"),</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 </code></pre></div>
     </div>
