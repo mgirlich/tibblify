@@ -121,6 +121,30 @@ test_that("can guess non-vector objects", {
   )
 })
 
+test_that("can guess spec for list_of column", {
+  expect_equal(
+    spec_guess_df(
+      tibble(
+        x = list_of(1L, 2:3),
+        y = list_of(tibble(a = 1:2)),
+        z = list_of(tibble(a = list(1, 2)))
+      )
+    ),
+    spec_df(
+      tib_int_vec("x"),
+      tib_df("y", tib_int("a")),
+      tib_df("z", tib_dbl_vec("a")),
+    )
+  )
+
+  expect_equal(
+    spec_guess_df(
+      tibble(x = list_of(tibble(a = list(1, "a"))))
+    ),
+    spec_df(tib_df("x", tib_variant("a")))
+  )
+})
+
 test_that("can guess tibble columns", {
   # scalar
   expect_equal(

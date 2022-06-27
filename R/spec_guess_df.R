@@ -25,7 +25,6 @@ spec_guess_df <- function(x,
 }
 
 col_to_spec <- function(col, name, empty_list_unspecified) {
-  # TODO add fast path for `list_of` columns?
   col_type <- tib_type_of(col, name, other = FALSE)
 
   if (col_type == "df") {
@@ -46,23 +45,28 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
-  # TODO this could use sampling for performance
-  ptype_common <- get_ptype_common(col, empty_list_unspecified)
-  # no common ptype can be one of two reasons:
-  # * it contains non-vector elements
-  # * it contains incompatible types
-  # in both cases `tib_variant()` is used
-  if (!ptype_common$has_common_ptype) {
-    return(tib_variant(name))
-  }
+  list_of_col <- is_list_of(col)
+  if (list_of_col) {
+    ptype <- col %@% ptype
+    ptype_type <- tib_type_of(ptype, name, other = FALSE)
+  } else {
+    # TODO this could use sampling for performance
+    ptype_common <- get_ptype_common(col, empty_list_unspecified)
+    # no common ptype can be one of two reasons:
+    # * it contains non-vector elements
+    # * it contains incompatible types
+    # in both cases `tib_variant()` is used
+    if (!ptype_common$has_common_ptype) {
+      return(tib_variant(name))
+    }
 
-  ptype <- ptype_common$ptype
-  if (is_null(ptype)) {
-    return(tib_unspecified(name))
-  }
+    ptype <- ptype_common$ptype
+    if (is_null(ptype)) {
+      return(tib_unspecified(name))
+    }
 
-  # TODO this should use `spec_guess_`
-  ptype_type <- tib_type_of(ptype, name, other = FALSE)
+    ptype_type <- tib_type_of(ptype, name, other = FALSE)
+  }
 
   # TODO should this care about names?
   if (ptype_type == "vector") {
@@ -70,9 +74,18 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   }
 
   if (ptype_type == "df") {
-    # TODO this could share code with other guessers
-    col_required <- df_guess_required(col, colnames(ptype))
-    col_flat <- vec_unchop(col, ptype = ptype)
+    if (list_of_col) {
+      col_required <- TRUE
+      has_non_vec_cols <- purrr::detect_index(ptype, ~ !is_vec(.x) || is.data.frame(.x)) > 0
+      if (has_non_vec_cols) {
+        col_flat <- vec_unchop(col, ptype = ptype)
+      } else {
+        col_flat <- ptype
+      }
+    } else {
+      col_required <- df_guess_required(col, colnames(ptype))
+      col_flat <- vec_unchop(col, ptype = ptype)
+    }
 
     fields_spec <- purrr::imap(col_flat, col_to_spec, empty_list_unspecified)
     for (col in names(col_required)) {
