@@ -121,6 +121,30 @@ test_that("can guess non-vector objects", {
   )
 })
 
+test_that("can guess spec for list_of column", {
+  expect_equal(
+    spec_guess_df(
+      tibble(
+        x = list_of(1L, 2:3),
+        y = list_of(tibble(a = 1:2)),
+        z = list_of(tibble(a = list(1, 2)))
+      )
+    ),
+    spec_df(
+      tib_int_vec("x"),
+      tib_df("y", tib_int("a")),
+      tib_df("z", tib_dbl_vec("a")),
+    )
+  )
+
+  expect_equal(
+    spec_guess_df(
+      tibble(x = list_of(tibble(a = list(1, "a"))))
+    ),
+    spec_df(tib_df("x", tib_variant("a")))
+  )
+})
+
 test_that("can guess tibble columns", {
   # scalar
   expect_equal(
@@ -385,6 +409,27 @@ test_that("can guess spec for nested list of df columns", {
           chr2 = tib_chr("chr2", required = FALSE)
         )
       )
+    )
+  )
+})
+
+test_that("can guess 0 row tibbles", {
+  expect_equal(
+    spec_guess_df(
+      tibble(
+        int = integer(),
+        dbl_vec = list_of(.ptype = 1),
+        row = tibble(chr = character()),
+        df = list_of(.ptype = tibble(dbl = 1, chr = "a")),
+        df2 = list_of(.ptype = tibble(chr_vec = list_of(.ptype = "a")))
+      )
+    ),
+    spec_df(
+      tib_int("int"),
+      tib_dbl_vec("dbl_vec"),
+      tib_row("row", tib_chr("chr")),
+      tib_df("df", tib_dbl("dbl"), tib_chr("chr")),
+      tib_df("df2", tib_chr_vec("chr_vec"))
     )
   )
 })
