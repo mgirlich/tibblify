@@ -413,6 +413,27 @@ test_that("can guess spec for nested list of df columns", {
   )
 })
 
+test_that("can guess 0 row tibbles", {
+  expect_equal(
+    spec_guess_df(
+      tibble(
+        int = integer(),
+        dbl_vec = list_of(.ptype = 1),
+        row = tibble(chr = character()),
+        df = list_of(.ptype = tibble(dbl = 1, chr = "a")),
+        df2 = list_of(.ptype = tibble(chr_vec = list_of(.ptype = "a")))
+      )
+    ),
+    spec_df(
+      tib_int("int"),
+      tib_dbl_vec("dbl_vec"),
+      tib_row("row", tib_chr("chr")),
+      tib_df("df", tib_dbl("dbl"), tib_chr("chr")),
+      tib_df("df2", tib_chr_vec("chr_vec"))
+    )
+  )
+})
+
 test_that("gives nice errors", {
   expect_snapshot({
     (expect_error(spec_guess_df(list(a = 1))))
