@@ -173,6 +173,20 @@ test_that("format for tib_df works", {
   )
 })
 
+test_that("can force to print canonical names", {
+  withr::local_options(list(tibblify.print_names = TRUE))
+
+  expect_snapshot(format(
+    spec_df(
+      a = tib_int("a"),
+      b = tib_df(
+        "b",
+        x = tib_int("x")
+      )
+    )
+  ))
+})
+
 test_that("format for empty tib_df works", {
   expect_equal(format(spec_df()), "spec_df()")
   expect_equal(format(spec_row()), "spec_row()")
@@ -184,6 +198,6 @@ test_that("format for empty tib_df works", {
 test_that("format uses trailing comma", {
   expect_equal(
     format(tib_df("x", a = tib_int("a"))),
-    'tib_df(\n  "x",\n  a = tib_int("a"),\n)'
+    'tib_df(\n  "x",\n  tib_int("a"),\n)'
   )
 })

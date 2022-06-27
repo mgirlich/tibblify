@@ -59,25 +59,43 @@ spec_row <- function(...) {
   spec_tib(list2(...), "row")
 }
 
-spec_tib <- function(fields, type, ...) {
+spec_tib <- function(fields, type, ..., call = caller_env()) {
   structure(
-    list(
+    list2(
       type = type,
-      fields = prep_spec_fields(fields) %||% list(),
+      fields = prep_spec_fields(fields, call) %||% list(),
       ...
     ),
     class = c(paste0("spec_", type), "spec_tib")
   )
 }
 
-prep_spec_fields <- function(fields) {
+prep_spec_fields <- function(fields, call) {
   fields <- flatten_fields(fields)
+  if (is_null(fields)) {
+    return(fields)
+  }
 
   collector_field <- purrr::map_lgl(fields, ~ inherits(.x, "tib_collector"))
   if (!all(collector_field)) {
-    abort("Every element in `...` must be a tib collector.")
+    abort("Every element in `...` must be a tib collector.", call = call)
   }
-  vec_as_names(names2(fields), repair = "check_unique")
+
+  field_nms <- names2(fields)
+  unnamed <- !have_name(fields)
+  auto_nms <- purrr::map_chr(
+    fields[unnamed],
+    ~ {
+      key <- .x$key
+      if (length(key) > 1 || !is.character(key)) {
+        cli::cli_abort("Can only infer name if key is a string", call = call)
+      }
+      key
+    }
+  )
+  field_nms[unnamed] <- auto_nms
+  field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = call)
+  names(fields) <- field_nms_repaired
 
   fields
 }
@@ -516,7 +534,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...)) %||% list()
+    fields = prep_spec_fields(list2(...), call = current_env()) %||% list()
   )
 }
 
@@ -527,7 +545,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...)) %||% list(),
+    fields = prep_spec_fields(list2(...), call = current_env()) %||% list(),
     names_col = .names_to
   )
 }
