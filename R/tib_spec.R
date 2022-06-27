@@ -8,6 +8,8 @@
 #' @param .names_to A string giving the name of the column which will contain
 #'   the names of elements of the object list. If `NULL`, the default, no name
 #'   column is created
+#' @param vector_allows_empty_list Should empty lists for `input_form = "vector"`
+#'   be accepted and treated as empty vector?
 #'
 #' @export
 #' @examples
