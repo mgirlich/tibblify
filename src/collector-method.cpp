@@ -366,6 +366,7 @@ private:
   const bool uses_names_col;
   const bool uses_values_col;
   const SEXP output_col_names;
+  const bool vector_allows_empty_list;
 
   vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
     if (input_form_ == "vector") {
@@ -445,7 +446,7 @@ private:
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
                    SEXP name_, SEXP transform_, cpp11::r_string input_form_,
-                   SEXP names_to_, SEXP values_to_)
+                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
@@ -453,6 +454,7 @@ public:
   , uses_names_col(!Rf_isNull(names_to_))
   , uses_values_col(!Rf_isNull(values_to_))
   , output_col_names(get_output_col_names(names_to_, values_to_))
+  , vector_allows_empty_list(vector_allows_empty_list_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -484,10 +486,12 @@ public:
 
     // TODO use `NULL` if `value` is empty?
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    // TODO should be controlled via an argument to `tibblify()`
-    if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
-      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-      return;
+    if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
+      // TODO should be controlled via an argument to `tibblify()`
+      if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
+        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+        return;
+      }
     }
 
     SEXP value_casted = vec_cast(PROTECT(value), ptype);
@@ -1000,7 +1004,8 @@ public:
   }
 };
 
-std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_list) {
+std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_list,
+                                                              bool vector_allows_empty_list) {
   cpp11::writable::strings keys;
   std::vector<Collector_Ptr> col_vec;
 
@@ -1011,7 +1016,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     if (type == "sub") {
       cpp11::list sub_spec = elt["spec"];
-      auto spec_pair = parse_fields_spec(sub_spec);
+      auto spec_pair = parse_fields_spec(sub_spec, vector_allows_empty_list);
       col_vec.push_back(std::unique_ptr<Collector_Same_Key>(new Collector_Same_Key(spec_pair.first, spec_pair.second)));
       continue;
     }
@@ -1022,12 +1027,12 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     if (type == "row") {
       cpp11::list fields = elt["fields"];
-      auto spec_pair = parse_fields_spec(fields);
+      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list);
       col_vec.push_back(std::unique_ptr<Collector_Tibble>(new Collector_Tibble(spec_pair.first, spec_pair.second, required, location, name)));
       continue;
     } else if (type == "df") {
       cpp11::list fields = elt["fields"];
-      auto spec_pair = parse_fields_spec(fields);
+      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list);
 
       cpp11::sexp names_col = elt["names_col"];
       if (!Rf_isNull(names_col)) {
@@ -1079,7 +1084,8 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           transform,
           input_form,
           names_to,
-          values_to))
+          values_to,
+          vector_allows_empty_list))
       );
     } else {
       cpp11::stop("Internal Error: Unsupported type");
@@ -1096,7 +1102,9 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec) {
 
   cpp11::list spec_list = spec;
   cpp11::r_string type = cpp11::strings(spec_list["type"])[0];
-  auto spec_pair = parse_fields_spec(spec_list["fields"]);
+
+  bool vector_allows_empty_list = cpp11::r_bool(cpp11::logicals(spec_list["vector_allows_empty_list"])[0]);
+  auto spec_pair = parse_fields_spec(spec_list["fields"], vector_allows_empty_list);
   if (type == "df") {
     cpp11::sexp names_col = spec_list["names_col"];
     if (!Rf_isNull(names_col)) {

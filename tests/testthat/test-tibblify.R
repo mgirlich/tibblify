@@ -166,6 +166,23 @@ test_that("vector column works", {
   )
 })
 
+test_that("vector column respects vector_allows_empty_list", {
+  x <- list(
+    list(x = 1),
+    list(x = list()),
+    list(x = 1:3)
+  )
+
+  expect_snapshot({
+    (expect_error(tibblify(x, spec_df(tib_int_vec("x")))))
+  })
+
+  expect_equal(
+    tibblify(x, spec_df(tib_int_vec("x"), vector_allows_empty_list = TRUE)),
+    tibble(x = list_of(1, NULL, 1:3))
+  )
+})
+
 test_that("vector column creates tibble with values_to", {
   spec <- tib_int_vec("x", values_to = "val")
   expect_equal(
