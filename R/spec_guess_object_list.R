@@ -1,5 +1,3 @@
-#' @rdname spec_guess
-#' @export
 spec_guess_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,

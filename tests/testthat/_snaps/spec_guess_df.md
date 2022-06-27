@@ -5,12 +5,11 @@
     Output
       <error/rlang_error>
       Error in `spec_guess_df()`:
-      ! `x` must be a <data.frame>. Instead, it is a list.
-      i Did you want to use `spec_guess_list()()` instead?
+      ! `x` is a list but not a list of objects.
     Code
       (expect_error(spec_guess_df(1:3)))
     Output
       <error/rlang_error>
       Error in `spec_guess_df()`:
-      ! `x` must be a <data.frame>. Instead, it is a <integer>.
+      ! Cannot guess the specification for type integer
 

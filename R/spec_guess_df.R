@@ -3,28 +3,34 @@
 spec_guess_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
+                          simplify_list = TRUE,
                           call = current_call()) {
   check_dots_empty()
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
-  if (!is.data.frame(x)) {
-    if (is.list(x)) {
-      msg <- c(
-        "{.arg x} must be a {.cls data.frame}. Instead, it is a list.",
-        i = "Did you want to use {.fn spec_guess_list()} instead?"
-      )
+  if (is.data.frame(x)) {
+    fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
+    spec_df(
+      !!!fields,
+      vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
+    )
+  } else if (is.list(x)) {
+    if (!is_object_list(x)) {
+      msg <- "{.arg x} is a list but not a list of objects."
       cli::cli_abort(msg, call = call)
     }
 
-    cls <- class(x)[[1]]
-    msg <- "{.arg x} must be a {.cls data.frame}. Instead, it is a {.cls {cls}}."
-    cli::cli_abort(msg, call = call)
+    spec_guess_object_list(
+      x,
+      empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list,
+      call = call
+    )
+  } else {
+    abort(paste0(
+      "Cannot guess the specification for type ",
+      vctrs::vec_ptype_full(x)
+    ), call = call)
   }
-
-  fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
-  spec_df(
-    !!!fields,
-    vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
-  )
 }
 
 col_to_spec <- function(col, name, empty_list_unspecified) {
