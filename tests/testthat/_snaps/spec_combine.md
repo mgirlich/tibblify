@@ -101,3 +101,30 @@
       Error in `spec_combine()`:
       ! Cannot combine different transforms
 
+# can't combine different input forms
+
+    Code
+      (expect_error(spec_combine(spec_vec, spec_vec_scalar)))
+    Output
+      <error/rlang_error>
+      Error in `spec_combine()`:
+      ! Cannot combine input forms `..1` <vector> and `..2` <scalar_list>
+    Code
+      (expect_error(spec_combine(spec_vec, spec_vec_object)))
+    Output
+      <error/rlang_error>
+      Error in `spec_combine()`:
+      ! Cannot combine input forms `..1` <vector> and `..2` <object>
+    Code
+      (expect_error(spec_combine(spec_vec_scalar, spec_vec_object)))
+    Output
+      <error/rlang_error>
+      Error in `spec_combine()`:
+      ! Cannot combine input forms `..1` <scalar_list> and `..2` <object>
+    Code
+      (expect_error(spec_combine(spec_scalar, spec_vec_object)))
+    Output
+      <error/rlang_error>
+      Error in `spec_combine()`:
+      ! Cannot combine input form "object" with `tib_scalar()`.
+
