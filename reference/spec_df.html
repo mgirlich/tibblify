@@ -60,11 +60,11 @@ to a one row tibble resp. a list.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_df</span><span class="op">(</span><span class="va">...</span>, .names_to <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_df</span><span class="op">(</span><span class="va">...</span>, .names_to <span class="op">=</span> <span class="cn">NULL</span>, vector_allows_empty_list <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">spec_object</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span>
+<span><span class="fu">spec_object</span><span class="op">(</span><span class="va">...</span>, vector_allows_empty_list <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">spec_row</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">spec_row</span><span class="op">(</span><span class="va">...</span>, vector_allows_empty_list <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -77,6 +77,11 @@ to a one row tibble resp. a list.</p>
 <dd><p>A string giving the name of the column which will contain
 the names of elements of the object list. If <code>NULL</code>, the default, no name
 column is created</p></dd>
+
+
+<dt>vector_allows_empty_list</dt>
+<dd><p>Should empty lists for <code>input_form = "vector"</code>
+be accepted and treated as empty vector?</p></dd>
 
 </dl></div>
 
