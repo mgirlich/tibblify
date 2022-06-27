@@ -35,11 +35,16 @@
 #' )
 #'
 #' spec_df(spec1, spec2)
-spec_df <- function(..., .names_to = NULL) {
+spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
   if (!is_null(.names_to)) {
     vec_assert(.names_to, character(), 1L, arg = ".names_to")
   }
-  out <- spec_tib(list2(...), "df", names_col = .names_to)
+  out <- spec_tib(
+    list2(...),
+    "df",
+    names_col = .names_to,
+    vector_allows_empty_list = vector_allows_empty_list
+  )
   if (!is_null(.names_to) && .names_to %in% names(out$fields)) {
     abort("The column name of `.names_to` is already specified in `...`")
   }
@@ -49,22 +54,31 @@ spec_df <- function(..., .names_to = NULL) {
 
 #' @rdname spec_df
 #' @export
-spec_object <- function(...) {
-  spec_tib(list2(...), "object")
+spec_object <- function(..., vector_allows_empty_list = FALSE) {
+  spec_tib(
+    list2(...),
+    "object",
+    vector_allows_empty_list = vector_allows_empty_list
+  )
 }
 
 #' @rdname spec_df
 #' @export
-spec_row <- function(...) {
-  spec_tib(list2(...), "row")
+spec_row <- function(..., vector_allows_empty_list = FALSE) {
+  spec_tib(
+    list2(...),
+    "row",
+    vector_allows_empty_list = vector_allows_empty_list
+  )
 }
 
-spec_tib <- function(fields, type, ..., call = caller_env()) {
+spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
   structure(
     list2(
       type = type,
       fields = prep_spec_fields(fields, call) %||% list(),
-      ...
+      ...,
+      vector_allows_empty_list = vector_allows_empty_list
     ),
     class = c(paste0("spec_", type), "spec_tib")
   )
