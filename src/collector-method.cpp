@@ -168,11 +168,11 @@ public:
     SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
                                  this->data,
                                  this->ptype));
-    SEXP value = R_tryEval(call, tibblify_ns_env, NULL);
+    SEXP value = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
 
     SET_VECTOR_ELT(list, this->col_location, value);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(1);
+    UNPROTECT(2);
   }
 };
 
@@ -415,7 +415,7 @@ private:
     SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
                                           this->ptype,
                                           tibblify_shared_int1));
-    SEXP missing_value = R_tryEval(vec_init_call, tibblify_ns_env, NULL);
+    SEXP missing_value = PROTECT(R_tryEval(vec_init_call, tibblify_ns_env, NULL));
 
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
@@ -438,8 +438,8 @@ private:
     SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
                                  out_list,
                                  this->ptype));
-    SEXP out = R_tryEval(call, tibblify_ns_env, NULL);
-    UNPROTECT(2);
+    SEXP out = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
+    UNPROTECT(4);
     return(out);
   }
 
