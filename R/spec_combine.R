@@ -68,7 +68,7 @@ tib_combine <- function(tib_list, call) {
   key <- tib_combine_key(tib_list, call)
 
   if (type == "unspecified") {
-    return(tib_unspecified(key, required))
+    return(tib_unspecified(key, required = required))
   }
 
   if (type %in% c("scalar", "vector")) {
