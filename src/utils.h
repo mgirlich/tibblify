@@ -96,7 +96,7 @@ SEXP my_vec_names2(SEXP x) {
 
 inline
 SEXP vec_slice_impl2(SEXP x, SEXP index) {
-  SEXP row = vec_slice_impl(x, index);
+  SEXP row = PROTECT(vec_slice_impl(x, index));
 
   R_xlen_t n_cols = Rf_length(row);
   for (R_xlen_t i = 0; i < n_cols; i++) {
@@ -106,5 +106,6 @@ SEXP vec_slice_impl2(SEXP x, SEXP index) {
     }
   }
 
+  UNPROTECT(1);
   return(row);
 }
