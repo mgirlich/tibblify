@@ -47,7 +47,10 @@ test_that("respect empty_list_unspecified for scalar elements", {
   # this should be `tib_vector` because a list cannot occur for a scalar
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = TRUE),
-    spec_df(x = tib_int_vec("x"))
+    spec_df(
+      vector_allows_empty_list = TRUE,
+      x = tib_int_vec("x")
+    )
   )
 })
 
@@ -89,7 +92,10 @@ test_that("respect empty_list_unspecified for vector elements", {
 
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = TRUE),
-    spec_df(x = tib_int_vec("x"))
+    spec_df(
+      vector_allows_empty_list = TRUE,
+      x = tib_int_vec("x")
+    )
   )
 })
 
@@ -216,7 +222,10 @@ test_that("respect empty_list_unspecified for object elements", {
 
   expect_equal(
     spec_guess_object_list(x, empty_list_unspecified = TRUE),
-    spec_df(x = tib_row("x", y = tib_int_vec("y")))
+    spec_df(
+      vector_allows_empty_list = TRUE,
+      x = tib_row("x", y = tib_int_vec("y"))
+    )
   )
 })
 

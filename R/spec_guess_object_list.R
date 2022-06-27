@@ -4,6 +4,7 @@ spec_guess_object_list <- function(x,
                                    simplify_list = TRUE,
                                    call = current_call()) {
   check_dots_empty()
+  withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
@@ -29,7 +30,11 @@ spec_guess_object_list <- function(x,
     names_to <- ".names"
   }
 
-  spec_df(!!!fields, .names_to = names_to)
+  spec_df(
+    !!!fields,
+    .names_to = names_to,
+    vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
+  )
 }
 
 guess_object_list_spec <- function(x,
@@ -80,6 +85,7 @@ guess_object_list_field_spec <- function(value,
     if (is_field_scalar(value)) {
       return(tib_scalar(name, ptype, required = required))
     } else {
+      mark_empty_list_argument(is_true(ptype_result$had_empty_lists))
       return(tib_vector(name, ptype, required = required))
     }
   }
