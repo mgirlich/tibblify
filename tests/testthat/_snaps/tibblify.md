@@ -109,6 +109,15 @@
 
     Can't convert <character> to <logical>.
 
+# vector column respects vector_allows_empty_list
+
+    Code
+      (expect_error(tibblify(x, spec_df(tib_int_vec("x")))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <list> to <integer>.
+
 # vector column can parse scalar list
 
     Code

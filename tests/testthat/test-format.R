@@ -195,6 +195,13 @@ test_that("format for empty tib_df works", {
   expect_equal(format(tib_row("x")), "tib_row(\n  \"x\",\n)")
 })
 
+test_that("prints x$vector_allows_empty_list", {
+  expect_equal(
+    format(spec_df(tib_int("a"), vector_allows_empty_list = TRUE)),
+    'spec_df(\n  vector_allows_empty_list = TRUE,\n  tib_int("a"),\n)'
+  )
+})
+
 test_that("format uses trailing comma", {
   expect_equal(
     format(tib_df("x", a = tib_int("a"))),

@@ -6,9 +6,12 @@ spec_guess_df <- function(x,
                           simplify_list = TRUE,
                           call = current_call()) {
   check_dots_empty()
+  withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
+    fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
     spec_df(
-      !!!purrr::imap(x, col_to_spec, empty_list_unspecified)
+      !!!fields,
+      vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
     )
   } else if (is.list(x)) {
     if (!is_object_list(x)) {
@@ -55,6 +58,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   if (list_of_col) {
     ptype <- col %@% ptype
     ptype_type <- tib_type_of(ptype, name, other = FALSE)
+    used_empty_list_argument <- FALSE
   } else {
     # TODO this could use sampling for performance
     ptype_common <- get_ptype_common(col, empty_list_unspecified)
@@ -72,10 +76,12 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
     }
 
     ptype_type <- tib_type_of(ptype, name, other = FALSE)
+    used_empty_list_argument <- ptype_common$had_empty_lists
   }
 
   # TODO should this care about names?
   if (ptype_type == "vector") {
+    mark_empty_list_argument(used_empty_list_argument)
     return(tib_vector(name, ptype))
   }
 
@@ -145,7 +151,11 @@ get_ptype_common <- function(x, empty_list_unspecified) {
     }
 
     ptype <- vec_ptype_common(!!!x)
-    list(has_common_ptype = TRUE, ptype = special_ptype_handling(ptype))
+    list(
+      has_common_ptype = TRUE,
+      ptype = special_ptype_handling(ptype),
+      had_empty_lists = x %@% had_empty_lists
+    )
   }, vctrs_error_incompatible_type = function(cnd) {
     list(has_common_ptype = FALSE)
   }, vctrs_error_scalar_type = function(cnd) {
@@ -162,6 +172,7 @@ drop_empty_lists <- function(x) {
   empty_flag[empty_flag] <- empty_list_flag
   if (any(empty_flag)) {
     x <- x[!empty_flag]
+    x %@% had_empty_lists <- TRUE
   }
 
   x

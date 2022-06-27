@@ -95,7 +95,10 @@ test_that("respect empty_list_unspecified for vector columns", {
 
   expect_equal(
     spec_guess_df(x, empty_list_unspecified = TRUE),
-    spec_df(int_vec = tib_int_vec("int_vec"))
+    spec_df(
+      vector_allows_empty_list = TRUE,
+      int_vec = tib_int_vec("int_vec")
+    )
   )
 })
 
@@ -188,20 +191,15 @@ test_that("respect empty_list_unspecified in tibble columns", {
   expect_equal(
     spec_guess_df(x, empty_list_unspecified = FALSE),
     spec_df(
-      x = tib_row(
-        "x",
-        int_vec = tib_variant("int_vec")
-      )
+      tib_row("x", tib_variant("int_vec"))
     )
   )
 
   expect_equal(
     spec_guess_df(x, empty_list_unspecified = TRUE),
     spec_df(
-      x = tib_row(
-        "x",
-        int_vec = tib_int_vec("int_vec")
-      )
+      vector_allows_empty_list = TRUE,
+      tib_row("x", tib_int_vec("int_vec"))
     )
   )
 })
@@ -296,10 +294,8 @@ test_that("respect empty_list_unspecified for list of tibble columns", {
   expect_equal(
     spec_guess_df(x, empty_list_unspecified = TRUE),
     spec_df(
-      x = tib_df(
-        "x",
-        int_vec = tib_int_vec("int_vec")
-      )
+      vector_allows_empty_list = TRUE,
+      tib_df("x", tib_int_vec("int_vec"))
     )
   )
 })

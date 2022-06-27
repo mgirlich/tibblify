@@ -6,11 +6,11 @@
 \alias{spec_row}
 \title{Create a Tibblify Specification}
 \usage{
-spec_df(..., .names_to = NULL)
+spec_df(..., .names_to = NULL, vector_allows_empty_list = FALSE)
 
-spec_object(...)
+spec_object(..., vector_allows_empty_list = FALSE)
 
-spec_row(...)
+spec_row(..., vector_allows_empty_list = FALSE)
 }
 \arguments{
 \item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
@@ -18,6 +18,9 @@ spec_row(...)
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name
 column is created}
+
+\item{vector_allows_empty_list}{Should empty lists for \code{input_form = "vector"}
+be accepted and treated as empty vector?}
 }
 \description{
 Use \code{spec_df()} to specify how to convert a list of objects to a tibble.

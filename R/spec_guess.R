@@ -154,3 +154,9 @@ maybe_tib_df <- function(name, fields, required = TRUE, names_to = NULL) {
 
   tib_df(name, !!!fields, .required = required, .names_to = names_to)
 }
+
+mark_empty_list_argument <- function(used_empty_list_arg) {
+  if (is_true(used_empty_list_arg)) {
+    options(tibblify.used_empty_list_arg = TRUE)
+  }
+}
