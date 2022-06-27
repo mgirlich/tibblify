@@ -1,46 +1,80 @@
 
 # collectors --------------------------------------------------------------
 
+#' Printing tibblify specifications
+#'
+#' @param x Spec to format or print
+#' @param width Width of text output to generate.
+#' @param ... These dots are for future extensions and must be empty.
+#' @param names Should names be printed even if they can be deduced from the
+#'   spec?
+#'
+#' @return `x` is returned invisibliy.
+#' @name formatting
 #' @export
-print.spec_tib <- function(x, width = NULL, ...) {
-  cat(format(x, width = width, ...))
+#'
+#' @examples
+#' spec <- spec_df(
+#'   a = tib_int("a"),
+#'   new_name = tib_chr("b"),
+#'   row = tib_row(
+#'     "row",
+#'     x = tib_int("x")
+#'   )
+#' )
+#' print(spec, names = FALSE)
+#' print(spec, names = TRUE)
+print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% get_force_names()
+  cat(format(x, width = width, ..., names = names))
 
   invisible(x)
 }
 
+#' @rdname formatting
 #' @export
-format.spec_df <- function(x, width = NULL, ...) {
+format.spec_df <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% get_force_names()
   format_fields(
     "spec_df",
     fields = x$fields,
     width = width,
     args = list(
       .names_to = if (!is.null(x$names_col)) deparse(x$names_col)
-    )
+    ),
+    force_names = names
   )
 }
 
 #' @export
-format.spec_row <- function(x, width = NULL, ...) {
+format.spec_row <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% get_force_names()
   format_fields(
     "spec_row",
     fields = x$fields,
-    width = width
+    width = width,
+    force_names = names
   )
 }
 
 #' @export
-format.spec_object <- function(x, width = NULL, ...) {
+format.spec_object <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% get_force_names()
   format_fields(
     "spec_object",
     fields = x$fields,
-    width = width
+    width = width,
+    force_names = names
   )
 }
 
-format_fields <- function(f_name, fields, width, args = NULL) {
-  canonical_name <- purrr::map2_lgl(fields, names2(fields), is_tib_name_canonical)
-  names2(fields)[canonical_name] <- ""
+format_fields <- function(f_name, fields, width, args = NULL, force_names) {
+  if (force_names) {
+    canonical_name <- FALSE
+  } else {
+    canonical_name <- purrr::map2_lgl(fields, names2(fields), is_tib_name_canonical)
+    names2(fields)[canonical_name] <- ""
+  }
 
   fields_formatted <- purrr::map2(
     fields,
@@ -91,13 +125,16 @@ is_tib_name_canonical <- function(field, name) {
 # format simple columns ---------------------------------------------------
 
 #' @export
-print.tib_collector <- function(x, ...) {
-  cat(format(x, ...))
+print.tib_collector <- function(x, ..., names = NULL) {
+  names <- names %||% get_force_names()
+  cat(format(x, ..., names = names))
 }
 
 #' @export
 format.tib_scalar <- function(x, ...,
-                              multi_line = FALSE, nchar_indent = 0, width = NULL) {
+                              multi_line = FALSE,
+                              nchar_indent = 0,
+                              width = NULL) {
   parts <- list(
     deparse(x$key),
     ptype = if (class(x)[1] == "tib_scalar" || class(x)[1] == "tib_vector") format_ptype(x$ptype),
@@ -135,7 +172,8 @@ format.tib_unspecified <- format.tib_scalar
 # format nested columns ---------------------------------------------------
 
 #' @export
-format.tib_row <- function(x, ..., width = NULL) {
+format.tib_row <- function(x, ..., width = NULL, names = NULL) {
+  names <- names %||% get_force_names()
   format_fields(
     "tib_row",
     fields = x$fields,
@@ -143,12 +181,14 @@ format.tib_row <- function(x, ..., width = NULL) {
     args = list(
       deparse(x$key),
       `.required` = if (!x$required) FALSE
-    )
+    ),
+    force_names = names
   )
 }
 
 #' @export
-format.tib_df <- function(x, ..., width = NULL) {
+format.tib_df <- function(x, ..., width = NULL, names = NULL) {
+  names <- names %||% get_force_names()
   format_fields(
     "tib_df",
     fields = x$fields,
@@ -157,7 +197,8 @@ format.tib_df <- function(x, ..., width = NULL) {
       deparse(x$key),
       `.required` = if (!x$required) FALSE,
       .names_to = if (!is.null(x$names_col)) paste0('"', x$names_col, '"')
-    )
+    ),
+    force_names = names
   )
 }
 
@@ -324,4 +365,8 @@ name_exprs <- function(exprs, names, show_name) {
   names[non_syntactic] <- paste0("`", gsub("`", "\\\\`", names[non_syntactic]), "`")
 
   ifelse(show_name, paste0(names, " = ", exprs), exprs)
+}
+
+get_force_names <- function() {
+  getOption("tibblify.print_names", default = FALSE)
 }

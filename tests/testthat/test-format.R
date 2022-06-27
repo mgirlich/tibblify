@@ -173,6 +173,20 @@ test_that("format for tib_df works", {
   )
 })
 
+test_that("can force to print canonical names", {
+  withr::local_options(list(tibblify.print_names = TRUE))
+
+  expect_snapshot(format(
+    spec_df(
+      a = tib_int("a"),
+      b = tib_df(
+        "b",
+        x = tib_int("x")
+      )
+    )
+  ))
+})
+
 test_that("format for empty tib_df works", {
   expect_equal(format(spec_df()), "spec_df()")
   expect_equal(format(spec_row()), "spec_row()")
