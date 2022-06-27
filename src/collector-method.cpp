@@ -143,7 +143,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = vec_cast(PROTECT(value), ptype);
+    SEXP value_casted = PROTECT(vec_cast(value, ptype));
     R_len_t size = short_vec_size(value_casted);
     if (size == 0) {
       value_casted = this->default_value;
@@ -494,7 +494,7 @@ public:
       }
     }
 
-    SEXP value_casted = vec_cast(PROTECT(value), ptype);
+    SEXP value_casted = PROTECT(vec_cast(value, ptype));
 
     if (this->uses_values_col) {
       if (Rf_isNull(value_casted)) {
@@ -863,9 +863,7 @@ private:
 
     SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
     if (this->has_names_col) {
-      SEXP object_list_names = my_vec_names2(object_list);
-      SET_VECTOR_ELT(df, 0, object_list_names);
-
+      SET_VECTOR_ELT(df, 0, my_vec_names2(object_list));
       SET_STRING_ELT(names, 0, this->names_col);
     }
 
