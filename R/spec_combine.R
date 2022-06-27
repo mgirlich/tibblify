@@ -44,9 +44,8 @@ check_spec_combine_type <- function(spec_list, call = caller_env()) {
 spec_combine_field_list <- function(spec_list, call) {
   fields_list <- purrr::map(spec_list, "fields")
   empty_idx <- lengths(fields_list) == 0
-  nms <- purrr::map(fields_list, names) %>%
-    vec_flatten(character()) %>%
-    vec_unique()
+  nms_list <- purrr::map(fields_list, names)
+  nms <- vec_unique(nms_list, vec_flatten(character()))
   fields_list_t <- purrr::transpose(fields_list[!empty_idx], nms)
 
   out <- purrr::map(fields_list_t, tib_combine, call)
