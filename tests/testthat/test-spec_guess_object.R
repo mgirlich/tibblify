@@ -61,19 +61,32 @@ test_that("POSIXlt is converted to POSIXct for vector elements", {
 })
 
 test_that("can guess tib_vector for a scalar list", {
-  skip("Guessing enlisted vectors not yet supported")
-  # FIXME this should get a different API
-  # https://github.com/mgirlich/tibblify/pull/69
   expect_equal(
-    spec_guess_object(list(x = list(TRUE, TRUE))),
-    spec_object(x = tib_lgl_vec("x", transform = make_unchop(logical()))),
-    ignore_function_env = TRUE
+    spec_guess_object(list(x = list(TRUE, TRUE, NULL))),
+    spec_object(x = tib_lgl_vec("x", input_form = "scalar_list"))
   )
 
   expect_equal(
     spec_guess_object(list(x = list(new_datetime(1)))),
-    spec_object(x = tib_vector("x", new_datetime(), transform = make_unchop(new_datetime()))),
-    ignore_function_env = TRUE
+    spec_object(x = tib_vector("x", new_datetime(), input_form = "scalar_list"))
+  )
+
+  # checks size
+  expect_equal(
+    spec_guess_object(list(x = list(1, 1:2))),
+    spec_object(x = tib_variant("x"))
+  )
+
+  expect_equal(
+    spec_guess_object(list(x = list(1, integer()))),
+    spec_object(x = tib_variant("x"))
+  )
+})
+
+test_that("can guess tib_vector for input form = object", {
+  expect_equal(
+    spec_guess_object(list(x = list(a = TRUE, b = TRUE))),
+    spec_object(x = tib_lgl_vec("x", input_form = "object"))
   )
 })
 
@@ -107,19 +120,15 @@ test_that("can guess tib_row", {
 })
 
 test_that("can guess tib_row with a scalar list", {
-  skip("Guessing enlisted vectors not yet supported")
-  # FIXME this should get a different API
-  # https://github.com/mgirlich/tibblify/pull/69
   expect_equal(
     spec_guess_object(list(x = list(a = list(1L, 2L), b = "a"))),
     spec_object(
       x = tib_row(
         "x",
-        a = tib_int_vec("a", transform = make_unchop(integer())),
+        a = tib_int_vec("a", input_form = "scalar_list"),
         b = tib_chr("b")
       )
-    ),
-    ignore_function_env = TRUE
+    )
   )
 })
 

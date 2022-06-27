@@ -25,7 +25,7 @@ spec_guess_object(
   x,
   ...,
   empty_list_unspecified = FALSE,
-  simplify_list = FALSE,
+  simplify_list = TRUE,
   call = current_call()
 )
 
@@ -33,7 +33,7 @@ spec_guess_object_list(
   x,
   ...,
   empty_list_unspecified = FALSE,
-  simplify_list = FALSE,
+  simplify_list = TRUE,
   call = current_call()
 )
 }
