@@ -3,7 +3,7 @@
 spec_guess_object <- function(x,
                               ...,
                               empty_list_unspecified = FALSE,
-                              simplify_list = FALSE,
+                              simplify_list = TRUE,
                               call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
@@ -88,21 +88,10 @@ guess_object_field_spec <- function(value,
   }
 
   if (simplify_list) {
-    cli::cli_abort("`simplify_list = TRUE` is not yet supported", call = call)
-    # TODO check if it is an enlisted vector
-    # ptype_result <- get_ptype_common(value, empty_list_unspecified)
-    # if (!ptype_result$has_common_ptype) return(tib_variant(name, required))
-    #
-    # ptype <- ptype_result$ptype
-    # if (is_null(ptype)) return(tib_unspecified(name, required))
-    # if (identical(ptype, list()) || identical(ptype, set_names(list()))) return(tib_unspecified(name, required))
-    #
-    # if (!simplify_list) return(tib_variant(name, required))
-    #
-    # list_of_scalars <- all(list_sizes(value_flat) == 1L)
-    # if (list_of_scalars) return(tib_vector(name, ptype, required, transform = make_unchop(ptype)))
-    #
-    # return(tib_variant(name, required, transform = make_new_list_of(ptype)))
+    input_form_result <- guess_vector_input_form(value, name)
+    if (input_form_result$can_simplify) {
+      return(input_form_result$tib_spec)
+    }
   }
 
   if (is_object(value)) {
@@ -130,4 +119,37 @@ check_object_names <- function(x, call) {
     msg <- "Names of {.arg x} must be unique."
     cli::cli_abort(msg, call = call)
   }
+}
+
+guess_vector_input_form <- function(value, name) {
+  ptype_result <- get_ptype_common(value, empty_list_unspecified = FALSE)
+  if (!ptype_result$has_common_ptype) {
+    return(list(can_simplify = FALSE))
+  }
+
+  ptype <- ptype_result$ptype
+  if (is_null(ptype)) {
+    if (is_named(value)) {
+      return(list(can_simplify = FALSE))
+    }
+
+    tib_spec <- tib_unspecified(name, required = TRUE)
+    return(list(can_simplify = TRUE, tib_spec = tib_spec))
+  }
+
+  if (!is_vec(ptype)) {
+    return(list(can_simplify = FALSE))
+  }
+
+  if (is_field_scalar(value)) {
+    if (is_named(value)) {
+      tib_spec <- tib_vector(name, ptype, required = TRUE, input_form = "object")
+    } else {
+      tib_spec <- tib_vector(name, ptype, required = TRUE, input_form = "scalar_list")
+    }
+
+    return(list(can_simplify = TRUE, tib_spec = tib_spec))
+  }
+
+  list(can_simplify = TRUE, tib_spec = tib_variant(name, required = TRUE))
 }
