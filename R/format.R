@@ -25,7 +25,8 @@
 #' print(spec, names = FALSE)
 #' print(spec, names = TRUE)
 print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   cat(format(x, width = width, ..., names = names))
 
   invisible(x)
@@ -34,7 +35,8 @@ print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
 #' @rdname formatting
 #' @export
 format.spec_df <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   format_fields(
     "spec_df",
     fields = x$fields,
@@ -49,7 +51,8 @@ format.spec_df <- function(x, width = NULL, ..., names = NULL) {
 
 #' @export
 format.spec_row <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   format_fields(
     "spec_row",
     fields = x$fields,
@@ -63,7 +66,8 @@ format.spec_row <- function(x, width = NULL, ..., names = NULL) {
 
 #' @export
 format.spec_object <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   format_fields(
     "spec_object",
     fields = x$fields,
@@ -133,7 +137,8 @@ is_tib_name_canonical <- function(field, name) {
 
 #' @export
 print.tib_collector <- function(x, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   cat(format(x, ..., names = names))
 }
 
@@ -180,7 +185,8 @@ format.tib_unspecified <- format.tib_scalar
 
 #' @export
 format.tib_row <- function(x, ..., width = NULL, names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   format_fields(
     "tib_row",
     fields = x$fields,
@@ -195,7 +201,8 @@ format.tib_row <- function(x, ..., width = NULL, names = NULL) {
 
 #' @export
 format.tib_df <- function(x, ..., width = NULL, names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   format_fields(
     "tib_df",
     fields = x$fields,
@@ -374,6 +381,6 @@ name_exprs <- function(exprs, names, show_name) {
   ifelse(show_name, paste0(names, " = ", exprs), exprs)
 }
 
-get_force_names <- function() {
+should_force_names <- function() {
   getOption("tibblify.print_names", default = FALSE)
 }
