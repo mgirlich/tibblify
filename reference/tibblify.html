@@ -56,7 +56,7 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tibblify</span><span class="op">(</span><span class="va">x</span>, spec <span class="op">=</span> <span class="cn">NULL</span>, names_to <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tibblify</span><span class="op">(</span><span class="va">x</span>, spec <span class="op">=</span> <span class="cn">NULL</span>, names_to <span class="op">=</span> <span class="cn">NULL</span>, unspecified <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -72,6 +72,15 @@ or <code><a href="spec_df.html">spec_df()</a></code>.</p></dd>
 
 <dt>names_to</dt>
 <dd><p>Deprecated. Use <code>spec_df(.names_to)</code> instead.</p></dd>
+
+
+<dt>unspecified</dt>
+<dd><p>A string that describes what happens if the specification
+contains unspecified fields. Can be one of</p><ul><li><p><code>"error"</code>: Throw an error.</p></li>
+<li><p><code>"inform"</code>: Inform.</p></li>
+<li><p><code>"drop"</code>: Do not parse these fields.</p></li>
+<li><p><code>"list"</code>: Parse an unspecified field into a list.</p></li>
+</ul></dd>
 
 </dl></div>
     <div id="value">
