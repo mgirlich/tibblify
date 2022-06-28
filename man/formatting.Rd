@@ -21,7 +21,7 @@
 spec?}
 }
 \value{
-\code{x} is returned invisibliy.
+\code{x} is returned invisibly.
 }
 \description{
 Printing tibblify specifications

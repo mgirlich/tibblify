@@ -759,6 +759,64 @@ test_that("spec_object() works", {
   )
 })
 
+test_that("spec_replace_unspecified works", {
+  spec <- spec_df(
+    tib_int("1int"),
+    tib_unspecified("1un"),
+    tib_df(
+      "1df",
+      tib_int("2int"),
+      tib_unspecified("2un"),
+      tib_row(
+        "2row",
+        `3un` = tib_unspecified("key"),
+        `3un2` = tib_unspecified("key2"),
+      )
+    ),
+    tib_row(
+      "1row",
+      tib_unspecified("2un2"),
+      `2un3` = tib_unspecified("key")
+    )
+  )
+
+  expect_equal(
+    spec_replace_unspecified(spec, unspecified = "drop"),
+    spec_df(
+      tib_int("1int"),
+      tib_df(
+        "1df",
+        tib_int("2int"),
+        tib_row("2row")
+      ),
+      tib_row("1row")
+    ),
+    ignore_attr = "names"
+  )
+  expect_equal(
+    spec_replace_unspecified(spec, unspecified = "list"),
+    spec_df(
+      tib_int("1int"),
+      tib_variant("1un"),
+      tib_df(
+        "1df",
+        tib_int("2int"),
+        tib_variant("2un"),
+        tib_row(
+          "2row",
+          `3un` = tib_variant("key"),
+          `3un2` = tib_variant("key2"),
+        )
+      ),
+      tib_row(
+        "1row",
+        tib_variant("2un2"),
+        `2un3` = tib_variant("key")
+      )
+    )
+  )
+})
+
 # remove_spec <- function(x) {
 #   attr(x, "spec") <- NULL
 #   x

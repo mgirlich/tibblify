@@ -205,7 +205,7 @@ is_testing <- function() {
   identical(Sys.getenv("TESTTHAT"), "true")
 }
 
-spec_inform_unspecified <- function(spec) {
+spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()) {
   unspecified_paths <- get_unspecfied_paths(spec)
 
   lines <- format_unspecified_paths(unspecified_paths)
@@ -216,7 +216,11 @@ spec_inform_unspecified <- function(spec) {
     set_names(lines, "*"),
     "\n"
   )
-  cli::cli_inform(msg)
+
+  switch (action,
+    inform = cli::cli_inform(msg),
+    error = cli::cli_abort(msg, call = call)
+  )
 }
 
 format_unspecified_paths <- function(path_list, path = character()) {
