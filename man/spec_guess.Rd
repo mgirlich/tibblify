@@ -11,6 +11,7 @@ spec_guess(
   x,
   ...,
   empty_list_unspecified = FALSE,
+  simplify_list = FALSE,
   inform_unspecified = should_inform_unspecified(),
   call = current_call()
 )
@@ -19,7 +20,7 @@ spec_guess_df(
   x,
   ...,
   empty_list_unspecified = FALSE,
-  simplify_list = TRUE,
+  simplify_list = FALSE,
   inform_unspecified = should_inform_unspecified(),
   call = current_call()
 )
@@ -28,7 +29,7 @@ spec_guess_object(
   x,
   ...,
   empty_list_unspecified = FALSE,
-  simplify_list = TRUE,
+  simplify_list = FALSE,
   call = current_call()
 )
 }
@@ -39,6 +40,8 @@ spec_guess_object(
 
 \item{empty_list_unspecified}{Treat empty lists as unspecified?}
 
+\item{simplify_list}{Should scalar lists be simplified to vectors?}
+
 \item{inform_unspecified}{Inform about fields whose type could not be
 determined?}
 
@@ -46,8 +49,6 @@ determined?}
 \code{caller_env()}. The function will be mentioned in error messages as the
 source of the error. See the \code{call} argument of \code{\link[=abort]{abort()}} for more
 information.}
-
-\item{simplify_list}{Should scalar lists be simplified to vectors?}
 }
 \value{
 A specification object that can used in \code{tibblify()}.
