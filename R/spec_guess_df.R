@@ -4,7 +4,7 @@ spec_guess_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
                           simplify_list = TRUE,
-                          inform_unspecified = show_show_unspecified(),
+                          inform_unspecified = should_inform_unspecified(),
                           call = current_call()) {
   check_dots_empty()
   check_flag(empty_list_unspecified, call = call)

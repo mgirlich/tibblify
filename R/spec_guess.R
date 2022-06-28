@@ -7,7 +7,8 @@
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
-#' @param simplify_list Try to simplify lists if possible?
+#' @param inform_unspecified Inform about fields whose type could not be
+#'   determined?
 #' @param call The execution environment of a currently running function, e.g.
 #'   `caller_env()`. The function will be mentioned in error messages as the
 #'   source of the error. See the `call` argument of [`abort()`] for more
@@ -24,7 +25,7 @@
 spec_guess <- function(x,
                        ...,
                        empty_list_unspecified = FALSE,
-                       inform_unspecified = show_show_unspecified(),
+                       inform_unspecified = should_inform_unspecified(),
                        call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
@@ -53,7 +54,7 @@ spec_guess_list <- function(x,
                             ...,
                             empty_list_unspecified = FALSE,
                             simplify_list = FALSE,
-                            inform_unspecified = show_show_unspecified(),
+                            inform_unspecified = should_inform_unspecified(),
                             call = current_call()) {
   check_dots_empty()
   check_flag(empty_list_unspecified, call = call)
@@ -174,8 +175,19 @@ mark_empty_list_argument <- function(used_empty_list_arg) {
   }
 }
 
+#' Determine whether to inform about unspecified fields in spec
+#'
+#' Wrapper around `getOption("tibblify.show_unspecified")` that implements some
+#' #' fall back logic if the option is unset. This returns:
+#'
+#' * `TRUE` if the option is set to `TRUE`
+#' * `FALSE` if the option is set to `FALSE`
+#' * `FALSE` if the option is unset and we appear to be running tests
+#' * `TRUE` otherwise
+#'
+#' @return `TRUE` or `FALSE`.
 #' @export
-show_show_unspecified <- function() {
+should_inform_unspecified <- function() {
   opt <- getOption("tibblify.show_unspecified", NA)
   if (is_true(opt)) {
     TRUE

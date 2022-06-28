@@ -7,13 +7,20 @@
 \alias{spec_guess_object}
 \title{Guess the \code{tibblify()} Specification}
 \usage{
-spec_guess(x, ..., empty_list_unspecified = FALSE, call = current_call())
+spec_guess(
+  x,
+  ...,
+  empty_list_unspecified = FALSE,
+  inform_unspecified = should_inform_unspecified(),
+  call = current_call()
+)
 
 spec_guess_df(
   x,
   ...,
   empty_list_unspecified = FALSE,
   simplify_list = TRUE,
+  inform_unspecified = should_inform_unspecified(),
   call = current_call()
 )
 
@@ -32,12 +39,13 @@ spec_guess_object(
 
 \item{empty_list_unspecified}{Treat empty lists as unspecified?}
 
+\item{inform_unspecified}{Inform about fields whose type could not be
+determined?}
+
 \item{call}{The execution environment of a currently running function, e.g.
 \code{caller_env()}. The function will be mentioned in error messages as the
 source of the error. See the \code{call} argument of \code{\link[=abort]{abort()}} for more
 information.}
-
-\item{simplify_list}{Try to simplify lists if possible?}
 }
 \value{
 A specification object that can used in \code{tibblify()}.
