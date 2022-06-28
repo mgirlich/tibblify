@@ -367,7 +367,7 @@ pad <- function(x, n) {
 name_exprs <- function(exprs, names, show_name) {
   # nocov start
   if (length(names) == 0 || length(exprs) == 0) {
-    abort("something went wrong")
+    cli::cli_abort("Empty names or empty exprs", .internal = TRUE)
   }
   # nocov end
 

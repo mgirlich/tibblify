@@ -20,7 +20,7 @@
 
 # errors if `.names_to` column name is not unique
 
-    The column name of `.names_to` is already specified in `...`
+    The column name of `.names_to` is already specified in `...`.
 
 # errors if element is not a tib collector
 

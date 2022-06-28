@@ -47,10 +47,8 @@ spec_guess <- function(x,
       call = call
     )
   } else {
-    abort(paste0(
-      "Cannot guess the specification for type ",
-      vctrs::vec_ptype_full(x)
-    ))
+    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
+    cli::cli_abort(msg, call = call)
   }
 }
 
