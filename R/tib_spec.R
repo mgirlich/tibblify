@@ -78,7 +78,7 @@ spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call =
   structure(
     list2(
       type = type,
-      fields = prep_spec_fields(fields, call) %||% list(),
+      fields = prep_spec_fields(fields, call),
       ...,
       vector_allows_empty_list = vector_allows_empty_list
     ),
@@ -89,14 +89,18 @@ spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call =
 prep_spec_fields <- function(fields, call) {
   fields <- flatten_fields(fields)
   if (is_null(fields)) {
-    return(fields)
+    return(list())
   }
 
   collector_field <- purrr::map_lgl(fields, ~ inherits(.x, "tib_collector"))
   if (!all(collector_field)) {
-    abort("Every element in `...` must be a tib collector.", call = call)
+    cli::cli_abort("Every element in {.arg ...} must be a tib collector.", call = call)
   }
 
+  spec_auto_name_fields(fields, call)
+}
+
+spec_auto_name_fields <- function(fields, call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
   auto_nms <- purrr::map_chr(
@@ -112,7 +116,6 @@ prep_spec_fields <- function(fields, call) {
   field_nms[unnamed] <- auto_nms
   field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = call)
   names(fields) <- field_nms_repaired
-
   fields
 }
 
@@ -562,7 +565,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env()) %||% list()
+    fields = prep_spec_fields(list2(...), call = current_env())
   )
 }
 
@@ -573,7 +576,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env()) %||% list(),
+    fields = prep_spec_fields(list2(...), call = current_env()),
     names_col = .names_to
   )
 }
