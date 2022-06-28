@@ -60,13 +60,20 @@ Use <code>spec_guess_objecte()</code> is the input is an object.</p>
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_guess</span><span class="op">(</span><span class="va">x</span>, <span class="va">...</span>, empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>, call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">spec_guess</span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  inform_unspecified <span class="op">=</span> <span class="fu"><a href="should_inform_unspecified.html">should_inform_unspecified</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">spec_guess_df</span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  simplify_list <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  inform_unspecified <span class="op">=</span> <span class="fu"><a href="should_inform_unspecified.html">should_inform_unspecified</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  call <span class="op">=</span> <span class="fu">current_call</span><span class="op">(</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -93,6 +100,11 @@ Use <code>spec_guess_objecte()</code> is the input is an object.</p>
 <dd><p>Treat empty lists as unspecified?</p></dd>
 
 
+<dt>inform_unspecified</dt>
+<dd><p>Inform about fields whose type could not be
+determined?</p></dd>
+
+
 <dt>call</dt>
 <dd><p>The execution environment of a currently running function, e.g.
 <code>caller_env()</code>. The function will be mentioned in error messages as the
@@ -101,7 +113,7 @@ information.</p></dd>
 
 
 <dt>simplify_list</dt>
-<dd><p>Try to simplify lists if possible?</p></dd>
+<dd><p>Should scalar lists be simplified to vectors?</p></dd>
 
 </dl></div>
     <div id="value">
