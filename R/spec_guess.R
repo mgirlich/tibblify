@@ -209,7 +209,7 @@ spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()
   unspecified_paths <- get_unspecfied_paths(spec)
 
   lines <- format_unspecified_paths(unspecified_paths)
-  if (is_empty(lines)) return()
+  if (is_empty(lines)) return(spec)
 
   msg <- c(
     "The spec contains {length(lines)} unspecified field{?s}:",
@@ -221,6 +221,8 @@ spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()
     inform = cli::cli_inform(msg),
     error = cli::cli_abort(msg, call = call)
   )
+
+  invisible(spec)
 }
 
 format_unspecified_paths <- function(path_list, path = character()) {
