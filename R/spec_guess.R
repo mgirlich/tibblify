@@ -200,6 +200,10 @@ should_inform_unspecified <- function() {
   }
 }
 
+is_testing <- function() {
+  identical(Sys.getenv("TESTTHAT"), "true")
+}
+
 spec_inform_unspecified <- function(spec) {
   unspecified_paths <- get_unspecfied_paths(spec)
 
@@ -225,7 +229,7 @@ format_unspecified_paths <- function(path_list, path = character()) {
       new_lines <- paste0(path, cli::style_bold(nm))
     } else {
       new_path <- paste0(path, nm, "->")
-      new_lines <- format_unspecified_flat(elt, path = new_path)
+      new_lines <- format_unspecified_paths(elt, path = new_path)
     }
 
     lines <- c(lines, new_lines)
