@@ -139,11 +139,11 @@ is_tib_name_canonical <- function(field, name) {
 # format simple columns ---------------------------------------------------
 
 #' @export
-print.tib_collector <- function(x, ..., names = NULL) {
+print.tib_collector <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
 
-  cat(format(x, ..., names = names))
+  cat(format(x, width = width, ..., names = names))
   invisible(x)
 }
 
