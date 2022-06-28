@@ -7,7 +7,9 @@
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
-#' @param simplify_list Try to simplify lists if possible?
+#' @param simplify_list Should scalar lists be simplified to vectors?
+#' @param inform_unspecified Inform about fields whose type could not be
+#'   determined?
 #' @param call The execution environment of a currently running function, e.g.
 #'   `caller_env()`. The function will be mentioned in error messages as the
 #'   source of the error. See the `call` argument of [`abort()`] for more
@@ -21,18 +23,24 @@
 #' spec_guess(list(list(x = 1), list(x = 2)))
 #'
 #' spec_guess(gh_users)
-spec_guess <- function(x, ..., empty_list_unspecified = FALSE, call = current_call()) {
+spec_guess <- function(x,
+                       ...,
+                       empty_list_unspecified = FALSE,
+                       inform_unspecified = should_inform_unspecified(),
+                       call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
     spec_guess_df(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      inform_unspecified = inform_unspecified,
       call = call
     )
   } else if (is.list(x)) {
     spec_guess_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      inform_unspecified = inform_unspecified,
       call = call
     )
   } else {
@@ -47,8 +55,13 @@ spec_guess_list <- function(x,
                             ...,
                             empty_list_unspecified = FALSE,
                             simplify_list = FALSE,
+                            inform_unspecified = should_inform_unspecified(),
                             call = current_call()) {
   check_dots_empty()
+  check_flag(empty_list_unspecified, call = call)
+  check_flag(simplify_list, call = call)
+  check_flag(inform_unspecified, call = call)
+
   if (vec_is(x) && !vec_is_list(x)) {
     cli::cli_abort(c(
       `!` = "{.arg x} must be a list.",
@@ -72,6 +85,7 @@ spec_guess_list <- function(x,
       simplify_list = simplify_list,
       call = call
     )
+    if (inform_unspecified) spec_inform_unspecified(spec)
     return(spec)
   }
 
@@ -82,6 +96,7 @@ spec_guess_list <- function(x,
       simplify_list = simplify_list,
       call = call
     )
+    if (inform_unspecified) spec_inform_unspecified(spec)
     return(spec)
   }
 
@@ -159,4 +174,85 @@ mark_empty_list_argument <- function(used_empty_list_arg) {
   if (is_true(used_empty_list_arg)) {
     options(tibblify.used_empty_list_arg = TRUE)
   }
+}
+
+#' Determine whether to inform about unspecified fields in spec
+#'
+#' Wrapper around `getOption("tibblify.show_unspecified")` that implements some
+#' #' fall back logic if the option is unset. This returns:
+#'
+#' * `TRUE` if the option is set to `TRUE`
+#' * `FALSE` if the option is set to `FALSE`
+#' * `FALSE` if the option is unset and we appear to be running tests
+#' * `TRUE` otherwise
+#'
+#' @return `TRUE` or `FALSE`.
+#' @export
+should_inform_unspecified <- function() {
+  opt <- getOption("tibblify.show_unspecified", NA)
+  if (is_true(opt)) {
+    TRUE
+  } else if (is_false(opt)) {
+    FALSE
+  } else if (is.na(opt) && is_testing()) {
+    FALSE
+  } else {
+    TRUE
+  }
+}
+
+is_testing <- function() {
+  identical(Sys.getenv("TESTTHAT"), "true")
+}
+
+spec_inform_unspecified <- function(spec) {
+  unspecified_paths <- get_unspecfied_paths(spec)
+
+  lines <- format_unspecified_paths(unspecified_paths)
+  if (is_empty(lines)) return()
+
+  msg <- c(
+    "The spec contains {length(lines)} unspecified field{?s}:",
+    set_names(lines, "*"),
+    "\n"
+  )
+  cli::cli_inform(msg)
+}
+
+format_unspecified_paths <- function(path_list, path = character()) {
+  nms <- names(path_list)
+  lines <- character()
+
+  for (i in seq_along(path_list)) {
+    nm <- nms[i]
+    elt <- path_list[[i]]
+    if (is.character(elt)) {
+      new_lines <- paste0(path, cli::style_bold(nm))
+    } else {
+      new_path <- paste0(path, nm, "->")
+      new_lines <- format_unspecified_paths(elt, path = new_path)
+    }
+
+    lines <- c(lines, new_lines)
+  }
+
+  lines
+}
+
+get_unspecfied_paths <- function(spec) {
+  fields <- spec$fields
+  unspecified_paths <- list()
+
+  for (i in seq_along(fields)) {
+    field <- fields[[i]]
+    nm <- names(fields)[[i]]
+    if (field$type == "unspecified") {
+      unspecified_paths[[nm]] <- nm
+    } else if (field$type %in% c("df", "row")) {
+      sub_paths <- get_unspecfied_paths(field)
+      unspecified_paths[[nm]] <- sub_paths
+    }
+  }
+
+  unspecified_paths
 }

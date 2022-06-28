@@ -436,3 +436,9 @@ test_that("gives nice errors", {
     (expect_error(spec_guess_df(1:3)))
   })
 })
+
+test_that("inform about unspecified elements", {
+  expect_snapshot({
+    spec_guess_df(tibble(lgl = NA), inform_unspecified = TRUE)
+  })
+})

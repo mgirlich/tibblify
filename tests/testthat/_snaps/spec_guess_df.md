@@ -13,3 +13,15 @@
       Error in `spec_guess_df()`:
       ! Cannot guess the specification for type integer
 
+# inform about unspecified elements
+
+    Code
+      spec_guess_df(tibble(lgl = NA), inform_unspecified = TRUE)
+    Message
+      The spec contains 1 unspecified field:
+      * lgl
+    Output
+      spec_df(
+        tib_unspecified("lgl"),
+      )
+
