@@ -3,7 +3,7 @@
 spec_guess_object <- function(x,
                               ...,
                               empty_list_unspecified = FALSE,
-                              simplify_list = TRUE,
+                              simplify_list = FALSE,
                               call = current_call()) {
   check_dots_empty()
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))

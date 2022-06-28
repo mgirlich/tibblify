@@ -26,6 +26,7 @@
 spec_guess <- function(x,
                        ...,
                        empty_list_unspecified = FALSE,
+                       simplify_list = FALSE,
                        inform_unspecified = should_inform_unspecified(),
                        call = current_call()) {
   check_dots_empty()
@@ -33,6 +34,7 @@ spec_guess <- function(x,
     spec_guess_df(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list,
       inform_unspecified = inform_unspecified,
       call = call
     )
@@ -40,6 +42,7 @@ spec_guess <- function(x,
     spec_guess_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list,
       inform_unspecified = inform_unspecified,
       call = call
     )

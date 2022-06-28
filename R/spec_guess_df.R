@@ -3,7 +3,7 @@
 spec_guess_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
-                          simplify_list = TRUE,
+                          simplify_list = FALSE,
                           inform_unspecified = should_inform_unspecified(),
                           call = current_call()) {
   check_dots_empty()

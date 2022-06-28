@@ -102,20 +102,20 @@ test_that("respect empty_list_unspecified for vector elements", {
 test_that("can guess vector input form", {
   x <- list(list(x = list(1, 2)), list(x = list()))
   expect_equal(
-    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_guess_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
     spec_df(x = tib_dbl_vec("x", input_form = "scalar_list"))
   )
 
   # checks size
   x <- list(list(x = list(1, 1:2)))
   expect_equal(
-    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_guess_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
     spec_df(x = tib_variant("x"))
   )
 
   x <- list(list(x = list(1, integer())))
   expect_equal(
-    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_guess_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
     spec_df(x = tib_variant("x"))
   )
 
@@ -126,7 +126,7 @@ test_that("can guess vector input form", {
     list(x = list(g = 1, h = 1, i = 1, j = 1))
   )
   expect_equal(
-    spec_guess_object_list(x, empty_list_unspecified = FALSE),
+    spec_guess_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
     spec_df(x = tib_dbl_vec("x", input_form = "object"))
   )
 })
