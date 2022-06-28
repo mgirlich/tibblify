@@ -308,13 +308,8 @@ test_that("order of fields does not matter", {
 })
 
 test_that("can guess object_list of length one (#50)", {
-  # TODO this should probably rather use `spec_guess()`
   expect_equal(
-    spec_guess_object_list(
-      list(
-        list(x = 1, y = 2)
-      )
-    ),
+    spec_guess(list(list(x = 1, y = 2))),
     spec_df(
       x = tib_dbl("x"),
       y = tib_dbl("y"),
