@@ -9,7 +9,7 @@
 #' @param names Should names be printed even if they can be deduced from the
 #'   spec?
 #'
-#' @return `x` is returned invisibliy.
+#' @return `x` is returned invisibly.
 #' @name formatting
 #' @export
 #'

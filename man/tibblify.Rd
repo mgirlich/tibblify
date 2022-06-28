@@ -4,7 +4,7 @@
 \alias{tibblify}
 \title{Rectangle a nested list}
 \usage{
-tibblify(x, spec = NULL, names_to = NULL)
+tibblify(x, spec = NULL, names_to = NULL, unspecified = NULL)
 }
 \arguments{
 \item{x}{A nested list.}
@@ -13,6 +13,15 @@ tibblify(x, spec = NULL, names_to = NULL)
 or \code{spec_df()}.}
 
 \item{names_to}{Deprecated. Use \code{spec_df(.names_to)} instead.}
+
+\item{unspecified}{A string that describes what happens if the specification
+contains unspecified fields. Can be one of
+\itemize{
+\item \code{"error"}: Throw an error.
+\item \code{"inform"}: Inform.
+\item \code{"drop"}: Do not parse these fields.
+\item \code{"list"}: Parse an unspecified field into a list.
+}}
 }
 \value{
 Either a tibble or a list, depending on the specification

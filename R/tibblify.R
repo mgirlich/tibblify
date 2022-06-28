@@ -4,6 +4,12 @@
 #' @param spec A specification how to convert `x`. Generated with `spec_row()`
 #'   or `spec_df()`.
 #' @param names_to Deprecated. Use `spec_df(.names_to)` instead.
+#' @param unspecified A string that describes what happens if the specification
+#'   contains unspecified fields. Can be one of
+#'   * `"error"`: Throw an error.
+#'   * `"inform"`: Inform.
+#'   * `"drop"`: Do not parse these fields.
+#'   * `"list"`: Parse an unspecified field into a list.
 #'
 #' @return Either a tibble or a list, depending on the specification
 #' @export
@@ -24,7 +30,10 @@
 #'
 #' # Provide a specification for a single object
 #' tibblify(x[[1]], spec_object(spec))
-tibblify <- function(x, spec = NULL, names_to = NULL) {
+tibblify <- function(x,
+                     spec = NULL,
+                     names_to = NULL,
+                     unspecified = NULL) {
   withr::local_locale(c(LC_COLLATE = "C"))
 
   if (!is.null(names_to)) {
@@ -32,7 +41,12 @@ tibblify <- function(x, spec = NULL, names_to = NULL) {
   }
 
   if (is_null(spec)) {
-    spec <- spec_guess(x)
+    spec <- spec_guess(x, inform_unspecified = TRUE, call = current_call())
+    unspecified <- "list"
+  } else {
+    unspecified <- unspecified %||% "error"
+    unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
+    spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
   }
 
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
@@ -150,6 +164,43 @@ prep_nested_keys <- function(spec, shift = FALSE) {
 set_spec <- function(x, spec) {
   attr(x, "tib_spec") <- spec
   x
+}
+
+tibblify_prepare_unspecified <- function(spec, unspecified, call) {
+  unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
+
+  if (unspecified %in% c("inform", "error")) {
+    spec_inform_unspecified(spec, action = unspecified, call = call)
+    spec
+  } else {
+    spec_replace_unspecified(spec, unspecified)
+  }
+}
+
+spec_replace_unspecified <- function(spec, unspecified) {
+  unspecified <- arg_match(unspecified, c("drop", "list"))
+  fields <- spec$fields
+  unspecified_idx <- integer()
+
+  for (i in seq_along(spec$fields)) {
+    field <- spec$fields[[i]]
+    if (field$type == "unspecified") {
+      if (unspecified == "drop") {
+        unspecified_idx <- c(unspecified_idx, i)
+      } else {
+        fields[[i]] <- tib_variant(field$key, required = field$required)
+      }
+    } else if (field$type %in% c("df", "row")) {
+      fields[[i]] <- spec_replace_unspecified(field, unspecified)
+    }
+  }
+
+  if (unspecified == "drop") {
+    fields[unspecified_idx] <- NULL
+  }
+
+  spec$fields <- fields
+  spec
 }
 
 #' Examine the column specification
