@@ -650,50 +650,51 @@ test_that("discog works", {
   )
 
   spec_collection <- spec_df(
-    instance_id = tib_int("instance_id"),
-    date_added = tib_chr("date_added"),
-    basic_information = tib_row(
+    tib_int("instance_id"),
+    tib_chr("date_added"),
+    tib_row(
       "basic_information",
-      labels = tib_df(
+      tib_df(
         "labels",
-        name = tib_chr("name"),
-        entity_type = tib_chr("entity_type"),
-        catno = tib_chr("catno"),
-        resource_url = tib_chr("resource_url"),
-        id = tib_int("id"),
-        entity_type_name = tib_chr("entity_type_name")
+        tib_chr("name"),
+        tib_chr("entity_type"),
+        tib_chr("catno"),
+        tib_chr("resource_url"),
+        tib_int("id"),
+        tib_chr("entity_type_name"),
       ),
-      year = tib_int("year"),
-      master_url = tib_chr("master_url"),
-      artists = tib_df(
+      tib_int("year"),
+      tib_chr("master_url"),
+      tib_df(
         "artists",
-        join = tib_chr("join"),
-        name = tib_chr("name"),
-        anv = tib_chr("anv"),
-        tracks = tib_chr("tracks"),
-        role = tib_chr("role"),
-        resource_url = tib_chr("resource_url"),
-        id = tib_int("id")
+        tib_chr("join"),
+        tib_chr("name"),
+        tib_chr("anv"),
+        tib_chr("tracks"),
+        tib_chr("role"),
+        tib_chr("resource_url"),
+        tib_int("id"),
       ),
-      id = tib_int("id"),
-      thumb = tib_chr("thumb"),
-      title = tib_chr("title"),
-      formats = tib_df(
+      tib_int("id"),
+      tib_chr("thumb"),
+      tib_chr("title"),
+      tib_df(
         "formats",
-        descriptions = tib_chr_vec(
+        tib_chr_vec(
           "descriptions",
-          transform = ~ vctrs::vec_c(!!!.x, .ptype = character())
+          required = FALSE,
+          input_form = "scalar_list",
         ),
-        text = tib_chr("text", required = FALSE),
-        name = tib_chr("name"),
-        qty = tib_chr("qty")
+        tib_chr("text", required = FALSE),
+        tib_chr("name"),
+        tib_chr("qty"),
       ),
-      cover_image = tib_chr("cover_image"),
-      resource_url = tib_chr("resource_url"),
-      master_id = tib_int("master_id")
+      tib_chr("cover_image"),
+      tib_chr("resource_url"),
+      tib_int("master_id"),
     ),
-    id = tib_int("id"),
-    rating = tib_int("rating"),
+    tib_int("id"),
+    tib_int("rating"),
   )
 
   expect_equal(tibblify(discog[1], spec_collection), row1)
