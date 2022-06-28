@@ -46,6 +46,8 @@ determined?}
 \code{caller_env()}. The function will be mentioned in error messages as the
 source of the error. See the \code{call} argument of \code{\link[=abort]{abort()}} for more
 information.}
+
+\item{simplify_list}{Should scalar lists be simplified to vectors?}
 }
 \value{
 A specification object that can used in \code{tibblify()}.

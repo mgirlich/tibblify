@@ -208,3 +208,5 @@ df_guess_required <- function(df_list, all_cols) {
 
   col_required
 }
+
+globalVariables("had_empty_lists")

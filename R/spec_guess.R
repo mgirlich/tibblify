@@ -7,6 +7,7 @@
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
 #' @param empty_list_unspecified Treat empty lists as unspecified?
+#' @param simplify_list Should scalar lists be simplified to vectors?
 #' @param inform_unspecified Inform about fields whose type could not be
 #'   determined?
 #' @param call The execution environment of a currently running function, e.g.
