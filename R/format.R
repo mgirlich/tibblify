@@ -102,7 +102,7 @@ format_fields <- function(f_name, fields, width, args = NULL, force_names) {
     }
   )
 
-  args <- purrr::compact(args)
+  args <- list_drop_null(args)
   if (is_empty(args)) {
     parts <- fields_formatted
   } else {
@@ -110,14 +110,15 @@ format_fields <- function(f_name, fields, width, args = NULL, force_names) {
   }
 
   if (is_empty(parts)) {
+    return(paste0(f_name, "()"))
     inner <- ""
-  } else {
-    inner <- collapse_with_pad(
-      parts,
-      multi_line = TRUE,
-      width = width
-    )
   }
+
+  inner <- collapse_with_pad(
+    parts,
+    multi_line = TRUE,
+    width = width
+  )
 
   paste0(
     f_name, "(",
@@ -164,7 +165,7 @@ format.tib_scalar <- function(x, ...,
     values_to = if (!is_null(x$values_to)) paste0('"', x$values_to, '"'),
     names_to = if (!is_null(x$names_to)) paste0('"', x$names_to, '"')
   )
-  parts <- purrr::discard(parts, is.null)
+  parts <- list_drop_null(parts)
 
   f_name <- get_f_name(x)
   nchar_prefix <- nchar_indent + nchar(f_name) + 2
@@ -175,7 +176,7 @@ format.tib_scalar <- function(x, ...,
     width = width
   )
 
-  paste0(f_name_col(x), "(", parts, ")")
+  paste0(colour_tib(x)(f_name), "(", parts, ")")
 }
 
 #' @export
@@ -341,8 +342,8 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   line_length <- nchar(x_single_line) + nchar_prefix
 
   if (multi_line ||
-    length(x) > 2 ||
-    line_length > tibblify_width(width)) {
+      length(x) > 2 ||
+      line_length > tibblify_width(width)) {
     x_multi_line
   } else {
     x_single_line

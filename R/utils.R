@@ -81,3 +81,12 @@ stop_vector_wrong_size_element <- function(path, input_form) {
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
 }
+
+list_drop_null <- function(x) {
+  null_flag <- vec_equal_na(x)
+  if (any(null_flag)) {
+    x <- x[!null_flag]
+  }
+
+  x
+}
