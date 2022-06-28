@@ -209,6 +209,7 @@ format.tib_row <- function(x, ..., width = NULL, names = NULL) {
 format.tib_df <- function(x, ..., width = NULL, names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   format_fields(
     "tib_df",
     fields = x$fields,
@@ -226,16 +227,7 @@ format.tib_df <- function(x, ..., width = NULL, names = NULL) {
 # colours -----------------------------------------------------------------
 
 f_name_col <- function(x) {
-  if (!has_colour()) {
-    return(get_f_name(x))
-  }
-
   colour_tib(x)(get_f_name(x))
-}
-
-has_colour <- function() {
-  cli::num_ansi_colors() > 1 ||
-    identical(Sys.getenv("TESTTHAT"), "true")
 }
 
 colour_tib <- function(x) {
