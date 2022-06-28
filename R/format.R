@@ -37,6 +37,7 @@ print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
 format.spec_df <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   format_fields(
     "spec_df",
     fields = x$fields,
@@ -53,6 +54,7 @@ format.spec_df <- function(x, width = NULL, ..., names = NULL) {
 format.spec_row <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   format_fields(
     "spec_row",
     fields = x$fields,
@@ -68,6 +70,7 @@ format.spec_row <- function(x, width = NULL, ..., names = NULL) {
 format.spec_object <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   format_fields(
     "spec_object",
     fields = x$fields,
@@ -139,7 +142,9 @@ is_tib_name_canonical <- function(field, name) {
 print.tib_collector <- function(x, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   cat(format(x, ..., names = names))
+  invisible(x)
 }
 
 #' @export
@@ -187,6 +192,7 @@ format.tib_unspecified <- format.tib_scalar
 format.tib_row <- function(x, ..., width = NULL, names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
+
   format_fields(
     "tib_row",
     fields = x$fields,
