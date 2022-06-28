@@ -66,7 +66,7 @@
       (expect_error(tib_int_vec("x", values_to = 1)))
     Output
       <error/vctrs_error_incompatible_type>
-      Error in `tib_vector_impl()`:
+      Error in `tib_int_vec()`:
       ! Can't convert `values_to` <double> to <character>.
     Code
       (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
@@ -98,7 +98,7 @@
         names_to = 1)))
     Output
       <error/vctrs_error_incompatible_type>
-      Error in `tib_vector_impl()`:
+      Error in `tib_int_vec()`:
       ! Can't convert `names_to` <double> to <character>.
     Code
       (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",

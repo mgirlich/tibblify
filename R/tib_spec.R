@@ -346,27 +346,8 @@ tib_vector_impl <- function(key,
   if (!is_null(default)) {
     default <- vec_cast(default, ptype)
   }
-  if (!is_null(values_to)) {
-    values_to <- vec_cast(values_to, character())
-    vec_assert(values_to, size = 1, call = call)
-  }
-  if (!is_null(names_to)) {
-    if (is_null(values_to)) {
-      msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
-      cli::cli_abort(msg, call = call)
-    }
-    if (input_form != "object") {
-      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
-      cli::cli_abort(msg, call = call)
-    }
-
-    names_to <- vec_cast(names_to, character())
-    vec_assert(names_to, size = 1, call = call)
-    if (names_to == values_to) {
-      msg <- "{.arg names_to} must be different from {.arg values_to}."
-      cli::cli_abort(msg, call = call)
-    }
-  }
+  values_to <- tib_check_values_to(values_to, call)
+  names_to <- tib_check_names_to(names_to, values_to, input_form, call)
 
   class <- NULL
   if (tib_has_special_scalar(ptype)) {
@@ -385,6 +366,37 @@ tib_vector_impl <- function(key,
     names_to = names_to,
     class = class
   )
+}
+
+tib_check_values_to <- function(values_to, call) {
+  if (!is_null(values_to)) {
+    values_to <- vec_cast(values_to, character(), call = call)
+    vec_assert(values_to, size = 1, call = call)
+  }
+
+  values_to
+}
+
+tib_check_names_to <- function(names_to, values_to, input_form, call) {
+  if (!is_null(names_to)) {
+    if (is_null(values_to)) {
+      msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
+      cli::cli_abort(msg, call = call)
+    }
+    if (input_form != "object") {
+      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
+      cli::cli_abort(msg, call = call)
+    }
+
+    names_to <- vec_cast(names_to, character(), call = call)
+    vec_assert(names_to, size = 1, call = call)
+    if (names_to == values_to) {
+      msg <- "{.arg names_to} must be different from {.arg values_to}."
+      cli::cli_abort(msg, call = call)
+    }
+  }
+
+  names_to
 }
 
 tib_has_special_vector <- function(ptype) {
