@@ -26,6 +26,7 @@
 spec_guess <- function(x,
                        ...,
                        empty_list_unspecified = FALSE,
+                       simplify_list = FALSE,
                        inform_unspecified = should_inform_unspecified(),
                        call = current_call()) {
   check_dots_empty()
@@ -33,6 +34,7 @@ spec_guess <- function(x,
     spec_guess_df(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list,
       inform_unspecified = inform_unspecified,
       call = call
     )
@@ -40,14 +42,13 @@ spec_guess <- function(x,
     spec_guess_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list,
       inform_unspecified = inform_unspecified,
       call = call
     )
   } else {
-    abort(paste0(
-      "Cannot guess the specification for type ",
-      vctrs::vec_ptype_full(x)
-    ))
+    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
+    cli::cli_abort(msg, call = call)
   }
 }
 
@@ -209,7 +210,7 @@ spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()
   unspecified_paths <- get_unspecfied_paths(spec)
 
   lines <- format_unspecified_paths(unspecified_paths)
-  if (is_empty(lines)) return()
+  if (is_empty(lines)) return(spec)
 
   msg <- c(
     "The spec contains {length(lines)} unspecified field{?s}:",
@@ -221,6 +222,8 @@ spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()
     inform = cli::cli_inform(msg),
     error = cli::cli_abort(msg, call = call)
   )
+
+  invisible(spec)
 }
 
 format_unspecified_paths <- function(path_list, path = character()) {

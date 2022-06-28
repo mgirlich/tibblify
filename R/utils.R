@@ -27,42 +27,32 @@ path_to_string <- function(path) {
 
 stop_required <- function(path) {
   path_str <- path_to_string(path)
-  message <- c(
-    paste0("Required element absent at path ", path_str)
-  )
-  abort(message)
+  msg <- "Required element absent at path {path_str}."
+  cli::cli_abort(msg)
 }
 
 stop_scalar <- function(path) {
   path_str <- path_to_string(path)
-  message <- c(
-    paste0("Element at path ", path_str, " must have size 1.")
-  )
-  abort(message)
+  msg <- "Element at path {path_str} must have size 1."
+  cli::cli_abort(msg)
 }
 
 stop_duplicate_name <- function(path, name) {
   path_str <- path_to_string(path)
-  message <- c(
-    paste0("Element at path ", path_str, " has duplicate name ", name, ".")
-  )
-  abort(message)
+  msg <- "Element at path {path_str} has duplicate name {.val {name}}."
+  cli::cli_abort(msg)
 }
 
 stop_empty_name <- function(path, index) {
   path_str <- path_to_string(path)
-  message <- c(
-    paste0("Element at path ", path_str, " has empty name at position ", index + 1, ".")
-  )
-  abort(message)
+  msg <- "Element at path {path_str} has empty name at position {index + 1}."
+  cli::cli_abort(msg)
 }
 
 stop_names_is_null <- function(path) {
   path_str <- path_to_string(path)
-  message <- c(
-    paste0("Element at path ", path_str, " has NULL names.")
-  )
-  abort(message)
+  msg <- "Element at path {path_str} has {.code NULL} names."
+  cli::cli_abort(msg)
 }
 
 stop_vector_non_list_element <- function(path, input_form) {
@@ -80,4 +70,13 @@ stop_vector_wrong_size_element <- function(path, input_form) {
 
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
+}
+
+list_drop_null <- function(x) {
+  null_flag <- vec_equal_na(x)
+  if (any(null_flag)) {
+    x <- x[!null_flag]
+  }
+
+  x
 }

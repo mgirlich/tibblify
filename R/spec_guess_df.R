@@ -3,7 +3,7 @@
 spec_guess_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
-                          simplify_list = TRUE,
+                          simplify_list = FALSE,
                           inform_unspecified = should_inform_unspecified(),
                           call = current_call()) {
   check_dots_empty()
@@ -31,10 +31,8 @@ spec_guess_df <- function(x,
       call = call
     )
   } else {
-    abort(paste0(
-      "Cannot guess the specification for type ",
-      vctrs::vec_ptype_full(x)
-    ), call = call)
+    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
+    cli::cli_abort(msg, call = call)
   }
 
   if (inform_unspecified) spec_inform_unspecified(spec)

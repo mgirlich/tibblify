@@ -62,30 +62,35 @@ test_that("POSIXlt is converted to POSIXct for vector elements", {
 
 test_that("can guess tib_vector for a scalar list", {
   expect_equal(
-    spec_guess_object(list(x = list(TRUE, TRUE, NULL))),
+    spec_guess_object(list(x = list(TRUE, TRUE, NULL)), simplify_list = FALSE),
+    spec_object(x = tib_variant("x"))
+  )
+
+  expect_equal(
+    spec_guess_object(list(x = list(TRUE, TRUE, NULL)), simplify_list = TRUE),
     spec_object(x = tib_lgl_vec("x", input_form = "scalar_list"))
   )
 
   expect_equal(
-    spec_guess_object(list(x = list(new_datetime(1)))),
+    spec_guess_object(list(x = list(new_datetime(1))), simplify_list = TRUE),
     spec_object(x = tib_vector("x", new_datetime(), input_form = "scalar_list"))
   )
 
   # checks size
   expect_equal(
-    spec_guess_object(list(x = list(1, 1:2))),
+    spec_guess_object(list(x = list(1, 1:2)), simplify_list = TRUE),
     spec_object(x = tib_variant("x"))
   )
 
   expect_equal(
-    spec_guess_object(list(x = list(1, integer()))),
+    spec_guess_object(list(x = list(1, integer())), simplify_list = TRUE),
     spec_object(x = tib_variant("x"))
   )
 })
 
 test_that("can guess tib_vector for input form = object", {
   expect_equal(
-    spec_guess_object(list(x = list(a = TRUE, b = TRUE))),
+    spec_guess_object(list(x = list(a = TRUE, b = TRUE)), simplify_list = TRUE),
     spec_object(x = tib_lgl_vec("x", input_form = "object"))
   )
 })
@@ -121,7 +126,7 @@ test_that("can guess tib_row", {
 
 test_that("can guess tib_row with a scalar list", {
   expect_equal(
-    spec_guess_object(list(x = list(a = list(1L, 2L), b = "a"))),
+    spec_guess_object(list(x = list(a = list(1L, 2L), b = "a")), simplify_list = TRUE),
     spec_object(
       x = tib_row(
         "x",

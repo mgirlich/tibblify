@@ -42,18 +42,14 @@ tibblify <- function(x,
 
   if (is_null(spec)) {
     spec <- spec_guess(x, inform_unspecified = TRUE, call = current_call())
-    unspecified <- "list"
-  } else {
-    unspecified <- unspecified %||% "error"
-    unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
-    spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
+    unspecified <- unspecified %||% "list"
   }
 
+  spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
   out <- tibblify_impl(x, spec)
 
   if (inherits(spec, "spec_object")) {
-    # TODO need custom class so that `spec` attribute isn't always printed
     out <- purrr::map2(spec$fields, out, finalize_spec_object)
   }
 
@@ -161,17 +157,12 @@ prep_nested_keys <- function(spec, shift = FALSE) {
   )
 }
 
-set_spec <- function(x, spec) {
-  attr(x, "tib_spec") <- spec
-  x
-}
-
 tibblify_prepare_unspecified <- function(spec, unspecified, call) {
+  unspecified <- unspecified %||% "error"
   unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
 
   if (unspecified %in% c("inform", "error")) {
     spec_inform_unspecified(spec, action = unspecified, call = call)
-    spec
   } else {
     spec_replace_unspecified(spec, unspecified)
   }
@@ -180,13 +171,13 @@ tibblify_prepare_unspecified <- function(spec, unspecified, call) {
 spec_replace_unspecified <- function(spec, unspecified) {
   unspecified <- arg_match(unspecified, c("drop", "list"))
   fields <- spec$fields
-  unspecified_idx <- integer()
 
-  for (i in seq_along(spec$fields)) {
+  # need to go backwards over fields because some are removed
+  for (i in rev(seq_along(spec$fields))) {
     field <- spec$fields[[i]]
     if (field$type == "unspecified") {
       if (unspecified == "drop") {
-        unspecified_idx <- c(unspecified_idx, i)
+        fields[[i]] <- NULL
       } else {
         fields[[i]] <- tib_variant(field$key, required = field$required)
       }
@@ -195,12 +186,13 @@ spec_replace_unspecified <- function(spec, unspecified) {
     }
   }
 
-  if (unspecified == "drop") {
-    fields[unspecified_idx] <- NULL
-  }
-
   spec$fields <- fields
   spec
+}
+
+set_spec <- function(x, spec) {
+  attr(x, "tib_spec") <- spec
+  x
 }
 
 #' Examine the column specification

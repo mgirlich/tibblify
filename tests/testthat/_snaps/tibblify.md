@@ -5,7 +5,7 @@
     Output
       <error/rlang_error>
       Error in `stop_names_is_null()`:
-      ! Element at path <root> has NULL names.
+      ! Element at path <root> has `NULL` names.
     Code
       (expect_error(tibblify(list(x = 1, 2), spec)))
     Output
@@ -35,27 +35,27 @@
     Output
       <error/rlang_error>
       Error in `stop_duplicate_name()`:
-      ! Element at path <root> has duplicate name x.
+      ! Element at path <root> has duplicate name "x".
 
 # scalar column works
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
@@ -99,11 +99,11 @@
 
 # vector column works
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x
+    Required element absent at path [[1]]$x.
 
 ---
 
@@ -150,13 +150,13 @@
 
 # list column works
 
-    Required element absent at path [[2]]$x
+    Required element absent at path [[2]]$x.
 
 # df column works
 
-    Required element absent at path [[2]]$x
+    Required element absent at path [[2]]$x.
 
 # list of df column works
 
-    Required element absent at path [[2]]$x
+    Required element absent at path [[2]]$x.
 

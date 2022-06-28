@@ -11,7 +11,7 @@
     Output
       <error/rlang_error>
       Error in `spec_guess_df()`:
-      ! Cannot guess the specification for type integer
+      ! Cannot guess the specification for type integer.
 
 # inform about unspecified elements
 

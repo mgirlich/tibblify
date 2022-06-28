@@ -48,7 +48,8 @@ spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
     vector_allows_empty_list = vector_allows_empty_list
   )
   if (!is_null(.names_to) && .names_to %in% names(out$fields)) {
-    abort("The column name of `.names_to` is already specified in `...`")
+    msg <- "The column name of {.arg .names_to} is already specified in {.arg ...}."
+    cli::cli_abort(msg)
   }
 
   out
@@ -78,7 +79,7 @@ spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call =
   structure(
     list2(
       type = type,
-      fields = prep_spec_fields(fields, call) %||% list(),
+      fields = prep_spec_fields(fields, call),
       ...,
       vector_allows_empty_list = vector_allows_empty_list
     ),
@@ -89,14 +90,18 @@ spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call =
 prep_spec_fields <- function(fields, call) {
   fields <- flatten_fields(fields)
   if (is_null(fields)) {
-    return(fields)
+    return(list())
   }
 
   collector_field <- purrr::map_lgl(fields, ~ inherits(.x, "tib_collector"))
   if (!all(collector_field)) {
-    abort("Every element in `...` must be a tib collector.", call = call)
+    cli::cli_abort("Every element in {.arg ...} must be a tib collector.", call = call)
   }
 
+  spec_auto_name_fields(fields, call)
+}
+
+spec_auto_name_fields <- function(fields, call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
   auto_nms <- purrr::map_chr(
@@ -112,7 +117,6 @@ prep_spec_fields <- function(fields, call) {
   field_nms[unnamed] <- auto_nms
   field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = call)
   names(fields) <- field_nms_repaired
-
   fields
 }
 
@@ -133,9 +137,14 @@ flatten_fields <- function(fields) {
 
 # field specifiers --------------------------------------------------------
 
-tib_collector <- function(key, type, ..., required = TRUE, class = NULL) {
-  check_key(key)
-  check_required(required)
+tib_collector <- function(key,
+                          type,
+                          ...,
+                          required = TRUE,
+                          class = NULL,
+                          call = caller_env()) {
+  check_key(key, call)
+  check_required(required, call)
 
   structure(
     list(
@@ -170,14 +179,15 @@ tib_scalar_impl <- function(key,
                             ...,
                             required = TRUE,
                             default = NULL,
-                            transform = NULL) {
+                            transform = NULL,
+                            call = caller_env()) {
   check_dots_empty()
   ptype <- vec_ptype(ptype)
   if (is_null(default)) {
     default <- vec_init(ptype)
   } else {
     vec_assert(default, size = 1L)
-    default <- vec_cast(default, ptype)
+    default <- vec_cast(default, ptype, call = call)
   }
 
   class <- NULL
@@ -192,7 +202,8 @@ tib_scalar_impl <- function(key,
     ptype = ptype,
     default_value = default,
     transform = prep_transform(transform),
-    class = class
+    class = class,
+    call = call
   )
 }
 
@@ -341,32 +352,17 @@ tib_vector_impl <- function(key,
                             names_to = NULL,
                             call = caller_env()) {
   check_dots_empty()
-  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  input_form <- arg_match0(
+    input_form,
+    c("vector", "scalar_list", "object"),
+    error_call = call
+  )
   ptype <- vec_ptype(ptype)
   if (!is_null(default)) {
-    default <- vec_cast(default, ptype)
+    default <- vec_cast(default, ptype, call = call)
   }
-  if (!is_null(values_to)) {
-    values_to <- vec_cast(values_to, character())
-    vec_assert(values_to, size = 1, call = call)
-  }
-  if (!is_null(names_to)) {
-    if (is_null(values_to)) {
-      msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
-      cli::cli_abort(msg, call = call)
-    }
-    if (input_form != "object") {
-      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
-      cli::cli_abort(msg, call = call)
-    }
-
-    names_to <- vec_cast(names_to, character())
-    vec_assert(names_to, size = 1, call = call)
-    if (names_to == values_to) {
-      msg <- "{.arg names_to} must be different from {.arg values_to}."
-      cli::cli_abort(msg, call = call)
-    }
-  }
+  values_to <- tib_check_values_to(values_to, call)
+  names_to <- tib_check_names_to(names_to, values_to, input_form, call)
 
   class <- NULL
   if (tib_has_special_scalar(ptype)) {
@@ -383,8 +379,40 @@ tib_vector_impl <- function(key,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to,
-    class = class
+    class = class,
+    call = call
   )
+}
+
+tib_check_values_to <- function(values_to, call) {
+  if (!is_null(values_to)) {
+    values_to <- vec_cast(values_to, character(), call = call)
+    vec_assert(values_to, size = 1, call = call)
+  }
+
+  values_to
+}
+
+tib_check_names_to <- function(names_to, values_to, input_form, call) {
+  if (!is_null(names_to)) {
+    if (is_null(values_to)) {
+      msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
+      cli::cli_abort(msg, call = call)
+    }
+    if (input_form != "object") {
+      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
+      cli::cli_abort(msg, call = call)
+    }
+
+    names_to <- vec_cast(names_to, character(), call = call)
+    vec_assert(names_to, size = 1, call = call)
+    if (names_to == values_to) {
+      msg <- "{.arg names_to} must be different from {.arg values_to}."
+      cli::cli_abort(msg, call = call)
+    }
+  }
+
+  names_to
 }
 
 tib_has_special_vector <- function(ptype) {
@@ -550,7 +578,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env()) %||% list()
+    fields = prep_spec_fields(list2(...), call = current_env())
   )
 }
 
@@ -561,7 +589,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env()) %||% list(),
+    fields = prep_spec_fields(list2(...), call = current_env()),
     names_col = .names_to
   )
 }
@@ -577,7 +605,7 @@ prep_transform <- function(f) {
   as_function(f)
 }
 
-check_key <- function(key) {
+check_key <- function(key, call = caller_env()) {
   if (is.character(key)) {
     return()
   }
@@ -587,15 +615,17 @@ check_key <- function(key) {
   }
 
   if (!is.list(key)) {
-    abort("`key` must be a character, integer or a list.")
+    msg <- "{.arg key} must be a character, integer or a list."
+    cli::cli_abort(msg, call = call)
   }
 
   valid_elt <- purrr::map_lgl(key, ~ is_scalar_character(.x) || is_scalar_integer(.x))
   if (!all(valid_elt)) {
-    abort("Every element of `key` must be a scalar character or scalar integer.")
+    msg <- "Every element of {.arg key} must be a scalar character or scalar integer."
+    cli::cli_abort(msg, call = call)
   }
 }
 
-check_required <- function(required) {
-  vec_assert(required, logical(), 1L)
+check_required <- function(required, call) {
+  vec_assert(required, logical(), size = 1L, call = call)
 }

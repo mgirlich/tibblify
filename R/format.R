@@ -25,7 +25,8 @@
 #' print(spec, names = FALSE)
 #' print(spec, names = TRUE)
 print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
   cat(format(x, width = width, ..., names = names))
 
   invisible(x)
@@ -34,7 +35,9 @@ print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
 #' @rdname formatting
 #' @export
 format.spec_df <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
+
   format_fields(
     "spec_df",
     fields = x$fields,
@@ -49,7 +52,9 @@ format.spec_df <- function(x, width = NULL, ..., names = NULL) {
 
 #' @export
 format.spec_row <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
+
   format_fields(
     "spec_row",
     fields = x$fields,
@@ -63,7 +68,9 @@ format.spec_row <- function(x, width = NULL, ..., names = NULL) {
 
 #' @export
 format.spec_object <- function(x, width = NULL, ..., names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
+
   format_fields(
     "spec_object",
     fields = x$fields,
@@ -95,7 +102,7 @@ format_fields <- function(f_name, fields, width, args = NULL, force_names) {
     }
   )
 
-  args <- purrr::compact(args)
+  args <- list_drop_null(args)
   if (is_empty(args)) {
     parts <- fields_formatted
   } else {
@@ -103,14 +110,15 @@ format_fields <- function(f_name, fields, width, args = NULL, force_names) {
   }
 
   if (is_empty(parts)) {
+    return(paste0(f_name, "()"))
     inner <- ""
-  } else {
-    inner <- collapse_with_pad(
-      parts,
-      multi_line = TRUE,
-      width = width
-    )
   }
+
+  inner <- collapse_with_pad(
+    parts,
+    multi_line = TRUE,
+    width = width
+  )
 
   paste0(
     f_name, "(",
@@ -132,9 +140,12 @@ is_tib_name_canonical <- function(field, name) {
 # format simple columns ---------------------------------------------------
 
 #' @export
-print.tib_collector <- function(x, ..., names = NULL) {
-  names <- names %||% get_force_names()
-  cat(format(x, ..., names = names))
+print.tib_collector <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% should_force_names()
+  check_flag(names)
+
+  cat(format(x, width = width, ..., names = names))
+  invisible(x)
 }
 
 #' @export
@@ -154,7 +165,7 @@ format.tib_scalar <- function(x, ...,
     values_to = if (!is_null(x$values_to)) paste0('"', x$values_to, '"'),
     names_to = if (!is_null(x$names_to)) paste0('"', x$names_to, '"')
   )
-  parts <- purrr::discard(parts, is.null)
+  parts <- list_drop_null(parts)
 
   f_name <- get_f_name(x)
   nchar_prefix <- nchar_indent + nchar(f_name) + 2
@@ -165,7 +176,7 @@ format.tib_scalar <- function(x, ...,
     width = width
   )
 
-  paste0(f_name_col(x), "(", parts, ")")
+  paste0(colour_tib(x)(f_name), "(", parts, ")")
 }
 
 #' @export
@@ -180,7 +191,9 @@ format.tib_unspecified <- format.tib_scalar
 
 #' @export
 format.tib_row <- function(x, ..., width = NULL, names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
+
   format_fields(
     "tib_row",
     fields = x$fields,
@@ -195,7 +208,9 @@ format.tib_row <- function(x, ..., width = NULL, names = NULL) {
 
 #' @export
 format.tib_df <- function(x, ..., width = NULL, names = NULL) {
-  names <- names %||% get_force_names()
+  names <- names %||% should_force_names()
+  check_flag(names)
+
   format_fields(
     "tib_df",
     fields = x$fields,
@@ -213,16 +228,7 @@ format.tib_df <- function(x, ..., width = NULL, names = NULL) {
 # colours -----------------------------------------------------------------
 
 f_name_col <- function(x) {
-  if (!has_colour()) {
-    return(get_f_name(x))
-  }
-
   colour_tib(x)(get_f_name(x))
-}
-
-has_colour <- function() {
-  cli::num_ansi_colors() > 1 ||
-    identical(Sys.getenv("TESTTHAT"), "true")
 }
 
 colour_tib <- function(x) {
@@ -310,12 +316,9 @@ format_ptype.Date <- function(x) {"vctrs::new_date()"}
 #' @export
 format_ptype.POSIXct <- function(x) {
   tzone <- attr(x, "tzone")
+  tzone_str <- if (!is_null(tzone)) paste0("tzone = ", deparse(tzone))
 
-  paste0(
-    "vctrs::new_datetime(",
-    if (!is_null(tzone)) paste0("tzone = ", deparse(tzone)),
-    ")"
-  )
+  paste0("vctrs::new_datetime(", tzone_str,")")
 }
 
 
@@ -339,8 +342,8 @@ collapse_with_pad <- function(x, multi_line, nchar_prefix = 0, width) {
   line_length <- nchar(x_single_line) + nchar_prefix
 
   if (multi_line ||
-    length(x) > 2 ||
-    line_length > tibblify_width(width)) {
+      length(x) > 2 ||
+      line_length > tibblify_width(width)) {
     x_multi_line
   } else {
     x_single_line
@@ -364,7 +367,7 @@ pad <- function(x, n) {
 name_exprs <- function(exprs, names, show_name) {
   # nocov start
   if (length(names) == 0 || length(exprs) == 0) {
-    abort("something went wrong")
+    cli::cli_abort("Empty names or empty exprs", .internal = TRUE)
   }
   # nocov end
 
@@ -374,6 +377,6 @@ name_exprs <- function(exprs, names, show_name) {
   ifelse(show_name, paste0(names, " = ", exprs), exprs)
 }
 
-get_force_names <- function() {
+should_force_names <- function() {
   getOption("tibblify.print_names", default = FALSE)
 }
