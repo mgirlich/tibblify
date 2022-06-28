@@ -4,12 +4,17 @@ spec_guess_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
                           simplify_list = TRUE,
+                          inform_unspecified = show_show_unspecified(),
                           call = current_call()) {
   check_dots_empty()
+  check_flag(empty_list_unspecified, call = call)
+  check_flag(simplify_list, call = call)
+  check_flag(inform_unspecified, call = call)
+
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
-    spec_df(
+    spec <- spec_df(
       !!!fields,
       vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
     )
@@ -19,7 +24,7 @@ spec_guess_df <- function(x,
       cli::cli_abort(msg, call = call)
     }
 
-    spec_guess_object_list(
+    spec <- spec_guess_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -31,6 +36,9 @@ spec_guess_df <- function(x,
       vctrs::vec_ptype_full(x)
     ), call = call)
   }
+
+  if (inform_unspecified) spec_inform_unspecified(spec)
+  spec
 }
 
 col_to_spec <- function(col, name, empty_list_unspecified) {

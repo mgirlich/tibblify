@@ -1,3 +1,11 @@
+check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
+  vctrs::vec_assert(x, logical(), size = 1L, arg = arg, call = call)
+
+  if (is.na(x)) {
+    cli::cli_abort("{.arg arg} must not be {.code NA}.", call = call)
+  }
+}
+
 path_to_string <- function(path) {
   if (length(path) == 0) {
     return("<root>")
