@@ -323,12 +323,9 @@ format_ptype.Date <- function(x) {"vctrs::new_date()"}
 #' @export
 format_ptype.POSIXct <- function(x) {
   tzone <- attr(x, "tzone")
+  tzone_str <- if (!is_null(tzone)) paste0("tzone = ", deparse(tzone))
 
-  paste0(
-    "vctrs::new_datetime(",
-    if (!is_null(tzone)) paste0("tzone = ", deparse(tzone)),
-    ")"
-  )
+  paste0("vctrs::new_datetime(", tzone_str,")")
 }
 
 
