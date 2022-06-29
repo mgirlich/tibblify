@@ -142,12 +142,15 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
+    if (Rf_isNull(value)) {
+      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      return;
+    }
+
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SEXP value_casted = PROTECT(vec_cast(value, ptype));
     R_len_t size = short_vec_size(value_casted);
-    if (size == 0) {
-      value_casted = this->default_value;
-    } else if (size > 1) {
+    if (size != 1) {
       stop_scalar(path);
     }
 
@@ -178,17 +181,19 @@ public:
 
 
 #define ADD_VALUE(F_SCALAR)                                    \
+  if (Rf_isNull(value)) {                                      \
+    *this->data_ptr = this->default_value;                     \
+    return;                                                    \
+  }                                                            \
+                                                               \
   if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
   SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
   R_len_t size = short_vec_size(value_casted);                 \
-  if (size == 0) {                                             \
-    *this->data_ptr = this->default_value;                     \
-  } else if (size == 1) {                                      \
-    *this->data_ptr = F_SCALAR(value_casted);                  \
-  } else if (size > 1) {                                       \
+  if (size != 1) {                                             \
     stop_scalar(path);                                         \
   }                                                            \
                                                                \
+  *this->data_ptr = F_SCALAR(value_casted);                    \
   ++this->data_ptr;                                            \
   UNPROTECT(2);
 
@@ -475,6 +480,19 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
+    if (Rf_isNull(value)) {
+      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      return;
+    }
+
+    if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
+      if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
+        // TODO this should probably be `vec_init(this->ptype, 0)`
+        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+        return;
+      }
+    }
+
     SEXP names;
     if (this->uses_names_col) {
       names = Rf_getAttrib(value, R_NamesSymbol);
@@ -484,25 +502,10 @@ public:
       value = unchop_value(value, path);
     }
 
-    // TODO use `NULL` if `value` is empty?
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
-      // TODO should be controlled via an argument to `tibblify()`
-      if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
-        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-        return;
-      }
-    }
-
     SEXP value_casted = PROTECT(vec_cast(value, ptype));
 
     if (this->uses_values_col) {
-      if (Rf_isNull(value_casted)) {
-        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-        UNPROTECT(1);
-        return;
-      }
-
       R_len_t size = short_vec_size(value_casted);
       cpp11::writable::list df = init_out_df(size);
 
@@ -532,12 +535,10 @@ public:
 
   inline void add_default(Path& path) {
     if (required) stop_required(path);
-    // TODO what if output form is a tibble and names_to?
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
   inline void add_default_df() {
-    // TODO what if output form is a tibble and names_to?
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -568,6 +569,11 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
+    if (Rf_isNull(value)) {
+      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      return;
+    }
+
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
@@ -991,7 +997,11 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
+    if (Rf_isNull(value)) {
+      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+    } else {
+      SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
+    }
   }
 
   inline void add_default(Path& path) {
