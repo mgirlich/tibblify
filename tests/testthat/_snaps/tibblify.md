@@ -97,6 +97,15 @@
 
     Can't convert <double> to <datetime<local>>.
 
+---
+
+    Code
+      (expect_error(tib(list(x = integer()), tib_int("x", required = FALSE))))
+    Output
+      <error/rlang_error>
+      Error in `stop_scalar()`:
+      ! Element at path [[1]]$x must have size 1.
+
 # vector column works
 
     Required element absent at path [[1]]$x.

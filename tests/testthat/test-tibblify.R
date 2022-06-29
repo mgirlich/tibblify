@@ -56,7 +56,7 @@ test_that("scalar column works", {
   expect_equal(tib(list(), tib_chr("x", required = FALSE)), tibble(x = NA_character_))
   expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
-  # use default if empty element
+  # use default if NULL
   expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
   expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, default = 1)), tibble(x = 1))
   expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, default = 1.5)), tibble(x = 1.5))
@@ -65,6 +65,11 @@ test_that("scalar column works", {
     tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, default = dtt)),
     tibble(x = dtt)
   )
+
+  # errors if empty element
+  expect_snapshot({
+    (expect_error(tib(list(x = integer()), tib_int("x", required = FALSE))))
+  })
 
   # specified default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
@@ -154,6 +159,9 @@ test_that("vector column works", {
   # specified default works
   expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, default = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
   expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, default = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+
+  # uses default for NULL
+  expect_equal(tib(list(x = NULL), tib_int_vec("x", default = 1:2)), tibble(x = list_of(1:2)))
 
   # transform works
   expect_equal(
@@ -353,6 +361,15 @@ test_that("list column works", {
     tibble(x = list(1))
   )
 
+  # can handle NULL
+  expect_equal(
+    tibblify(
+      list(list(x = NULL)),
+      spec_df(x = tib_variant("x", default = 1))
+    ),
+    tibble(x = list(1))
+  )
+
   # transform works
   expect_equal(
     tibblify(
@@ -533,10 +550,9 @@ test_that("tibble with list columns work - #43", {
 
   y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
   spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
-  # TODO the second element should be `NULL`
   expect_equal(
     tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
-    tibble(x = list_of(tibble(a = 1:2), tibble(a = integer()), tibble(a = 1)))
+    tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
   )
 })
 
