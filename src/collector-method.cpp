@@ -43,6 +43,12 @@ inline void stop_names_is_null(const Path& path) {
   Rf_eval(call, tibblify_ns_env);
 }
 
+inline void stop_object_vector_names_is_null(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_object_vector_names_is_null"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
+}
+
 inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
   cpp11::r_string input_form_string;
   switch (input_form) {
@@ -407,15 +413,6 @@ private:
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
-    if (Rf_isNull(value)) {
-      return(value);
-    }
-
-    // FIXME should check with `vec_is_list()`
-    if (TYPEOF(value) != VECSXP) {
-      stop_vector_non_list_element(path, this->input_form);
-    }
-
     cpp11::integers n1({1});
     SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
                                           this->ptype,
@@ -494,11 +491,22 @@ public:
     }
 
     SEXP names;
-    if (this->uses_names_col) {
+    if (this->uses_names_col || this->input_form == vector_input_form::object) {
       names = Rf_getAttrib(value, R_NamesSymbol);
     }
 
-    if (this->input_form == scalar_list || this->input_form == object) {
+    if (this->input_form == vector_input_form::scalar_list || this->input_form == vector_input_form::object) {
+      // FIXME should check with `vec_is_list()`
+      if (TYPEOF(value) != VECSXP) {
+        stop_vector_non_list_element(path, this->input_form);
+      }
+
+      if (this->input_form == vector_input_form::object) {
+        if (Rf_isNull(names)) {
+          stop_object_vector_names_is_null(path);
+        }
+      }
+
       value = unchop_value(value, path);
     }
 
