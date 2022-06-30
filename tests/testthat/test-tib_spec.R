@@ -74,7 +74,7 @@ test_that("tib_vector checks arguments", {
     (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
 
     # input_form != "object"
-    (expect_error(tib_int_vec("x", values_to = "val", names_to = "name")))
+    (expect_error(tib_int_vec("x", input_form = "scalar_list", values_to = "val", names_to = "name")))
     # values_to = NULL
     (expect_error(tib_int_vec("x", input_form = "object", names_to = "name")))
     # values_to = names_to

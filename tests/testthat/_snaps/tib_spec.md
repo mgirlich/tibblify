@@ -75,11 +75,12 @@
       Error in `tib_int_vec()`:
       ! `values_to` must have size 1, not size 2.
     Code
-      (expect_error(tib_int_vec("x", values_to = "val", names_to = "name")))
+      (expect_error(tib_int_vec("x", input_form = "scalar_list", values_to = "val",
+        names_to = "name")))
     Output
       <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! `names_to` can only be used if `input_form` is "object".
+      ! `names_to` can't be used for `input_form = "scalar_list"`.
     Code
       (expect_error(tib_int_vec("x", input_form = "object", names_to = "name")))
     Output

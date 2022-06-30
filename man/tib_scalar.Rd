@@ -122,9 +122,9 @@ specified column.
 \item{names_to}{Can be one of the following:
 \itemize{
 \item \code{NULL}: the default. The inner names of the field are not used.
-\item A string: This can only be used if 1) \code{input_form = "object"} and
-2) \code{values_to} is a string. The inner names of the field go into the
-specified column.
+\item A string: This can only be used if 1) for the input form is \code{"object"}
+or \code{"vector"} and 2) \code{values_to} is a string. The inner names of the
+field go into the specified column.
 }}
 
 \item{.names_to}{A string giving the name of the column which will contain
