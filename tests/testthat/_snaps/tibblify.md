@@ -157,6 +157,16 @@
       Error in `stop_vector_wrong_size_element()`:
       ! Each element in list at path [[1]]$x must have size 1.
 
+# vector column can parse object
+
+    Code
+      (expect_error(tib(list(x = list(1, 2)), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_object_vector_names_is_null()`:
+      ! Element at path [[1]]$x has `NULL` names.
+      i Element must be named for `tib_vector(input_form = "object")`.
+
 # list column works
 
     Required element absent at path [[2]]$x.

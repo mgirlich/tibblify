@@ -55,6 +55,15 @@ stop_names_is_null <- function(path) {
   cli::cli_abort(msg)
 }
 
+stop_object_vector_names_is_null <- function(path) {
+  path_str <- path_to_string(path)
+  msg <- c(
+    "Element at path {path_str} has {.code NULL} names.",
+    i = 'Element must be named for {.code tib_vector(input_form = "object")}.'
+  )
+  cli::cli_abort(msg)
+}
+
 stop_vector_non_list_element <- function(path, input_form) {
   # FIXME {.code} cannot be interpolated correctly
   path_str <- path_to_string(path)

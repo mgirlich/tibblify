@@ -263,19 +263,16 @@ test_that("vector column can parse object", {
     tibble(x = list_of(c(1L, NA, 3L)))
   )
 
-  skip("Unclear what tib_vector should do with missing names")
-  expect_equal(
-    tib(list(x = list(1, 2)), spec),
-    tibble(x = list_of(c(1L, 2L)))
+  expect_snapshot(
+    (expect_error(tib(list(x = list(1, 2)), spec)))
   )
 
-  skip("Unclear what tib_vector should do with partial names")
+  # partial or duplicate names are not checked - https://github.com/mgirlich/tibblify/issues/103
   expect_equal(
     tib(list(x = list(a = 1, 2)), spec),
     tibble(x = list_of(c(1L, 2L)))
   )
 
-  skip("Unclear what tib_vector should do with duplicate names")
   expect_equal(
     tib(list(x = list(a = 1, a = 2)), spec),
     tibble(x = list_of(c(1L, 2L)))
@@ -301,19 +298,6 @@ test_that("vector column creates tibble with names_to", {
   expect_equal(
     tib(list(a = 1), spec2),
     tibble(x = list_of(tibble(name = c("x", "y"), val = c(1L, 2L))))
-  )
-
-  # currently not clear what to do about missing names but it should not crash
-  # and if no error is thrown it should at least produce both columns
-  expect_named(
-    tib(list(x = list(1, NULL)), spec)$x[[1]],
-    c("name", "val")
-  )
-
-  skip("Unclear what tib_vector should do with missing names")
-  expect_equal(
-    tib(list(x = list(1, NULL)), spec),
-    tibble(x = list_of(tibble(name = c(NA, NA), val = c(1L, NA))))
   )
 })
 
