@@ -299,6 +299,12 @@ test_that("vector column creates tibble with names_to", {
     tib(list(a = 1), spec2),
     tibble(x = list_of(tibble(name = c("x", "y"), val = c(1L, 2L))))
   )
+
+  spec3 <- tib_int_vec("x", values_to = "val", names_to = "name")
+  expect_equal(
+    tib(list(x = c(a = 1, b = NA)), spec3),
+    tibble(x = list_of(tibble(name = c("a", "b"), val = c(1L, NA))))
+  )
 })
 
 test_that("list column works", {
@@ -449,13 +455,6 @@ test_that("list of df column works", {
 })
 
 test_that("names_to works", {
-  tib2 <- function(x, y, col) {
-    tibblify(
-      list(x, y),
-      spec_df(x = col)
-    )
-  }
-
   # can parse
   expect_equal(
     tibblify(

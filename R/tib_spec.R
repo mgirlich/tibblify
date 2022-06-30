@@ -243,9 +243,9 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'     specified column.
 #' @param names_to Can be one of the following:
 #'   * `NULL`: the default. The inner names of the field are not used.
-#'   * A string: This can only be used if 1) `input_form = "object"` and
-#'     2) `values_to` is a string. The inner names of the field go into the
-#'     specified column.
+#'   * A string: This can only be used if 1) for the input form is `"object"`
+#'     or `"vector"` and 2) `values_to` is a string. The inner names of the
+#'     field go into the specified column.
 #' @inheritParams spec_df
 #'
 #' @details There are basically five different `tib_*()` functions
@@ -399,8 +399,8 @@ tib_check_names_to <- function(names_to, values_to, input_form, call) {
       msg <- "{.arg names_to} can only be used if {.arg values_to} is not {.code NULL}."
       cli::cli_abort(msg, call = call)
     }
-    if (input_form != "object") {
-      msg <- "{.arg names_to} can only be used if {.arg input_form} is {.val object}."
+    if (input_form == "scalar_list") {
+      msg <- '{.arg names_to} can\'t be used for {.code input_form = "scalar_list"}.'
       cli::cli_abort(msg, call = call)
     }
 
