@@ -78,13 +78,13 @@
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
-      ! Can't combine default values `..1` <NA_integer_> and `..2` <1L>
+      ! Can't combine fill `..1` <NA_integer_> and `..2` <1L>
     Code
       (expect_error(spec_combine(spec_default1, spec_default2)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
-      ! Can't combine default values `..1` <1L> and `..2` <2L>
+      ! Can't combine fill `..1` <1L> and `..2` <2L>
 
 # can't combine different transforms
 

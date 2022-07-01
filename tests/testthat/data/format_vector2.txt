@@ -1,1 +1,1 @@
-lcol_int("a", .default = NA_integer_)
+lcol_int("a", .fill = NA_integer_)

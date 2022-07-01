@@ -57,12 +57,12 @@ test_that("scalar column works", {
   expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
   # use default if NULL
-  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, default = 1)), tibble(x = 1))
-  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, default = 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, default = "a")), tibble(x = "a"))
+  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, fill = 1)), tibble(x = 1))
+  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, fill = "a")), tibble(x = "a"))
   expect_equal(
-    tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, default = dtt)),
+    tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
     tibble(x = dtt)
   )
 
@@ -72,12 +72,12 @@ test_that("scalar column works", {
   })
 
   # specified default works
-  expect_equal(tib(list(), tib_lgl("x", required = FALSE, default = FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(), tib_int("x", required = FALSE, default = 1)), tibble(x = 1))
-  expect_equal(tib(list(), tib_dbl("x", required = FALSE, default = 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(), tib_chr("x", required = FALSE, default = "a")), tibble(x = "a"))
+  expect_equal(tib(list(), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
+  expect_equal(tib(list(), tib_int("x", required = FALSE, fill = 1)), tibble(x = 1))
+  expect_equal(tib(list(), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = 1.5))
+  expect_equal(tib(list(), tib_chr("x", required = FALSE, fill = "a")), tibble(x = "a"))
   expect_equal(
-    tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, default = dtt)),
+    tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
     tibble(x = dtt)
   )
 
@@ -157,11 +157,11 @@ test_that("vector column works", {
   expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE)), tibble(x = list_of(NULL, .ptype = vctrs::new_datetime())))
 
   # specified default works
-  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, default = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
-  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, default = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, fill = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, fill = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
 
   # uses default for NULL
-  expect_equal(tib(list(x = NULL), tib_int_vec("x", default = 1:2)), tibble(x = list_of(1:2)))
+  expect_equal(tib(list(x = NULL), tib_int_vec("x", fill = 1:2)), tibble(x = list_of(1:2)))
 
   # transform works
   expect_equal(
@@ -210,7 +210,7 @@ test_that("vector column creates tibble with values_to", {
     tibble(x = list_of(tibble(val = integer())))
   )
 
-  spec2 <- tib_int_vec("x", required = FALSE, default = c(1:2), values_to = "val")
+  spec2 <- tib_int_vec("x", required = FALSE, fill = c(1:2), values_to = "val")
   # can use default
   expect_equal(
     tib(list(), spec2),
@@ -289,7 +289,7 @@ test_that("vector column creates tibble with names_to", {
   # names of default value are used
   spec2 <- tib_int_vec(
     "x",
-    default = c(x = 1L, y = 2L),
+    fill = c(x = 1L, y = 2L),
     required = FALSE,
     input_form = "object",
     values_to = "val",
@@ -346,7 +346,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list()),
-      spec_df(x = tib_variant("x", required = FALSE, default = 1))
+      spec_df(x = tib_variant("x", required = FALSE, fill = 1))
     ),
     tibble(x = list(1))
   )
@@ -355,7 +355,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = NULL)),
-      spec_df(x = tib_variant("x", default = 1))
+      spec_df(x = tib_variant("x", fill = 1))
     ),
     tibble(x = list(1))
   )

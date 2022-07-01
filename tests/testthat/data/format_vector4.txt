@@ -1,5 +1,5 @@
 lcol_int(
   "a",
   .parser = as.integer,
-  .default = NA_integer_
+  .fill = NA_integer_
 )

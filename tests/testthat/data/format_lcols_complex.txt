@@ -13,7 +13,7 @@ lcols(
       entity_type_name = lcol_chr("entity_type_name")
     ),
     year = lcol_int("year"),
-    master_url = lcol_chr("master_url", .default = NA),
+    master_url = lcol_chr("master_url", .fill = NA),
     artists = lcol_df_lst(
       "artists",
       join = lcol_chr("join"),
@@ -33,9 +33,9 @@ lcols(
         "descriptions",
         .ptype = character(0),
         .parser = ~vec_c(!!!.x, .ptype = character()),
-        .default = NULL
+        .fill = NULL
       ),
-      text = lcol_chr("text", .default = NA),
+      text = lcol_chr("text", .fill = NA),
       name = lcol_chr("name"),
       qty = lcol_chr("qty")
     ),

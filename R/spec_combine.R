@@ -72,14 +72,14 @@ tib_combine <- function(tib_list, call) {
 
   if (type %in% c("scalar", "vector")) {
     ptype <- tib_combine_ptype(tib_list, call)
-    default <- tib_combine_default(tib_list, type, ptype, call)
+    fill <- tib_combine_fill(tib_list, type, ptype, call)
     transform <- tib_combine_transform(tib_list, call)
 
     args <- list(
       key = key,
       ptype = ptype,
       required = required,
-      default = default,
+      fill = fill,
       transform = transform
     )
 
@@ -173,7 +173,7 @@ tib_combine_ptype <- function(tib_list, call) {
   )
 }
 
-tib_combine_default <- function(tib_list, type, ptype, call) {
+tib_combine_fill <- function(tib_list, type, ptype, call) {
   if (type == "unspecified") {
     return(NULL)
   }
@@ -181,47 +181,47 @@ tib_combine_default <- function(tib_list, type, ptype, call) {
   types <- purrr::map_chr(tib_list, "type")
   unspecified_locs <- which(types == "unspecified")
 
-  default_list <- lapply(tib_list, `[[`, "default_value")
+  fill_list <- lapply(tib_list, `[[`, "fill")
 
   if (type == "scalar") {
-    default_locs <- vec_unique_loc(default_list)
-    default_locs <- default_locs[!default_locs %in% unspecified_locs]
-    default_list <- default_list[default_locs]
+    fill_locs <- vec_unique_loc(fill_list)
+    fill_locs <- fill_locs[!fill_locs %in% unspecified_locs]
+    fill_list <- fill_list[fill_locs]
 
-    default_list_cast <- lapply(default_list, vec_cast, ptype)
-    default_locs2 <- vec_unique_loc(default_list_cast)
-    default_list_cast <- default_list_cast[default_locs2]
-    default_locs <- default_locs[default_locs2]
+    fill_list_cast <- lapply(fill_list, vec_cast, ptype)
+    fill_locs2 <- vec_unique_loc(fill_list_cast)
+    fill_list_cast <- fill_list_cast[fill_locs2]
+    fill_locs <- fill_locs[fill_locs2]
 
-    if (length(default_locs2) > 1) {
+    if (length(fill_locs2) > 1) {
       # TODO better error message
-      values <- purrr::map_chr(default_list_cast, as_label)
-      value_infos <- loc_name_helper(default_locs2, values)
-      cli::cli_abort("Can't combine default values {value_infos}", call = call)
+      values <- purrr::map_chr(fill_list_cast, as_label)
+      value_infos <- loc_name_helper(fill_locs2, values)
+      cli::cli_abort("Can't combine fill {value_infos}", call = call)
     }
 
-    return(vec_cast(default_list_cast[[1]], ptype))
+    return(vec_cast(fill_list_cast[[1]], ptype))
   }
 
   scalar_idx <- types == "scalar"
-  scalar_default <- vec_c(!!!default_list[scalar_idx], .ptype = ptype)
-  scalar_na_idx <- vec_equal_na(scalar_default)
+  scalar_fill <- vec_c(!!!fill_list[scalar_idx], .ptype = ptype)
+  scalar_na_idx <- vec_equal_na(scalar_fill)
   scalar_replace_idx <- scalar_idx[scalar_na_idx]
-  default_list[scalar_replace_idx] <- list(NULL)
+  fill_list[scalar_replace_idx] <- list(NULL)
 
-  default_locs <- vec_unique_loc(default_list)
-  default_values <- default_list[default_locs]
-  if (length(default_locs) > 1) {
+  fill_locs <- vec_unique_loc(fill_list)
+  fill_values <- fill_list[fill_locs]
+  if (length(fill_locs) > 1) {
     # TODO better error message
-    cli::cli_abort("Cannot combine default values {default_values}", call = call)
+    cli::cli_abort("Cannot combine fill {fill_values}", call = call)
   }
 
-  default_value <- default_values[[1]]
+  fill_value <- fill_values[[1]]
 
-  if (is_null(default_value)) {
-    default_value
+  if (is_null(fill_value)) {
+    fill_value
   } else {
-    vec_cast(default_value, ptype)
+    vec_cast(fill_value, ptype)
   }
 }
 
