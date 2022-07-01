@@ -90,6 +90,12 @@ test_that("errors on invalid `required`", {
   })
 })
 
+test_that("errors if dots are not empty", {
+  expect_snapshot({
+    (expect_error(tib_int("x", TRUE)))
+  })
+})
+
 test_that("empty dots create empty list", {
   expect_equal(spec_df()$fields, list())
   expect_equal(spec_row()$fields, list())
@@ -97,6 +103,23 @@ test_that("empty dots create empty list", {
 
   expect_equal(tib_df("x")$fields, list())
   expect_equal(tib_row("x")$fields, list())
+})
+
+test_that("tib_scalar checks arguments", {
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  expect_snapshot({
+    (expect_error(tib_scalar("x", model)))
+  })
+
+  expect_snapshot({
+    (expect_error(tib_int("x", fill = integer())))
+    (expect_error(tib_int("x", fill = 1:2)))
+    (expect_error(tib_int("x", fill = "a")))
+  })
+
+  expect_snapshot({
+    (expect_error(tib_int("x", transform = integer())))
+  })
 })
 
 test_that("tib_vector checks arguments", {

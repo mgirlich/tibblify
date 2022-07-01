@@ -134,6 +134,57 @@
       Error in `tib_int()`:
       ! `required` must be `TRUE` or `FALSE`, not a logical vector.
 
+# errors if dots are not empty
+
+    Code
+      (expect_error(tib_int("x", TRUE)))
+    Output
+      <error/rlib_error_dots_nonempty>
+      Error in `tib_int()`:
+      ! `...` must be empty.
+      x Problematic argument:
+      * ..1 = TRUE
+      i Did you forget to name an argument?
+
+# tib_scalar checks arguments
+
+    Code
+      (expect_error(tib_scalar("x", model)))
+    Output
+      <error/vctrs_error_scalar_type>
+      Error in `tib_scalar()`:
+      ! `ptype` must be a vector, not a <lm> object.
+
+---
+
+    Code
+      (expect_error(tib_int("x", fill = integer())))
+    Output
+      <error/vctrs_error_assert_size>
+      Error in `tib_int()`:
+      ! `fill` must have size 1, not size 0.
+    Code
+      (expect_error(tib_int("x", fill = 1:2)))
+    Output
+      <error/vctrs_error_assert_size>
+      Error in `tib_int()`:
+      ! `fill` must have size 1, not size 2.
+    Code
+      (expect_error(tib_int("x", fill = "a")))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error in `tib_int()`:
+      ! Can't convert `fill` <character> to <integer>.
+
+---
+
+    Code
+      (expect_error(tib_int("x", transform = integer())))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! Can't convert `transform`, an empty integer vector, to a function.
+
 # tib_vector checks arguments
 
     Code

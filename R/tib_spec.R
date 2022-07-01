@@ -199,11 +199,11 @@ tib_scalar_impl <- function(key,
                             transform = NULL,
                             call = caller_env()) {
   check_dots_empty()
-  ptype <- vec_ptype(ptype)
+  ptype <- vec_ptype(ptype, x_arg = "ptype", call = call)
   if (is_null(fill)) {
     fill <- vec_init(ptype)
   } else {
-    vec_assert(fill, size = 1L)
+    vec_assert(fill, size = 1L, call = call)
     fill <- vec_cast(fill, ptype, call = call)
   }
 
@@ -218,7 +218,7 @@ tib_scalar_impl <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform),
+    transform = prep_transform(transform, call),
     class = class,
     call = call
   )
@@ -307,7 +307,7 @@ tib_scalar <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform)
+    transform = transform
   )
 }
 
@@ -392,7 +392,7 @@ tib_vector_impl <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform),
+    transform = prep_transform(transform, call),
     input_form = input_form,
     values_to = values_to,
     names_to = names_to,
@@ -584,7 +584,7 @@ tib_variant <- function(key,
     type = "variant",
     required = required,
     fill = fill,
-    transform = prep_transform(transform)
+    transform = prep_transform(transform, call = caller_env())
   )
 }
 
@@ -614,12 +614,12 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
 
 # helpers -----------------------------------------------------------------
 
-prep_transform <- function(f) {
+prep_transform <- function(f, call) {
   if (is_null(f)) {
     return(f)
   }
 
-  as_function(f)
+  as_function(f, arg = "transform", call = call)
 }
 
 check_key <- function(key, call = caller_env()) {
