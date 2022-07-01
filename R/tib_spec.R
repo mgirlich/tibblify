@@ -601,6 +601,10 @@ tib_row <- function(.key, ..., .required = TRUE) {
 #' @rdname tib_scalar
 #' @export
 tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
+  if (!is_null(.names_to)) {
+    check_string(.names_to)
+  }
+
   tib_collector(
     key = .key,
     type = "df",

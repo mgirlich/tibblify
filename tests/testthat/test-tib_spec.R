@@ -151,3 +151,9 @@ test_that("tib_vector checks arguments", {
     (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = c("a", "b"))))
   })
 })
+
+test_that("tib_df() checks arguments", {
+  expect_snapshot({
+    (expect_error(tib_df("x", .names_to = 1)))
+  })
+})
