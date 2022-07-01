@@ -244,7 +244,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; [[2]]$duration</span></span>
 <span><span class="co">#&gt; Time difference of 200 secs</span></span></code></pre></div>
-<p>and then use it in <code><a href="../reference/lcol_lgl.html">lcol_vec()</a></code></p>
+<p>and then use it in <code><a href="../reference/tib_scalar.html">tib_scalar()</a></code></p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span></span>
 <span>  <span class="va">x</span>,</span>
@@ -410,11 +410,11 @@
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1 a    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2 <span style="color: #BB0000;">NA</span></span></span></code></pre></div>
-<p>You can specify the value to use with the <code>default</code> argument</p>
+<p>You can specify the value to use with the <code>fill</code> argument</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/spec_df.html">spec_df</a></span><span class="op">(</span></span>
 <span>  x <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,</span>
-<span>  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span></span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="../reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>

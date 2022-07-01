@@ -58,22 +58,22 @@
     <div id="ref-usage">
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">tib_unspecified</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_scalar</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_scalar</span><span class="op">(</span><span class="va">key</span>, <span class="va">ptype</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_lgl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_lgl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_int</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_int</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_dbl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_dbl</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_chr</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_chr</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tib_vector</span><span class="op">(</span></span>
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">ptype</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
 <span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -84,7 +84,7 @@
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
 <span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -95,7 +95,7 @@
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
 <span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -106,7 +106,7 @@
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
 <span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -117,14 +117,14 @@
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  default <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
 <span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  names_to <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, default <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
+<span><span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tib_row</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
@@ -149,8 +149,8 @@
 <dd><p>A prototype of the desired output type of the field.</p></dd>
 
 
-<dt>default</dt>
-<dd><p>Default value to use if the field does not exist.</p></dd>
+<dt>fill</dt>
+<dd><p>Optionally, a value to use if the field does not exist.</p></dd>
 
 
 <dt>transform</dt>
@@ -204,11 +204,11 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
     <h2>Examples</h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">tib_int</span>("int")</span>
-<span class="r-in"><span><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, default <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tib_int</span><span class="op">(</span><span class="st">"int"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #00BB00;">tib_int</span>(</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   "int",</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   required = FALSE,</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   default = 0L,</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   fill = 0L,</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tib_scalar</span><span class="op">(</span><span class="st">"date"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>, transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">x</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span><span class="op">)</span></span></span>
