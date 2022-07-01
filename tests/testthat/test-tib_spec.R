@@ -10,7 +10,6 @@ test_that("can infer name from key", {
     spec_df(x = tib_row("x", a = tib_int("a")))
   )
 
-  expect_snapshot_error(spec_df(tib_int(1L)))
   expect_snapshot_error(spec_df(tib_int(c("a", "b"))))
   # auto name creates duplicated name
   expect_snapshot_error(spec_df(y = tib_int("x"), tib_int("y")))
@@ -26,12 +25,18 @@ test_that("errors if element is not a tib collector", {
 })
 
 test_that("errors on invalid key", {
-  expect_snapshot_error(tib_int(1.5))
+  expect_snapshot({
+    (expect_error(tib_int(1L)))
+    (expect_error(tib_int(c("x", NA))))
+  })
+})
 
-  expect_snapshot_error(tib_int(list(1.5)))
-
-  expect_snapshot_error(tib_int(list(1:2)))
-  expect_snapshot_error(tib_int(list(c("a", "b"))))
+test_that("errors on invalid required", {
+  # required
+  expect_snapshot({
+    (expect_error(tib_int("x", required = NA)))
+    (expect_error(tib_int("x", required = 1L)))
+  })
 })
 
 test_that("can nest specifications", {

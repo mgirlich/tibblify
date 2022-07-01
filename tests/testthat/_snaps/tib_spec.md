@@ -10,10 +10,6 @@
 
 ---
 
-    Can only infer name if key is a string
-
----
-
     Names must be unique.
     x These names are duplicated:
       * "y" at locations 1 and 2.
@@ -32,19 +28,34 @@
 
 # errors on invalid key
 
-    `key` must be a character, integer or a list.
+    Code
+      (expect_error(tib_int(1L)))
+    Output
+      <error/rlang_error>
+      Error in `check_key()`:
+      ! `key` must be a character vector, not an integer.
+    Code
+      (expect_error(tib_int(c("x", NA))))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! Element 2 of `key` is "NA".
+      i No element of `key` can be "NA".
 
----
+# errors on invalid required
 
-    Every element of `key` must be a scalar character or scalar integer.
-
----
-
-    Every element of `key` must be a scalar character or scalar integer.
-
----
-
-    Every element of `key` must be a scalar character or scalar integer.
+    Code
+      (expect_error(tib_int("x", required = NA)))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `required` must be `TRUE` or `FALSE`, not `NA`.
+    Code
+      (expect_error(tib_int("x", required = 1L)))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `required` must be `TRUE` or `FALSE`, not an integer.
 
 # can nest specifications
 

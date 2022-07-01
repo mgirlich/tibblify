@@ -606,26 +606,20 @@ prep_transform <- function(f) {
 }
 
 check_key <- function(key, call = caller_env()) {
-  if (is.character(key)) {
-    return()
-  }
+  check_character(key)
 
-  if (is.integer(key)) {
-    return()
-  }
-
-  if (!is.list(key)) {
-    msg <- "{.arg key} must be a character, integer or a list."
-    cli::cli_abort(msg, call = call)
-  }
-
-  valid_elt <- purrr::map_lgl(key, ~ is_scalar_character(.x) || is_scalar_integer(.x))
-  if (!all(valid_elt)) {
-    msg <- "Every element of {.arg key} must be a scalar character or scalar integer."
+  na_flag <- vec_equal_na(key)
+  if (any(na_flag)) {
+    na_locs <- which(na_flag)
+    na_locs <- as.character(na_locs)
+    msg <- c(
+      "Element{?s} {na_locs} of {.arg key} {?is/are} {.val NA}.",
+      i = "No element of {.arg key} can be {.val NA}."
+    )
     cli::cli_abort(msg, call = call)
   }
 }
 
 check_required <- function(required, call) {
-  vec_assert(required, logical(), size = 1L, call = call)
+  check_bool(required, call = call)
 }
