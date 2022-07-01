@@ -609,16 +609,32 @@ prep_transform <- function(f) {
 }
 
 check_key <- function(key, call = caller_env()) {
-  check_character(key)
+  check_character(key, call = call)
 
-  na_flag <- vec_equal_na(key)
-  if (any(na_flag)) {
-    na_locs <- which(na_flag)
-    na_locs <- as.character(na_locs)
-    msg <- c(
-      "Element{?s} {na_locs} of {.arg key} {?is/are} {.val NA}.",
-      i = "No element of {.arg key} can be {.val NA}."
-    )
+  n <- vec_size(key)
+  if (n == 0) {
+    cli::cli_abort("{.arg key} must not be empty.", call = call)
+  }
+
+  if (n == 1) {
+    if (key == "") {
+      cli::cli_abort("{.arg key} must not be an empty string.", call = call)
+    }
+
+    if (is.na(key)) {
+      cli::cli_abort("{.arg key} must not be {.val NA}.", call = call)
+    }
+  }
+
+  na_idx <- purrr::detect_index(vec_equal_na(key), ~ .x)
+  if (na_idx != 0) {
+    msg <- "`key[{.field {na_idx}}] must not be NA."
+    cli::cli_abort(msg, call = call)
+  }
+
+  empty_string_idx <- purrr::detect_index(key == "", ~ .x)
+  if (empty_string_idx != 0) {
+    msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
     cli::cli_abort(msg, call = call)
   }
 }
