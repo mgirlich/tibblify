@@ -1,26 +1,46 @@
 # errors on invalid names
 
-    Names must be unique.
-    x These names are duplicated:
-      * "x" at locations 1 and 2.
+    Code
+      (expect_error(spec_df(x = tib_int("x"), x = tib_int("y"))))
+    Output
+      <error/vctrs_error_names_must_be_unique>
+      Error in `spec_df()`:
+      ! Names must be unique.
+      x These names are duplicated:
+        * "x" at locations 1 and 2.
 
 # errors if element is not a tib collector
 
-    Every element in `...` must be a tib collector.
-
----
-
-    Every element in `...` must be a tib collector.
+    Code
+      (expect_error(spec_df(1)))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! Element ..1 must be a tib collector, not a number.
+    Code
+      (expect_error(spec_df(x = tib_int("x"), y = "a")))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! Element y must be a tib collector, not a string.
 
 # can infer name from key
 
-    Can only infer name if key is a string
-
----
-
-    Names must be unique.
-    x These names are duplicated:
-      * "y" at locations 1 and 2.
+    Code
+      (expect_error(spec_df(tib_int(c("a", "b")))))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! Can't infer name if key is not a single string
+      x `key` of element ..1 has length 2.
+    Code
+      (expect_error(spec_df(y = tib_int("x"), tib_int("y"))))
+    Output
+      <error/vctrs_error_names_must_be_unique>
+      Error in `spec_df()`:
+      ! Names must be unique.
+      x These names are duplicated:
+        * "y" at locations 1 and 2.
 
 # can nest specifications
 
@@ -48,24 +68,53 @@
 
     The column name of `.names_to` is already specified in `...`.
 
-# errors on invalid key
+# errors on invalid `key`
 
+    Code
+      (expect_error(tib_int(character())))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `key` must not be empty.
+    Code
+      (expect_error(tib_int(NA)))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `key` must be a character vector, not `NA`.
+    Code
+      (expect_error(tib_int("")))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `key` must not be an empty string.
     Code
       (expect_error(tib_int(1L)))
     Output
       <error/rlang_error>
-      Error in `check_key()`:
+      Error in `tib_int()`:
       ! `key` must be a character vector, not an integer.
     Code
       (expect_error(tib_int(c("x", NA))))
     Output
       <error/rlang_error>
       Error in `tib_int()`:
-      ! Element 2 of `key` is "NA".
-      i No element of `key` can be "NA".
+      ! `key[2] must not be NA.
+    Code
+      (expect_error(tib_int(c("x", ""))))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `key[2] must not be an empty string.
 
-# errors on invalid required
+# errors on invalid `required`
 
+    Code
+      (expect_error(tib_int("x", required = logical())))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `required` must be `TRUE` or `FALSE`, not an empty logical vector.
     Code
       (expect_error(tib_int("x", required = NA)))
     Output
@@ -78,6 +127,12 @@
       <error/rlang_error>
       Error in `tib_int()`:
       ! `required` must be `TRUE` or `FALSE`, not an integer.
+    Code
+      (expect_error(tib_int("x", required = c(TRUE, FALSE))))
+    Output
+      <error/rlang_error>
+      Error in `tib_int()`:
+      ! `required` must be `TRUE` or `FALSE`, not a logical vector.
 
 # tib_vector checks arguments
 
