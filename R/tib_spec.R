@@ -374,7 +374,7 @@ tib_vector_impl <- function(key,
     c("vector", "scalar_list", "object"),
     error_call = call
   )
-  ptype <- vec_ptype(ptype)
+  ptype <- vec_ptype(ptype, call = call)
   if (!is_null(fill)) {
     fill <- vec_cast(fill, ptype, call = call)
   }
@@ -403,8 +403,7 @@ tib_vector_impl <- function(key,
 
 tib_check_values_to <- function(values_to, call) {
   if (!is_null(values_to)) {
-    values_to <- vec_cast(values_to, character(), call = call)
-    vec_assert(values_to, size = 1, call = call)
+    check_string(values_to, call = call)
   }
 
   values_to
@@ -421,7 +420,7 @@ tib_check_names_to <- function(names_to, values_to, input_form, call) {
       cli::cli_abort(msg, call = call)
     }
 
-    names_to <- vec_cast(names_to, character(), call = call)
+    check_string(names_to, call = call)
     vec_assert(names_to, size = 1, call = call)
     if (names_to == values_to) {
       msg <- "{.arg names_to} must be different from {.arg values_to}."
@@ -584,7 +583,7 @@ tib_variant <- function(key,
     type = "variant",
     required = required,
     fill = fill,
-    transform = prep_transform(transform, call = caller_env())
+    transform = prep_transform(transform, call = current_env())
   )
 }
 

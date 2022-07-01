@@ -107,28 +107,39 @@ test_that("empty dots create empty list", {
 
 test_that("tib_scalar checks arguments", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  # ptype
   expect_snapshot({
     (expect_error(tib_scalar("x", model)))
   })
 
+  # fill
   expect_snapshot({
     (expect_error(tib_int("x", fill = integer())))
     (expect_error(tib_int("x", fill = 1:2)))
     (expect_error(tib_int("x", fill = "a")))
   })
 
+  # transform
   expect_snapshot({
     (expect_error(tib_int("x", transform = integer())))
   })
 })
 
 test_that("tib_vector checks arguments", {
+  # input_form
   expect_snapshot({
     (expect_error(tib_int_vec("x", input_form = "v")))
+  })
 
+  # values_to
+  expect_snapshot({
+    (expect_error(tib_int_vec("x", values_to = NA)))
     (expect_error(tib_int_vec("x", values_to = 1)))
     (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
+  })
 
+  # names_to
+  expect_snapshot({
     # input_form != "object"
     (expect_error(tib_int_vec("x", input_form = "scalar_list", values_to = "val", names_to = "name")))
     # values_to = NULL

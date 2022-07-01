@@ -194,18 +194,30 @@
       Error in `tib_int_vec()`:
       ! `input_form` must be one of "vector", "scalar_list", or "object", not "v".
       i Did you mean "vector"?
+
+---
+
+    Code
+      (expect_error(tib_int_vec("x", values_to = NA)))
+    Output
+      <error/rlang_error>
+      Error in `tib_int_vec()`:
+      ! `values_to` must be a single string, not `NA`.
     Code
       (expect_error(tib_int_vec("x", values_to = 1)))
     Output
-      <error/vctrs_error_incompatible_type>
+      <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! Can't convert `values_to` <double> to <character>.
+      ! `values_to` must be a single string, not a number.
     Code
       (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
     Output
-      <error/vctrs_error_assert_size>
+      <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! `values_to` must have size 1, not size 2.
+      ! `values_to` must be a single string, not a character vector.
+
+---
+
     Code
       (expect_error(tib_int_vec("x", input_form = "scalar_list", values_to = "val",
         names_to = "name")))
@@ -230,14 +242,14 @@
       (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
         names_to = 1)))
     Output
-      <error/vctrs_error_incompatible_type>
+      <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! Can't convert `names_to` <double> to <character>.
+      ! `names_to` must be a single string, not a number.
     Code
       (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
         names_to = c("a", "b"))))
     Output
-      <error/vctrs_error_assert_size>
+      <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! `names_to` must have size 1, not size 2.
+      ! `names_to` must be a single string, not a character vector.
 
