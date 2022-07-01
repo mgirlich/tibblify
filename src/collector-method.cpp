@@ -133,13 +133,15 @@ protected:
   int current_row = 0;
 private:
   cpp11::writable::list data;
+  const SEXP na;
 
 public:
-  Collector_Scalar(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
+  Collector_Scalar(SEXP default_value_, SEXP na_, bool required_, SEXP ptype_, int col_location_,
                    SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(vec_cast(default_value_, ptype_))
   , ptype(ptype_)
+  , na(na_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -149,7 +151,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
-      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      SET_VECTOR_ELT(this->data, this->current_row++, this->na);
       return;
     }
 
@@ -186,9 +188,9 @@ public:
 };
 
 
-#define ADD_VALUE(F_SCALAR)                                    \
+#define ADD_VALUE(F_SCALAR, NA)                                \
   if (Rf_isNull(value)) {                                      \
-    *this->data_ptr = this->default_value;                     \
+    *this->data_ptr = NA;                                      \
     return;                                                    \
   }                                                            \
                                                                \
@@ -234,7 +236,7 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asLogical);
+    ADD_VALUE(Rf_asLogical, NA_LOGICAL);
   }
 
   inline void add_default(Path& path) {
@@ -272,7 +274,7 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asInteger);
+    ADD_VALUE(Rf_asInteger, NA_INTEGER);
   }
 
   inline void add_default(Path& path) {
@@ -310,7 +312,7 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asReal);
+    ADD_VALUE(Rf_asReal, NA_REAL);
   }
 
   inline void add_default(Path& path) {
@@ -348,7 +350,7 @@ public:
   }
 
   void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asChar);
+    ADD_VALUE(Rf_asChar, NA_STRING);
   }
 
   inline void add_default(Path& path) {
@@ -478,7 +480,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
-      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
       return;
     }
 
@@ -578,7 +580,7 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
-      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
       return;
     }
 
@@ -1096,7 +1098,8 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
         cpp11::sexp default_str = cpp11::strings(default_sexp)[0];
         col_vec.push_back(std::unique_ptr<Collector_Scalar_Str>(new Collector_Scalar_Str(default_str, required, location, name, transform)));
       } else {
-        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, required, ptype, location, name, transform)));
+        cpp11::sexp na = elt["na"];
+        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, location, name, transform)));
       }
     } else if (type == "vector") {
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];

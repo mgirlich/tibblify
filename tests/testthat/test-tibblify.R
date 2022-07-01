@@ -56,14 +56,14 @@ test_that("scalar column works", {
   expect_equal(tib(list(), tib_chr("x", required = FALSE)), tibble(x = NA_character_))
   expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
-  # use default if NULL
-  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, fill = 1)), tibble(x = 1))
-  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, fill = "a")), tibble(x = "a"))
+  # use NA if NULL
+  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = NA))
+  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, fill = 1)), tibble(x = NA_integer_))
+  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = NA_real_))
+  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, fill = "a")), tibble(x = NA_character_))
   expect_equal(
     tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
-    tibble(x = dtt)
+    tibble(x = vec_init(dtt))
   )
 
   # errors if empty element
@@ -160,8 +160,8 @@ test_that("vector column works", {
   expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, fill = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
   expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, fill = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
 
-  # uses default for NULL
-  expect_equal(tib(list(x = NULL), tib_int_vec("x", fill = 1:2)), tibble(x = list_of(1:2)))
+  # uses NULL for NULL
+  expect_equal(tib(list(x = NULL), tib_int_vec("x", fill = 1:2)), tibble(x = list_of(NULL, .ptype = integer())))
 
   # transform works
   expect_equal(
@@ -357,7 +357,7 @@ test_that("list column works", {
       list(list(x = NULL)),
       spec_df(x = tib_variant("x", fill = 1))
     ),
-    tibble(x = list(1))
+    tibble(x = list(NULL))
   )
 
   # transform works
