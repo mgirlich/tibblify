@@ -96,9 +96,16 @@ prep_spec_fields <- function(fields, call) {
     return(list())
   }
 
-  collector_field <- purrr::map_lgl(fields, ~ inherits(.x, "tib_collector"))
-  if (!all(collector_field)) {
-    cli::cli_abort("Every element in {.arg ...} must be a tib collector.", call = call)
+  bad_idx <- purrr::detect_index(fields, ~ !inherits(.x, "tib_collector"))
+  if (bad_idx != 0) {
+    name <- names2(fields)[[bad_idx]]
+    if (name == "") {
+      name <- paste0("..", bad_idx)
+    }
+    friendly_type <- obj_type_friendly(fields[[bad_idx]])
+
+    msg <- "Element {.field {name}} must be a tib collector, not {friendly_type}."
+    cli::cli_abort(msg, call = call)
   }
 
   spec_auto_name_fields(fields, call)
