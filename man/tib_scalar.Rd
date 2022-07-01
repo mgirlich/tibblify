@@ -19,22 +19,22 @@
 \usage{
 tib_unspecified(key, ..., required = TRUE)
 
-tib_scalar(key, ptype, ..., required = TRUE, default = NULL, transform = NULL)
+tib_scalar(key, ptype, ..., required = TRUE, fill = NULL, transform = NULL)
 
-tib_lgl(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_lgl(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
-tib_int(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_int(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
-tib_dbl(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_dbl(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
-tib_chr(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_chr(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
 tib_vector(
   key,
   ptype,
   ...,
   required = TRUE,
-  default = NULL,
+  fill = NULL,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -45,7 +45,7 @@ tib_lgl_vec(
   key,
   ...,
   required = TRUE,
-  default = NULL,
+  fill = NULL,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -56,7 +56,7 @@ tib_int_vec(
   key,
   ...,
   required = TRUE,
-  default = NULL,
+  fill = NULL,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -67,7 +67,7 @@ tib_dbl_vec(
   key,
   ...,
   required = TRUE,
-  default = NULL,
+  fill = NULL,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -78,14 +78,14 @@ tib_chr_vec(
   key,
   ...,
   required = TRUE,
-  default = NULL,
+  fill = NULL,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
   names_to = NULL
 )
 
-tib_variant(key, ..., required = TRUE, default = NULL, transform = NULL)
+tib_variant(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
 tib_row(.key, ..., .required = TRUE)
 
@@ -100,7 +100,7 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 
 \item{ptype}{A prototype of the desired output type of the field.}
 
-\item{default}{Default value to use if the field does not exist.}
+\item{fill}{Optionally, a value to use if the field does not exist.}
 
 \item{transform}{A function to apply to the field before casting to \code{ptype}.}
 
@@ -155,7 +155,7 @@ the most common prototypes
 }
 \examples{
 tib_int("int")
-tib_int("int", required = FALSE, default = 0)
+tib_int("int", required = FALSE, fill = 0)
 
 tib_scalar("date", Sys.Date(), transform = function(x) as.Date(x, format = "\%Y-\%m-\%d"))
 
