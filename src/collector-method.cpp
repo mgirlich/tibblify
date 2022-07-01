@@ -139,7 +139,7 @@ public:
   Collector_Scalar(SEXP default_value_, SEXP na_, bool required_, SEXP ptype_, int col_location_,
                    SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(vec_cast(default_value_, ptype_))
+  , default_value(default_value_)
   , ptype(ptype_)
   , na(na_)
   { }

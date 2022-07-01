@@ -543,7 +543,7 @@ test_that("nested keys work", {
   expect_equal(
     tibblify(
       list(list(x = list(y = list(z = 1)))),
-      spec_df(xyz = tib_int(list("x", "y", "z")))
+      spec_df(xyz = tib_int(c("x", "y", "z")))
     ),
     tibble(xyz = 1)
   )

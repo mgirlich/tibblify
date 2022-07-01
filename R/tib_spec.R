@@ -39,8 +39,9 @@
 #' spec_df(spec1, spec2)
 spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
   if (!is_null(.names_to)) {
-    vec_assert(.names_to, character(), 1L, arg = ".names_to")
+    check_string(.names_to, what = "a single string or `NULL`")
   }
+
   out <- spec_tib(
     list2(...),
     "df",
@@ -76,6 +77,8 @@ spec_row <- function(..., vector_allows_empty_list = FALSE) {
 }
 
 spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
+  check_bool(vector_allows_empty_list)
+
   structure(
     list2(
       type = type,
@@ -93,9 +96,16 @@ prep_spec_fields <- function(fields, call) {
     return(list())
   }
 
-  collector_field <- purrr::map_lgl(fields, ~ inherits(.x, "tib_collector"))
-  if (!all(collector_field)) {
-    cli::cli_abort("Every element in {.arg ...} must be a tib collector.", call = call)
+  bad_idx <- purrr::detect_index(fields, ~ !inherits(.x, "tib_collector"))
+  if (bad_idx != 0) {
+    name <- names2(fields)[[bad_idx]]
+    if (name == "") {
+      name <- paste0("..", bad_idx)
+    }
+    friendly_type <- obj_type_friendly(fields[[bad_idx]])
+
+    msg <- "Element {.field {name}} must be a tib collector, not {friendly_type}."
+    cli::cli_abort(msg, call = call)
   }
 
   spec_auto_name_fields(fields, call)
@@ -104,13 +114,20 @@ prep_spec_fields <- function(fields, call) {
 spec_auto_name_fields <- function(fields, call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
-  auto_nms <- purrr::map_chr(
+  auto_nms <- purrr::map2_chr(
     fields[unnamed],
+    seq_along(fields)[unnamed],
     ~ {
       key <- .x$key
-      if (length(key) > 1 || !is.character(key)) {
-        cli::cli_abort("Can only infer name if key is a string", call = call)
+      if (!is_string(key)) {
+        loc <- paste0("..", .y)
+        msg <- c(
+          "Can't infer name if key is not a single string",
+          x = "{.arg key} of element {.field {loc}} has length {length(key)}."
+        )
+        cli::cli_abort(msg, call = call)
       }
+
       key
     }
   )
@@ -182,11 +199,11 @@ tib_scalar_impl <- function(key,
                             transform = NULL,
                             call = caller_env()) {
   check_dots_empty()
-  ptype <- vec_ptype(ptype)
+  ptype <- vec_ptype(ptype, x_arg = "ptype", call = call)
   if (is_null(fill)) {
     fill <- vec_init(ptype)
   } else {
-    vec_assert(fill, size = 1L)
+    vec_assert(fill, size = 1L, call = call)
     fill <- vec_cast(fill, ptype, call = call)
   }
 
@@ -201,7 +218,7 @@ tib_scalar_impl <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform),
+    transform = prep_transform(transform, call),
     class = class,
     call = call
   )
@@ -290,7 +307,7 @@ tib_scalar <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform)
+    transform = transform
   )
 }
 
@@ -357,7 +374,7 @@ tib_vector_impl <- function(key,
     c("vector", "scalar_list", "object"),
     error_call = call
   )
-  ptype <- vec_ptype(ptype)
+  ptype <- vec_ptype(ptype, call = call)
   if (!is_null(fill)) {
     fill <- vec_cast(fill, ptype, call = call)
   }
@@ -375,7 +392,7 @@ tib_vector_impl <- function(key,
     required = required,
     ptype = ptype,
     fill = fill,
-    transform = prep_transform(transform),
+    transform = prep_transform(transform, call),
     input_form = input_form,
     values_to = values_to,
     names_to = names_to,
@@ -386,8 +403,7 @@ tib_vector_impl <- function(key,
 
 tib_check_values_to <- function(values_to, call) {
   if (!is_null(values_to)) {
-    values_to <- vec_cast(values_to, character(), call = call)
-    vec_assert(values_to, size = 1, call = call)
+    check_string(values_to, call = call)
   }
 
   values_to
@@ -404,7 +420,7 @@ tib_check_names_to <- function(names_to, values_to, input_form, call) {
       cli::cli_abort(msg, call = call)
     }
 
-    names_to <- vec_cast(names_to, character(), call = call)
+    check_string(names_to, call = call)
     vec_assert(names_to, size = 1, call = call)
     if (names_to == values_to) {
       msg <- "{.arg names_to} must be different from {.arg values_to}."
@@ -567,7 +583,7 @@ tib_variant <- function(key,
     type = "variant",
     required = required,
     fill = fill,
-    transform = prep_transform(transform)
+    transform = prep_transform(transform, call = current_env())
   )
 }
 
@@ -585,6 +601,10 @@ tib_row <- function(.key, ..., .required = TRUE) {
 #' @rdname tib_scalar
 #' @export
 tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
+  if (!is_null(.names_to)) {
+    check_string(.names_to)
+  }
+
   tib_collector(
     key = .key,
     type = "df",
@@ -597,35 +617,45 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
 
 # helpers -----------------------------------------------------------------
 
-prep_transform <- function(f) {
+prep_transform <- function(f, call) {
   if (is_null(f)) {
     return(f)
   }
 
-  as_function(f)
+  as_function(f, arg = "transform", call = call)
 }
 
 check_key <- function(key, call = caller_env()) {
-  if (is.character(key)) {
-    return()
+  check_character(key, call = call)
+
+  n <- vec_size(key)
+  if (n == 0) {
+    cli::cli_abort("{.arg key} must not be empty.", call = call)
   }
 
-  if (is.integer(key)) {
-    return()
+  if (n == 1) {
+    if (key == "") {
+      cli::cli_abort("{.arg key} must not be an empty string.", call = call)
+    }
+
+    if (is.na(key)) {
+      cli::cli_abort("{.arg key} must not be {.val NA}.", call = call)
+    }
   }
 
-  if (!is.list(key)) {
-    msg <- "{.arg key} must be a character, integer or a list."
+  na_idx <- purrr::detect_index(vec_equal_na(key), ~ .x)
+  if (na_idx != 0) {
+    msg <- "`key[{.field {na_idx}}] must not be NA."
     cli::cli_abort(msg, call = call)
   }
 
-  valid_elt <- purrr::map_lgl(key, ~ is_scalar_character(.x) || is_scalar_integer(.x))
-  if (!all(valid_elt)) {
-    msg <- "Every element of {.arg key} must be a scalar character or scalar integer."
+  empty_string_idx <- purrr::detect_index(key == "", ~ .x)
+  if (empty_string_idx != 0) {
+    msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
     cli::cli_abort(msg, call = call)
   }
 }
 
 check_required <- function(required, call) {
-  vec_assert(required, logical(), size = 1L, call = call)
+  check_bool(required, call = call)
 }

@@ -1,5 +1,17 @@
+
+# spec_* ------------------------------------------------------------------
+
 test_that("errors on invalid names", {
-  expect_snapshot_error(spec_df(x = tib_int("x"), x = tib_int("y")))
+  expect_snapshot({
+    (expect_error(spec_df(x = tib_int("x"), x = tib_int("y"))))
+  })
+})
+
+test_that("errors if element is not a tib collector", {
+  expect_snapshot({
+    (expect_error(spec_df(1)))
+    (expect_error(spec_df(x = tib_int("x"), y = "a")))
+  })
 })
 
 test_that("can infer name from key", {
@@ -10,28 +22,12 @@ test_that("can infer name from key", {
     spec_df(x = tib_row("x", a = tib_int("a")))
   )
 
-  expect_snapshot_error(spec_df(tib_int(1L)))
-  expect_snapshot_error(spec_df(tib_int(c("a", "b"))))
-  # auto name creates duplicated name
-  expect_snapshot_error(spec_df(y = tib_int("x"), tib_int("y")))
-})
+  expect_snapshot({
+    (expect_error(spec_df(tib_int(c("a", "b")))))
 
-test_that("errors if `.names_to` column name is not unique", {
-  expect_snapshot_error(spec_df(x = tib_int("x"), .names_to = "x"))
-})
-
-test_that("errors if element is not a tib collector", {
-  expect_snapshot_error(spec_df(x = "a"))
-  expect_snapshot_error(spec_df(x = tib_int("x"), y = "a"))
-})
-
-test_that("errors on invalid key", {
-  expect_snapshot_error(tib_int(1.5))
-
-  expect_snapshot_error(tib_int(list(1.5)))
-
-  expect_snapshot_error(tib_int(list(1:2)))
-  expect_snapshot_error(tib_int(list(c("a", "b"))))
+    # auto name creates duplicated name
+    (expect_error(spec_df(y = tib_int("x"), tib_int("y"))))
+  })
 })
 
 test_that("can nest specifications", {
@@ -57,6 +53,49 @@ test_that("can nest specifications", {
   expect_snapshot_error(spec_df(spec1, spec1))
 })
 
+test_that("errors on invalid `.names_to`", {
+  expect_snapshot({
+    (expect_error(spec_df(.names_to = NA_character_)))
+    (expect_error(spec_df(.names_to = 1)))
+  })
+})
+
+test_that("errors if `.names_to` column name is not unique", {
+  expect_snapshot_error(spec_df(x = tib_int("x"), .names_to = "x"))
+})
+
+
+# tib_* -------------------------------------------------------------------
+
+test_that("errors on invalid `key`", {
+  expect_snapshot({
+    (expect_error(tib_int(character())))
+
+    (expect_error(tib_int(NA)))
+    (expect_error(tib_int("")))
+    (expect_error(tib_int(1L)))
+
+    (expect_error(tib_int(c("x", NA))))
+    (expect_error(tib_int(c("x", ""))))
+  })
+})
+
+test_that("errors on invalid `required`", {
+  expect_snapshot({
+    (expect_error(tib_int("x", required = logical())))
+
+    (expect_error(tib_int("x", required = NA)))
+    (expect_error(tib_int("x", required = 1L)))
+    (expect_error(tib_int("x", required = c(TRUE, FALSE))))
+  })
+})
+
+test_that("errors if dots are not empty", {
+  expect_snapshot({
+    (expect_error(tib_int("x", TRUE)))
+  })
+})
+
 test_that("empty dots create empty list", {
   expect_equal(spec_df()$fields, list())
   expect_equal(spec_row()$fields, list())
@@ -66,13 +105,41 @@ test_that("empty dots create empty list", {
   expect_equal(tib_row("x")$fields, list())
 })
 
+test_that("tib_scalar checks arguments", {
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  # ptype
+  expect_snapshot({
+    (expect_error(tib_scalar("x", model)))
+  })
+
+  # fill
+  expect_snapshot({
+    (expect_error(tib_int("x", fill = integer())))
+    (expect_error(tib_int("x", fill = 1:2)))
+    (expect_error(tib_int("x", fill = "a")))
+  })
+
+  # transform
+  expect_snapshot({
+    (expect_error(tib_int("x", transform = integer())))
+  })
+})
+
 test_that("tib_vector checks arguments", {
+  # input_form
   expect_snapshot({
     (expect_error(tib_int_vec("x", input_form = "v")))
+  })
 
+  # values_to
+  expect_snapshot({
+    (expect_error(tib_int_vec("x", values_to = NA)))
     (expect_error(tib_int_vec("x", values_to = 1)))
     (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
+  })
 
+  # names_to
+  expect_snapshot({
     # input_form != "object"
     (expect_error(tib_int_vec("x", input_form = "scalar_list", values_to = "val", names_to = "name")))
     # values_to = NULL
@@ -82,5 +149,11 @@ test_that("tib_vector checks arguments", {
 
     (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = 1)))
     (expect_error(tib_int_vec("x", input_form = "object", values_to = "val", names_to = c("a", "b"))))
+  })
+})
+
+test_that("tib_df() checks arguments", {
+  expect_snapshot({
+    (expect_error(tib_df("x", .names_to = 1)))
   })
 })
