@@ -4,6 +4,14 @@
     x These names are duplicated:
       * "x" at locations 1 and 2.
 
+# errors if element is not a tib collector
+
+    Every element in `...` must be a tib collector.
+
+---
+
+    Every element in `...` must be a tib collector.
+
 # can infer name from key
 
     Can only infer name if key is a string
@@ -14,17 +22,31 @@
     x These names are duplicated:
       * "y" at locations 1 and 2.
 
+# can nest specifications
+
+    Names must be unique.
+    x These names are duplicated:
+      * "a" at locations 1 and 3.
+      * "b" at locations 2 and 4.
+
+# errors on invalid `.names_to`
+
+    Code
+      (expect_error(spec_df(.names_to = NA_character_)))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! `.names_to` must be a single string or `NULL`, not a character `NA`.
+    Code
+      (expect_error(spec_df(.names_to = 1)))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! `.names_to` must be a single string or `NULL`, not a number.
+
 # errors if `.names_to` column name is not unique
 
     The column name of `.names_to` is already specified in `...`.
-
-# errors if element is not a tib collector
-
-    Every element in `...` must be a tib collector.
-
----
-
-    Every element in `...` must be a tib collector.
 
 # errors on invalid key
 
@@ -56,13 +78,6 @@
       <error/rlang_error>
       Error in `tib_int()`:
       ! `required` must be `TRUE` or `FALSE`, not an integer.
-
-# can nest specifications
-
-    Names must be unique.
-    x These names are duplicated:
-      * "a" at locations 1 and 3.
-      * "b" at locations 2 and 4.
 
 # tib_vector checks arguments
 

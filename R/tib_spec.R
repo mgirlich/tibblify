@@ -39,8 +39,9 @@
 #' spec_df(spec1, spec2)
 spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
   if (!is_null(.names_to)) {
-    vec_assert(.names_to, character(), 1L, arg = ".names_to")
+    check_string(.names_to, what = "a single string or `NULL`")
   }
+
   out <- spec_tib(
     list2(...),
     "df",
@@ -76,6 +77,8 @@ spec_row <- function(..., vector_allows_empty_list = FALSE) {
 }
 
 spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
+  check_bool(vector_allows_empty_list)
+
   structure(
     list2(
       type = type,
