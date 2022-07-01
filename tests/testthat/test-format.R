@@ -16,11 +16,11 @@ test_that("format for scalars works", {
 
   expect_snapshot(tib_variant("a") %>% print())
 
-  expect_snapshot(tib_int("a", default = NA_integer_) %>% print())
-  expect_snapshot(tib_int("a", default = 1) %>% print())
+  expect_snapshot(tib_int("a", fill = NA_integer_) %>% print())
+  expect_snapshot(tib_int("a", fill = 1) %>% print())
 
   expect_snapshot(tib_int("a", transform = as.integer) %>% print())
-  expect_snapshot(tib_int("a", default = NA_integer_, transform = as.integer) %>% print())
+  expect_snapshot(tib_int("a", fill = NA_integer_, transform = as.integer) %>% print())
 
   expect_snapshot(tib_scalar("a", ptype = new_difftime(units = "mins")) %>% print())
 
@@ -28,8 +28,8 @@ test_that("format for scalars works", {
     tib_row(
       "a",
       x = tib_int("x"),
-      y = tib_dbl("y", default = NA_real_),
-      z = tib_chr("z", default = "abc")
+      y = tib_dbl("y", fill = NA_real_),
+      z = tib_chr("z", fill = "abc")
     ) %>% print()
   )
 })
@@ -40,15 +40,15 @@ test_that("format breaks long lines", {
   expect_snapshot(
     tib_row(
       "path",
-      a_long_name = tib_dbl("a looooooooooooooooooooong name", default = 1)
+      a_long_name = tib_dbl("a looooooooooooooooooooong name", fill = 1)
     ) %>%
-      print(width = 70)
+      print(width = 60)
   )
 
   expect_snapshot(
     tib_row(
       "path",
-      a_long_name = tib_dbl("a looooooooooooooooooooong name", default = 1)
+      a_long_name = tib_dbl("a looooooooooooooooooooong name", fill = 1)
     ) %>%
        print(width = 69)
   )
@@ -72,7 +72,7 @@ test_that("format for tib_vector works", {
   )
 
   # multi value default
-  expect_snapshot(tib_int_vec("a", default = 1:2) %>% print())
+  expect_snapshot(tib_int_vec("a", fill = 1:2) %>% print())
 })
 
 test_that("format for tib_row works", {
@@ -80,7 +80,7 @@ test_that("format for tib_row works", {
   expect_snapshot(
     tib_row(
       "formats",
-      text = tib_chr("text", default = NA_character_)
+      text = tib_chr("text", fill = NA_character_)
     ) %>%
       print()
   )
@@ -107,7 +107,7 @@ test_that("format for tib_row works", {
         entity_type_name = tib_chr("entity_type_name")
       ),
       year = tib_int("year"),
-      master_url = tib_chr("master_url", default = NA),
+      master_url = tib_chr("master_url", fill = NA),
       artists = tib_df(
         "artists",
         join = tib_chr("join"),
@@ -125,9 +125,9 @@ test_that("format for tib_row works", {
         "formats",
         descriptions = tib_chr_vec(
           "descriptions",
-          default = NULL
+          fill = NULL
         ),
-        text = tib_chr("text", default = NA),
+        text = tib_chr("text", fill = NA),
         name = tib_chr("name"),
         qty = tib_chr("qty")
       ),
@@ -141,7 +141,7 @@ test_that("format for tib_row works", {
 
 test_that("format for tib_variant works", {
   expect_snapshot(tib_variant("a"))
-  expect_snapshot(tib_variant("a", default = tibble(a = 1:2)))
+  expect_snapshot(tib_variant("a", fill = tibble(a = 1:2)))
 })
 
 test_that("format for tib_df works", {
@@ -149,7 +149,7 @@ test_that("format for tib_df works", {
   expect_snapshot(
     tib_df(
       "formats",
-      text = tib_chr("text", default = NA_character_)
+      text = tib_chr("text", fill = NA_character_)
     ) %>%
       print()
   )

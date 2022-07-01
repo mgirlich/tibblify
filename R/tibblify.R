@@ -116,19 +116,23 @@ prep_nested_keys <- function(spec, shift = FALSE) {
         x$fields <- spec_prep(x$fields, shift = !is.null(x$names_col))
       }
 
-      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$default_value)) {
+      if (x$type == "scalar") {
+        x$na <- vec_init(x$ptype)
+      }
+
+      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
         if (is_null(x$names_to)) {
-          default_value_list <- set_names(
-            list(unname(x$default_value)),
+          fill_list <- set_names(
+            list(unname(x$fill)),
             x$values_to
           )
         } else {
-          default_value_list <- set_names(
-            list(names(x$default_value), unname(x$default_value)),
+          fill_list <- set_names(
+            list(names(x$fill), unname(x$fill)),
             c(x$names_to, x$values_to)
           )
         }
-        x$default_value <- tibble::as_tibble(default_value_list)
+        x$fill <- tibble::as_tibble(fill_list)
       }
 
       x

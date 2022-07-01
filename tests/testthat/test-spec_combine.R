@@ -94,8 +94,8 @@ test_that("can combine ptype", {
 
 test_that("can't combine different defaults", {
   spec_no_default <- spec_df(a = tib_int("a"))
-  spec_default1 <- spec_df(a = tib_int("a", default = 1))
-  spec_default2 <- spec_df(a = tib_int("a", default = 2))
+  spec_default1 <- spec_df(a = tib_int("a", fill = 1))
+  spec_default2 <- spec_df(a = tib_int("a", fill = 2))
 
   expect_equal(spec_combine(spec_default1, spec_default1), spec_default1)
 

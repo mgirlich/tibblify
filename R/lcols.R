@@ -51,42 +51,42 @@ lcol_lgl <- function(path, .default = zap(), .parser = NULL) {
 #' @rdname lcol_lgl
 lcol_int <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_int()", "tib_int()")
-  tib_int(path, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_int(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_dbl <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_dbl()", "tib_dbl()")
-  tib_dbl(path, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_dbl(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_chr <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_chr()", "tib_chr()")
-  tib_chr(path, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_chr(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_dat <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_dat()", "tib_scalar()")
-  tib_scalar(path, ptype = new_date(), is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_scalar(path, ptype = new_date(), is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_dtt <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_dtt()", "tib_scalar()")
-  tib_scalar(path, ptype = new_datetime(tzone = "UTC"), is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_scalar(path, ptype = new_datetime(tzone = "UTC"), is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_vec <- function(path, ptype, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_vec()", "tib_scalar()")
-  tib_scalar(path, ptype = ptype, is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_scalar(path, ptype = ptype, is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
@@ -105,14 +105,14 @@ lcol_skip <- function(path) {
 #' @rdname lcol_lgl
 lcol_lst <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_lst()", "tib_variant()")
-  tib_variant(path, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_variant(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
 #' @rdname lcol_lgl
 lcol_lst_of <- function(path, .ptype, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_lst_of()", "tib_vector()")
-  tib_vector(path, .ptype, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_vector(path, .ptype, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export
