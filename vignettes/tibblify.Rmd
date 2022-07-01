@@ -152,7 +152,7 @@ x <- list(
 x
 ```
 
-and then use it in `lcol_vec()`
+and then use it in `tib_scalar()`
 
 ```{r}
 tibblify(
