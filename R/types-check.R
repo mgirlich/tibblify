@@ -1,3 +1,5 @@
+# nocov start --- r-lib/rlang types-check
+
 # Scalars -----------------------------------------------------------------
 
 check_bool <- function(x,
@@ -112,3 +114,5 @@ check_character <- function(x,
     stop_input_type(x, what, ..., arg = arg, call = call)
   }
 }
+
+# nocov end
