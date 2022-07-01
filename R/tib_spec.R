@@ -114,13 +114,20 @@ prep_spec_fields <- function(fields, call) {
 spec_auto_name_fields <- function(fields, call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
-  auto_nms <- purrr::map_chr(
+  auto_nms <- purrr::map2_chr(
     fields[unnamed],
+    seq_along(fields)[unnamed],
     ~ {
       key <- .x$key
-      if (length(key) > 1 || !is.character(key)) {
-        cli::cli_abort("Can only infer name if key is a string", call = call)
+      if (!is_string(key)) {
+        loc <- paste0("..", .y)
+        msg <- c(
+          "Can't infer name if key is not a single string",
+          x = "{.arg key} of element {.field {loc}} has length {length(key)}."
+        )
+        cli::cli_abort(msg, call = call)
       }
+
       key
     }
   )
