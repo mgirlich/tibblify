@@ -174,6 +174,19 @@ test_that("vector column works", {
   )
 })
 
+test_that("explicit NULL work", {
+  x <- list(
+    list(x = NULL),
+    list(x = 3L),
+    list()
+  )
+
+  expect_equal(
+    tibblify(x, spec_df(tib_int("x", required = FALSE))),
+    tibble(x = c(NA, 3L, NA))
+  )
+})
+
 test_that("vector column respects vector_allows_empty_list", {
   x <- list(
     list(x = 1),

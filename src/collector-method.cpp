@@ -191,6 +191,7 @@ public:
 #define ADD_VALUE(F_SCALAR, NA)                                \
   if (Rf_isNull(value)) {                                      \
     *this->data_ptr = NA;                                      \
+    ++this->data_ptr;                                          \
     return;                                                    \
   }                                                            \
                                                                \
