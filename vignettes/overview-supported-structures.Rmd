@@ -1,0 +1,245 @@
+---
+title: "Overview supported structures"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overview supported structures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tibblify)
+```
+
+## Supported input for `tibblify()`
+
+There are three types of valid input to `tibblify()`:
+
+### 1. Object
+
+The R equivalent to a JSON object is a named list where the names fulfill the
+requirements of `vctrs::vec_as_names(repair = "check_unique")`.
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "a": 1,
+  "b": true
+}
+```
+
+:::
+
+::: {}
+
+
+```{r results='hide'}
+x <- list(
+  a = 1,
+  b = TRUE
+)
+```
+
+:::
+
+::::
+
+They can be parsed with `spec_object()` to produce a list or with `spec_row()`
+to produce a 1 row tibble
+
+```{r}
+object_spec <- spec_object(
+  tib_int("a"),
+  tib_lgl("b")
+)
+
+tibblify(x, object_spec)
+```
+
+```{r}
+row_spec <- spec_row(
+  tib_int("a"),
+  tib_lgl("b")
+)
+
+tibblify(x, row_spec)
+```
+
+
+### 2.  List of homogeneous objects
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[
+  {"a": 1, "b": true},
+  {"b": 2, "b": false}
+]
+```
+
+:::
+
+::: {}
+
+```{r eval=FALSE}
+list(
+  list(a = 1, b = TRUE),
+  list(a = 2, b = FALSE)
+)
+```
+
+:::
+
+::::
+
+They are parsed with `spec_df()`
+
+## Supported fields
+
+### JSON Scalars and R scalars
+
+JSON has 4 types of scalars: boolean, integer, float, string
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+true
+1
+1.5
+"a"
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+TRUE
+1
+1.5
+"a"
+```
+
+:::
+
+::::
+
+which can be parsed with
+
+* `tib_lgl()`
+* `tib_int()`
+* `tib_dbl()`
+* `tib_chr()`
+
+Other R vectors without JSON equivalent are also supported as long as they are
+a scalar according to `vctrs::vec_is(size = 1)`. For example
+
+```{r}
+x <- as.Date("2022-07-01")
+```
+
+can be parsed with
+
+```{r eval=FALSE}
+tib_scalar(ptype = vctrs::new_date())
+```
+
+<!-- TODO: add `tib_date()`, `tib_dtt()` -->
+
+
+### Homogeneous JSON arrays of scalars and R vectors
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[true, null, false]
+[1, null, 3]
+[1.5, null, 3.5]
+["a", null, "c"]
+```
+
+:::
+
+::: {}
+
+```{r eval=FALSE}
+c(TRUE, NA, FALSE)
+c(1L, NA, 2L)
+c(1.5, NA, 2.5)
+c("a", NA, "c")
+```
+
+Or if parsed with `jsonlite::fromJSON(simplifyVector = FALSE)`
+
+```{r eval=FALSE}
+list(TRUE, NULL, FALSE)
+list(1L, NULL, 2L)
+list(1.5, NULL, 2.5)
+list("a", NULL, "c")
+```
+
+:::
+
+::::
+
+They can be parsed with
+
+* `tib_lgl_vec()`
+* `tib_int_vec()`
+* `tib_dbl_vec()`
+* `tib_chr_vec()`
+
+
+<!-- |                     |                                    |                                       | -->
+<!-- |                     | Analogue to scalars                | Analogue to scalars                   | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+<!-- |                     | List of scalars                    | `tib_vector()` with argument          | -->
+<!-- |                     |                                    |                                       | -->
+<!-- |                     | `fromJSON(simplifyVector = FALSE)` | `input_form = "scalar_list"`          | -->
+<!-- |                     |                                    |                                       | -->
+<!-- |                     | ``` r                              | ``` r                                 | -->
+<!-- |                     | list(TRUE, NULL, FALSE)            | tib_lgl_vec(                          | -->
+<!-- |                     | ```                                |   input_form = "scalar_list"          | -->
+<!-- |                     |                                    | )                                     | -->
+<!-- |                     |                                    | ```                                   | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+<!-- | Object of scalars   | Named list of scalar               | `input_form = "object"`               | -->
+<!-- |                     |                                    |                                       | -->
+<!-- | ``` json            | ``` r                              | ``` r                                 | -->
+<!-- | {                   | list(                              | tib_lgl_vec(                          | -->
+<!-- |   "a": true,        |   a = TRUE,                        |   input_form = "object"               | -->
+<!-- |   "b": null,        |   b = NA,                          | )                                     | -->
+<!-- |   "c": false        |   c = FALSE                        | ```                                   | -->
+<!-- | }                   | )                                  |                                       | -->
+<!-- | ```                 | ```                                |                                       | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+<!-- | Object              | Named list                         | `tib_row()`                           | -->
+<!-- |                     |                                    |                                       | -->
+<!-- | ``` json            | ``` r                              | ``` r                                 | -->
+<!-- | {                   | list(                              | tib_row(                              | -->
+<!-- |   "a": 1,           |   a = 1L,                          |   tib_int("a"),                       | -->
+<!-- |   "b": "a",         |   b = "a",                         |   tib_chr("b"),                       | -->
+<!-- |   "c": [1, 2, 3]    |   c = c(1L, 2L, 3L)                |   tib_int_vec("c")                    | -->
+<!-- | }                   | )                                  | )                                     | -->
+<!-- | ```                 | ```                                | ```                                   | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+<!-- |                     |                                    |                                       | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+<!-- |                     |                                    |                                       | -->
+<!-- +---------------------+------------------------------------+---------------------------------------+ -->
