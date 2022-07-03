@@ -156,14 +156,14 @@ public:
     }
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = PROTECT(vec_cast(value, ptype));
+    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), ptype));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path);
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
-    UNPROTECT(1);
+    UNPROTECT(2);
   }
 
   inline void add_default(Path& path) {
@@ -191,6 +191,7 @@ public:
 #define ADD_VALUE(F_SCALAR, NA)                                \
   if (Rf_isNull(value)) {                                      \
     *this->data_ptr = NA;                                      \
+    ++this->data_ptr;                                          \
     return;                                                    \
   }                                                            \
                                                                \
@@ -513,7 +514,7 @@ public:
     }
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = PROTECT(vec_cast(value, ptype));
+    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), ptype));
 
     if (this->uses_values_col) {
       R_len_t size = short_vec_size(value_casted);
@@ -540,7 +541,7 @@ public:
     } else {
       SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
     }
-    UNPROTECT(1);
+    UNPROTECT(2);
   }
 
   inline void add_default(Path& path) {
