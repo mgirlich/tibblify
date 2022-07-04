@@ -83,6 +83,14 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
   return out;
 }
 
+inline SEXP vec_flatten(SEXP value, SEXP ptype) {
+  SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
+                               value,
+                               ptype));
+  SEXP out = R_tryEval(call, tibblify_ns_env, NULL);
+  UNPROTECT(1);
+  return(out);
+}
 
 class Collector {
 public:
@@ -176,14 +184,11 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
-                                 this->data,
-                                 this->ptype));
-    SEXP value = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
+    SEXP value = PROTECT(vec_flatten(this->data, this->ptype));
 
     SET_VECTOR_ELT(list, this->col_location, value);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(2);
+    UNPROTECT(1);
   }
 };
 
@@ -349,7 +354,6 @@ private:
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
-    cpp11::integers n1({1});
     SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
                                           this->ptype,
                                           tibblify_shared_int1));
@@ -373,11 +377,8 @@ private:
       out_list[i] = *ptr_row;
     }
 
-    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
-                                 out_list,
-                                 this->ptype));
-    SEXP out = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
-    UNPROTECT(4);
+    SEXP out = PROTECT(vec_flatten(out_list, this->ptype));
+    UNPROTECT(3);
     return(out);
   }
 
