@@ -109,12 +109,12 @@
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
 <span><span class="co">#&gt;   followers login       url                    name  location email public_gists</span></span>
 <span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       303 gaborcsardi https://api.github.co… Gábo… Chippen… <span style="color: #949494;">"</span>csa…            6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       780 jennybc     https://api.github.co… Jenn… Vancouv…  <span style="color: #BB0000;">NA</span>             54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      <span style="text-decoration: underline;">3</span>958 jtleek      https://api.github.co… Jeff… Baltimo… <span style="color: #949494;">""</span>              12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       115 juliasilge  https://api.github.co… Juli… Salt La… <span style="color: #949494;">""</span>               4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       213 leeper      https://api.github.co… Thom… London,… <span style="color: #949494;">""</span>              46</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.co… Maël… Barcelo… <span style="color: #949494;">""</span>               0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       303 gaborcsardi https://api.github.co… Gábo… Chippen… csar…            6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       780 jennybc     https://api.github.co… Jenn… Vancouv… <span style="color: #BB0000;">NA</span>              54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      <span style="text-decoration: underline;">3</span>958 jtleek      https://api.github.co… Jeff… Baltimo… <span style="color: #BB0000;">NA</span>              12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       115 juliasilge  https://api.github.co… Juli… Salt La… <span style="color: #BB0000;">NA</span>               4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       213 leeper      https://api.github.co… Thom… London,… <span style="color: #BB0000;">NA</span>              46</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.co… Maël… Barcelo… <span style="color: #BB0000;">NA</span>               0</span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="../reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/spec_guess.html">spec_guess</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
