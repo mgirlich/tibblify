@@ -1,8 +1,6 @@
 /* TODOs
  * [ ] heuristic to detect object vs list of object -> appropriate error message
- * [ ] support integer index
  * [ ] add other scalar types: complex, raw
- * [ ] natively support `id` column in `Collector_Tibble`?
  */
 
 #include <cpp11.hpp>
