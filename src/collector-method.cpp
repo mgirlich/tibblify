@@ -102,9 +102,7 @@ public:
   // if key is found -> add `object` to internal memory
   virtual inline void add_value(SEXP object, Path& path) = 0;
   // if key is absent -> check if field is required; if not add `default`
-  virtual inline void add_default(Path& path) = 0;
-  // called for data frame column
-  virtual inline void add_default_df() = 0;
+  virtual inline void add_default(bool check, Path& path) = 0;
   // assign data to input `list` at correct location and update `names`
   virtual inline void assign_data(SEXP list, SEXP names) const = 0;
 };
@@ -172,12 +170,8 @@ public:
     UNPROTECT(2);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -300,13 +294,8 @@ public:
     UNPROTECT(2);
   }
 
-  inline void add_default(Path& path) {
-    if (this->required) stop_required(path);
-    *this->data_ptr = this->default_value;
-    ++this->data_ptr;
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && this->required) stop_required(path);
     *this->data_ptr = this->default_value;
     ++this->data_ptr;
   }
@@ -472,12 +461,8 @@ public:
     UNPROTECT(2);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -517,12 +502,8 @@ public:
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -610,7 +591,7 @@ public:
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
         path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(path);
+        (*this->collector_vec[key_index]).add_default(true, path);
       }
       path.up();
       return;
@@ -649,7 +630,7 @@ public:
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
         path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(path);
+        (*this->collector_vec[key_index]).add_default(true, path);
         key_names_ptr++; key_index++;
         continue;
       }
@@ -661,7 +642,7 @@ public:
 
     for (; key_index < this->n_keys; key_index++) {
       path.replace(*key_names_ptr);
-      (*this->collector_vec[key_index]).add_default(path);
+      (*this->collector_vec[key_index]).add_default(true, path);
       key_names_ptr++;
     }
 
@@ -697,15 +678,9 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_default(Path& path) {
+  inline void add_default(bool check, Path& path) {
     for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default(path);
-    }
-  }
-
-  inline void add_default_df() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default_df();
+      (*collector).add_default(check, path);
     }
   }
 
@@ -771,16 +746,10 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_default(Path& path) {
+  inline void add_default(bool check, Path& path) {
     if (required) stop_required(path);
     for (int i = 0; i < this->n_keys; i++) {
-      (*this->collector_vec[i]).add_default_df();
-    }
-  }
-
-  inline void add_default_df() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default_df();
+      (*this->collector_vec[i]).add_default(check, path);
     }
   }
 
@@ -908,12 +877,8 @@ public:
     }
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
   }
 
