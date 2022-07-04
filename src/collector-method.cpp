@@ -747,11 +747,6 @@ private:
   const SEXP name;
   R_xlen_t n_rows;
 
-  inline SEXP get_data() const {
-    SEXP out = collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0);
-    return(out);
-  }
-
 public:
   Collector_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_,
                    bool required_, int col_location_, SEXP name_)
@@ -790,8 +785,11 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->get_data());
+    SEXP data = PROTECT(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
+
+    SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
+    UNPROTECT(1);
   }
 };
 
@@ -861,12 +859,6 @@ public:
 };
 
 class Parser_Object : Multi_Collector {
-private:
-  inline SEXP get_data() {
-    SEXP out = collector_vec_to_df(std::move(this->collector_vec), 1, 0);
-    return(out);
-  }
-
 public:
   Parser_Object(SEXP keys_, std::vector<Collector_Ptr>& col_vec_)
     : Multi_Collector(keys_, col_vec_)
@@ -877,7 +869,8 @@ public:
     this->init(n_rows);
     this->add_value(object, path);
 
-    return this->get_data();
+    SEXP out = collector_vec_to_df(std::move(this->collector_vec), n_rows, 0);
+    return(out);
   }
 };
 
