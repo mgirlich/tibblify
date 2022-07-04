@@ -187,55 +187,101 @@ public:
   }
 };
 
+template <typename CPP11_TYPE>
+SEXP r_alloc_vector(R_xlen_t& length);
 
-#define ADD_VALUE(F_SCALAR, NA)                                \
-  if (Rf_isNull(value)) {                                      \
-    *this->data_ptr = NA;                                      \
-    ++this->data_ptr;                                          \
-    return;                                                    \
-  }                                                            \
-                                                               \
-  if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
-  R_len_t size = short_vec_size(value_casted);                 \
-  if (size != 1) {                                             \
-    stop_scalar(path);                                         \
-  }                                                            \
-                                                               \
-  *this->data_ptr = F_SCALAR(value_casted);                    \
-  ++this->data_ptr;                                            \
-  UNPROTECT(2);
+template <>
+SEXP r_alloc_vector<cpp11::r_bool>(R_xlen_t& length) {
+  return(Rf_allocVector(LGLSXP, length));
+};
 
-#define ADD_DEFAULT()                                          \
-  if (this->required) stop_required(path);                     \
-  *this->data_ptr = this->default_value;                       \
-  ++this->data_ptr;
+template <>
+SEXP r_alloc_vector<int>(R_xlen_t& length) {
+  return(Rf_allocVector(INTSXP, length));
+};
 
-#define ADD_DEFAULT_DF()                                       \
-  *this->data_ptr = this->default_value;                       \
-  ++this->data_ptr;
+template <>
+SEXP r_alloc_vector<double>(R_xlen_t& length) {
+  return(Rf_allocVector(REALSXP, length));
+};
 
+template <>
+SEXP r_alloc_vector<cpp11::r_string>(R_xlen_t& length) {
+  return(Rf_allocVector(STRSXP, length));
+};
 
-class Collector_Scalar_Lgl : public Collector_Scalar_Base {
+template <typename T, typename CPP11_TYPE>
+T* r_vector_ptr(SEXP data);
+
+template <>
+int* r_vector_ptr<int, cpp11::r_bool>(SEXP data) {
+  return(LOGICAL(data));
+};
+
+template <>
+int* r_vector_ptr<int, int>(SEXP data) {
+  return(INTEGER(data));
+};
+
+template <>
+double* r_vector_ptr<double, double>(SEXP data) {
+  return(REAL(data));
+};
+
+template <>
+SEXP* r_vector_ptr<SEXP, cpp11::r_string>(SEXP data) {
+  return(STRING_PTR(data));
+};
+
+template <typename T, typename CPP11_TYPE>
+T r_vector_cast(SEXP data);
+
+template <>
+int r_vector_cast<int, cpp11::r_bool>(SEXP data) {
+  return(Rf_asLogical(data));
+};
+
+template <>
+int r_vector_cast<int, int>(SEXP data) {
+  return(Rf_asInteger(data));
+};
+
+template <>
+double r_vector_cast<double, double>(SEXP data) {
+  return(Rf_asReal(data));
+};
+
+template <>
+SEXP r_vector_cast<SEXP, cpp11::r_string>(SEXP data) {
+  return(Rf_asChar(data));
+};
+
+template <typename T, typename CPP11_TYPE>
+class Collector_Scalar2 : public Collector_Scalar_Base {
 private:
-  const cpp11::r_bool default_value;
-  const SEXP ptype = tibblify_shared_empty_lgl;
-  cpp11::writable::r_vector<cpp11::r_bool> data;
+  const T default_value;
+  const SEXP ptype;
+  cpp11::sexp data;
+  T* data_ptr;
 
 public:
-  Collector_Scalar_Lgl(cpp11::r_bool default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
+  Collector_Scalar2(T default_value_, bool required_, int col_location_,
+                    SEXP ptype_, SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
+  , ptype(ptype_)
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data.reserve(length);
+    this->data = r_alloc_vector<CPP11_TYPE>(length);
+    this->data_ptr = r_vector_ptr<T, CPP11_TYPE>(this->data);
   }
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
-      this->data.push_back(cpp11::na<cpp11::r_bool>());
+      // TODO cache this?
+      *this->data_ptr = cpp11::na<CPP11_TYPE>();
+      ++this->data_ptr;
       return;
     }
 
@@ -246,25 +292,20 @@ public:
       stop_scalar(path);
     }
 
-    // WHY DOESN'T THIS WORK?!
-    // cpp11::r_bool out = value_casted;
-    // cpp11::r_bool out = static_cast<cpp11::r_bool>(value_casted);
-
-    // BUT THESE DO?!
-    // cpp11::r_bool out = static_cast<Rboolean>(LOGICAL_ELT(value_casted, 0));
-    // cpp11::r_bool out = cpp11::logicals(value)[0];
-
-    this->data.push_back(Rf_asLogical(value_casted));
+    *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
+    ++this->data_ptr;
     UNPROTECT(2);
   }
 
   inline void add_default(Path& path) {
     if (this->required) stop_required(path);
-    this->data.push_back(this->default_value);
+    *this->data_ptr = this->default_value;
+    ++this->data_ptr;
   }
 
   inline void add_default_df() {
-    this->data.push_back(this->default_value);
+    *this->data_ptr = this->default_value;
+    ++this->data_ptr;
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -272,121 +313,6 @@ public:
     SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
-
-class Collector_Scalar_Int : public Collector_Scalar_Base {
-private:
-  const int default_value;
-  const SEXP ptype = tibblify_shared_empty_int;
-  int* data_ptr;
-private:
-  cpp11::writable::integers data;
-
-public:
-  Collector_Scalar_Int(int default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(INTSXP, length);
-    this->data_ptr = INTEGER(this->data);
-  }
-
-  inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asInteger, NA_INTEGER);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
-class Collector_Scalar_Dbl : public Collector_Scalar_Base {
-private:
-  const double default_value;
-  const SEXP ptype = tibblify_shared_empty_dbl;
-  double* data_ptr;
-private:
-  cpp11::writable::doubles data;
-
-public:
-  Collector_Scalar_Dbl(double default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(REALSXP, length);
-    this->data_ptr = REAL(this->data);
-  }
-
-  inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asReal, NA_REAL);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
-class Collector_Scalar_Str : public Collector_Scalar_Base {
-private:
-  const SEXP default_value;
-  const SEXP ptype = tibblify_shared_empty_chr;
-  SEXP* data_ptr;
-private:
-  cpp11::writable::strings data;
-
-public:
-  Collector_Scalar_Str(SEXP default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(STRSXP, length);
-    this->data_ptr = STRING_PTR(this->data);
-  }
-
-  void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asChar, NA_STRING);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
 
 class Collector_Vector : public Collector_Scalar_Base {
 protected:
@@ -1107,16 +1033,16 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     if (type == "scalar") {
       if (vec_is(ptype, tibblify_shared_empty_lgl)) {
         cpp11::r_bool default_bool = cpp11::logicals(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Lgl>(new Collector_Scalar_Lgl(default_bool, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(default_bool, required, location, tibblify_shared_empty_lgl, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_int)) {
         int default_int = cpp11::as_integers(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Int>(new Collector_Scalar_Int(default_int, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(default_int, required, location, tibblify_shared_empty_int, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_dbl)) {
         double default_dbl = cpp11::as_doubles(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Dbl>(new Collector_Scalar_Dbl(default_dbl, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(default_dbl, required, location, tibblify_shared_empty_dbl, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_chr)) {
         cpp11::sexp default_str = cpp11::strings(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Str>(new Collector_Scalar_Str(default_str, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(default_str, required, location, tibblify_shared_empty_chr, name, transform)));
       } else {
         cpp11::sexp na = elt["na"];
         col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, location, name, transform)));
