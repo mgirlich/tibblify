@@ -1,8 +1,6 @@
 /* TODOs
  * [ ] heuristic to detect object vs list of object -> appropriate error message
- * [ ] support integer index
  * [ ] add other scalar types: complex, raw
- * [ ] natively support `id` column in `Collector_Tibble`?
  */
 
 #include <cpp11.hpp>
@@ -83,6 +81,14 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
   return out;
 }
 
+inline SEXP vec_flatten(SEXP value, SEXP ptype) {
+  SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
+                               value,
+                               ptype));
+  SEXP out = R_tryEval(call, tibblify_ns_env, NULL);
+  UNPROTECT(1);
+  return(out);
+}
 
 class Collector {
 public:
@@ -96,9 +102,7 @@ public:
   // if key is found -> add `object` to internal memory
   virtual inline void add_value(SEXP object, Path& path) = 0;
   // if key is absent -> check if field is required; if not add `default`
-  virtual inline void add_default(Path& path) = 0;
-  // called for data frame column
-  virtual inline void add_default_df() = 0;
+  virtual inline void add_default(bool check, Path& path) = 0;
   // assign data to input `list` at correct location and update `names`
   virtual inline void assign_data(SEXP list, SEXP names) const = 0;
 };
@@ -166,86 +170,134 @@ public:
     UNPROTECT(2);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
-                                 this->data,
-                                 this->ptype));
-    SEXP value = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
+    SEXP value = PROTECT(vec_flatten(this->data, this->ptype));
 
     SET_VECTOR_ELT(list, this->col_location, value);
     SET_STRING_ELT(names, this->col_location, this->name);
+    UNPROTECT(1);
+  }
+};
+
+template <typename CPP11_TYPE>
+SEXP r_alloc_vector(R_xlen_t& length);
+
+template <>
+SEXP r_alloc_vector<cpp11::r_bool>(R_xlen_t& length) {
+  return(Rf_allocVector(LGLSXP, length));
+};
+
+template <>
+SEXP r_alloc_vector<int>(R_xlen_t& length) {
+  return(Rf_allocVector(INTSXP, length));
+};
+
+template <>
+SEXP r_alloc_vector<double>(R_xlen_t& length) {
+  return(Rf_allocVector(REALSXP, length));
+};
+
+template <>
+SEXP r_alloc_vector<cpp11::r_string>(R_xlen_t& length) {
+  return(Rf_allocVector(STRSXP, length));
+};
+
+template <typename T, typename CPP11_TYPE>
+T* r_vector_ptr(SEXP data);
+
+template <>
+int* r_vector_ptr<int, cpp11::r_bool>(SEXP data) {
+  return(LOGICAL(data));
+};
+
+template <>
+int* r_vector_ptr<int, int>(SEXP data) {
+  return(INTEGER(data));
+};
+
+template <>
+double* r_vector_ptr<double, double>(SEXP data) {
+  return(REAL(data));
+};
+
+template <>
+SEXP* r_vector_ptr<SEXP, cpp11::r_string>(SEXP data) {
+  return(STRING_PTR(data));
+};
+
+template <typename T, typename CPP11_TYPE>
+T r_vector_cast(SEXP data);
+
+template <>
+int r_vector_cast<int, cpp11::r_bool>(SEXP data) {
+  return(Rf_asLogical(data));
+};
+
+template <>
+int r_vector_cast<int, int>(SEXP data) {
+  return(Rf_asInteger(data));
+};
+
+template <>
+double r_vector_cast<double, double>(SEXP data) {
+  return(Rf_asReal(data));
+};
+
+template <>
+SEXP r_vector_cast<SEXP, cpp11::r_string>(SEXP data) {
+  return(Rf_asChar(data));
+};
+
+template <typename T, typename CPP11_TYPE>
+class Collector_Scalar2 : public Collector_Scalar_Base {
+private:
+  const T default_value;
+  const SEXP ptype;
+  cpp11::sexp data;
+  T* data_ptr;
+
+public:
+  Collector_Scalar2(T default_value_, bool required_, int col_location_,
+                    SEXP ptype_, SEXP name_, SEXP transform_)
+    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
+  , default_value(default_value_)
+  , ptype(ptype_)
+  { }
+
+  inline void init(R_xlen_t& length) {
+    this->data = r_alloc_vector<CPP11_TYPE>(length);
+    this->data_ptr = r_vector_ptr<T, CPP11_TYPE>(this->data);
+  }
+
+  inline void add_value(SEXP value, Path& path) {
+    if (Rf_isNull(value)) {
+      // TODO cache this?
+      *this->data_ptr = cpp11::na<CPP11_TYPE>();
+      ++this->data_ptr;
+      return;
+    }
+
+    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));
+    R_len_t size = short_vec_size(value_casted);
+    if (size != 1) {
+      stop_scalar(path);
+    }
+
+    *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
+    ++this->data_ptr;
     UNPROTECT(2);
   }
-};
 
-
-#define ADD_VALUE(F_SCALAR, NA)                                \
-  if (Rf_isNull(value)) {                                      \
-    *this->data_ptr = NA;                                      \
-    ++this->data_ptr;                                          \
-    return;                                                    \
-  }                                                            \
-                                                               \
-  if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform); \
-  SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));   \
-  R_len_t size = short_vec_size(value_casted);                 \
-  if (size != 1) {                                             \
-    stop_scalar(path);                                         \
-  }                                                            \
-                                                               \
-  *this->data_ptr = F_SCALAR(value_casted);                    \
-  ++this->data_ptr;                                            \
-  UNPROTECT(2);
-
-#define ADD_DEFAULT()                                          \
-  if (this->required) stop_required(path);                     \
-  *this->data_ptr = this->default_value;                       \
-  ++this->data_ptr;
-
-#define ADD_DEFAULT_DF()                                       \
-  *this->data_ptr = this->default_value;                       \
-  ++this->data_ptr;
-
-
-class Collector_Scalar_Lgl : public Collector_Scalar_Base {
-private:
-  const int default_value;
-  const SEXP ptype = tibblify_shared_empty_lgl;
-  int* data_ptr;
-private:
-  cpp11::writable::logicals data;
-
-public:
-  Collector_Scalar_Lgl(int default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(LGLSXP, length);
-    this->data_ptr = LOGICAL(this->data);
-  }
-
-  inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asLogical, NA_LOGICAL);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
+  inline void add_default(bool check, Path& path) {
+    if (check && this->required) stop_required(path);
+    *this->data_ptr = this->default_value;
+    ++this->data_ptr;
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -253,121 +305,6 @@ public:
     SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
-
-class Collector_Scalar_Int : public Collector_Scalar_Base {
-private:
-  const int default_value;
-  const SEXP ptype = tibblify_shared_empty_int;
-  int* data_ptr;
-private:
-  cpp11::writable::integers data;
-
-public:
-  Collector_Scalar_Int(int default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(INTSXP, length);
-    this->data_ptr = INTEGER(this->data);
-  }
-
-  inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asInteger, NA_INTEGER);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
-class Collector_Scalar_Dbl : public Collector_Scalar_Base {
-private:
-  const double default_value;
-  const SEXP ptype = tibblify_shared_empty_dbl;
-  double* data_ptr;
-private:
-  cpp11::writable::doubles data;
-
-public:
-  Collector_Scalar_Dbl(double default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(REALSXP, length);
-    this->data_ptr = REAL(this->data);
-  }
-
-  inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asReal, NA_REAL);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
-class Collector_Scalar_Str : public Collector_Scalar_Base {
-private:
-  const SEXP default_value;
-  const SEXP ptype = tibblify_shared_empty_chr;
-  SEXP* data_ptr;
-private:
-  cpp11::writable::strings data;
-
-public:
-  Collector_Scalar_Str(SEXP default_value_, bool required_, int col_location_,
-                       SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  { }
-
-  void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(STRSXP, length);
-    this->data_ptr = STRING_PTR(this->data);
-  }
-
-  void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asChar, NA_STRING);
-  }
-
-  inline void add_default(Path& path) {
-    ADD_DEFAULT();
-  }
-
-  inline void add_default_df() {
-    ADD_DEFAULT_DF();
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
-};
-
 
 class Collector_Vector : public Collector_Scalar_Base {
 protected:
@@ -381,18 +318,7 @@ private:
   const bool uses_values_col;
   const SEXP output_col_names;
   const bool vector_allows_empty_list;
-
-  vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
-    if (input_form_ == "vector") {
-      return(vector);
-    } else if (input_form_ == "scalar_list") {
-      return(scalar_list);
-    } else if (input_form_ == "object") {
-      return(object);
-    } else{
-      cpp11::stop("Internal error.");
-    }
-  }
+  const SEXP na;
 
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     if (Rf_isNull(values_to_)) {
@@ -416,12 +342,6 @@ private:
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
-    cpp11::integers n1({1});
-    SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
-                                          this->ptype,
-                                          tibblify_shared_int1));
-    SEXP missing_value = PROTECT(R_tryEval(vec_init_call, tibblify_ns_env, NULL));
-
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
     R_xlen_t n = Rf_length(value);
@@ -429,7 +349,7 @@ private:
     cpp11::writable::list out_list(n);
     for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
       if (Rf_isNull(*ptr_row)) {
-        out_list[i] = missing_value;
+        out_list[i] = this->na;
         continue;
       }
 
@@ -440,26 +360,23 @@ private:
       out_list[i] = *ptr_row;
     }
 
-    SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
-                                 out_list,
-                                 this->ptype));
-    SEXP out = PROTECT(R_tryEval(call, tibblify_ns_env, NULL));
-    UNPROTECT(4);
-    return(out);
+    return(vec_flatten(out_list, this->ptype));
   }
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
-                   SEXP name_, SEXP transform_, cpp11::r_string input_form_,
-                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_)
+                   SEXP name_, SEXP transform_, vector_input_form input_form_,
+                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_,
+                   SEXP na_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
-  , input_form(string_to_form_enum(input_form_))
+  , input_form(input_form_)
   , uses_names_col(!Rf_isNull(names_to_))
   , uses_values_col(!Rf_isNull(values_to_))
   , output_col_names(get_output_col_names(names_to_, values_to_))
   , vector_allows_empty_list(vector_allows_empty_list_)
+  , na(na_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -544,12 +461,8 @@ public:
     UNPROTECT(2);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -589,12 +502,8 @@ public:
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
@@ -682,7 +591,7 @@ public:
       path.down();
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
         path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(path);
+        (*this->collector_vec[key_index]).add_default(true, path);
       }
       path.up();
       return;
@@ -721,7 +630,7 @@ public:
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
         path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(path);
+        (*this->collector_vec[key_index]).add_default(true, path);
         key_names_ptr++; key_index++;
         continue;
       }
@@ -733,7 +642,7 @@ public:
 
     for (; key_index < this->n_keys; key_index++) {
       path.replace(*key_names_ptr);
-      (*this->collector_vec[key_index]).add_default(path);
+      (*this->collector_vec[key_index]).add_default(true, path);
       key_names_ptr++;
     }
 
@@ -769,15 +678,9 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_default(Path& path) {
+  inline void add_default(bool check, Path& path) {
     for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default(path);
-    }
-  }
-
-  inline void add_default_df() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default_df();
+      (*collector).add_default(check, path);
     }
   }
 
@@ -788,6 +691,29 @@ public:
   }
 };
 
+inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
+                                R_xlen_t n_rows,
+                                int n_extra_cols) {
+  int n_cols = n_extra_cols;
+  for (const Collector_Ptr& collector : collector_vec) {
+    n_cols += (*collector).size();
+  }
+
+  SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
+  SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+
+  for (const Collector_Ptr& collector : collector_vec) {
+    (*collector).assign_data(df, names);
+  }
+
+  Rf_setAttrib(df, R_NamesSymbol, names);
+  set_df_attributes(df, n_rows);
+
+  UNPROTECT(2);
+  return df;
+}
+
+
 
 class Collector_Tibble : public Collector, Multi_Collector {
 private:
@@ -795,25 +721,6 @@ private:
   const int col_location;
   const SEXP name;
   R_xlen_t n_rows;
-
-  inline SEXP get_data() const {
-    int size = 0;
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      size += (*collector).size();
-    }
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, size));
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, size));
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, this->n_rows);
-
-    UNPROTECT(2);
-    return df;
-  }
 
 public:
   Collector_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_,
@@ -839,22 +746,19 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_default(Path& path) {
+  inline void add_default(bool check, Path& path) {
     if (required) stop_required(path);
     for (int i = 0; i < this->n_keys; i++) {
-      (*this->collector_vec[i]).add_default_df();
-    }
-  }
-
-  inline void add_default_df() {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).add_default_df();
+      (*this->collector_vec[i]).add_default(check, path);
     }
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->get_data());
+    SEXP data = PROTECT(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
+
+    SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
+    UNPROTECT(1);
   }
 };
 
@@ -863,36 +767,19 @@ private:
   const SEXP names_col;
   const bool has_names_col;
 
-  int get_n_cols() const {
-    int n_cols = 0;
-    if (this->has_names_col) n_cols = 1;
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      n_cols += (*collector).size();
-    }
-
-    return n_cols;
-  }
-
   inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
-    const int n_cols = this->get_n_cols();
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
+    int n_extra_cols = this->has_names_col ? 1 : 0;
 
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+    SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
+    SEXP names = Rf_getAttrib(out, R_NamesSymbol);
+
     if (this->has_names_col) {
-      SET_VECTOR_ELT(df, 0, my_vec_names2(object_list));
+      SET_VECTOR_ELT(out, 0, my_vec_names2(object_list));
       SET_STRING_ELT(names, 0, this->names_col);
     }
 
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, n_rows);
-
-    UNPROTECT(2);
-    return df;
+    UNPROTECT(1);
+    return(out);
   }
 
 public:
@@ -941,32 +828,6 @@ public:
 };
 
 class Parser_Object : Multi_Collector {
-private:
-  int get_n_cols() const {
-    int n_cols = 0;
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      n_cols += (*collector).size();
-    }
-
-    return n_cols;
-  }
-
-  inline SEXP get_data() {
-    const int n_cols = this->get_n_cols();
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, 1);
-
-    UNPROTECT(2);
-    return df;
-  }
-
 public:
   Parser_Object(SEXP keys_, std::vector<Collector_Ptr>& col_vec_)
     : Multi_Collector(keys_, col_vec_)
@@ -977,7 +838,8 @@ public:
     this->init(n_rows);
     this->add_value(object, path);
 
-    return this->get_data();
+    SEXP out = collector_vec_to_df(std::move(this->collector_vec), n_rows, 0);
+    return(out);
   }
 };
 
@@ -1015,12 +877,8 @@ public:
     }
   }
 
-  inline void add_default(Path& path) {
-    if (required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-  }
-
-  inline void add_default_df() {
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
   }
 
@@ -1088,16 +946,16 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     if (type == "scalar") {
       if (vec_is(ptype, tibblify_shared_empty_lgl)) {
         cpp11::r_bool default_bool = cpp11::logicals(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Lgl>(new Collector_Scalar_Lgl(default_bool, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(default_bool, required, location, tibblify_shared_empty_lgl, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_int)) {
         int default_int = cpp11::as_integers(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Int>(new Collector_Scalar_Int(default_int, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(default_int, required, location, tibblify_shared_empty_int, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_dbl)) {
         double default_dbl = cpp11::as_doubles(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Dbl>(new Collector_Scalar_Dbl(default_dbl, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(default_dbl, required, location, tibblify_shared_empty_dbl, name, transform)));
       } else if (vec_is(ptype, tibblify_shared_empty_chr)) {
         cpp11::sexp default_str = cpp11::strings(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar_Str>(new Collector_Scalar_Str(default_str, required, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(default_str, required, location, tibblify_shared_empty_chr, name, transform)));
       } else {
         cpp11::sexp na = elt["na"];
         col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, location, name, transform)));
@@ -1106,6 +964,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
       cpp11::sexp names_to = elt["names_to"];
       cpp11::sexp values_to = elt["values_to"];
+      cpp11::sexp na = elt["na"];
       col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(
           default_sexp,
           required,
@@ -1113,10 +972,11 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           location,
           name,
           transform,
-          input_form,
+          string_to_form_enum(input_form),
           names_to,
           values_to,
-          vector_allows_empty_list))
+          vector_allows_empty_list,
+          na))
       );
     } else {
       cpp11::stop("Internal Error: Unsupported type");
