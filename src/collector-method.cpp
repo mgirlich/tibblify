@@ -331,6 +331,7 @@ private:
   const bool uses_values_col;
   const SEXP output_col_names;
   const bool vector_allows_empty_list;
+  const SEXP na;
 
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     if (Rf_isNull(values_to_)) {
@@ -354,11 +355,6 @@ private:
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
-    SEXP vec_init_call = PROTECT(Rf_lang3(syms_vec_init,
-                                          this->ptype,
-                                          tibblify_shared_int1));
-    SEXP missing_value = PROTECT(R_tryEval(vec_init_call, tibblify_ns_env, NULL));
-
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
     R_xlen_t n = Rf_length(value);
@@ -366,7 +362,7 @@ private:
     cpp11::writable::list out_list(n);
     for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
       if (Rf_isNull(*ptr_row)) {
-        out_list[i] = missing_value;
+        out_list[i] = this->na;
         continue;
       }
 
@@ -378,14 +374,15 @@ private:
     }
 
     SEXP out = PROTECT(vec_flatten(out_list, this->ptype));
-    UNPROTECT(3);
+    UNPROTECT(1);
     return(out);
   }
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
                    SEXP name_, SEXP transform_, vector_input_form input_form_,
-                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_)
+                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_,
+                   SEXP na_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
@@ -394,6 +391,7 @@ public:
   , uses_values_col(!Rf_isNull(values_to_))
   , output_col_names(get_output_col_names(names_to_, values_to_))
   , vector_allows_empty_list(vector_allows_empty_list_)
+  , na(na_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -1040,6 +1038,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
       cpp11::sexp names_to = elt["names_to"];
       cpp11::sexp values_to = elt["values_to"];
+      cpp11::sexp na = elt["na"];
       col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(
           default_sexp,
           required,
@@ -1050,7 +1049,8 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           string_to_form_enum(input_form),
           names_to,
           values_to,
-          vector_allows_empty_list))
+          vector_allows_empty_list,
+          na))
       );
     } else {
       cpp11::stop("Internal Error: Unsupported type");
