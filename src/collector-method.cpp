@@ -718,6 +718,29 @@ public:
   }
 };
 
+inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
+                                R_xlen_t n_rows,
+                                int n_extra_cols) {
+  int n_cols = n_extra_cols;
+  for (const Collector_Ptr& collector : collector_vec) {
+    n_cols += (*collector).size();
+  }
+
+  SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
+  SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+
+  for (const Collector_Ptr& collector : collector_vec) {
+    (*collector).assign_data(df, names);
+  }
+
+  Rf_setAttrib(df, R_NamesSymbol, names);
+  set_df_attributes(df, n_rows);
+
+  UNPROTECT(2);
+  return df;
+}
+
+
 
 class Collector_Tibble : public Collector, Multi_Collector {
 private:
@@ -727,22 +750,8 @@ private:
   R_xlen_t n_rows;
 
   inline SEXP get_data() const {
-    int size = 0;
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      size += (*collector).size();
-    }
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, size));
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, size));
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, this->n_rows);
-
-    UNPROTECT(2);
-    return df;
+    SEXP out = collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0);
+    return(out);
   }
 
 public:
@@ -793,36 +802,19 @@ private:
   const SEXP names_col;
   const bool has_names_col;
 
-  int get_n_cols() const {
-    int n_cols = 0;
-    if (this->has_names_col) n_cols = 1;
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      n_cols += (*collector).size();
-    }
-
-    return n_cols;
-  }
-
   inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
-    const int n_cols = this->get_n_cols();
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
+    int n_extra_cols = this->has_names_col ? 1 : 0;
 
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+    SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
+    SEXP names = Rf_getAttrib(out, R_NamesSymbol);
+
     if (this->has_names_col) {
-      SET_VECTOR_ELT(df, 0, my_vec_names2(object_list));
+      SET_VECTOR_ELT(out, 0, my_vec_names2(object_list));
       SET_STRING_ELT(names, 0, this->names_col);
     }
 
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, n_rows);
-
-    UNPROTECT(2);
-    return df;
+    UNPROTECT(1);
+    return(out);
   }
 
 public:
@@ -872,29 +864,9 @@ public:
 
 class Parser_Object : Multi_Collector {
 private:
-  int get_n_cols() const {
-    int n_cols = 0;
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      n_cols += (*collector).size();
-    }
-
-    return n_cols;
-  }
-
   inline SEXP get_data() {
-    const int n_cols = this->get_n_cols();
-    SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-    SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
-
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).assign_data(df, names);
-    }
-
-    Rf_setAttrib(df, R_NamesSymbol, names);
-    set_df_attributes(df, 1);
-
-    UNPROTECT(2);
-    return df;
+    SEXP out = collector_vec_to_df(std::move(this->collector_vec), 1, 0);
+    return(out);
   }
 
 public:
