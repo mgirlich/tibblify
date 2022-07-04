@@ -327,18 +327,6 @@ private:
   const SEXP output_col_names;
   const bool vector_allows_empty_list;
 
-  vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
-    if (input_form_ == "vector") {
-      return(vector);
-    } else if (input_form_ == "scalar_list") {
-      return(scalar_list);
-    } else if (input_form_ == "object") {
-      return(object);
-    } else{
-      cpp11::stop("Internal error.");
-    }
-  }
-
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     if (Rf_isNull(values_to_)) {
       return(NULL);
@@ -395,12 +383,12 @@ private:
 
 public:
   Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
-                   SEXP name_, SEXP transform_, cpp11::r_string input_form_,
+                   SEXP name_, SEXP transform_, vector_input_form input_form_,
                    SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
-  , input_form(string_to_form_enum(input_form_))
+  , input_form(input_form_)
   , uses_names_col(!Rf_isNull(names_to_))
   , uses_values_col(!Rf_isNull(values_to_))
   , output_col_names(get_output_col_names(names_to_, values_to_))
@@ -1058,7 +1046,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           location,
           name,
           transform,
-          input_form,
+          string_to_form_enum(input_form),
           names_to,
           values_to,
           vector_allows_empty_list))

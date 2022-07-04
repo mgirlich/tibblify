@@ -3,6 +3,18 @@
 
 enum vector_input_form {vector, scalar_list, object};
 
+inline vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
+  if (input_form_ == "vector") {
+    return(vector);
+  } else if (input_form_ == "scalar_list") {
+    return(scalar_list);
+  } else if (input_form_ == "object") {
+    return(object);
+  } else{
+    cpp11::stop("Internal error.");
+  }
+}
+
 inline cpp11::sexp vector_input_form_to_sexp(vector_input_form input_form) {
   cpp11::r_string input_form_string;
   switch (input_form) {
