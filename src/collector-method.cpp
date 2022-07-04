@@ -373,9 +373,7 @@ private:
       out_list[i] = *ptr_row;
     }
 
-    SEXP out = PROTECT(vec_flatten(out_list, this->ptype));
-    UNPROTECT(1);
-    return(out);
+    return(vec_flatten(out_list, this->ptype));
   }
 
 public:
