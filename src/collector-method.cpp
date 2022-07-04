@@ -218,34 +218,53 @@ public:
 
 class Collector_Scalar_Lgl : public Collector_Scalar_Base {
 private:
-  const int default_value;
+  const cpp11::r_bool default_value;
   const SEXP ptype = tibblify_shared_empty_lgl;
-  int* data_ptr;
-private:
-  cpp11::writable::logicals data;
+  cpp11::writable::r_vector<cpp11::r_bool> data;
 
 public:
-  Collector_Scalar_Lgl(int default_value_, bool required_, int col_location_,
+  Collector_Scalar_Lgl(cpp11::r_bool default_value_, bool required_, int col_location_,
                        SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   { }
 
   inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(LGLSXP, length);
-    this->data_ptr = LOGICAL(this->data);
+    this->data.reserve(length);
   }
 
   inline void add_value(SEXP value, Path& path) {
-    ADD_VALUE(Rf_asLogical, NA_LOGICAL);
+    if (Rf_isNull(value)) {
+      this->data.push_back(cpp11::na<cpp11::r_bool>());
+      return;
+    }
+
+    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));
+    R_len_t size = short_vec_size(value_casted);
+    if (size != 1) {
+      stop_scalar(path);
+    }
+
+    // WHY DOESN'T THIS WORK?!
+    // cpp11::r_bool out = value_casted;
+    // cpp11::r_bool out = static_cast<cpp11::r_bool>(value_casted);
+
+    // BUT THESE DO?!
+    // cpp11::r_bool out = static_cast<Rboolean>(LOGICAL_ELT(value_casted, 0));
+    // cpp11::r_bool out = cpp11::logicals(value)[0];
+
+    this->data.push_back(Rf_asLogical(value_casted));
+    UNPROTECT(2);
   }
 
   inline void add_default(Path& path) {
-    ADD_DEFAULT();
+    if (this->required) stop_required(path);
+    this->data.push_back(this->default_value);
   }
 
   inline void add_default_df() {
-    ADD_DEFAULT_DF();
+    this->data.push_back(this->default_value);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
