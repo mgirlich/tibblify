@@ -104,6 +104,17 @@
 <span>  transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">tib_date</span><span class="op">(</span></span>
+<span>  <span class="va">key</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ptype_inner <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html" class="external-link">new_date</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  transform <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">tib_chr_date</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">tib_vector</span><span class="op">(</span></span>
 <span>  <span class="va">key</span>,</span>
 <span>  <span class="va">ptype</span>,</span>
@@ -165,6 +176,29 @@
 <span>  names_to <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">tib_date_vec</span><span class="op">(</span></span>
+<span>  <span class="va">key</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  ptype_inner <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html" class="external-link">new_date</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  transform <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
+<span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  names_to <span class="op">=</span> <span class="cn">NULL</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">tib_chr_date_vec</span><span class="op">(</span></span>
+<span>  <span class="va">key</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  required <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fill <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"vector"</span>, <span class="st">"scalar_list"</span>, <span class="st">"object"</span><span class="op">)</span>,</span>
+<span>  values_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  names_to <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">tib_variant</span><span class="op">(</span><span class="va">key</span>, <span class="va">...</span>, required <span class="op">=</span> <span class="cn">TRUE</span>, fill <span class="op">=</span> <span class="cn">NULL</span>, transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tib_row</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
@@ -203,6 +237,10 @@
 When exactly it is applied depends on the field type:</p><ul><li><p><code>tib_scalar()</code> it is applied to the column.</p></li>
 <li><p><code>tib_vector()</code>, <code>tib_variant()</code> it is applied to each element of the column.</p></li>
 </ul></dd>
+
+
+<dt>format</dt>
+<dd><p>Optional, a string passed to the <code>format</code> argument of <code><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date()</a></code>.</p></dd>
 
 
 <dt>input_form</dt>
@@ -246,7 +284,10 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
 <li><p><code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>: <code>tib_int()</code> resp. <code>tib_int_vec()</code></p></li>
 <li><p><code><a href="https://rdrr.io/r/base/double.html" class="external-link">double()</a></code>: <code>tib_dbl()</code> resp. <code>tib_dbl_vec()</code></p></li>
 <li><p><code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code>: <code>tib_chr()</code> resp. <code>tib_chr_vec()</code></p></li>
-</ul></div>
+<li><p><code>Date</code>: <code>tib_date()</code> resp. <code>tib_date_vec()</code></p></li>
+</ul><p>Further, there is also a special shortcut for dates encoded as character:
+<code>tib_chr_date()</code> resp. <code>tib_chr_date_vec()</code>.</p>
+    </div>
 
     <div id="ref-examples">
     <h2>Examples</h2>
@@ -260,12 +301,8 @@ the most common prototypes</p><ul><li><p><code><a href="https://rdrr.io/r/base/l
 <span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tib_scalar</span><span class="op">(</span><span class="st">"date"</span>, <span class="fu"><a href="https://rdrr.io/r/base/Sys.time.html" class="external-link">Sys.Date</a></span><span class="op">(</span><span class="op">)</span>, transform <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/as.Date.html" class="external-link">as.Date</a></span><span class="op">(</span><span class="va">x</span>, format <span class="op">=</span> <span class="st">"%Y-%m-%d"</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> tib_scalar(</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   "date",</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   ptype = vctrs::new_date(),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   transform = function (x) </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   as.Date(x, format = "%Y-%m-%d"),</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> )</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> tib_date("date", transform = function (x) </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> as.Date(x, format = "%Y-%m-%d"))</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="fu">tib_df</span><span class="op">(</span></span></span>
 <span class="r-in"><span>  <span class="st">"data"</span>,</span></span>
