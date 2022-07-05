@@ -171,6 +171,17 @@
       Error in `tibblify()`:
       ! Each element in list at path [[1]]$x must have size 1.
 
+---
+
+    Code
+      (expect_error(tib(list(x = list(1, "a")), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <character> to <integer>.
+
 # vector column can parse object
 
     Code

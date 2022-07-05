@@ -85,7 +85,7 @@ inline SEXP vec_flatten(SEXP value, SEXP ptype) {
   SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
                                value,
                                ptype));
-  SEXP out = R_tryEval(call, tibblify_ns_env, NULL);
+  SEXP out = Rf_eval(call, tibblify_ns_env);
   UNPROTECT(1);
   return(out);
 }
