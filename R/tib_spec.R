@@ -415,7 +415,7 @@ tib_vector_impl <- function(key,
   ptype <- vec_ptype(ptype, call = call)
   ptype_inner <- vec_ptype(ptype_inner, call = call)
   if (!is_null(fill)) {
-    fill <- vec_cast(fill, ptype_inner, call = call)
+    fill <- vec_cast(fill, ptype, call = call, to_arg = "ptype")
   }
   values_to <- tib_check_values_to(values_to, call)
   names_to <- tib_check_names_to(names_to, values_to, input_form, call)
