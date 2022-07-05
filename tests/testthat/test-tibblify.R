@@ -23,44 +23,26 @@ test_that("scalar column works", {
 
   # can parse
   expect_equal(tib(list(x = TRUE), tib_lgl("x")), tibble(x = TRUE))
-  expect_equal(tib(list(x = 1), tib_int("x")), tibble(x = 1L))
-  expect_equal(tib(list(x = 1.5), tib_dbl("x")), tibble(x = 1.5))
-  expect_equal(tib(list(x = "a"), tib_chr("x")), tibble(x = "a"))
   expect_equal(tib(list(x = dtt), tib_scalar("x", dtt)), tibble(x = dtt))
 
   # errors if required but absent
   expect_snapshot((expect_error(tib(list(), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(), tib_int("x")))))
-  expect_snapshot((expect_error(tib(list(), tib_dbl("x")))))
-  expect_snapshot((expect_error(tib(list(), tib_chr("x")))))
   expect_snapshot((expect_error(tib(list(), tib_scalar("x", dtt)))))
 
   # errors if bad size
   expect_snapshot((expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(x = c(1, 1)), tib_int("x")))))
-  expect_snapshot((expect_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x")))))
-  expect_snapshot((expect_error(tib(list(x = c("a", "a")), tib_chr("x")))))
   expect_snapshot((expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))))
 
   # errors if bad type
   expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(x = "a"), tib_int("x")))))
-  expect_snapshot((expect_error(tib(list(x = "a"), tib_dbl("x")))))
-  expect_snapshot((expect_error(tib(list(x = 1), tib_chr("x")))))
   expect_snapshot((expect_error(tib(list(x = 1), tib_scalar("x", dtt)))))
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
-  expect_equal(tib(list(), tib_int("x", required = FALSE)), tibble(x = NA_integer_))
-  expect_equal(tib(list(), tib_dbl("x", required = FALSE)), tibble(x = NA_real_))
-  expect_equal(tib(list(), tib_chr("x", required = FALSE)), tibble(x = NA_character_))
   expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
   # use NA if NULL
   expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = NA))
-  expect_equal(tib(list(x = NULL), tib_int("x", required = FALSE, fill = 1)), tibble(x = NA_integer_))
-  expect_equal(tib(list(x = NULL), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = NA_real_))
-  expect_equal(tib(list(x = NULL), tib_chr("x", required = FALSE, fill = "a")), tibble(x = NA_character_))
   expect_equal(
     tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
     tibble(x = vec_init(dtt))
@@ -73,9 +55,6 @@ test_that("scalar column works", {
 
   # specified default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
-  expect_equal(tib(list(), tib_int("x", required = FALSE, fill = 1)), tibble(x = 1))
-  expect_equal(tib(list(), tib_dbl("x", required = FALSE, fill = 1.5)), tibble(x = 1.5))
-  expect_equal(tib(list(), tib_chr("x", required = FALSE, fill = "a")), tibble(x = "a"))
   expect_equal(
     tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
     tibble(x = dtt)
@@ -85,18 +64,6 @@ test_that("scalar column works", {
   expect_equal(
     tib(list(x = TRUE), tib_lgl("x", transform = ~ !.x)),
     tibble(x = FALSE)
-  )
-  expect_equal(
-    tib(list(x = 1), tib_int("x", transform = ~ .x - 1)),
-    tibble(x = 0)
-  )
-  expect_equal(
-    tib(list(x = 1.5), tib_dbl("x", transform = ~ .x - 1)),
-    tibble(x = 0.5)
-  )
-  expect_equal(
-    tib(list(x = "a"), tib_chr("x", transform = ~ paste0(.x, "b"))),
-    tibble(x = "ab")
   )
   expect_equal(
     tib(list(x = dtt), tib_scalar("x", dtt, transform = ~ .x + 1)),

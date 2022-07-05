@@ -49,33 +49,6 @@
 ---
 
     Code
-      (expect_error(tib(list(), tib_int("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
-    Code
-      (expect_error(tib(list(), tib_dbl("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
-    Code
-      (expect_error(tib(list(), tib_chr("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
-    Code
       (expect_error(tib(list(), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
@@ -86,33 +59,6 @@
 
     Code
       (expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
-
----
-
-    Code
-      (expect_error(tib(list(x = c(1, 1)), tib_int("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
-
----
-
-    Code
-      (expect_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
-
----
-
-    Code
-      (expect_error(tib(list(x = c("a", "a")), tib_chr("x"))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
@@ -137,39 +83,6 @@
       ! Cannot `tibblify()` field [[1]]$x
       Caused by error:
       ! Can't convert <character> to <logical>.
-
----
-
-    Code
-      (expect_error(tib(list(x = "a"), tib_int("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
-      Caused by error:
-      ! Can't convert <character> to <integer>.
-
----
-
-    Code
-      (expect_error(tib(list(x = "a"), tib_dbl("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
-      Caused by error:
-      ! Can't convert <character> to <double>.
-
----
-
-    Code
-      (expect_error(tib(list(x = 1), tib_chr("x"))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
-      Caused by error:
-      ! Can't convert <double> to <character>.
 
 ---
 
