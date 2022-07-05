@@ -206,7 +206,7 @@ tib_scalar_impl <- function(key,
     fill <- vec_init(ptype_inner)
   } else {
     vec_assert(fill, size = 1L, call = call)
-    fill <- vec_cast(fill, ptype_inner, call = call)
+    fill <- vec_cast(fill, ptype_inner, call = call, to_arg = "ptype_inner")
   }
 
   class <- NULL

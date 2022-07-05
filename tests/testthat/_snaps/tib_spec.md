@@ -174,7 +174,7 @@
     Output
       <error/vctrs_error_incompatible_type>
       Error in `tib_int()`:
-      ! Can't convert `fill` <character> to <integer>.
+      ! Can't convert `fill` <character> to match type of `ptype_inner` <integer>.
 
 ---
 
