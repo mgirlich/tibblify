@@ -88,6 +88,17 @@
         tib_chr("z", fill = "abc"),
       )
 
+---
+
+    Code
+      tib_int(key = "x", ptype_inner = character(), fill = "a")
+    Output
+      tib_int(
+        "x",
+        fill = "a",
+        ptype_inner = character(0),
+      )
+
 # format breaks long lines
 
     Code
@@ -147,6 +158,17 @@
       tib_int_vec("a", fill = 1:2) %>% print()
     Output
       tib_int_vec("a", fill = 1:2)
+
+---
+
+    Code
+      tib_int_vec(key = "x", ptype_inner = character(), fill = 1:2)
+    Output
+      tib_int_vec(
+        "x",
+        fill = 1:2,
+        ptype_inner = character(0),
+      )
 
 # format for tib_row works
 

@@ -32,6 +32,14 @@ test_that("format for scalars works", {
       z = tib_chr("z", fill = "abc")
     ) %>% print()
   )
+
+  expect_snapshot(
+    tib_int(
+      key = "x",
+      ptype_inner = character(),
+      fill = "a"
+    )
+  )
 })
 
 
@@ -73,6 +81,14 @@ test_that("format for tib_vector works", {
 
   # multi value default
   expect_snapshot(tib_int_vec("a", fill = 1:2) %>% print())
+
+  expect_snapshot(
+    tib_int_vec(
+      key = "x",
+      ptype_inner = character(),
+      fill = 1:2
+    )
+  )
 })
 
 test_that("format for tib_row works", {

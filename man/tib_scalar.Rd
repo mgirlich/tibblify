@@ -145,7 +145,12 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 
 \item{ptype_inner}{A prototype of the field.}
 
-\item{transform}{A function to apply to the field after casting to \code{ptype_inner}.}
+\item{transform}{A function to apply after casting to \code{ptype_inner}.
+When exactly it is applied depends on the field type:
+\itemize{
+\item \code{tib_scalar()} it is applied to the column.
+\item \code{tib_vector()}, \code{tib_variant()} it is applied to each element of the column.
+}}
 
 \item{input_form}{A string that describes what structure the field has. Can
 be one of:

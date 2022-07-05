@@ -394,7 +394,6 @@ tib_chr <- function(key,
   )
 }
 
-
 # vector fields -----------------------------------------------------------
 
 tib_vector_impl <- function(key,
