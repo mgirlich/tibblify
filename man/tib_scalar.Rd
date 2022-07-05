@@ -19,15 +19,51 @@
 \usage{
 tib_unspecified(key, ..., required = TRUE)
 
-tib_scalar(key, ptype, ..., required = TRUE, fill = NULL, transform = NULL)
+tib_scalar(
+  key,
+  ptype,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = ptype,
+  transform = NULL
+)
 
-tib_lgl(key, ..., required = TRUE, fill = NULL, transform = NULL)
+tib_lgl(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = logical(),
+  transform = NULL
+)
 
-tib_int(key, ..., required = TRUE, fill = NULL, transform = NULL)
+tib_int(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = integer(),
+  transform = NULL
+)
 
-tib_dbl(key, ..., required = TRUE, fill = NULL, transform = NULL)
+tib_dbl(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = double(),
+  transform = NULL
+)
 
-tib_chr(key, ..., required = TRUE, fill = NULL, transform = NULL)
+tib_chr(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = character(),
+  transform = NULL
+)
 
 tib_vector(
   key,
@@ -35,6 +71,7 @@ tib_vector(
   ...,
   required = TRUE,
   fill = NULL,
+  ptype_inner = ptype,
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -46,6 +83,7 @@ tib_lgl_vec(
   ...,
   required = TRUE,
   fill = NULL,
+  ptype_inner = logical(),
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -57,6 +95,7 @@ tib_int_vec(
   ...,
   required = TRUE,
   fill = NULL,
+  ptype_inner = integer(),
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -68,6 +107,7 @@ tib_dbl_vec(
   ...,
   required = TRUE,
   fill = NULL,
+  ptype_inner = double(),
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -79,6 +119,7 @@ tib_chr_vec(
   ...,
   required = TRUE,
   fill = NULL,
+  ptype_inner = character(),
   transform = NULL,
   input_form = c("vector", "scalar_list", "object"),
   values_to = NULL,
@@ -102,7 +143,9 @@ tib_df(.key, ..., .required = TRUE, .names_to = NULL)
 
 \item{fill}{Optionally, a value to use if the field does not exist.}
 
-\item{transform}{A function to apply to the field before casting to \code{ptype}.}
+\item{ptype_inner}{A prototype of the field.}
+
+\item{transform}{A function to apply to the field after casting to \code{ptype_inner}.}
 
 \item{input_form}{A string that describes what structure the field has. Can
 be one of:
