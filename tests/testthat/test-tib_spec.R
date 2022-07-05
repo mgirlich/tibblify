@@ -50,7 +50,7 @@ test_that("can nest specifications", {
     spec_df(!!!spec1$fields, !!!spec2$fields)
   )
 
-  expect_snapshot_error(spec_df(spec1, spec1))
+  expect_snapshot((expect_error(spec_df(spec1, spec1))))
 })
 
 test_that("errors on invalid `.names_to`", {
@@ -61,7 +61,7 @@ test_that("errors on invalid `.names_to`", {
 })
 
 test_that("errors if `.names_to` column name is not unique", {
-  expect_snapshot_error(spec_df(x = tib_int("x"), .names_to = "x"))
+  expect_snapshot((expect_error(spec_df(x = tib_int("x"), .names_to = "x"))))
 })
 
 

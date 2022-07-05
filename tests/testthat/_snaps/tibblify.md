@@ -39,27 +39,57 @@
 
 # scalar column works
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_lgl("x"))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_scalar("x", dtt))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x"))))
+    Output
+      <error/rlang_error>
+      Error in `stop_scalar()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt))))
+    Output
+      <error/rlang_error>
+      Error in `stop_scalar()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Can't convert <character> to <logical>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_lgl("x"))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <character> to <logical>.
 
 ---
 
-    Can't convert <double> to <datetime<local>>.
+    Code
+      (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <double> to <datetime<local>>.
 
 ---
 
@@ -72,15 +102,30 @@
 
 # vector column works
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_lgl_vec("x"))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_vector("x", dtt))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Can't convert <character> to <logical>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_lgl_vec("x"))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <character> to <logical>.
 
 # vector column respects vector_allows_empty_list
 
@@ -142,13 +187,31 @@
 
 # list column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = TRUE), list(zzz = 1)), spec_df(x = tib_variant(
+        "x")))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[2]]$x.
 
 # df column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = list(a = TRUE)), list()), spec_df(x = tib_row(
+        "x", a = tib_lgl("a"))))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[2]]$x.
 
 # list of df column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = list(list(a = TRUE), list(a = FALSE))),
+      list()), spec_df(x = tib_df("x", a = tib_lgl("a"))))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[2]]$x.
 

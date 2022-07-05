@@ -44,10 +44,15 @@
 
 # can nest specifications
 
-    Names must be unique.
-    x These names are duplicated:
-      * "a" at locations 1 and 3.
-      * "b" at locations 2 and 4.
+    Code
+      (expect_error(spec_df(spec1, spec1)))
+    Output
+      <error/vctrs_error_names_must_be_unique>
+      Error in `spec_df()`:
+      ! Names must be unique.
+      x These names are duplicated:
+        * "a" at locations 1 and 3.
+        * "b" at locations 2 and 4.
 
 # errors on invalid `.names_to`
 
@@ -66,7 +71,12 @@
 
 # errors if `.names_to` column name is not unique
 
-    The column name of `.names_to` is already specified in `...`.
+    Code
+      (expect_error(spec_df(x = tib_int("x"), .names_to = "x")))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! The column name of `.names_to` is already specified in `...`.
 
 # errors on invalid `key`
 
