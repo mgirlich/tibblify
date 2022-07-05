@@ -173,6 +173,34 @@ test_that("tib_vector checks arguments", {
   })
 })
 
+test_that("tib_chr_date works", {
+  expect_equal(
+    tib_chr_date("a"),
+    tib_scalar_impl(
+      "a",
+      ptype = vctrs::new_date(),
+      ptype_inner = character(),
+      format = "%Y-%m-%d",
+      transform = ~ as.Date(.x, format = format),
+      class = "tib_scalar_chr_date"
+    ),
+    ignore_function_env = TRUE
+  )
+
+  expect_equal(
+    tib_chr_date_vec("a"),
+    tib_vector_impl(
+      "a",
+      ptype = vctrs::new_date(),
+      ptype_inner = character(),
+      format = "%Y-%m-%d",
+      transform = ~ as.Date(.x, format = format),
+      class = "tib_vector_chr_date"
+    ),
+    ignore_function_env = TRUE
+  )
+})
+
 test_that("tib_df() checks arguments", {
   expect_snapshot({
     (expect_error(tib_df("x", .names_to = 1)))

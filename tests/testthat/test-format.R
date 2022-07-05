@@ -8,7 +8,7 @@ test_that("format for scalars works", {
   local_options(cli.num_colors = 1)
 
   expect_snapshot(tib_chr("a") %>% print())
-  # expect_snapshot(tib_dat("a") %>% print())
+  expect_snapshot(tib_date("a") %>% print())
   expect_snapshot(tib_dbl("a") %>% print())
   # expect_snapshot(tib_dtt("a") %>% print())
   expect_snapshot(tib_int("a") %>% print())
@@ -66,12 +66,12 @@ test_that("format breaks long lines", {
 test_that("format for tib_vector works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(tib_chr_vec("a") %>% print())
-  expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
+  expect_snapshot(tib_vector("a", ptype = vctrs::new_duration()) %>% print())
 
   expect_snapshot(
     tib_vector(
       "a",
-      ptype = Sys.Date(),
+      ptype = vctrs::new_duration(),
       input_form = "object",
       values_to = "vals",
       names_to = "names"
@@ -89,6 +89,18 @@ test_that("format for tib_vector works", {
       fill = 1:2
     )
   )
+})
+
+test_that("format for tib_chr_date works", {
+  expect_snapshot({
+    tib_chr_date("a")
+    tib_chr_date("a", required = FALSE, fill = "2022-01-01", format = "%Y")
+  })
+
+  expect_snapshot({
+    tib_chr_date_vec("a")
+    tib_chr_date_vec("a", required = FALSE, fill = as.Date("2022-01-01"), format = "%Y")
+  })
 })
 
 test_that("format for tib_row works", {
