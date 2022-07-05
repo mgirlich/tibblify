@@ -6,6 +6,10 @@ check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
   }
 }
 
+format_path <- function(path_ptr) {
+  path_to_string(get_path_data(path_ptr))
+}
+
 path_to_string <- function(path) {
   if (length(path) == 0) {
     return("<root>")
@@ -25,56 +29,60 @@ path_to_string <- function(path) {
   paste0(path_elements, collapse = "")
 }
 
+tibblify_abort <- function(..., .envir = caller_env()) {
+  cli::cli_abort(..., class = "tibblify_error", .envir = .envir)
+}
+
 stop_required <- function(path) {
   path_str <- path_to_string(path)
   msg <- "Required element absent at path {path_str}."
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_scalar <- function(path) {
   path_str <- path_to_string(path)
   msg <- "Element at path {path_str} must have size 1."
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_duplicate_name <- function(path, name) {
   path_str <- path_to_string(path)
   msg <- "Element at path {path_str} has duplicate name {.val {name}}."
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_empty_name <- function(path, index) {
   path_str <- path_to_string(path)
   msg <- "Element at path {path_str} has empty name at position {index + 1}."
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_names_is_null <- function(path) {
   path_str <- path_to_string(path)
   msg <- "Element at path {path_str} has {.code NULL} names."
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_object_vector_names_is_null <- function(path) {
   path_str <- path_to_string(path)
   msg <- c(
-    "Element at path {path_str} has {.code NULL} names.",
+    "Element at path {.field {path_str}} has {.code NULL} names.",
     i = 'Element must be named for {.code tib_vector(input_form = "object")}.'
   )
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_vector_non_list_element <- function(path, input_form) {
   # FIXME {.code} cannot be interpolated correctly
   path_str <- path_to_string(path)
   msg <- 'Element at path {path_str} must be a list for `input_form = "{input_form}"`'
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_vector_wrong_size_element <- function(path, input_form) {
   path_str <- path_to_string(path)
   msg <- 'Each element in list at path {path_str} must have size 1.'
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 vec_flatten <- function(x, ptype) {

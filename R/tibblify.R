@@ -47,7 +47,24 @@ tibblify <- function(x,
 
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
-  out <- tibblify_impl(x, spec)
+  path_ptr <- init_tibblify_path()
+  call <- current_call()
+  try_fetch(
+    out <- tibblify_impl(x, spec, path_ptr),
+    error = function(cnd) {
+      if (inherits(cnd, "tibblify_error")) {
+        cnd$call <- call
+        cnd_signal(cnd)
+      }
+
+      path <- format_path(path_ptr)
+      tibblify_abort(
+        "Cannot {.fn tibblify} field {.field {path}}",
+        parent = cnd,
+        call = call
+      )
+    }
+  )
 
   if (inherits(spec, "spec_object")) {
     out <- purrr::map2(spec$fields, out, finalize_spec_object)
