@@ -157,6 +157,15 @@
       Error in `stop_vector_wrong_size_element()`:
       ! Each element in list at path [[1]]$x must have size 1.
 
+---
+
+    Code
+      (expect_error(tib(list(x = list(1, "a")), spec)))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <character> to <integer>.
+
 # vector column can parse object
 
     Code
