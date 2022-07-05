@@ -148,22 +148,23 @@ print.tib_collector <- function(x, width = NULL, ..., names = NULL) {
 }
 
 #' @export
-format.tib_scalar <- function(x, ...,
+format.tib_scalar <- function(x,
+                              ...,
+                              fill = NULL,
+                              ptype_inner = NULL,
+                              transform = NULL,
                               multi_line = FALSE,
                               nchar_indent = 0,
-                              width = NULL) {
+                              width = NULL,
+                              names = FALSE) {
   parts <- list(
     deparse(x$key),
     ptype = format_ptype_arg(x),
     required = if (!x$required) FALSE,
-    fill = format_fill_arg(x),
-    ptype_inner = format_ptype_inner(x),
-    transform = x$transform,
-    input_form = if (!identical(x$input_form, "vector")) {
-      double_tick(x$input_form)
-    },
-    values_to = double_tick(x$values_to),
-    names_to = double_tick(x$names_to)
+    fill = format_fill_arg(x, fill),
+    ptype_inner = format_ptype_inner(x, ptype_inner),
+    transform = if (!is_zap(transform)) x$transform,
+    ...
   )
   parts <- list_drop_null(parts)
 
@@ -182,10 +183,45 @@ format.tib_scalar <- function(x, ...,
 #' @export
 format.tib_variant <- format.tib_scalar
 #' @export
-format.tib_vector <- format.tib_scalar
+format.tib_vector <- function(x, ...,
+                              multi_line = FALSE,
+                              nchar_indent = 0,
+                              width = NULL) {
+  format.tib_scalar(
+    x = x,
+    input_form = if (!identical(x$input_form, "vector")) {
+      double_tick(x$input_form)
+    },
+    values_to = double_tick(x$values_to),
+    names_to = double_tick(x$names_to),
+    multi_line = multi_line,
+    nchar_indent = nchar_indent,
+    width = width
+  )
+}
 #' @export
 format.tib_unspecified <- format.tib_scalar
 
+
+#' @export
+format.tib_scalar_chr_date <- function(x, ...,
+                                       multi_line = FALSE,
+                                       nchar_indent = 0,
+                                       width = NULL) {
+  format.tib_scalar(
+    x = x,
+    fill = if (identical(x$fill, NA_character_)) zap(),
+    ptype_inner = zap(),
+    format = if (x$format != "%Y-%m-%d") double_tick(x$format),
+    transform = zap(),
+    multi_line = multi_line,
+    nchar_indent = nchar_indent,
+    width = width
+  )
+}
+
+#' @export
+format.tib_vector_chr_date <- format.tib_scalar_chr_date
 
 # format nested columns ---------------------------------------------------
 
@@ -243,6 +279,10 @@ format_tib_f.tib_scalar_double <- function(x) {cli::col_green("tib_dbl")}
 #' @export
 format_tib_f.tib_scalar_character <- function(x) {cli::col_red("tib_chr")}
 #' @export
+format_tib_f.tib_scalar_date <- function(x) {"tib_date"}
+#' @export
+format_tib_f.tib_scalar_chr_date <- function(x) {"tib_chr_date"}
+#' @export
 format_tib_f.tib_scalar<- function(x) {"tib_scalar"}
 
 #' @export
@@ -254,7 +294,11 @@ format_tib_f.tib_vector_double <- function(x) {cli::col_green("tib_dbl_vec")}
 #' @export
 format_tib_f.tib_vector_character <- function(x) {cli::col_red("tib_chr_vec")}
 #' @export
-format_tib_f.tib_vector<- function(x) {"tib_vector"}
+format_tib_f.tib_vector_date <- function(x) {cli::col_red("tib_date_vec")}
+#' @export
+format_tib_f.tib_vector_chr_date <- function(x) {"tib_chr_date_vec"}
+#' @export
+format_tib_f.tib_vector <- function(x) {"tib_vector"}
 
 #' @export
 format_tib_f.tib_variant <- function(x) {"tib_variant"}
@@ -270,7 +314,9 @@ format_tib_f.default <- function(x) {class(x)[[1]]}
 
 # format ptype ------------------------------------------------------------
 
-format_ptype_inner <- function(x) {
+format_ptype_inner <- function(x, ptype_inner) {
+  if (is_zap(ptype_inner)) return(NULL)
+  if (is_null(x$ptype_inner)) return(NULL)
   if (!identical(x$ptype, x$ptype_inner)) format_ptype(x$ptype_inner)
 }
 
@@ -304,7 +350,9 @@ format_ptype.POSIXct <- function(x) {
 
 # format fill -------------------------------------------------------------
 
-format_fill_arg <- function(x) {
+format_fill_arg <- function(x, fill) {
+  if (is_zap(fill)) return(NULL)
+
   if (is_null(x$fill)) return(NULL)
 
   if (inherits(x, "tib_variant") || inherits(x, "tib_unspecified")) {

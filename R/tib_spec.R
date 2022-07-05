@@ -163,13 +163,16 @@ tib_collector <- function(key,
   check_key(key, call)
   check_required(required, call)
 
+  fields <- list(
+    type = type,
+    key = key,
+    required = required,
+    ...
+  )
+
+  class <- tib_native_ptype(fields$ptype, class, fields)
   structure(
-    list(
-      type = type,
-      key = key,
-      required = required,
-      ...
-    ),
+    fields,
     class = c(class, paste0("tib_", type), "tib_collector")
   )
 }
@@ -196,8 +199,8 @@ tib_scalar_impl <- function(key,
                             fill = NULL,
                             ptype_inner = ptype,
                             transform = NULL,
+                            class = NULL,
                             call = caller_env()) {
-  check_dots_empty()
   ptype <- vec_ptype(ptype, x_arg = "ptype", call = call)
   ptype_inner <- vec_ptype(ptype_inner, x_arg = "ptype_inner", call = call)
   if (is_null(fill)) {
@@ -205,11 +208,6 @@ tib_scalar_impl <- function(key,
   } else {
     vec_assert(fill, size = 1L, call = call)
     fill <- vec_cast(fill, ptype_inner, call = call, to_arg = "ptype_inner")
-  }
-
-  class <- NULL
-  if (tib_has_special_scalar(ptype)) {
-    class <- paste0("tib_scalar_", vec_ptype_full(ptype))
   }
 
   tib_collector(
@@ -220,25 +218,51 @@ tib_scalar_impl <- function(key,
     ptype_inner = ptype_inner,
     fill = fill,
     transform = prep_transform(transform, call),
+    ...,
     class = class,
     call = call
   )
 }
 
-tib_has_special_scalar <- function(ptype) {
-  UseMethod("tib_has_special_scalar")
+tib_native_ptype <- function(ptype, class, fields) {
+  if (!is_null(class)) return(class)
+  if (!fields$type %in% c("scalar", "vector")) return(NULL)
+
+  UseMethod("tib_native_ptype")
 }
 
 #' @export
-tib_has_special_scalar.default <- function(ptype) FALSE
+tib_native_ptype.default <- function(ptype, class, fields) NULL
 #' @export
-tib_has_special_scalar.logical <- function(ptype) vec_is(ptype, logical())
+tib_native_ptype.logical <- function(ptype, class, fields) {
+  if (!vec_is(ptype, logical())) return(NULL)
+
+  paste0("tib_", fields$type, "_logical")
+}
 #' @export
-tib_has_special_scalar.integer <- function(ptype) vec_is(ptype, integer())
+tib_native_ptype.integer <- function(ptype, class, fields) {
+  if (!vec_is(ptype, integer())) return(NULL)
+
+  paste0("tib_", fields$type, "_integer")
+}
 #' @export
-tib_has_special_scalar.double <- function(ptype) vec_is(ptype, double())
+tib_native_ptype.double <- function(ptype, class, fields) {
+  if (!vec_is(ptype, double())) return(NULL)
+
+  paste0("tib_", fields$type, "_double")
+}
 #' @export
-tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
+tib_native_ptype.character <- function(ptype, class, fields) {
+  if (!vec_is(ptype, character())) return(NULL)
+
+  paste0("tib_", fields$type, "_character")
+}
+#' @export
+tib_native_ptype.Date <- function(ptype, class, fields) {
+  if (!vec_is(ptype, vctrs::new_date())) return(NULL)
+
+  paste0("tib_", fields$type, "_date")
+}
 
 #' Create a Field Specification
 #'
@@ -268,6 +292,7 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #'   * A string: This can only be used if 1) for the input form is `"object"`
 #'     or `"vector"` and 2) `values_to` is a string. The inner names of the
 #'     field go into the specified column.
+#' @param format Optional, a string passed to the `format` argument of `as.Date()`.
 #' @inheritParams spec_df
 #'
 #' @details There are basically five different `tib_*()` functions
@@ -285,6 +310,10 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #' * `integer()`: `tib_int()` resp. `tib_int_vec()`
 #' * `double()`: `tib_dbl()` resp. `tib_dbl_vec()`
 #' * `character()`: `tib_chr()` resp. `tib_chr_vec()`
+#' * `Date`: `tib_date()` resp. `tib_date_vec()`
+#'
+#' Further, there is also a special shortcut for dates encoded as character:
+#' `tib_chr_date()` resp. `tib_chr_date_vec()`.
 #'
 #' @export
 #'
@@ -394,6 +423,45 @@ tib_chr <- function(key,
   )
 }
 
+#' @rdname tib_scalar
+#' @export
+tib_date <- function(key,
+                     ...,
+                     required = TRUE,
+                     fill = NULL,
+                     ptype_inner = vctrs::new_date(),
+                     transform = NULL) {
+  check_dots_empty()
+  tib_scalar_impl(
+    key,
+    ptype = vctrs::new_date(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform
+  )
+}
+
+#' @rdname tib_scalar
+#' @export
+tib_chr_date <- function(key,
+                         ...,
+                         required = TRUE,
+                         fill = NULL,
+                         format = "%Y-%m-%d") {
+  check_dots_empty()
+  tib_scalar_impl(
+    key,
+    ptype = vctrs::new_date(),
+    required = required,
+    fill = fill,
+    ptype_inner = character(),
+    format = format,
+    transform = ~ as.Date(.x, format = format),
+    class = "tib_scalar_chr_date"
+  )
+}
+
 # vector fields -----------------------------------------------------------
 
 tib_vector_impl <- function(key,
@@ -406,8 +474,8 @@ tib_vector_impl <- function(key,
                             input_form = c("vector", "scalar_list", "object"),
                             values_to = NULL,
                             names_to = NULL,
+                            class = NULL,
                             call = caller_env()) {
-  check_dots_empty()
   input_form <- arg_match0(
     input_form,
     c("vector", "scalar_list", "object"),
@@ -421,11 +489,6 @@ tib_vector_impl <- function(key,
   values_to <- tib_check_values_to(values_to, call)
   names_to <- tib_check_names_to(names_to, values_to, input_form, call)
 
-  class <- NULL
-  if (tib_has_special_scalar(ptype)) {
-    class <- paste0("tib_vector_", vec_ptype_full(ptype))
-  }
-
   tib_collector(
     key = key,
     type = "vector",
@@ -437,6 +500,7 @@ tib_vector_impl <- function(key,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to,
+    ...,
     class = class,
     call = call
   )
@@ -615,6 +679,59 @@ tib_chr_vec <- function(key,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
+  )
+}
+
+#' @rdname tib_scalar
+#' @export
+tib_date_vec <- function(key,
+                         ...,
+                         required = TRUE,
+                         fill = NULL,
+                         ptype_inner = vctrs::new_date(),
+                         transform = NULL,
+                         input_form = c("vector", "scalar_list", "object"),
+                         values_to = NULL,
+                         names_to = NULL) {
+  check_dots_empty()
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = vctrs::new_date(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform,
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to
+  )
+}
+
+#' @rdname tib_scalar
+#' @export
+tib_chr_date_vec <- function(key,
+                             ...,
+                             required = TRUE,
+                             fill = NULL,
+                             input_form = c("vector", "scalar_list", "object"),
+                             values_to = NULL,
+                             names_to = NULL,
+                             format = "%Y-%m-%d") {
+  check_dots_empty()
+  input_form <- arg_match0(input_form, c("vector", "scalar_list", "object"))
+  tib_vector_impl(
+    key,
+    ptype = vctrs::new_date(),
+    required = required,
+    fill = fill,
+    ptype_inner = character(),
+    format = format,
+    transform = ~ as.Date(.x, format = format),
+    input_form = input_form,
+    values_to = values_to,
+    names_to = names_to,
+    class = "tib_vector_chr_date"
   )
 }
 

@@ -7,11 +7,15 @@
 \alias{tib_int}
 \alias{tib_dbl}
 \alias{tib_chr}
+\alias{tib_date}
+\alias{tib_chr_date}
 \alias{tib_vector}
 \alias{tib_lgl_vec}
 \alias{tib_int_vec}
 \alias{tib_dbl_vec}
 \alias{tib_chr_vec}
+\alias{tib_date_vec}
+\alias{tib_chr_date_vec}
 \alias{tib_variant}
 \alias{tib_row}
 \alias{tib_df}
@@ -64,6 +68,17 @@ tib_chr(
   ptype_inner = character(),
   transform = NULL
 )
+
+tib_date(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = vctrs::new_date(),
+  transform = NULL
+)
+
+tib_chr_date(key, ..., required = TRUE, fill = NULL, format = "\%Y-\%m-\%d")
 
 tib_vector(
   key,
@@ -126,6 +141,29 @@ tib_chr_vec(
   names_to = NULL
 )
 
+tib_date_vec(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = vctrs::new_date(),
+  transform = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL
+)
+
+tib_chr_date_vec(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  input_form = c("vector", "scalar_list", "object"),
+  values_to = NULL,
+  names_to = NULL,
+  format = "\%Y-\%m-\%d"
+)
+
 tib_variant(key, ..., required = TRUE, fill = NULL, transform = NULL)
 
 tib_row(.key, ..., .required = TRUE)
@@ -151,6 +189,8 @@ When exactly it is applied depends on the field type:
 \item \code{tib_scalar()} it is applied to the column.
 \item \code{tib_vector()}, \code{tib_variant()} it is applied to each element of the column.
 }}
+
+\item{format}{Optional, a string passed to the \code{format} argument of \code{as.Date()}.}
 
 \item{input_form}{A string that describes what structure the field has. Can
 be one of:
@@ -199,7 +239,11 @@ the most common prototypes
 \item \code{integer()}: \code{tib_int()} resp. \code{tib_int_vec()}
 \item \code{double()}: \code{tib_dbl()} resp. \code{tib_dbl_vec()}
 \item \code{character()}: \code{tib_chr()} resp. \code{tib_chr_vec()}
+\item \code{Date}: \code{tib_date()} resp. \code{tib_date_vec()}
 }
+
+Further, there is also a special shortcut for dates encoded as character:
+\code{tib_chr_date()} resp. \code{tib_chr_date_vec()}.
 }
 \examples{
 tib_int("int")

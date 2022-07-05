@@ -15,6 +15,13 @@
 ---
 
     Code
+      tib_date("a") %>% print()
+    Output
+      tib_date("a")
+
+---
+
+    Code
       tib_dbl("a") %>% print()
     Output
       tib_dbl("a")
@@ -134,19 +141,19 @@
 ---
 
     Code
-      tib_vector("a", ptype = Sys.Date()) %>% print()
+      tib_vector("a", ptype = vctrs::new_duration()) %>% print()
     Output
-      tib_vector("a", ptype = vctrs::new_date())
+      tib_vector("a", ptype = vctrs::new_duration())
 
 ---
 
     Code
-      tib_vector("a", ptype = Sys.Date(), input_form = "object", values_to = "vals",
-      names_to = "names") %>% print()
+      tib_vector("a", ptype = vctrs::new_duration(), input_form = "object",
+      values_to = "vals", names_to = "names") %>% print()
     Output
       tib_vector(
         "a",
-        ptype = vctrs::new_date(),
+        ptype = vctrs::new_duration(),
         input_form = "object",
         values_to = "vals",
         names_to = "names",
@@ -168,6 +175,38 @@
         "x",
         fill = 1:2,
         ptype_inner = character(0),
+      )
+
+# format for tib_chr_date works
+
+    Code
+      tib_chr_date("a")
+    Output
+      tib_chr_date("a")
+    Code
+      tib_chr_date("a", required = FALSE, fill = "2022-01-01", format = "%Y")
+    Output
+      tib_chr_date(
+        "a",
+        required = FALSE,
+        fill = "2022-01-01",
+        format = "%Y",
+      )
+
+---
+
+    Code
+      tib_chr_date_vec("a")
+    Output
+      tib_chr_date_vec("a")
+    Code
+      tib_chr_date_vec("a", required = FALSE, fill = as.Date("2022-01-01"), format = "%Y")
+    Output
+      tib_chr_date_vec(
+        "a",
+        required = FALSE,
+        fill = as.Date("2022-01-01"),
+        format = "%Y",
       )
 
 # format for tib_row works
