@@ -112,11 +112,21 @@ test_that("tib_scalar checks arguments", {
     (expect_error(tib_scalar("x", model)))
   })
 
+  # ptype_inner
+  expect_snapshot({
+    (expect_error(tib_chr("x", ptype_inner = model)))
+  })
+
   # fill
   expect_snapshot({
     (expect_error(tib_int("x", fill = integer())))
     (expect_error(tib_int("x", fill = 1:2)))
     (expect_error(tib_int("x", fill = "a")))
+  })
+
+  # ptype_inner + fill
+  expect_snapshot({
+    (expect_error(tib_chr("x", fill = 0L, ptype_inner = character())))
   })
 
   # transform
@@ -129,6 +139,11 @@ test_that("tib_vector checks arguments", {
   # input_form
   expect_snapshot({
     (expect_error(tib_int_vec("x", input_form = "v")))
+  })
+
+  # ptype_inner
+  expect_snapshot({
+    (expect_error(tib_chr_vec("x", ptype_inner = model)))
   })
 
   # values_to

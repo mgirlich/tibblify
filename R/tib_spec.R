@@ -182,8 +182,6 @@ tib_unspecified <- function(key, ..., required = TRUE) {
     key = key,
     type = "unspecified",
     required = required,
-    fill = NULL,
-    transform = NULL,
     class = "tib_unspecified"
   )
 }
@@ -251,7 +249,11 @@ tib_has_special_scalar.character <- function(ptype) vec_is(ptype, character())
 #' @param ... These dots are for future extensions and must be empty.
 #' @param required,.required Throw an error if the field does not exist?
 #' @param fill Optionally, a value to use if the field does not exist.
-#' @param transform A function to apply to the field before casting to `ptype`.
+#' @param ptype_inner A prototype of the field.
+#' @param transform A function to apply after casting to `ptype_inner`.
+#'   When exactly it is applied depends on the field type:
+#'   * `tib_scalar()` it is applied to the column.
+#'   * `tib_vector()`, `tib_variant()` it is applied to each element of the column.
 #' @param input_form A string that describes what structure the field has. Can
 #'   be one of:
 #'   * `"vector"`: The field is a vector, e.g. `c(1, 2, 3)`.
@@ -412,8 +414,8 @@ tib_vector_impl <- function(key,
     c("vector", "scalar_list", "object"),
     error_call = call
   )
-  ptype <- vec_ptype(ptype, call = call)
-  ptype_inner <- vec_ptype(ptype_inner, call = call)
+  ptype <- vec_ptype(ptype, call = call, x_arg = "ptype")
+  ptype_inner <- vec_ptype(ptype_inner, call = call, x_arg = "ptype_inner")
   if (!is_null(fill)) {
     fill <- vec_cast(fill, ptype, call = call, to_arg = "ptype")
   }
