@@ -7,6 +7,8 @@
 \alias{tib_int}
 \alias{tib_dbl}
 \alias{tib_chr}
+\alias{tib_date}
+\alias{tib_chr_date}
 \alias{tib_vector}
 \alias{tib_lgl_vec}
 \alias{tib_int_vec}
@@ -64,6 +66,17 @@ tib_chr(
   ptype_inner = character(),
   transform = NULL
 )
+
+tib_date(
+  key,
+  ...,
+  required = TRUE,
+  fill = NULL,
+  ptype_inner = vctrs::new_date(),
+  transform = NULL
+)
+
+tib_chr_date(key, ..., required = TRUE, fill = NULL, format = "\%Y-\%m-\%d")
 
 tib_vector(
   key,
