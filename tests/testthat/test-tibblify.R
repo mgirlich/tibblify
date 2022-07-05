@@ -29,25 +29,25 @@ test_that("scalar column works", {
   expect_equal(tib(list(x = dtt), tib_scalar("x", dtt)), tibble(x = dtt))
 
   # errors if required but absent
-  expect_snapshot_error(tib(list(), tib_lgl("x")))
-  expect_snapshot_error(tib(list(), tib_int("x")))
-  expect_snapshot_error(tib(list(), tib_dbl("x")))
-  expect_snapshot_error(tib(list(), tib_chr("x")))
-  expect_snapshot_error(tib(list(), tib_scalar("x", dtt)))
+  expect_snapshot((expect_error(tib(list(), tib_lgl("x")))))
+  expect_snapshot((expect_error(tib(list(), tib_int("x")))))
+  expect_snapshot((expect_error(tib(list(), tib_dbl("x")))))
+  expect_snapshot((expect_error(tib(list(), tib_chr("x")))))
+  expect_snapshot((expect_error(tib(list(), tib_scalar("x", dtt)))))
 
   # errors if bad size
-  expect_snapshot_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x")))
-  expect_snapshot_error(tib(list(x = c(1, 1)), tib_int("x")))
-  expect_snapshot_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x")))
-  expect_snapshot_error(tib(list(x = c("a", "a")), tib_chr("x")))
-  expect_snapshot_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))
+  expect_snapshot((expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x")))))
+  expect_snapshot((expect_error(tib(list(x = c(1, 1)), tib_int("x")))))
+  expect_snapshot((expect_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x")))))
+  expect_snapshot((expect_error(tib(list(x = c("a", "a")), tib_chr("x")))))
+  expect_snapshot((expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))))
 
   # errors if bad type
-  expect_snapshot_error(tib(list(x = "a"), tib_lgl("x")))
-  expect_snapshot_error(tib(list(x = "a"), tib_int("x")))
-  expect_snapshot_error(tib(list(x = "a"), tib_dbl("x")))
-  expect_snapshot_error(tib(list(x = 1), tib_chr("x")))
-  expect_snapshot_error(tib(list(x = 1), tib_scalar("x", dtt)))
+  expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl("x")))))
+  expect_snapshot((expect_error(tib(list(x = "a"), tib_int("x")))))
+  expect_snapshot((expect_error(tib(list(x = "a"), tib_dbl("x")))))
+  expect_snapshot((expect_error(tib(list(x = 1), tib_chr("x")))))
+  expect_snapshot((expect_error(tib(list(x = 1), tib_scalar("x", dtt)))))
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
@@ -189,11 +189,11 @@ test_that("vector column works", {
   expect_equal(tib(list(x = c(dtt, dtt + 1)), tib_vector("x", dtt)), tibble(x = list_of(c(dtt, dtt + 1))))
 
   # errors if required but absent
-  expect_snapshot_error(tib(list(), tib_lgl_vec("x")))
-  expect_snapshot_error(tib(list(), tib_vector("x", dtt)))
+  expect_snapshot((expect_error(tib(list(), tib_lgl_vec("x")))))
+  expect_snapshot((expect_error(tib(list(), tib_vector("x", dtt)))))
 
   # errors if bad type
-  expect_snapshot_error(tib(list(x = "a"), tib_lgl_vec("x")))
+  expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl_vec("x")))))
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE)), tibble(x = list_of(NULL, .ptype = logical())))
@@ -412,11 +412,11 @@ test_that("list column works", {
   )
 
   # errors if required but absent
-  expect_snapshot_error(
-    tibblify(
+  expect_snapshot(
+    (expect_error(tibblify(
       list(list(x = TRUE), list(zzz = 1)),
       spec_df(x = tib_variant("x"))
-    )
+    )))
   )
 
   # fallback default works
@@ -470,14 +470,14 @@ test_that("df column works", {
   )
 
   # errors if required but absent
-  expect_snapshot_error(
-    tibblify(
+  expect_snapshot(
+    (expect_error(tibblify(
       list(
         list(x = list(a = TRUE)),
         list()
       ),
       spec_df(x = tib_row("x", a = tib_lgl("a")))
-    )
+    )))
   )
 
   # fallback default works
@@ -510,8 +510,8 @@ test_that("list of df column works", {
   )
 
   # errors if required but absent
-  expect_snapshot_error(
-    tibblify(
+  expect_snapshot(
+    (expect_error(tibblify(
       list(
         list(x = list(
           list(a = TRUE),
@@ -520,7 +520,7 @@ test_that("list of df column works", {
         list()
       ),
       spec_df(x = tib_df("x", a = tib_lgl("a")))
-    )
+    )))
   )
 
   # fallback default works

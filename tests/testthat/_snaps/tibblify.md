@@ -39,73 +39,148 @@
 
 # scalar column works
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_int("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_dbl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_chr("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_scalar("x", dtt))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(1, 1)), tib_int("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(1.5, 1.5)), tib_dbl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c("a", "a")), tib_chr("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Element at path [[1]]$x must have size 1.
+    Code
+      (expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[1]]$x must have size 1.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <character> to <logical>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <character> to <logical>.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <character> to <integer>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_int("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <character> to <integer>.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <character> to <double>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_dbl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <character> to <double>.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <double> to <character>.
+    Code
+      (expect_error(tib(list(x = 1), tib_chr("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <double> to <character>.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <double> to <datetime<local>>.
+    Code
+      (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <double> to <datetime<local>>.
 
 ---
 
@@ -118,17 +193,32 @@
 
 # vector column works
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_lgl_vec("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Required element absent at path [[1]]$x.
+    Code
+      (expect_error(tib(list(), tib_vector("x", dtt))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x.
 
 ---
 
-    Cannot `tibblify()` field [[1]]$x
-    Caused by error:
-    ! Can't convert <character> to <logical>.
+    Code
+      (expect_error(tib(list(x = "a"), tib_lgl_vec("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[1]]$x
+      Caused by error:
+      ! Can't convert <character> to <logical>.
 
 # vector column respects vector_allows_empty_list
 
@@ -194,13 +284,31 @@
 
 # list column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = TRUE), list(zzz = 1)), spec_df(x = tib_variant(
+        "x")))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[2]]$x.
 
 # df column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = list(a = TRUE)), list()), spec_df(x = tib_row(
+        "x", a = tib_lgl("a"))))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[2]]$x.
 
 # list of df column works
 
-    Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = list(list(a = TRUE), list(a = FALSE))),
+      list()), spec_df(x = tib_df("x", a = tib_lgl("a"))))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[2]]$x.
 
