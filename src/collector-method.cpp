@@ -325,6 +325,7 @@ class Collector_Vector : public Collector_Scalar_Base {
 protected:
   const SEXP default_value;
   const SEXP ptype;
+  const SEXP ptype_inner;
   int current_row = 0;
 private:
   cpp11::writable::list data;
@@ -375,17 +376,19 @@ private:
       out_list[i] = *ptr_row;
     }
 
-    return(vec_flatten(out_list, this->ptype));
+    return(vec_flatten(out_list, this->ptype_inner));
   }
 
 public:
-  Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
+  Collector_Vector(SEXP default_value_, bool required_,
+                   SEXP ptype_, SEXP ptype_inner_, int col_location_,
                    SEXP name_, SEXP transform_, vector_input_form input_form_,
                    SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_,
                    SEXP na_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
+  , ptype_inner(ptype_inner_)
   , input_form(input_form_)
   , uses_names_col(!Rf_isNull(names_to_))
   , uses_values_col(!Rf_isNull(values_to_))
@@ -985,6 +988,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           default_sexp,
           required,
           ptype,
+          ptype_inner,
           location,
           name,
           transform,

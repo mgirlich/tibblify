@@ -202,6 +202,20 @@ test_that("vector column works", {
   )
 })
 
+test_that("vector columns respect ptype_inner", {
+  spec <- spec_df(
+    tib_vector("x", Sys.Date(), ptype_inner = character(), transform = as.Date),
+  )
+
+  expect_equal(
+    tibblify(
+      list(list(x = "2022-06-01"), list(x = c("2022-06-02", "2022-06-03"))),
+      spec
+    ),
+    tibble(x = list_of(as.Date("2022-06-01"), as.Date(c("2022-06-02", "2022-06-03"))))
+  )
+})
+
 test_that("explicit NULL work", {
   x <- list(
     list(x = NULL),
