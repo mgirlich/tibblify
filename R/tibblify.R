@@ -116,7 +116,9 @@ prep_nested_keys <- function(spec, shift = FALSE) {
         x$fields <- spec_prep(x$fields, shift = !is.null(x$names_col))
       }
 
-      if (x$type == "scalar" || x$type == "vector") {
+      if (x$type == "scalar") {
+        x$na <- vec_init(x$ptype_inner)
+      } else if (x$type == "vector") {
         x$na <- vec_init(x$ptype)
       }
 

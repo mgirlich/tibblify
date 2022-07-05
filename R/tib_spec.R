@@ -196,15 +196,17 @@ tib_scalar_impl <- function(key,
                             ...,
                             required = TRUE,
                             fill = NULL,
+                            ptype_inner = ptype,
                             transform = NULL,
                             call = caller_env()) {
   check_dots_empty()
   ptype <- vec_ptype(ptype, x_arg = "ptype", call = call)
+  ptype_inner <- vec_ptype(ptype_inner, x_arg = "ptype_inner", call = call)
   if (is_null(fill)) {
-    fill <- vec_init(ptype)
+    fill <- vec_init(ptype_inner)
   } else {
     vec_assert(fill, size = 1L, call = call)
-    fill <- vec_cast(fill, ptype, call = call)
+    fill <- vec_cast(fill, ptype_inner, call = call)
   }
 
   class <- NULL
@@ -217,6 +219,7 @@ tib_scalar_impl <- function(key,
     type = "scalar",
     required = required,
     ptype = ptype,
+    ptype_inner = ptype_inner,
     fill = fill,
     transform = prep_transform(transform, call),
     class = class,
@@ -300,12 +303,14 @@ tib_scalar <- function(key,
                        ...,
                        required = TRUE,
                        fill = NULL,
+                       ptype_inner = ptype,
                        transform = NULL) {
   check_dots_empty()
   tib_scalar_impl(
     key = key,
     required = required,
     ptype = ptype,
+    ptype_inner = ptype_inner,
     fill = fill,
     transform = transform
   )
@@ -317,9 +322,17 @@ tib_lgl <- function(key,
                     ...,
                     required = TRUE,
                     fill = NULL,
+                    ptype_inner = logical(),
                     transform = NULL) {
   check_dots_empty()
-  tib_scalar_impl(key, ptype = logical(), required = required, fill = fill, transform = transform)
+  tib_scalar_impl(
+    key,
+    ptype = logical(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform
+  )
 }
 
 #' @rdname tib_scalar
@@ -328,9 +341,17 @@ tib_int <- function(key,
                     ...,
                     required = TRUE,
                     fill = NULL,
+                    ptype_inner = integer(),
                     transform = NULL) {
   check_dots_empty()
-  tib_scalar_impl(key, ptype = integer(), required = required, fill = fill, transform = transform)
+  tib_scalar_impl(
+    key,
+    ptype = integer(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform
+  )
 }
 
 #' @rdname tib_scalar
@@ -339,9 +360,17 @@ tib_dbl <- function(key,
                     ...,
                     required = TRUE,
                     fill = NULL,
+                    ptype_inner = double(),
                     transform = NULL) {
   check_dots_empty()
-  tib_scalar_impl(key, ptype = double(), required = required, fill = fill, transform = transform)
+  tib_scalar_impl(
+    key,
+    ptype = double(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform
+  )
 }
 
 #' @rdname tib_scalar
@@ -350,9 +379,17 @@ tib_chr <- function(key,
                     ...,
                     required = TRUE,
                     fill = NULL,
+                    ptype_inner = character(),
                     transform = NULL) {
   check_dots_empty()
-  tib_scalar_impl(key, ptype = character(), required = required, fill = fill, transform = transform)
+  tib_scalar_impl(
+    key,
+    ptype = character(),
+    required = required,
+    fill = fill,
+    ptype_inner = ptype_inner,
+    transform = transform
+  )
 }
 
 

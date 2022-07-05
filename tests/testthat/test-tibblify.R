@@ -138,6 +138,34 @@ test_that("record objects work", {
   )
 })
 
+test_that("scalar columns respect ptype_inner", {
+  spec <- spec_df(
+    tib_scalar("x", Sys.Date(), ptype_inner = character(), transform = as.Date),
+  )
+
+  expect_equal(
+    tibblify(
+      list(list(x = "2022-06-01"), list(x = "2022-06-02")),
+      spec
+    ),
+    tibble(x = as.Date(c("2022-06-01", "2022-06-02")))
+  )
+
+  spec2 <- spec_df(
+    tib_scalar("x", Sys.Date(), ptype_inner = Sys.time(), transform = as.Date),
+  )
+
+  x <- as.POSIXct("2022-06-02") + c(-60, 60)
+
+  expect_equal(
+    tibblify(
+      list(list(x = x[[1]]), list(x = x[[2]])),
+      spec2
+    ),
+    tibble(x = as.Date(c("2022-06-01", "2022-06-02")))
+  )
+})
+
 test_that("vector column works", {
   dtt <- vctrs::new_datetime(1)
 
