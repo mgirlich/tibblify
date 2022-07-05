@@ -134,17 +134,22 @@ class Collector_Scalar : public Collector_Scalar_Base {
 protected:
   const SEXP default_value;
   const SEXP ptype;
+  const SEXP ptype_inner;
   int current_row = 0;
 private:
   cpp11::writable::list data;
   const SEXP na;
 
 public:
-  Collector_Scalar(SEXP default_value_, SEXP na_, bool required_, SEXP ptype_, int col_location_,
+  Collector_Scalar(SEXP default_value_, SEXP na_, bool required_,
+                   SEXP ptype_,
+                   SEXP ptype_inner_,
+                   int col_location_,
                    SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
+  , ptype_inner(ptype_inner_)
   , na(na_)
   { }
 
@@ -159,15 +164,14 @@ public:
       return;
     }
 
-    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), ptype));
+    SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path);
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
-    UNPROTECT(2);
+    UNPROTECT(1);
   }
 
   inline void add_default(bool check, Path& path) {
@@ -176,11 +180,14 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SEXP value = PROTECT(vec_flatten(this->data, this->ptype));
+    SEXP value = PROTECT(vec_flatten(this->data, this->ptype_inner));
 
-    SET_VECTOR_ELT(list, this->col_location, value);
+    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    SEXP value_cast = PROTECT(vec_cast(PROTECT(value), this->ptype));
+
+    SET_VECTOR_ELT(list, this->col_location, value_cast);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(1);
+    UNPROTECT(3);
   }
 };
 
@@ -258,15 +265,20 @@ class Collector_Scalar2 : public Collector_Scalar_Base {
 private:
   const T default_value;
   const SEXP ptype;
+  const SEXP ptype_inner;
   cpp11::sexp data;
   T* data_ptr;
+  const T na = cpp11::na<CPP11_TYPE>();
 
 public:
   Collector_Scalar2(T default_value_, bool required_, int col_location_,
-                    SEXP ptype_, SEXP name_, SEXP transform_)
+                    SEXP ptype_,
+                    SEXP ptype_inner_,
+                    SEXP name_, SEXP transform_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
+  , ptype_inner(ptype_inner_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -276,14 +288,12 @@ public:
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
-      // TODO cache this?
-      *this->data_ptr = cpp11::na<CPP11_TYPE>();
+      *this->data_ptr = this->na;
       ++this->data_ptr;
       return;
     }
 
-    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));
+    SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path);
@@ -291,7 +301,7 @@ public:
 
     *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
     ++this->data_ptr;
-    UNPROTECT(2);
+    UNPROTECT(1);
   }
 
   inline void add_default(bool check, Path& path) {
@@ -301,7 +311,12 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
+    SEXP data = this->data;
+    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+
+    SEXP data_cast = PROTECT(vec_cast(PROTECT(data), this->ptype));
+    SET_VECTOR_ELT(list, this->col_location, data_cast);
+    UNPROTECT(2);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
@@ -310,6 +325,7 @@ class Collector_Vector : public Collector_Scalar_Base {
 protected:
   const SEXP default_value;
   const SEXP ptype;
+  const SEXP ptype_inner;
   int current_row = 0;
 private:
   cpp11::writable::list data;
@@ -360,17 +376,19 @@ private:
       out_list[i] = *ptr_row;
     }
 
-    return(vec_flatten(out_list, this->ptype));
+    return(vec_flatten(out_list, this->ptype_inner));
   }
 
 public:
-  Collector_Vector(SEXP default_value_, bool required_, SEXP ptype_, int col_location_,
+  Collector_Vector(SEXP default_value_, bool required_,
+                   SEXP ptype_, SEXP ptype_inner_, int col_location_,
                    SEXP name_, SEXP transform_, vector_input_form input_form_,
                    SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_,
                    SEXP na_)
     : Collector_Scalar_Base(required_, col_location_, name_, transform_)
   , default_value(default_value_)
   , ptype(ptype_)
+  , ptype_inner(ptype_inner_)
   , input_form(input_form_)
   , uses_names_col(!Rf_isNull(names_to_))
   , uses_values_col(!Rf_isNull(values_to_))
@@ -943,22 +961,23 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     }
 
     cpp11::sexp ptype = elt["ptype"];
+    cpp11::sexp ptype_inner = elt["ptype_inner"];
     if (type == "scalar") {
-      if (vec_is(ptype, tibblify_shared_empty_lgl)) {
+      if (vec_is(ptype_inner, tibblify_shared_empty_lgl)) {
         cpp11::r_bool default_bool = cpp11::logicals(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(default_bool, required, location, tibblify_shared_empty_lgl, name, transform)));
-      } else if (vec_is(ptype, tibblify_shared_empty_int)) {
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(default_bool, required, location, ptype, tibblify_shared_empty_lgl, name, transform)));
+      } else if (vec_is(ptype_inner, tibblify_shared_empty_int)) {
         int default_int = cpp11::as_integers(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(default_int, required, location, tibblify_shared_empty_int, name, transform)));
-      } else if (vec_is(ptype, tibblify_shared_empty_dbl)) {
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(default_int, required, location, ptype, tibblify_shared_empty_int, name, transform)));
+      } else if (vec_is(ptype_inner, tibblify_shared_empty_dbl)) {
         double default_dbl = cpp11::as_doubles(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(default_dbl, required, location, tibblify_shared_empty_dbl, name, transform)));
-      } else if (vec_is(ptype, tibblify_shared_empty_chr)) {
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(default_dbl, required, location, ptype, tibblify_shared_empty_dbl, name, transform)));
+      } else if (vec_is(ptype_inner, tibblify_shared_empty_chr)) {
         cpp11::sexp default_str = cpp11::strings(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(default_str, required, location, tibblify_shared_empty_chr, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(default_str, required, location, ptype, tibblify_shared_empty_chr, name, transform)));
       } else {
         cpp11::sexp na = elt["na"];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, ptype_inner, location, name, transform)));
       }
     } else if (type == "vector") {
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
@@ -969,6 +988,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
           default_sexp,
           required,
           ptype,
+          ptype_inner,
           location,
           name,
           transform,

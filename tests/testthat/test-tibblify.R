@@ -138,6 +138,49 @@ test_that("record objects work", {
   )
 })
 
+test_that("scalar columns respect ptype_inner", {
+  f <- function(x) {
+    stopifnot(is.character(x))
+    as.Date(x)
+  }
+  spec <- spec_df(
+    tib_scalar(
+      "x", Sys.Date(),
+      required = FALSE,
+      ptype_inner = character(),
+      fill = "2000-01-01",
+      transform = f,
+    ),
+  )
+
+  expect_equal(
+    tibblify(
+      list(list(x = "2022-06-01"), list(x = "2022-06-02"), list()),
+      spec
+    ),
+    tibble(x = as.Date(c("2022-06-01", "2022-06-02", "2000-01-01")))
+  )
+
+  spec2 <- spec_df(
+    tib_scalar(
+      "x", Sys.Date(),
+      required = FALSE,
+      ptype_inner = Sys.time(),
+      fill = as.POSIXct("2000-01-01"),
+      transform = as.Date
+    ),
+  )
+  x <- as.POSIXct("2022-06-02") + c(-60, 60)
+
+  expect_equal(
+    tibblify(
+      list(list(x = x[[1]]), list(x = x[[2]]), list()),
+      spec2
+    ),
+    tibble(x = as.Date(c("2022-06-01", "2022-06-02", "2000-01-01")))
+  )
+})
+
 test_that("vector column works", {
   dtt <- vctrs::new_datetime(1)
 
@@ -171,6 +214,32 @@ test_that("vector column works", {
   expect_equal(
     tib(list(x = c(dtt - 1, dtt)), tib_vector("x", dtt, transform = ~ .x + 1)),
     tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+})
+
+test_that("vector columns respect ptype_inner", {
+  spec <- spec_df(
+    tib_vector(
+      "x", Sys.Date(),
+      required = FALSE,
+      ptype_inner = character(),
+      fill = as.Date("2000-01-01"),
+      transform = as.Date
+    ),
+  )
+
+  expect_equal(
+    tibblify(
+      list(list(x = "2022-06-01"), list(x = c("2022-06-02", "2022-06-03")), list()),
+      spec
+    ),
+    tibble(
+      x = list_of(
+        as.Date("2022-06-01"),
+        as.Date(c("2022-06-02", "2022-06-03")),
+        as.Date("2000-01-01")
+      )
+    )
   )
 })
 

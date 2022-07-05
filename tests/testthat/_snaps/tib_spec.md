@@ -158,6 +158,15 @@
 ---
 
     Code
+      (expect_error(tib_chr("x", ptype_inner = model)))
+    Output
+      <error/vctrs_error_scalar_type>
+      Error in `tib_chr()`:
+      ! `ptype_inner` must be a vector, not a <lm> object.
+
+---
+
+    Code
       (expect_error(tib_int("x", fill = integer())))
     Output
       <error/vctrs_error_assert_size>
@@ -174,7 +183,16 @@
     Output
       <error/vctrs_error_incompatible_type>
       Error in `tib_int()`:
-      ! Can't convert `fill` <character> to <integer>.
+      ! Can't convert `fill` <character> to match type of `ptype_inner` <integer>.
+
+---
+
+    Code
+      (expect_error(tib_chr("x", fill = 0L, ptype_inner = character())))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error in `tib_chr()`:
+      ! Can't convert `fill` <integer> to match type of `ptype_inner` <character>.
 
 ---
 
@@ -194,6 +212,24 @@
       Error in `tib_int_vec()`:
       ! `input_form` must be one of "vector", "scalar_list", or "object", not "v".
       i Did you mean "vector"?
+
+---
+
+    Code
+      (expect_error(tib_vector("x", ptype = model)))
+    Output
+      <error/vctrs_error_scalar_type>
+      Error in `tib_vector()`:
+      ! `ptype` must be a vector, not a <lm> object.
+
+---
+
+    Code
+      (expect_error(tib_chr_vec("x", ptype_inner = model)))
+    Output
+      <error/vctrs_error_scalar_type>
+      Error in `tib_chr_vec()`:
+      ! `ptype_inner` must be a vector, not a <lm> object.
 
 ---
 
