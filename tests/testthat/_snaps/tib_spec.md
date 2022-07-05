@@ -216,6 +216,15 @@
 ---
 
     Code
+      (expect_error(tib_vector("x", ptype = model)))
+    Output
+      <error/vctrs_error_scalar_type>
+      Error in `tib_vector()`:
+      ! `ptype` must be a vector, not a <lm> object.
+
+---
+
+    Code
       (expect_error(tib_chr_vec("x", ptype_inner = model)))
     Output
       <error/vctrs_error_scalar_type>

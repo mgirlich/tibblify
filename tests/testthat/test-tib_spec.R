@@ -141,6 +141,12 @@ test_that("tib_vector checks arguments", {
     (expect_error(tib_int_vec("x", input_form = "v")))
   })
 
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  # ptype
+  expect_snapshot({
+    (expect_error(tib_vector("x", ptype = model)))
+  })
+
   # ptype_inner
   expect_snapshot({
     (expect_error(tib_chr_vec("x", ptype_inner = model)))
