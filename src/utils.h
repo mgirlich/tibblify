@@ -56,7 +56,8 @@ inline cpp11::sexp vector_input_form_to_sexp(vector_input_form input_form) {
 }
 
 inline
-SEXP set_df_attributes(SEXP list, R_xlen_t n_rows) {
+SEXP set_df_attributes(SEXP list, SEXP col_names, R_xlen_t n_rows) {
+  Rf_setAttrib(list, R_NamesSymbol, col_names);
   Rf_setAttrib(list, R_ClassSymbol, classes_tibble);
 
   SEXP row_attr = PROTECT(Rf_allocVector(INTSXP, 2));
@@ -73,9 +74,8 @@ inline
 SEXP init_df(R_xlen_t n_rows, SEXP col_names) {
   int n_cols = Rf_length(col_names);
   SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-  Rf_setAttrib(df, R_NamesSymbol, col_names);
 
-  set_df_attributes(df, n_rows);
+  set_df_attributes(df, col_names, n_rows);
 
   UNPROTECT(1);
   return df;

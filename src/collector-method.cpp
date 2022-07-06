@@ -101,7 +101,7 @@ private:
   const SEXP na;
 
 public:
-  Collector_Scalar(SEXP na_, bool required_, int col_location_, SEXP name_, Field_Args& field_args)
+  Collector_Scalar(bool required_, int col_location_, SEXP name_, Field_Args& field_args, SEXP na_)
     : Collector_Base(required_, col_location_, name_, field_args)
   , na(na_)
   { }
@@ -615,9 +615,7 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
   for (const Collector_Ptr& collector : collector_vec) {
     (*collector).assign_data(df, names);
   }
-
-  Rf_setAttrib(df, R_NamesSymbol, names);
-  set_df_attributes(df, n_rows);
+  set_df_attributes(df, names, n_rows);
 
   UNPROTECT(2);
   return df;
@@ -783,7 +781,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     if (type == "sub") {
       cpp11::list sub_spec = elt["spec"];
       auto spec_pair = parse_fields_spec(sub_spec, vector_allows_empty_list);
-      col_vec.push_back(std::unique_ptr<Collector_Same_Key>(new Collector_Same_Key(spec_pair.first, spec_pair.second)));
+      col_vec.push_back(Collector_Ptr(new Collector_Same_Key(spec_pair.first, spec_pair.second)));
       continue;
     }
 
@@ -794,7 +792,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     if (type == "row") {
       cpp11::list fields = elt["fields"];
       auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list);
-      col_vec.push_back(std::unique_ptr<Collector_Tibble>(new Collector_Tibble(spec_pair.first, spec_pair.second, required, location, name)));
+      col_vec.push_back(Collector_Ptr(new Collector_Tibble(spec_pair.first, spec_pair.second, required, location, name)));
       continue;
     } else if (type == "df") {
       cpp11::list fields = elt["fields"];
@@ -806,7 +804,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       }
 
       col_vec.push_back(
-        std::unique_ptr<Collector_List_Of_Tibble>(
+        Collector_Ptr(
           new Collector_List_Of_Tibble(spec_pair.first, spec_pair.second, names_col, required, location, name)
         )
       );
@@ -816,7 +814,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     Field_Args field_args = Field_Args(elt["fill"], elt["transform"]);
 
     if (type == "variant" || type == "unspecified") {
-      col_vec.push_back(std::unique_ptr<Collector_List>(new Collector_List(required, location, name, field_args)));
+      col_vec.push_back(Collector_Ptr(new Collector_List(required, location, name, field_args)));
       continue;
     }
 
@@ -825,20 +823,20 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
     field_args.ptype_inner = ptype_inner;
     if (type == "scalar") {
       if (vec_is(ptype_inner, tibblify_shared_empty_lgl)) {
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(required, location, name, field_args)));
+        col_vec.push_back(Collector_Ptr(new Collector_Scalar2<int, cpp11::r_bool>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_int)) {
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(required, location, name, field_args)));
+        col_vec.push_back(Collector_Ptr(new Collector_Scalar2<int, int>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_dbl)) {
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(required, location, name, field_args)));
+        col_vec.push_back(Collector_Ptr(new Collector_Scalar2<double, double>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_chr)) {
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(required, location, name, field_args)));
+        col_vec.push_back(Collector_Ptr(new Collector_Scalar2<SEXP, cpp11::r_string>(required, location, name, field_args)));
       } else {
         cpp11::sexp na = elt["na"];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(na, required, location, name, field_args)));
+        col_vec.push_back(Collector_Ptr(new Collector_Scalar(required, location, name, field_args, na)));
       }
     } else if (type == "vector") {
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
-      Vector_Args args {
+      Vector_Args vector_args {
         string_to_form_enum(input_form),
         vector_allows_empty_list,
         .names_to = elt["names_to"],
@@ -846,7 +844,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
         .na = elt["na"]
       };
 
-      col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(required, location, name, field_args, args))
+      col_vec.push_back(Collector_Ptr(new Collector_Vector(required, location, name, field_args, vector_args))
       );
     } else {
       cpp11::stop("Internal Error: Unsupported type");
