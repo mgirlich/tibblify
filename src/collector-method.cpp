@@ -48,16 +48,10 @@ inline void stop_object_vector_names_is_null(const Path& path) {
 }
 
 inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
-  cpp11::r_string input_form_string;
-  switch (input_form) {
-  case scalar_list: {input_form_string = "scalar_list";} break;
-  case vector: {input_form_string = "vector";} break;
-  case object: {input_form_string = "object";} break;
-  }
-
+  cpp11::sexp input_form_string = vector_input_form_to_sexp(input_form);
   SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_non_list_element"),
                                PROTECT(path.data()),
-                               cpp11::as_sexp(input_form_string)));
+                               input_form_string));
   Rf_eval(call, tibblify_ns_env);
 }
 
@@ -94,7 +88,7 @@ class Collector {
 public:
   virtual ~ Collector() {};
 
-  // reserve space and protect against garbage collection
+  // reserve space
   virtual void init(R_xlen_t& length) = 0;
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
@@ -336,17 +330,15 @@ private:
     if (Rf_isNull(names_to_)) {
       return(values_to_);
     } else {
-      cpp11::writable::strings col_names_(2);
-      col_names_[0] = cpp11::strings(names_to_)[0];
-      col_names_[1] = cpp11::strings(values_to_)[0];
-      return(col_names_);
+      cpp11::writable::strings col_names(2);
+      col_names[0] = cpp11::strings(names_to_)[0];
+      col_names[1] = cpp11::strings(values_to_)[0];
+      return(col_names);
     }
   }
 
   cpp11::writable::list init_out_df(R_xlen_t n_rows) {
-    cpp11::writable::list ptype_out(init_df(n_rows, this->output_col_names));
-
-    return(ptype_out);
+    return(init_df(n_rows, this->output_col_names));
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
