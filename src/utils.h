@@ -14,10 +14,19 @@ struct Vector_Args
 
 struct Field_Args
 {
-  cpp11::sexp transform;
   cpp11::sexp default_sexp;
+  cpp11::sexp transform;
   cpp11::sexp ptype;
   cpp11::sexp ptype_inner;
+
+  Field_Args(cpp11::sexp default_sexp_ = R_NilValue,
+             cpp11::sexp transform_ = R_NilValue,
+             cpp11::sexp ptype_ = R_NilValue,
+             cpp11::sexp ptype_inner_ = R_NilValue)
+    : default_sexp(default_sexp_)
+    , transform(transform_)
+    , ptype(ptype_)
+    , ptype_inner(ptype_inner_) { }
 };
 
 inline vector_input_form string_to_form_enum(cpp11::r_string input_form_) {

@@ -692,7 +692,7 @@ private:
 public:
   Collector_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_,
                    bool required_, int col_location_, SEXP name_)
-    : Collector_Base(required_, col_location_, name_, Field_Args {})
+    : Collector_Base(required_, col_location_, name_, Field_Args())
   , Multi_Collector(keys_, col_vec_)
   { }
 
@@ -810,7 +810,7 @@ private:
 public:
   Collector_List_Of_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_,
                            bool required_, int& col_location_, SEXP name_)
-    : Collector_Base(required_, col_location_, name_,  {.default_sexp = R_NilValue})
+    : Collector_Base(required_, col_location_, name_,  Field_Args())
   , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, names_col_)))
   { }
 
@@ -873,10 +873,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       continue;
     }
 
-    Field_Args field_args {
-      .transform = elt["transform"],
-      .default_sexp = elt["fill"]
-    };
+    Field_Args field_args = Field_Args(elt["fill"], elt["transform"]);
 
     if (type == "variant" || type == "unspecified") {
       col_vec.push_back(std::unique_ptr<Collector_List>(new Collector_List(required, location, name, field_args)));
