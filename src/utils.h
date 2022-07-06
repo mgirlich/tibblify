@@ -1,3 +1,6 @@
+#ifndef TIBBLIFY_UTILS_H
+#define TIBBLIFY_UTILS_H
+
 #include <cpp11.hpp>
 #include "tibblify.h"
 
@@ -145,3 +148,5 @@ SEXP vec_slice_impl2(SEXP x, SEXP index) {
   UNPROTECT(1);
   return(row);
 }
+
+#endif

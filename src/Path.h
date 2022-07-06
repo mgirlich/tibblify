@@ -1,3 +1,6 @@
+#ifndef TIBBLIFY_PATH_H
+#define TIBBLIFY_PATH_H
+
 #include <cpp11.hpp>
 #include "tibblify.h"
 
@@ -45,3 +48,5 @@ public:
     return out;
   }
 };
+
+#endif
