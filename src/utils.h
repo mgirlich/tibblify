@@ -70,13 +70,11 @@ SEXP init_df(R_xlen_t n_rows, SEXP col_names) {
 }
 
 inline
-SEXP init_list_of(R_xlen_t& length, SEXP ptype) {
-  SEXP out = PROTECT(Rf_allocVector(VECSXP, length));
-  Rf_setAttrib(out, R_ClassSymbol, classes_list_of);
-  Rf_setAttrib(out, Rf_install("ptype"), ptype);
+SEXP set_list_of_attributes(SEXP x, SEXP ptype) {
+  Rf_setAttrib(x, R_ClassSymbol, classes_list_of);
+  Rf_setAttrib(x, Rf_install("ptype"), ptype);
 
-  UNPROTECT(1);
-  return out;
+  return x;
 }
 
 static inline

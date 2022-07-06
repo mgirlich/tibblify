@@ -110,49 +110,59 @@ public:
 using Collector_Ptr = std::unique_ptr<Collector>;
 
 
-class Collector_Scalar_Base : public Collector {
+class Collector_Base : public Collector {
 protected:
   const bool required;
   const int col_location;
   const SEXP name;
   const SEXP transform;
-
-public:
-  Collector_Scalar_Base(bool& required_, int& col_location_, SEXP name_, SEXP transform_)
-    : required(required_)
-  , col_location(col_location_)
-  , name(name_)
-  , transform(transform_)
-  { }
-
-  inline int size() const {
-    return 1;
-  }
-};
-
-class Collector_Scalar : public Collector_Scalar_Base {
-protected:
   const SEXP default_value;
   const SEXP ptype;
   const SEXP ptype_inner;
+
   int current_row = 0;
-private:
   cpp11::writable::list data;
-  const SEXP na;
 
 public:
-  Collector_Scalar(SEXP na_, bool required_, int col_location_, SEXP name_, Field_Args field_args)
-    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  Collector_Base(bool& required_, int& col_location_, SEXP name_, const Field_Args& field_args)
+    : required(required_)
+  , col_location(col_location_)
+  , name(name_)
+  , transform(field_args.transform)
   , default_value(field_args.default_sexp)
   , ptype(field_args.ptype)
   , ptype_inner(field_args.ptype_inner)
-  , na(na_)
   { }
 
   inline void init(R_xlen_t& length) {
     this->data = Rf_allocVector(VECSXP, length);
     this->current_row = 0;
   }
+
+  inline int size() const {
+    return 1;
+  }
+
+  inline void add_default(bool check, Path& path) {
+    if (check && required) stop_required(path);
+    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+  }
+
+  inline void assign_data(SEXP list, SEXP names) const {
+    SET_VECTOR_ELT(list, this->col_location, this->data);
+    SET_STRING_ELT(names, this->col_location, this->name);
+  }
+};
+
+class Collector_Scalar : public Collector_Base {
+private:
+  const SEXP na;
+
+public:
+  Collector_Scalar(SEXP na_, bool required_, int col_location_, SEXP name_, Field_Args& field_args)
+    : Collector_Base(required_, col_location_, name_, field_args)
+  , na(na_)
+  { }
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
@@ -168,11 +178,6 @@ public:
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
     UNPROTECT(1);
-  }
-
-  inline void add_default(bool check, Path& path) {
-    if (check && required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -257,25 +262,21 @@ SEXP r_vector_cast<SEXP, cpp11::r_string>(SEXP data) {
 };
 
 template <typename T, typename CPP11_TYPE>
-class Collector_Scalar2 : public Collector_Scalar_Base {
+class Collector_Scalar2 : public Collector_Base {
 private:
   const T default_value;
-  const SEXP ptype;
-  const SEXP ptype_inner;
+  const T na = cpp11::na<CPP11_TYPE>();
   cpp11::sexp data;
   T* data_ptr;
-  const T na = cpp11::na<CPP11_TYPE>();
 
   T convert_default(cpp11::sexp default_sexp) {
     return(cpp11::r_vector<CPP11_TYPE>(default_sexp)[0]);
   }
 
 public:
-  Collector_Scalar2(bool required_, int col_location_, SEXP name_, Field_Args field_args)
-    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  Collector_Scalar2(bool required_, int col_location_, SEXP name_, Field_Args& field_args)
+    : Collector_Base(required_, col_location_, name_, field_args)
   , default_value(convert_default(field_args.default_sexp))
-  , ptype(field_args.ptype)
-  , ptype_inner(field_args.ptype_inner)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -318,14 +319,8 @@ public:
   }
 };
 
-class Collector_Vector : public Collector_Scalar_Base {
-protected:
-  const SEXP default_value;
-  const SEXP ptype;
-  const SEXP ptype_inner;
-  int current_row = 0;
+class Collector_Vector : public Collector_Base {
 private:
-  cpp11::writable::list data;
   const vector_input_form input_form;
   const bool uses_names_col;
   const bool uses_values_col;
@@ -377,11 +372,8 @@ private:
   }
 
 public:
-  Collector_Vector(bool required_, int col_location_, SEXP name_, Field_Args field_args, Vector_Args vector_args)
-    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
-  , default_value(field_args.default_sexp)
-  , ptype(field_args.ptype)
-  , ptype_inner(field_args.ptype_inner)
+  Collector_Vector(bool required_, int col_location_, SEXP name_, Field_Args& field_args, Vector_Args vector_args)
+    : Collector_Base(required_, col_location_, name_, field_args)
   , input_form(vector_args.input_form)
   , uses_names_col(!Rf_isNull(vector_args.names_to))
   , uses_values_col(!Rf_isNull(vector_args.values_to))
@@ -391,6 +383,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    Collector_Base::init(length);
+
     if (this->uses_values_col) {
       auto ptype_df = init_out_df(0);
       if (this->uses_names_col) {
@@ -399,12 +393,10 @@ public:
       } else {
         ptype_df[0] = this->ptype;
       }
-      this->data = init_list_of(length, ptype_df);
+      set_list_of_attributes(this->data, ptype_df);
     } else {
-      this->data = init_list_of(length, this->ptype);
+      set_list_of_attributes(this->data, this->ptype);
     }
-
-    this->current_row = 0;
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -471,37 +463,14 @@ public:
     }
     UNPROTECT(2);
   }
-
-  inline void add_default(bool check, Path& path) {
-    if (check && required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
-  }
 };
 
 
-class Collector_List : public Collector_Scalar_Base {
-protected:
-  const SEXP default_value;
-  int current_row = 0;
-private:
-  cpp11::writable::list data;
-
+class Collector_List : public Collector_Base {
 public:
-  Collector_List(bool required_, int col_location_, SEXP name_,
-                 Field_Args field_args)
-    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
-  , default_value(field_args.default_sexp)
+  Collector_List(bool required_, int col_location_, SEXP name_, Field_Args& field_args)
+    : Collector_Base(required_, col_location_, name_, field_args)
   { }
-
-  inline void init(R_xlen_t& length) {
-    this->data = Rf_allocVector(VECSXP, length);
-    this->current_row = 0;
-  }
 
   inline void add_value(SEXP value, Path& path) {
     if (Rf_isNull(value)) {
@@ -511,16 +480,6 @@ public:
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SET_VECTOR_ELT(this->data, this->current_row++, value);
-  }
-
-  inline void add_default(bool check, Path& path) {
-    if (check && required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
 
@@ -726,27 +685,16 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
 
 
 
-class Collector_Tibble : public Collector, Multi_Collector {
+class Collector_Tibble : public Collector_Base, Multi_Collector {
 private:
-  const bool required;
-  const int col_location;
-  const SEXP name;
   R_xlen_t n_rows;
 
 public:
   Collector_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_,
                    bool required_, int col_location_, SEXP name_)
-    : Multi_Collector(keys_, col_vec_)
-  , required(required_)
-  , col_location(col_location_)
-  , name(name_)
+    : Collector_Base(required_, col_location_, name_, Field_Args {})
+  , Multi_Collector(keys_, col_vec_)
   { }
-
-  ~ Collector_Tibble() {}
-
-  inline int size() const {
-    return 1;
-  }
 
   inline void init(R_xlen_t& length) {
     this->n_rows = length;
@@ -855,29 +803,22 @@ public:
 };
 
 
-class Collector_List_Of_Tibble : public Collector {
+class Collector_List_Of_Tibble : public Collector_Base {
 private:
-  cpp11::writable::list data;
-  const bool required;
-  const SEXP name;
-  const int col_location;
   const std::unique_ptr<Parser_Object_List> parser_ptr;
-  int current_row = 0;
 
 public:
   Collector_List_Of_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_,
                            bool required_, int& col_location_, SEXP name_)
-    : required(required_)
-  , name(name_)
-  , col_location(col_location_)
+    : Collector_Base(required_, col_location_, name_,  {.default_sexp = R_NilValue})
   , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, names_col_)))
   { }
 
   inline void init(R_xlen_t& length) {
+    Collector_Base::init(length);
     Path path;
     SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
-    this->data = init_list_of(length, ptype);
-    this->current_row = 0;
+    set_list_of_attributes(this->data, ptype);
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -886,20 +827,6 @@ public:
     } else {
       SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
     }
-  }
-
-  inline void add_default(bool check, Path& path) {
-    if (check && required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
-  }
-
-  inline int size() const {
-    return 1;
-  }
-
-  inline void assign_data(SEXP list, SEXP names) const {
-    SET_VECTOR_ELT(list, this->col_location, this->data);
-    SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
 
