@@ -198,22 +198,22 @@ SEXP r_alloc_vector(R_xlen_t& length);
 template <>
 SEXP r_alloc_vector<cpp11::r_bool>(R_xlen_t& length) {
   return(Rf_allocVector(LGLSXP, length));
-};
+}
 
 template <>
 SEXP r_alloc_vector<int>(R_xlen_t& length) {
   return(Rf_allocVector(INTSXP, length));
-};
+}
 
 template <>
 SEXP r_alloc_vector<double>(R_xlen_t& length) {
   return(Rf_allocVector(REALSXP, length));
-};
+}
 
 template <>
 SEXP r_alloc_vector<cpp11::r_string>(R_xlen_t& length) {
   return(Rf_allocVector(STRSXP, length));
-};
+}
 
 template <typename T, typename CPP11_TYPE>
 T* r_vector_ptr(SEXP data);
@@ -221,22 +221,22 @@ T* r_vector_ptr(SEXP data);
 template <>
 int* r_vector_ptr<int, cpp11::r_bool>(SEXP data) {
   return(LOGICAL(data));
-};
+}
 
 template <>
 int* r_vector_ptr<int, int>(SEXP data) {
   return(INTEGER(data));
-};
+}
 
 template <>
 double* r_vector_ptr<double, double>(SEXP data) {
   return(REAL(data));
-};
+}
 
 template <>
 SEXP* r_vector_ptr<SEXP, cpp11::r_string>(SEXP data) {
   return(STRING_PTR(data));
-};
+}
 
 template <typename T, typename CPP11_TYPE>
 T r_vector_cast(SEXP data);
@@ -244,7 +244,7 @@ T r_vector_cast(SEXP data);
 template <>
 int r_vector_cast<int, cpp11::r_bool>(SEXP data) {
   return(Rf_asLogical(data));
-};
+}
 
 template <>
 int r_vector_cast<int, int>(SEXP data) {
@@ -254,12 +254,12 @@ int r_vector_cast<int, int>(SEXP data) {
 template <>
 double r_vector_cast<double, double>(SEXP data) {
   return(Rf_asReal(data));
-};
+}
 
 template <>
 SEXP r_vector_cast<SEXP, cpp11::r_string>(SEXP data) {
   return(Rf_asChar(data));
-};
+}
 
 template <typename T, typename CPP11_TYPE>
 class Collector_Scalar2 : public Collector_Base {
