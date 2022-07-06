@@ -141,15 +141,11 @@ private:
   const SEXP na;
 
 public:
-  Collector_Scalar(SEXP default_value_, SEXP na_, bool required_,
-                   SEXP ptype_,
-                   SEXP ptype_inner_,
-                   int col_location_,
-                   SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  , ptype(ptype_)
-  , ptype_inner(ptype_inner_)
+  Collector_Scalar(SEXP na_, bool required_, int col_location_, SEXP name_, Field_Args field_args)
+    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  , default_value(field_args.default_sexp)
+  , ptype(field_args.ptype)
+  , ptype_inner(field_args.ptype_inner)
   , na(na_)
   { }
 
@@ -270,15 +266,16 @@ private:
   T* data_ptr;
   const T na = cpp11::na<CPP11_TYPE>();
 
+  T convert_default(cpp11::sexp default_sexp) {
+    return(cpp11::r_vector<CPP11_TYPE>(default_sexp)[0]);
+  }
+
 public:
-  Collector_Scalar2(T default_value_, bool required_, int col_location_,
-                    SEXP ptype_,
-                    SEXP ptype_inner_,
-                    SEXP name_, SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  , ptype(ptype_)
-  , ptype_inner(ptype_inner_)
+  Collector_Scalar2(bool required_, int col_location_, SEXP name_, Field_Args field_args)
+    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  , default_value(convert_default(field_args.default_sexp))
+  , ptype(field_args.ptype)
+  , ptype_inner(field_args.ptype_inner)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -380,21 +377,17 @@ private:
   }
 
 public:
-  Collector_Vector(SEXP default_value_, bool required_,
-                   SEXP ptype_, SEXP ptype_inner_, int col_location_,
-                   SEXP name_, SEXP transform_, vector_input_form input_form_,
-                   SEXP names_to_, SEXP values_to_, bool vector_allows_empty_list_,
-                   SEXP na_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
-  , ptype(ptype_)
-  , ptype_inner(ptype_inner_)
-  , input_form(input_form_)
-  , uses_names_col(!Rf_isNull(names_to_))
-  , uses_values_col(!Rf_isNull(values_to_))
-  , output_col_names(get_output_col_names(names_to_, values_to_))
-  , vector_allows_empty_list(vector_allows_empty_list_)
-  , na(na_)
+  Collector_Vector(bool required_, int col_location_, SEXP name_, Field_Args field_args, Vector_Args vector_args)
+    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  , default_value(field_args.default_sexp)
+  , ptype(field_args.ptype)
+  , ptype_inner(field_args.ptype_inner)
+  , input_form(vector_args.input_form)
+  , uses_names_col(!Rf_isNull(vector_args.names_to))
+  , uses_values_col(!Rf_isNull(vector_args.values_to))
+  , output_col_names(get_output_col_names(vector_args.names_to, vector_args.values_to))
+  , vector_allows_empty_list(vector_args.vector_allows_empty_list)
+  , na(vector_args.na)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -499,10 +492,10 @@ private:
   cpp11::writable::list data;
 
 public:
-  Collector_List(SEXP default_value_, bool required_, int col_location_, SEXP name_,
-                 SEXP transform_)
-    : Collector_Scalar_Base(required_, col_location_, name_, transform_)
-  , default_value(default_value_)
+  Collector_List(bool required_, int col_location_, SEXP name_,
+                 Field_Args field_args)
+    : Collector_Scalar_Base(required_, col_location_, name_, field_args.transform)
+  , default_value(field_args.default_sexp)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -953,50 +946,43 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       continue;
     }
 
-    cpp11::sexp transform = elt["transform"];
-    cpp11::sexp default_sexp = elt["fill"];
+    Field_Args field_args {
+      .transform = elt["transform"],
+      .default_sexp = elt["fill"]
+    };
+
     if (type == "variant" || type == "unspecified") {
-      col_vec.push_back(std::unique_ptr<Collector_List>(new Collector_List(default_sexp, required, location, name, transform)));
+      col_vec.push_back(std::unique_ptr<Collector_List>(new Collector_List(required, location, name, field_args)));
       continue;
     }
 
-    cpp11::sexp ptype = elt["ptype"];
+    field_args.ptype = elt["ptype"];
     cpp11::sexp ptype_inner = elt["ptype_inner"];
+    field_args.ptype_inner = ptype_inner;
     if (type == "scalar") {
       if (vec_is(ptype_inner, tibblify_shared_empty_lgl)) {
-        cpp11::r_bool default_bool = cpp11::logicals(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(default_bool, required, location, ptype, tibblify_shared_empty_lgl, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, cpp11::r_bool>>(new Collector_Scalar2<int, cpp11::r_bool>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_int)) {
-        int default_int = cpp11::as_integers(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(default_int, required, location, ptype, tibblify_shared_empty_int, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<int, int>>(new Collector_Scalar2<int, int>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_dbl)) {
-        double default_dbl = cpp11::as_doubles(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(default_dbl, required, location, ptype, tibblify_shared_empty_dbl, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<double, double>>(new Collector_Scalar2<double, double>(required, location, name, field_args)));
       } else if (vec_is(ptype_inner, tibblify_shared_empty_chr)) {
-        cpp11::sexp default_str = cpp11::strings(default_sexp)[0];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(default_str, required, location, ptype, tibblify_shared_empty_chr, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar2<SEXP, cpp11::r_string>>(new Collector_Scalar2<SEXP, cpp11::r_string>(required, location, name, field_args)));
       } else {
         cpp11::sexp na = elt["na"];
-        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(default_sexp, na, required, ptype, ptype_inner, location, name, transform)));
+        col_vec.push_back(std::unique_ptr<Collector_Scalar>(new Collector_Scalar(na, required, location, name, field_args)));
       }
     } else if (type == "vector") {
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
-      cpp11::sexp names_to = elt["names_to"];
-      cpp11::sexp values_to = elt["values_to"];
-      cpp11::sexp na = elt["na"];
-      col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(
-          default_sexp,
-          required,
-          ptype,
-          ptype_inner,
-          location,
-          name,
-          transform,
-          string_to_form_enum(input_form),
-          names_to,
-          values_to,
-          vector_allows_empty_list,
-          na))
+      Vector_Args args {
+        string_to_form_enum(input_form),
+        vector_allows_empty_list,
+        .names_to = elt["names_to"],
+        .values_to = elt["values_to"],
+        .na = elt["na"]
+      };
+
+      col_vec.push_back(std::unique_ptr<Collector_Vector>(new Collector_Vector(required, location, name, field_args, args))
       );
     } else {
       cpp11::stop("Internal Error: Unsupported type");

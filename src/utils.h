@@ -3,6 +3,23 @@
 
 enum vector_input_form {vector, scalar_list, object};
 
+struct Vector_Args
+{
+  vector_input_form input_form;
+  bool vector_allows_empty_list;
+  SEXP names_to;
+  SEXP values_to;
+  SEXP na;
+};
+
+struct Field_Args
+{
+  cpp11::sexp transform;
+  cpp11::sexp default_sexp;
+  cpp11::sexp ptype;
+  cpp11::sexp ptype_inner;
+};
+
 inline vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
   if (input_form_ == "vector") {
     return(vector);
