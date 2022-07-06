@@ -31,8 +31,6 @@ extern SEXP tibblify_shared_empty_list;
 // extern SEXP tibblify_shared_empty_date;
 // extern SEXP tibblify_shared_empty_uns;
 
-extern SEXP tibblify_shared_int1;
-
 extern SEXP syms_transform;
 extern SEXP syms_value;
 extern SEXP syms_x;

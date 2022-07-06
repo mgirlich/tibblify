@@ -22,8 +22,6 @@ SEXP tibblify_shared_empty_list = NULL;
 // SEXP tibblify_shared_empty_date = NULL;
 // SEXP tibblify_shared_empty_uns = NULL;
 
-SEXP tibblify_shared_int1 = NULL;
-
 // SEXP classes_date = NULL;
 SEXP classes_tibble = NULL;
 SEXP classes_list_of = NULL;
@@ -90,9 +88,6 @@ void tibblify_init_utils(SEXP ns) {
   // tibblify_shared_empty_date = r_new_shared_vector(REALSXP, 0);
   // Rf_setAttrib(tibblify_shared_empty_date, R_ClassSymbol, classes_date);
   // tibblify_shared_empty_uns = r_new_shared_vector(LGLSXP, 0);
-
-  tibblify_shared_int1 = r_new_shared_vector(INTSXP, 1);
-  INTEGER(tibblify_shared_int1)[0] = 1;
 
   syms_ptype = Rf_install("ptype");
   syms_transform = Rf_install("transform");

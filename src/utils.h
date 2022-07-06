@@ -1,7 +1,36 @@
+#ifndef TIBBLIFY_UTILS_H
+#define TIBBLIFY_UTILS_H
+
 #include <cpp11.hpp>
 #include "tibblify.h"
 
 enum vector_input_form {vector, scalar_list, object};
+
+struct Vector_Args
+{
+  vector_input_form input_form;
+  bool vector_allows_empty_list;
+  SEXP names_to;
+  SEXP values_to;
+  SEXP na;
+};
+
+struct Field_Args
+{
+  cpp11::sexp default_sexp;
+  cpp11::sexp transform;
+  cpp11::sexp ptype;
+  cpp11::sexp ptype_inner;
+
+  Field_Args(cpp11::sexp default_sexp_ = R_NilValue,
+             cpp11::sexp transform_ = R_NilValue,
+             cpp11::sexp ptype_ = R_NilValue,
+             cpp11::sexp ptype_inner_ = R_NilValue)
+    : default_sexp(default_sexp_)
+    , transform(transform_)
+    , ptype(ptype_)
+    , ptype_inner(ptype_inner_) { }
+};
 
 inline vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
   if (input_form_ == "vector") {
@@ -27,7 +56,8 @@ inline cpp11::sexp vector_input_form_to_sexp(vector_input_form input_form) {
 }
 
 inline
-SEXP set_df_attributes(SEXP list, R_xlen_t n_rows) {
+SEXP set_df_attributes(SEXP list, SEXP col_names, R_xlen_t n_rows) {
+  Rf_setAttrib(list, R_NamesSymbol, col_names);
   Rf_setAttrib(list, R_ClassSymbol, classes_tibble);
 
   SEXP row_attr = PROTECT(Rf_allocVector(INTSXP, 2));
@@ -44,22 +74,19 @@ inline
 SEXP init_df(R_xlen_t n_rows, SEXP col_names) {
   int n_cols = Rf_length(col_names);
   SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-  Rf_setAttrib(df, R_NamesSymbol, col_names);
 
-  set_df_attributes(df, n_rows);
+  set_df_attributes(df, col_names, n_rows);
 
   UNPROTECT(1);
   return df;
 }
 
 inline
-SEXP init_list_of(R_xlen_t& length, SEXP ptype) {
-  SEXP out = PROTECT(Rf_allocVector(VECSXP, length));
-  Rf_setAttrib(out, R_ClassSymbol, classes_list_of);
-  Rf_setAttrib(out, Rf_install("ptype"), ptype);
+SEXP set_list_of_attributes(SEXP x, SEXP ptype) {
+  Rf_setAttrib(x, R_ClassSymbol, classes_list_of);
+  Rf_setAttrib(x, Rf_install("ptype"), ptype);
 
-  UNPROTECT(1);
-  return out;
+  return x;
 }
 
 static inline
@@ -121,3 +148,5 @@ SEXP vec_slice_impl2(SEXP x, SEXP index) {
   UNPROTECT(1);
   return(row);
 }
+
+#endif
