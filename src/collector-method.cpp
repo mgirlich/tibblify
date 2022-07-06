@@ -95,16 +95,16 @@ public:
   virtual ~ Collector() {};
 
   // reserve space and protect against garbage collection
-  virtual inline void init(R_xlen_t& length) = 0;
+  virtual void init(R_xlen_t& length) = 0;
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
-  virtual inline int size() const = 0;
+  virtual int size() const = 0;
   // if key is found -> add `object` to internal memory
-  virtual inline void add_value(SEXP object, Path& path) = 0;
+  virtual void add_value(SEXP object, Path& path) = 0;
   // if key is absent -> check if field is required; if not add `default`
-  virtual inline void add_default(bool check, Path& path) = 0;
+  virtual void add_default(bool check, Path& path) = 0;
   // assign data to input `list` at correct location and update `names`
-  virtual inline void assign_data(SEXP list, SEXP names) const = 0;
+  virtual void assign_data(SEXP list, SEXP names) const = 0;
 };
 
 using Collector_Ptr = std::unique_ptr<Collector>;
