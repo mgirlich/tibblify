@@ -3,3 +3,7 @@
 tibblify_impl <- function(object_list, spec) {
   .Call(`_tibblify_tibblify_impl`, object_list, spec)
 }
+
+init_logging <- function(log_level) {
+  invisible(.Call(`_tibblify_init_logging`, log_level))
+}

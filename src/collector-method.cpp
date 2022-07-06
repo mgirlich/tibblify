@@ -4,6 +4,8 @@
  */
 
 #include <cpp11.hpp>
+#include <plogr.h>
+
 #include <vector>
 #include "tibblify.h"
 #include "utils.h"
@@ -11,6 +13,8 @@
 #include "conditions.h"
 
 inline SEXP apply_transform(SEXP value, SEXP fn) {
+  LOG_DEBUG;
+
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
   SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
 
@@ -24,6 +28,8 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
 }
 
 inline SEXP vec_flatten(SEXP value, SEXP ptype) {
+  LOG_DEBUG;
+
   SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
                                value,
                                ptype));
@@ -77,6 +83,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     this->data = Rf_allocVector(VECSXP, length);
     this->current_row = 0;
   }
@@ -86,11 +94,15 @@ public:
   }
 
   inline void add_default(bool check, Path& path) {
+    LOG_DEBUG;
+
     if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
     SET_VECTOR_ELT(list, this->col_location, this->data);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
@@ -107,7 +119,10 @@ public:
   { }
 
   inline void add_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     if (Rf_isNull(value)) {
+      LOG_DEBUG << "NULL";
       SET_VECTOR_ELT(this->data, this->current_row++, this->na);
       return;
     }
@@ -123,6 +138,8 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
     SEXP value = PROTECT(vec_flatten(this->data, this->ptype_inner));
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
@@ -222,12 +239,18 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     this->data = r_alloc_vector<CPP11_TYPE>(length);
     this->data_ptr = r_vector_ptr<T, CPP11_TYPE>(this->data);
   }
 
   inline void add_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     if (Rf_isNull(value)) {
+      LOG_DEBUG << "NULL";
+
       *this->data_ptr = this->na;
       ++this->data_ptr;
       return;
@@ -245,12 +268,16 @@ public:
   }
 
   inline void add_default(bool check, Path& path) {
+    LOG_DEBUG;
+
     if (check && this->required) stop_required(path);
     *this->data_ptr = this->default_value;
     ++this->data_ptr;
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
     SEXP data = this->data;
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
 
@@ -270,8 +297,26 @@ private:
   const bool vector_allows_empty_list;
   const SEXP na;
 
+  vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
+    LOG_DEBUG;
+
+    if (input_form_ == "vector") {
+      return(vector);
+    } else if (input_form_ == "scalar_list") {
+      return(scalar_list);
+    } else if (input_form_ == "object") {
+      return(object);
+    } else{
+      cpp11::stop("Internal error.");
+    }
+  }
+
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
+    LOG_DEBUG;
+
     if (Rf_isNull(values_to_)) {
+      LOG_DEBUG << "NULL";
+
       return(NULL);
     }
 
@@ -290,6 +335,8 @@ private:
   }
 
   SEXP unchop_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
     R_xlen_t n = Rf_length(value);
@@ -323,6 +370,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     Collector_Base::init(length);
 
     if (this->uses_values_col) {
@@ -340,7 +389,11 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     if (Rf_isNull(value)) {
+      LOG_DEBUG << "NULL";
+
       SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
       return;
     }
@@ -413,7 +466,11 @@ public:
   { }
 
   inline void add_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     if (Rf_isNull(value)) {
+      LOG_DEBUG << "NULL";
+
       SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
       return;
     }
@@ -432,6 +489,8 @@ private:
   int ind[INDEX_SIZE];
 
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
+    LOG_DEBUG << "n_fields: " << n_fields;
+
     if (n_fields != this->n_fields_prev) return true;
 
     if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
@@ -444,12 +503,16 @@ private:
   }
 
   inline void update_order(SEXP field_names, const int& n_fields) {
+    LOG_DEBUG;
+
     this->n_fields_prev = n_fields;
     this->field_names_prev = field_names;
     R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
   }
 
   inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
+    LOG_DEBUG;
+
     // this relies on the fields already being in order
     if (n_fields <= 1) return;
 
@@ -474,6 +537,8 @@ public:
   Multi_Collector(SEXP keys_, std::vector<Collector_Ptr>& collector_vec_)
     : n_keys(Rf_length(keys_))
   {
+    LOG_DEBUG;
+
     int n_keys = Rf_length(keys_);
     R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
     this->n_fields_prev = Rf_length(keys_);
@@ -488,12 +553,16 @@ public:
   }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).init(length);
     }
   }
 
   inline void add_value(SEXP object, Path& path) {
+    LOG_DEBUG;
+
     const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     const int n_fields = Rf_length(object);
 
@@ -526,6 +595,8 @@ public:
     int key_index = 0;
     int field_index = 0;
     for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      LOG_DEBUG << field_index;
+
       SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
 
       if (field_nm == *key_names_ptr) {
@@ -572,6 +643,8 @@ public:
   { }
 
   inline int size() const {
+    LOG_DEBUG;
+
     int size = 0;
     for (const Collector_Ptr& collector : this->collector_vec) {
       size += (*collector).size();
@@ -581,20 +654,28 @@ public:
   }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     Multi_Collector::init(length);
   }
 
   inline void add_value(SEXP object, Path& path) {
+    LOG_DEBUG;
+
     Multi_Collector::add_value(object, path);
   }
 
   inline void add_default(bool check, Path& path) {
+    LOG_DEBUG;
+
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).add_default(check, path);
     }
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).assign_data(list, names);
     }
@@ -604,6 +685,8 @@ public:
 inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
                                 R_xlen_t n_rows,
                                 int n_extra_cols) {
+  LOG_DEBUG;
+
   int n_cols = n_extra_cols;
   for (const Collector_Ptr& collector : collector_vec) {
     n_cols += (*collector).size();
@@ -635,15 +718,21 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     this->n_rows = length;
     Multi_Collector::init(length);
   }
 
   inline void add_value(SEXP object, Path& path) {
+    LOG_DEBUG;
+
     Multi_Collector::add_value(object, path);
   }
 
   inline void add_default(bool check, Path& path) {
+    LOG_DEBUG;
+
     if (required) stop_required(path);
     for (int i = 0; i < this->n_keys; i++) {
       (*this->collector_vec[i]).add_default(check, path);
@@ -651,6 +740,8 @@ public:
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
     SEXP data = PROTECT(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
 
     SET_VECTOR_ELT(list, this->col_location, data);
@@ -665,6 +756,8 @@ private:
   const bool has_names_col;
 
   inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
+    LOG_DEBUG;
+
     int n_extra_cols = this->has_names_col ? 1 : 0;
 
     SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
@@ -687,6 +780,8 @@ public:
   { }
 
   inline SEXP parse(SEXP object_list, Path& path) {
+    LOG_DEBUG;
+
     R_xlen_t n_rows = short_vec_size(object_list);
     this->init(n_rows);
 
@@ -731,6 +826,8 @@ public:
   { }
 
   inline SEXP parse(SEXP object, Path& path) {
+    LOG_DEBUG;
+
     R_xlen_t n_rows = 1;
     this->init(n_rows);
     this->add_value(object, path);
@@ -753,6 +850,8 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
+    LOG_DEBUG;
+
     Collector_Base::init(length);
     Path path;
     SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
@@ -760,6 +859,8 @@ public:
   }
 
   inline void add_value(SEXP value, Path& path) {
+    LOG_DEBUG;
+
     if (Rf_isNull(value)) {
       SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
     } else {
@@ -770,6 +871,8 @@ public:
 
 std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_list,
                                                               bool vector_allows_empty_list) {
+  LOG_DEBUG;
+
   cpp11::writable::strings keys;
   std::vector<Collector_Ptr> col_vec;
 
@@ -857,6 +960,8 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
 [[cpp11::register]]
 SEXP tibblify_impl(SEXP object_list, SEXP spec) {
+  LOG_DEBUG;
+
   Path path;
 
   cpp11::list spec_list = spec;
@@ -879,4 +984,9 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec) {
   } else {
     cpp11::stop("Internal Error: Unexpected type");
   }
+}
+
+[[cpp11::register]]
+void init_logging(const std::string& log_level) {
+  plog::init_r(log_level);
 }
