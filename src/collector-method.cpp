@@ -882,136 +882,6 @@ public:
   }
 };
 
-class Column_Major_Collector {
-private:
-  static const int INDEX_SIZE = 256;
-  int ind[INDEX_SIZE];
-
-  inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
-    // this relies on the fields already being in order
-    if (n_fields <= 1) return;
-
-    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
-    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[0]);
-
-    for (int field_index = 1; field_index < n_fields; field_index++) {
-      SEXPREC* field_nm_prev = field_nm;
-      field_nm = field_names_ptr[this->ind[field_index]];
-      if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
-
-      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[field_index]);
-    }
-  }
-
-protected:
-  cpp11::writable::strings keys;
-  std::vector<Collector_Ptr> collector_vec;
-  const int n_keys;
-
-public:
-  Column_Major_Collector(SEXP keys_, std::vector<Collector_Ptr>& collector_vec_)
-    : n_keys(Rf_length(keys_))
-  {
-    int n_keys = Rf_length(keys_);
-    R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
-
-    this->keys = Rf_allocVector(STRSXP, n_keys);
-    for(int i = 0; i < n_keys; i++) {
-      int key_index = this->ind[i];
-      SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
-      this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
-    }
-  }
-
-  inline void init(R_xlen_t& length) {
-    for (const Collector_Ptr& collector : this->collector_vec) {
-      (*collector).init(length);
-    }
-  }
-
-  inline void add_value(SEXP object, Path& path) {
-    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
-    const int n_fields = Rf_length(object);
-
-    if (n_fields == 0) {
-      // TODO
-      // path.down();
-      // for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-      //   path.replace(*key_names_ptr);
-      //   (*this->collector_vec[key_index]).add_default(path);
-      // }
-      // path.up();
-      // return;
-    }
-
-    SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
-    if (field_names == R_NilValue) stop_names_is_null(path);
-
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-    // update order
-    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
-    this->check_names(field_names_ptr, n_fields, path);
-
-    // TODO VECTOR_PTR_RO only works if object is a list
-    const SEXP* col_ptr = VECTOR_PTR_RO(object);
-    R_xlen_t n_rows = short_vec_size(*col_ptr);
-
-    // The manual loop is quite a bit faster than the range based loop
-    path.down();
-    int key_index = 0;
-    int field_index = 0;
-    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
-      SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
-
-      if (field_nm == *key_names_ptr) {
-        path.replace(*key_names_ptr);
-        SEXP col = col_ptr[this->ind[field_index]];
-        // if row (collector_tibble)
-        // -> add_value
-        // next
-
-        // check size
-        if (short_vec_size(col) != n_rows) {
-          // TODO stop
-        }
-
-
-        if (TYPEOF(col) == VECSXP) {
-          // 2. iterate over elements and call `add_value()`
-          // const SEXP* val_ptr = VECTOR_PTR_RO(col);
-        } else {
-          // use vec_cast
-        }
-        // (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
-        key_names_ptr++; key_index++;
-        field_index++;
-        continue;
-      }
-
-      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
-      const char* field_nm_char = CHAR(field_nm);
-      if (strcmp(key_char, field_nm_char) < 0) {
-        path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(true, path);
-        key_names_ptr++; key_index++;
-        continue;
-      }
-
-      // field_name does not occur in keys
-      // TODO store unused field_name somewhere?
-      field_index++;
-    }
-
-    for (; key_index < this->n_keys; key_index++) {
-      path.replace(*key_names_ptr);
-      (*this->collector_vec[key_index]).add_default(true, path);
-      key_names_ptr++;
-    }
-
-    path.up();
-  }
-};
-
 class Collector_Same_Key : public Collector, Multi_Collector {
 protected:
   int n_keys;
@@ -1179,7 +1049,6 @@ private:
 
       SEXPREC* field_nm = field_names_ptr[ind[field_index]];
       if (field_nm == *key_names_ptr) {
-        // path.replace(*key_names_ptr);
         SEXP field = ptr_field[ind[field_index]];
 
         if ((*this->collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
@@ -1191,11 +1060,71 @@ private:
         continue;
       }
 
-      // TODO cannot be done here as `n_rows` isn't necessarily initialized...
+      const char* key_char = CHAR(*key_names_ptr);
+      const char* field_nm_char = CHAR(field_nm);
+      if (strcmp(key_char, field_nm_char) < 0) {
+        key_names_ptr++; key_index++;
+        continue;
+      }
+
+      // field_name does not occur in keys
+      field_index++;
+    }
+
+    return(0);
+  }
+
+  R_xlen_t parse_colmajor(SEXP object_list, Path& path) {
+    LOG_DEBUG;
+
+    const R_xlen_t n_fields = short_vec_size(object_list);
+
+    if (n_fields == 0) {
+      R_xlen_t n_rows (0);
+      this->init(n_rows);
+      return(n_rows);
+    }
+
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+    if (field_names == R_NilValue) stop_names_is_null(path);
+
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    // update order
+    static const int INDEX_SIZE = 256;
+    int ind[INDEX_SIZE];
+
+    R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
+    // TODO
+    // this->check_names(field_names_ptr, n_fields, path);
+
+    R_xlen_t n_rows = get_n_rows(object_list, ind);
+
+    const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+
+    path.down();
+    this->init(n_rows);
+
+    int key_index = 0;
+    for (int field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      LOG_DEBUG << "iteration:" << field_index;
+
+      SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+      if (field_nm == *key_names_ptr) {
+        path.replace(*key_names_ptr);
+        SEXP field = ptr_field[ind[field_index]];
+
+        (*this->collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
+        key_names_ptr++; key_index++;
+        field_index++;
+        continue;
+      }
+
       const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
-        // path.replace(*key_names_ptr);
+        path.replace(*key_names_ptr);
+        (*this->collector_vec[key_index]).add_default_colmajor(true, path);
         key_names_ptr++; key_index++;
         continue;
       }
@@ -1205,7 +1134,19 @@ private:
       field_index++;
     }
 
-    return(0);
+
+    // TODO this could be more efficient with memcopy?
+    for (; key_index < this->n_keys; key_index++) {
+      path.replace(*key_names_ptr);
+      // memset(INTEGER(out), 0, n * sizeof(int));
+      for (R_xlen_t row = 0; row < n_rows; row++) {
+        (*this->collector_vec[key_index]).add_default_colmajor(true, path);
+      }
+      key_names_ptr++;
+    }
+
+    path.up();
+    return(n_rows);
   }
 
 public:
@@ -1223,79 +1164,8 @@ public:
     LOG_DEBUG;
 
     if (this->input_form == "colmajor") {
-      LOG_DEBUG << "colmajor";
-
-      const R_xlen_t n_fields = short_vec_size(object_list);
-
-      if (n_fields == 0) {
-        R_xlen_t n_rows (0);
-        this->init(n_rows);
-        return this->get_data(object_list, n_rows);
-      }
-
-      const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
-      SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-      if (field_names == R_NilValue) stop_names_is_null(path);
-
-      const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-      // update order
-      static const int INDEX_SIZE = 256;
-      int ind[INDEX_SIZE];
-
-      R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-      // TODO
-      // this->check_names(field_names_ptr, n_fields, path);
-
-      R_xlen_t n_rows = get_n_rows(object_list, ind);
-
-      const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
-
-      path.down();
-      this->init(n_rows);
-
-      int key_index = 0;
-      for (int field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
-        LOG_DEBUG << "iteration:" << field_index;
-
-        SEXPREC* field_nm = field_names_ptr[ind[field_index]];
-        if (field_nm == *key_names_ptr) {
-          path.replace(*key_names_ptr);
-          SEXP field = ptr_field[ind[field_index]];
-
-          (*this->collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
-          key_names_ptr++; key_index++;
-          field_index++;
-          continue;
-        }
-
-        const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
-        const char* field_nm_char = CHAR(field_nm);
-        if (strcmp(key_char, field_nm_char) < 0) {
-          path.replace(*key_names_ptr);
-          (*this->collector_vec[key_index]).add_default_colmajor(true, path);
-          key_names_ptr++; key_index++;
-          continue;
-        }
-
-        // field_name does not occur in keys
-        // TODO store unused field_name somewhere?
-        field_index++;
-      }
-
-
-      // TODO this could be more efficient with memcopy?
-      for (; key_index < this->n_keys; key_index++) {
-        path.replace(*key_names_ptr);
-        // memset(INTEGER(out), 0, n * sizeof(int));
-        for (R_xlen_t row = 0; row < n_rows; row++) {
-          (*this->collector_vec[key_index]).add_default_colmajor(true, path);
-        }
-        key_names_ptr++;
-      }
-
-      path.up();
+      auto n_rows = this->parse_colmajor(object_list, path);
       return this->get_data(object_list, n_rows);
-
     } else if (input_form == "rowmajor") {
       R_xlen_t n_rows = short_vec_size(object_list);
       this->init(n_rows);
