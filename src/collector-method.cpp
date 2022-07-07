@@ -151,34 +151,11 @@ public:
   }
 };
 
-inline void scalar_add_default_colmajor(cpp11::sexp& data, cpp11::sexp na, Path& path) {
-  LOG_DEBUG;
-
-  R_xlen_t n_rows = short_vec_size(data);
-  SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
-  SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
-                               na,
-                               n_rows_sexp));
-  data = Rf_eval(call, tibblify_ns_env);
-  UNPROTECT(2);
-}
-
-
-inline void scalar_add_value_colmajor(cpp11::sexp& data, SEXP value, cpp11::sexp ptype_inner, cpp11::sexp na, Path& path) {
-  LOG_DEBUG;
-
-  if (Rf_isNull(value)) {
-    scalar_add_default_colmajor(data, na, path);
-    return;
-  }
-
-  data = vec_cast(value, ptype_inner);
-}
-
 class Collector_Scalar : public Collector_Base {
 private:
   const SEXP na;
-  cpp11::sexp data_colmajor = R_NilValue;
+  cpp11::sexp data_colmajor;
+  bool colmajor = false;
 
 public:
   Collector_Scalar(bool required_, int col_location_, SEXP name_, Field_Args& field_args, SEXP na_)
@@ -218,23 +195,41 @@ public:
 
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
+    this->colmajor = true;
 
-    scalar_add_value_colmajor(this->data_colmajor, value, this->ptype_inner, this->na, path);
+    if (Rf_isNull(value)) {
+      this->add_default_colmajor(false, path);
+      return;
+    }
+
+    this->data_colmajor = vec_cast(value, ptype_inner);
   }
 
   inline void add_default_colmajor(bool check, Path& path) {
     LOG_DEBUG;
+    this->colmajor = true;
 
     if (check && this->required) stop_required(path);
 
-    scalar_add_default_colmajor(this->data_colmajor, this->na, path);
+    R_xlen_t n_rows = short_vec_size(data);
+    SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
+    SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
+                                 this->na,
+                                 n_rows_sexp));
+    this->data_colmajor = Rf_eval(call, tibblify_ns_env);
+    UNPROTECT(2);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
     LOG_DEBUG;
 
-    // TODO not necessary for input_form 'colmajor'
-    SEXP value = PROTECT(vec_flatten(this->data, this->ptype_inner));
+    SEXP value = R_NilValue;
+    if (this->colmajor) {
+      value = this->data_colmajor;
+    } else {
+      value = vec_flatten(this->data, this->ptype_inner);
+    }
+    PROTECT(value);
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SEXP value_cast = PROTECT(vec_cast(PROTECT(value), this->ptype));
