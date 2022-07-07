@@ -907,14 +907,11 @@ public:
       field_index++;
     }
 
-
     // TODO this could be more efficient with
     for (; key_index < this->n_keys; key_index++) {
       path.replace(*key_names_ptr);
       // memset(INTEGER(out), 0, n * sizeof(int));
-      for (R_xlen_t row = 0; row < n_rows; row++) {
-        (*this->collector_vec[key_index]).add_default_colmajor(true, path);
-      }
+      (*this->collector_vec[key_index]).add_default_colmajor(true, path);
       key_names_ptr++;
     }
 
@@ -962,6 +959,7 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
+  // TODO
   inline void add_value_colmajor(SEXP object, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
@@ -1030,7 +1028,6 @@ public:
     int ind[INDEX_SIZE];
 
     R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-
     n_rows = get_n_rows(value,
                         this->collector_vec,
                         ind,
@@ -1038,7 +1035,6 @@ public:
                         this->n_keys);
 
     return(true);
-    // return(Multi_Collector::colmajor_nrows(value, n_rows));
   }
 
   inline void add_value(SEXP object, Path& path) {
