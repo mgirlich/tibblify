@@ -873,50 +873,59 @@ test_that("spec_replace_unspecified works", {
 # colmajor ----------------------------------------------------------------
 
 test_that("colmajor works", {
-  tib_cm <- function(x, col) {
+  tib_cm <- function(col, x, ...) {
     tibblify(
-      list(x = x),
+      list(x = x, ...),
       spec_df(x = col, .input_form = "colmajor")
     )
   }
 
+  spec_cm <- function(...) {
+    spec_df(.input_form = "colmajor", ...)
+  }
+
   # scalar fields works
   expect_equal(
-    tib_cm(1:3, tib_int("x")),
+    tib_cm(tib_int("x"), 1:3),
     tibble(x = 1:3)
   )
 
   # scalar fields with transform works
   expect_equal(
-    tib_cm(1:3, tib_chr("x", ptype_inner = integer(), transform = ~ letters[.x])),
+    tib_cm(tib_chr("x", ptype_inner = integer(), transform = ~ letters[.x]), 1:3),
     tibble(x = letters[1:3])
   )
 
   # non-base scalar fields work
-  # TODO
-  # expect_equal(
-  #   tib_cm(new_rational(1, 1:3), tib_scalar("x", new_rational())),
-  #   tibble(x = 1:3)
-  # )
+  expect_equal(
+    tib_cm(tib_scalar("x", vctrs::new_date()), vctrs::new_date(1:3 + 0.0)),
+    tibble(x = vctrs::new_date(1:3 + 0.0))
+  )
+
+  # record scalars work
+  expect_equal(
+    tib_cm(tib_scalar("x", new_rational()), new_rational(1, 1:3)),
+    tibble(x = new_rational(1, 1:3))
+  )
 
   # vector fields works
   expect_equal(
-    tib_cm(list(1:2, NULL, 3), tib_int_vec("x")),
+    tib_cm(tib_int_vec("x"), list(1:2, NULL, 3)),
     tibble(x = list_of(1:2, NULL, 3))
   )
 
   # variant works
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
-    tib_cm(list(1:2, "a", model), tib_variant("x")),
+    tib_cm(tib_variant("x"), list(1:2, "a", model)),
     tibble(x = list(1:2, "a", model))
   )
 
   # row works
   expect_equal(
     tib_cm(
-      list(int = 1:2, chr_vec = list("a", c("b", "c"))),
-      tib_row("x", tib_int("int"), tib_chr_vec("chr_vec"))
+      tib_row("x", tib_int("int"), tib_chr_vec("chr_vec")),
+      list(int = 1:2, chr_vec = list("a", c("b", "c")))
     ),
     tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
   )
@@ -924,24 +933,83 @@ test_that("colmajor works", {
   # nested row works
   expect_equal(
     tib_cm(
-      list(row = list(int = 1:2, chr_vec = list("a", c("b", "c")))),
-      tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec")))
+      tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec"))),
+      list(row = list(int = 1:2, chr_vec = list("a", c("b", "c"))))
     ),
     tibble(x = tibble(row = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c")))))
   )
 
+  # df works
   expect_equal(
     tib_cm(
+      tib_df("x", tib_int("int")),
       list(
         list(int = 1:2),
         list(int = NULL)
-      ),
-      tib_df("x", tib_int("int"))
+      )
     ),
     # TODO should this be NULL?
     tibble(x = list_of(tibble(int = 1:2), tibble(int = integer())))
   )
 
-  # TODO missing fields
-  # TODO extra fields
+  # nested df works
+  expect_equal(
+    tib_cm(
+      tib_df(
+        "x",
+        tib_row("row", tib_int("int")), tib_df("df", tib_int("df_int"))
+      ),
+      list(
+        list(row = list(int = 1:2), df = list(list(df_int = 1), list(df_int = 3:4))),
+        list(row = list(int = 3), df = NULL)
+      )
+    ),
+    # TODO should this be NULL?
+    tibble(x = list_of(
+      tibble(row = tibble(int = 1:2), df = list_of(tibble(df_int = 1), tibble(df_int = 3:4))),
+      tibble(row = tibble(int = 3))
+    ))
+  )
+
+  # TODO what should happen if no required variable was found?
+  # TODO these two should show the same behaviour...
+  # tibblify(list(b = 1:3), spec_df(.input_form = "colmajor", tib_int("c")))
+  # tibblify(list(b = 1:3), spec_df(.input_form = "colmajor", tib_int("a")))
+
+  # TODO what should happen for an empty list? probably just error
+  # tibblify(list(), spec_df(.input_form = "colmajor", tib_int("a")))
+  # tibblify(set_names(list()), spec_df(.input_form = "colmajor", tib_int("a")))
+
+  # required works
+  expect_snapshot({
+    (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
+    (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
+  })
+
+  expect_equal(
+    tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y", required = FALSE))),
+    tibble(x = 1:3, y = NA_integer_)
+  )
+
+  # which size should this have?
+  # tib_cm(list(x = 1:3), tib_row("x", tib_int("y", required = FALSE)))
+})
+
+test_that("colmajor checks size", {
+  tib_cm <- function(col1, col2, x, y) {
+    tibblify(
+      list(x = x, y = y),
+      spec_df(col1, col2, .input_form = "colmajor")
+    )
+  }
+
+  spec_cm <- function(...) {
+    spec_df(.input_form = "colmajor", ...)
+  }
+
+  expect_snapshot({
+    (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
+    (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(x = 1:3))))
+    (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = 1:3)))
+  })
 })
