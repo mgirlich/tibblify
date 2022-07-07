@@ -854,12 +854,6 @@ public:
 
     const R_xlen_t n_fields = short_vec_size(object_list);
 
-    if (n_fields == 0) {
-      R_xlen_t n_rows (0);
-      this->init(n_rows);
-      // return this->get_data(object_list, n_rows);
-    }
-
     const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
     if (field_names == R_NilValue) stop_names_is_null(path);
@@ -885,7 +879,6 @@ public:
       if (field_nm == *key_names_ptr) {
         path.replace(*key_names_ptr);
         SEXP field = ptr_field[ind[field_index]];
-        auto tmp = std::string(cpp11::r_string(field_nm));
 
         (*this->collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
         key_names_ptr++; key_index++;
@@ -893,7 +886,7 @@ public:
         continue;
       }
 
-      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* key_char = CHAR(*key_names_ptr);
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
         path.replace(*key_names_ptr);
@@ -903,20 +896,16 @@ public:
       }
 
       // field_name does not occur in keys
-      // TODO store unused field_name somewhere?
       field_index++;
     }
 
-    // TODO this could be more efficient with
     for (; key_index < this->n_keys; key_index++) {
       path.replace(*key_names_ptr);
-      // memset(INTEGER(out), 0, n * sizeof(int));
       (*this->collector_vec[key_index]).add_default_colmajor(true, path);
       key_names_ptr++;
     }
 
     path.up();
-    // return this->get_data(object_list, n_rows);
   }
 };
 
@@ -1018,10 +1007,7 @@ public:
     }
 
     SEXP field_names = Rf_getAttrib(value, R_NamesSymbol);
-    // TODO should this check if no names?
-    // if (field_names == R_NilValue) stop_names_is_null(path);
 
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
     R_xlen_t n_fields = short_vec_size(value);
     // update order
     static const int INDEX_SIZE = 256;
@@ -1112,8 +1098,6 @@ private:
     int ind[INDEX_SIZE];
 
     R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-    // TODO
-    // this->check_names(field_names_ptr, n_fields, path);
 
     R_xlen_t n_rows = get_n_rows(object_list, this->collector_vec, ind, this->keys, this->n_keys);
     const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
@@ -1137,7 +1121,7 @@ private:
         continue;
       }
 
-      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* key_char = CHAR(*key_names_ptr);
       const char* field_nm_char = CHAR(field_nm);
       if (strcmp(key_char, field_nm_char) < 0) {
         path.replace(*key_names_ptr);
@@ -1152,10 +1136,8 @@ private:
     }
 
 
-    // TODO this could be more efficient with memcopy?
     for (; key_index < this->n_keys; key_index++) {
       path.replace(*key_names_ptr);
-      // memset(INTEGER(out), 0, n * sizeof(int));
       for (R_xlen_t row = 0; row < n_rows; row++) {
         (*this->collector_vec[key_index]).add_default_colmajor(true, path);
       }
