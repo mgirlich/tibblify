@@ -113,7 +113,7 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (n_rows != short_vec_size(this->data)) {
+    if (short_vec_size(value) != n_rows) {
       stop_colmajor_wrong_size_element(path);
     }
 
