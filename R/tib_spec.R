@@ -37,7 +37,11 @@
 #' )
 #'
 #' spec_df(spec1, spec2)
-spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
+spec_df <- function(...,
+                    .input_form = c("rowmajor", "colmajor"),
+                    .names_to = NULL,
+                    vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
   if (!is_null(.names_to)) {
     check_string(.names_to, what = "a single string or `NULL`")
   }
@@ -45,6 +49,7 @@ spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
   out <- spec_tib(
     list2(...),
     "df",
+    input_form = .input_form,
     names_col = .names_to,
     vector_allows_empty_list = vector_allows_empty_list
   )
@@ -58,20 +63,28 @@ spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
 
 #' @rdname spec_df
 #' @export
-spec_object <- function(..., vector_allows_empty_list = FALSE) {
+spec_object <- function(...,
+                        .input_form = c("rowmajor", "colmajor"),
+                        vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
   spec_tib(
     list2(...),
     "object",
+    input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
   )
 }
 
 #' @rdname spec_df
 #' @export
-spec_row <- function(..., vector_allows_empty_list = FALSE) {
+spec_row <- function(...,
+                     .input_form = c("rowmajor", "colmajor"),
+                     vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
   spec_tib(
     list2(...),
     "row",
+    input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
   )
 }

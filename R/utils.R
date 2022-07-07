@@ -77,6 +77,15 @@ stop_vector_wrong_size_element <- function(path, input_form) {
   cli::cli_abort(msg)
 }
 
+stop_colmajor_wrong_size_element <- function(path, input_form) {
+  path_str <- path_to_string(path)
+  msg <- c(
+    "Field at path {path_str} has incorrect size.",
+    i = 'For {.code input_form = "colmajor"} each field must have the same size.'
+  )
+  cli::cli_abort(msg)
+}
+
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
 }

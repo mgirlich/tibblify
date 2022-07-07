@@ -47,10 +47,16 @@ public:
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
   virtual int size() const = 0;
+
+  virtual bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) = 0;
   // if key is found -> add `object` to internal memory
   virtual void add_value(SEXP object, Path& path) = 0;
+
+  virtual inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) = 0;
   // if key is absent -> check if field is required; if not add `default`
   virtual void add_default(bool check, Path& path) = 0;
+
+  virtual void add_default_colmajor(bool check, Path& path) = 0;
   // assign data to input `list` at correct location and update `names`
   virtual void assign_data(SEXP list, SEXP names) const = 0;
 };
@@ -93,11 +99,48 @@ public:
     return 1;
   }
 
+  inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
+    LOG_DEBUG;
+
+    if (Rf_isNull(value)) {
+      return(false);
+    }
+
+    n_rows = Rf_length(value);
+    return(true);
+  }
+
+  inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    if (n_rows != short_vec_size(this->data)) {
+      stop_colmajor_wrong_size_element(path);
+    }
+
+    const SEXP* ptr_field = VECTOR_PTR_RO(value);
+
+    for (R_xlen_t row = 0; row < n_rows; row++) {
+      this->add_value(*ptr_field, path);
+      ++ptr_field;
+    }
+  }
+
   inline void add_default(bool check, Path& path) {
     LOG_DEBUG;
 
     if (check && required) stop_required(path);
     SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+  }
+
+  void add_default_colmajor(bool check, Path& path) {
+    LOG_DEBUG;
+
+    if (check && required) stop_required(path);
+
+    const R_xlen_t n_rows = Rf_length(this->data);
+    for (R_xlen_t row = 0; row < n_rows; row++) {
+      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+    }
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -108,15 +151,51 @@ public:
   }
 };
 
+inline void scalar_add_default_colmajor(cpp11::sexp& data, cpp11::sexp na, Path& path) {
+  LOG_DEBUG;
+
+  R_xlen_t n_rows = short_vec_size(data);
+  SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
+  SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
+                               na,
+                               n_rows_sexp));
+  data = Rf_eval(call, tibblify_ns_env);
+  UNPROTECT(2);
+}
+
+
+inline void scalar_add_value_colmajor(cpp11::sexp& data, SEXP value, cpp11::sexp ptype_inner, cpp11::sexp na, Path& path) {
+  LOG_DEBUG;
+
+  if (Rf_isNull(value)) {
+    scalar_add_default_colmajor(data, na, path);
+    return;
+  }
+
+  data = vec_cast(value, ptype_inner);
+}
+
 class Collector_Scalar : public Collector_Base {
 private:
   const SEXP na;
+  cpp11::sexp data_colmajor = R_NilValue;
 
 public:
   Collector_Scalar(bool required_, int col_location_, SEXP name_, Field_Args& field_args, SEXP na_)
     : Collector_Base(required_, col_location_, name_, field_args)
   , na(na_)
   { }
+
+  inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
+    LOG_DEBUG;
+
+    if (Rf_isNull(value)) {
+      return(false);
+    }
+
+    n_rows = short_vec_size(value);
+    return(true);
+  }
 
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
@@ -137,9 +216,24 @@ public:
     UNPROTECT(1);
   }
 
+  inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    scalar_add_value_colmajor(this->data_colmajor, value, this->ptype_inner, this->na, path);
+  }
+
+  inline void add_default_colmajor(bool check, Path& path) {
+    LOG_DEBUG;
+
+    if (check && this->required) stop_required(path);
+
+    scalar_add_default_colmajor(this->data_colmajor, this->na, path);
+  }
+
   inline void assign_data(SEXP list, SEXP names) const {
     LOG_DEBUG;
 
+    // TODO not necessary for input_form 'colmajor'
     SEXP value = PROTECT(vec_flatten(this->data, this->ptype_inner));
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
@@ -267,12 +361,41 @@ public:
     UNPROTECT(1);
   }
 
+  inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    if (Rf_isNull(value)) {
+      add_default_colmajor(false, path);
+      return;
+    }
+
+    if (short_vec_size(value) != n_rows) {
+      stop_colmajor_wrong_size_element(path);
+    }
+
+    this->data = vec_cast(value, this->ptype_inner);
+  }
+
   inline void add_default(bool check, Path& path) {
     LOG_DEBUG;
 
     if (check && this->required) stop_required(path);
     *this->data_ptr = this->default_value;
     ++this->data_ptr;
+  }
+
+  inline void add_default_colmajor(bool check, Path& path) {
+    LOG_DEBUG;
+
+    if (check && this->required) stop_required(path);
+
+    R_xlen_t n_rows = short_vec_size(this->data);
+    SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
+    SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
+                                 cpp11::as_sexp(cpp11::na<CPP11_TYPE>()),
+                                 n_rows_sexp));
+    this->data = Rf_eval(call, tibblify_ns_env);
+    UNPROTECT(2);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -478,8 +601,39 @@ public:
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
+
+  inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    if (n_rows != short_vec_size(this->data)) {
+      stop_colmajor_wrong_size_element(path);
+    }
+
+    this->data = value;
+  }
 };
 
+inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
+                                R_xlen_t n_rows,
+                                int n_extra_cols) {
+  LOG_DEBUG;
+
+  int n_cols = n_extra_cols;
+  for (const Collector_Ptr& collector : collector_vec) {
+    n_cols += (*collector).size();
+  }
+
+  SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
+  SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+
+  for (const Collector_Ptr& collector : collector_vec) {
+    (*collector).assign_data(df, names);
+  }
+  set_df_attributes(df, names, n_rows);
+
+  UNPROTECT(2);
+  return df;
+}
 
 class Multi_Collector {
 private:
@@ -533,6 +687,14 @@ protected:
   std::vector<Collector_Ptr> collector_vec;
   const int n_keys;
 
+  // TODO duplicate of Collector_Tibble Method
+  inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
+    LOG_DEBUG;
+
+    SEXP out = collector_vec_to_df(std::move(this->collector_vec), n_rows, 0);
+    return(out);
+  }
+
 public:
   Multi_Collector(SEXP keys_, std::vector<Collector_Ptr>& collector_vec_)
     : n_keys(Rf_length(keys_))
@@ -558,6 +720,22 @@ public:
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).init(length);
     }
+  }
+
+  inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
+    LOG_DEBUG;
+
+    if (Rf_isNull(value)) {
+      return(false);
+    }
+
+    for (const Collector_Ptr& collector : this->collector_vec) {
+      if ((*collector).colmajor_nrows(value, n_rows)) {
+        return(true);
+      }
+    }
+
+    return(false);
   }
 
   inline void add_value(SEXP object, Path& path) {
@@ -629,8 +807,210 @@ public:
 
     path.up();
   }
+
+  inline void add_value_colmajor(SEXP object_list, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG << "colmajor";
+
+    const R_xlen_t n_fields = short_vec_size(object_list);
+
+    if (n_fields == 0) {
+      R_xlen_t n_rows (0);
+      this->init(n_rows);
+      // return this->get_data(object_list, n_rows);
+    }
+
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+    if (field_names == R_NilValue) stop_names_is_null(path);
+
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    // update order
+    static const int INDEX_SIZE = 256;
+    int ind[INDEX_SIZE];
+
+    R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
+    // this->check_names(field_names_ptr, n_fields, path);
+
+    const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+
+    path.down();
+    int key_index = 0;
+    int field_index = 0;
+
+    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      LOG_DEBUG << "iteration:" << field_index;
+
+      SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+      if (field_nm == *key_names_ptr) {
+        path.replace(*key_names_ptr);
+        SEXP field = ptr_field[ind[field_index]];
+        auto tmp = std::string(cpp11::r_string(field_nm));
+
+        (*this->collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
+        key_names_ptr++; key_index++;
+        field_index++;
+        continue;
+      }
+
+      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* field_nm_char = CHAR(field_nm);
+      if (strcmp(key_char, field_nm_char) < 0) {
+        path.replace(*key_names_ptr);
+        (*this->collector_vec[key_index]).add_default_colmajor(true, path);
+        key_names_ptr++; key_index++;
+        continue;
+      }
+
+      // field_name does not occur in keys
+      // TODO store unused field_name somewhere?
+      field_index++;
+    }
+
+
+    // TODO this could be more efficient with
+    for (; key_index < this->n_keys; key_index++) {
+      path.replace(*key_names_ptr);
+      // memset(INTEGER(out), 0, n * sizeof(int));
+      for (R_xlen_t row = 0; row < n_rows; row++) {
+        (*this->collector_vec[key_index]).add_default_colmajor(true, path);
+      }
+      key_names_ptr++;
+    }
+
+    path.up();
+    // return this->get_data(object_list, n_rows);
+  }
 };
 
+class Column_Major_Collector {
+private:
+  static const int INDEX_SIZE = 256;
+  int ind[INDEX_SIZE];
+
+  inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
+    // this relies on the fields already being in order
+    if (n_fields <= 1) return;
+
+    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
+    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[0]);
+
+    for (int field_index = 1; field_index < n_fields; field_index++) {
+      SEXPREC* field_nm_prev = field_nm;
+      field_nm = field_names_ptr[this->ind[field_index]];
+      if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
+
+      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[field_index]);
+    }
+  }
+
+protected:
+  cpp11::writable::strings keys;
+  std::vector<Collector_Ptr> collector_vec;
+  const int n_keys;
+
+public:
+  Column_Major_Collector(SEXP keys_, std::vector<Collector_Ptr>& collector_vec_)
+    : n_keys(Rf_length(keys_))
+  {
+    int n_keys = Rf_length(keys_);
+    R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
+
+    this->keys = Rf_allocVector(STRSXP, n_keys);
+    for(int i = 0; i < n_keys; i++) {
+      int key_index = this->ind[i];
+      SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
+      this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
+    }
+  }
+
+  inline void init(R_xlen_t& length) {
+    for (const Collector_Ptr& collector : this->collector_vec) {
+      (*collector).init(length);
+    }
+  }
+
+  inline void add_value(SEXP object, Path& path) {
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    const int n_fields = Rf_length(object);
+
+    if (n_fields == 0) {
+      // TODO
+      // path.down();
+      // for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
+      //   path.replace(*key_names_ptr);
+      //   (*this->collector_vec[key_index]).add_default(path);
+      // }
+      // path.up();
+      // return;
+    }
+
+    SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
+    if (field_names == R_NilValue) stop_names_is_null(path);
+
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    // update order
+    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
+    this->check_names(field_names_ptr, n_fields, path);
+
+    // TODO VECTOR_PTR_RO only works if object is a list
+    const SEXP* col_ptr = VECTOR_PTR_RO(object);
+    R_xlen_t n_rows = short_vec_size(*col_ptr);
+
+    // The manual loop is quite a bit faster than the range based loop
+    path.down();
+    int key_index = 0;
+    int field_index = 0;
+    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
+
+      if (field_nm == *key_names_ptr) {
+        path.replace(*key_names_ptr);
+        SEXP col = col_ptr[this->ind[field_index]];
+        // if row (collector_tibble)
+        // -> add_value
+        // next
+
+        // check size
+        if (short_vec_size(col) != n_rows) {
+          // TODO stop
+        }
+
+
+        if (TYPEOF(col) == VECSXP) {
+          // 2. iterate over elements and call `add_value()`
+          // const SEXP* val_ptr = VECTOR_PTR_RO(col);
+        } else {
+          // use vec_cast
+        }
+        // (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
+        key_names_ptr++; key_index++;
+        field_index++;
+        continue;
+      }
+
+      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* field_nm_char = CHAR(field_nm);
+      if (strcmp(key_char, field_nm_char) < 0) {
+        path.replace(*key_names_ptr);
+        (*this->collector_vec[key_index]).add_default(true, path);
+        key_names_ptr++; key_index++;
+        continue;
+      }
+
+      // field_name does not occur in keys
+      // TODO store unused field_name somewhere?
+      field_index++;
+    }
+
+    for (; key_index < this->n_keys; key_index++) {
+      path.replace(*key_names_ptr);
+      (*this->collector_vec[key_index]).add_default(true, path);
+      key_names_ptr++;
+    }
+
+    path.up();
+  }
+};
 
 class Collector_Same_Key : public Collector, Multi_Collector {
 protected:
@@ -659,10 +1039,22 @@ public:
     Multi_Collector::init(length);
   }
 
+  inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
+    LOG_DEBUG;
+
+    return(Multi_Collector::colmajor_nrows(value, n_rows));
+  }
+
   inline void add_value(SEXP object, Path& path) {
     LOG_DEBUG;
 
     Multi_Collector::add_value(object, path);
+  }
+
+  inline void add_value_colmajor(SEXP object, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    // Multi_Collector::add_value_colmajor(object, path);
   }
 
   inline void add_default(bool check, Path& path) {
@@ -670,6 +1062,15 @@ public:
 
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).add_default(check, path);
+    }
+  }
+
+  // TODO?
+  inline void add_default_colmajor(bool check, Path& path) {
+    LOG_DEBUG;
+
+    for (const Collector_Ptr& collector : this->collector_vec) {
+      (*collector).add_default_colmajor(check, path);
     }
   }
 
@@ -681,30 +1082,6 @@ public:
     }
   }
 };
-
-inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
-                                R_xlen_t n_rows,
-                                int n_extra_cols) {
-  LOG_DEBUG;
-
-  int n_cols = n_extra_cols;
-  for (const Collector_Ptr& collector : collector_vec) {
-    n_cols += (*collector).size();
-  }
-
-  SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-  SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
-
-  for (const Collector_Ptr& collector : collector_vec) {
-    (*collector).assign_data(df, names);
-  }
-  set_df_attributes(df, names, n_rows);
-
-  UNPROTECT(2);
-  return df;
-}
-
-
 
 class Collector_Tibble : public Collector_Base, Multi_Collector {
 private:
@@ -724,10 +1101,22 @@ public:
     Multi_Collector::init(length);
   }
 
+  inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
+    LOG_DEBUG;
+
+    return(Multi_Collector::colmajor_nrows(value, n_rows));
+  }
+
   inline void add_value(SEXP object, Path& path) {
     LOG_DEBUG;
 
     Multi_Collector::add_value(object, path);
+  }
+
+  inline void add_value_colmajor(SEXP object, R_xlen_t& n_rows, Path& path) {
+    LOG_DEBUG;
+
+    Multi_Collector::add_value_colmajor(object, n_rows, path);
   }
 
   inline void add_default(bool check, Path& path) {
@@ -752,6 +1141,7 @@ public:
 
 class Parser_Object_List : Multi_Collector {
 private:
+  const std::string input_form;
   const SEXP names_col;
   const bool has_names_col;
 
@@ -772,9 +1162,59 @@ private:
     return(out);
   }
 
+  R_xlen_t get_n_rows(SEXP object_list, int ind[]) {
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+
+    R_xlen_t n_rows;
+    const R_xlen_t n_fields = short_vec_size(object_list);
+    const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+
+    int key_index = 0;
+    int field_index = 0;
+
+    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+      LOG_DEBUG << "iteration:" << field_index;
+
+      SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+      if (field_nm == *key_names_ptr) {
+        // path.replace(*key_names_ptr);
+        SEXP field = ptr_field[ind[field_index]];
+
+        if ((*this->collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
+          LOG_DEBUG << "found rows: " << n_rows;
+          return(n_rows);
+        }
+        key_names_ptr++; key_index++;
+        field_index++;
+        continue;
+      }
+
+      // TODO cannot be done here as `n_rows` isn't necessarily initialized...
+      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+      const char* field_nm_char = CHAR(field_nm);
+      if (strcmp(key_char, field_nm_char) < 0) {
+        // path.replace(*key_names_ptr);
+        key_names_ptr++; key_index++;
+        continue;
+      }
+
+      // field_name does not occur in keys
+      // TODO store unused field_name somewhere?
+      field_index++;
+    }
+
+    return(0);
+  }
+
 public:
-  Parser_Object_List(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_ = R_NilValue)
+  Parser_Object_List(SEXP keys_,
+                     std::vector<Collector_Ptr>& col_vec_,
+                     std::string input_form_,
+                     SEXP names_col_ = R_NilValue)
     : Multi_Collector(keys_, col_vec_)
+  , input_form(input_form_)
   , names_col(names_col_)
   , has_names_col(!Rf_isNull(names_col_))
   { }
@@ -782,40 +1222,117 @@ public:
   inline SEXP parse(SEXP object_list, Path& path) {
     LOG_DEBUG;
 
-    R_xlen_t n_rows = short_vec_size(object_list);
-    this->init(n_rows);
+    if (this->input_form == "colmajor") {
+      LOG_DEBUG << "colmajor";
 
-    if (Rf_inherits(object_list, "data.frame")) {
-      SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
-      int* slice_index_int_ptr = INTEGER(slice_index_int);
+      const R_xlen_t n_fields = short_vec_size(object_list);
 
-      for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
-        path.replace(row_index);
-        *slice_index_int_ptr = row_index + 1;
-        this->add_value(PROTECT(vec_slice_impl2(object_list, slice_index_int)), path);
+      if (n_fields == 0) {
+        R_xlen_t n_rows (0);
+        this->init(n_rows);
+        return this->get_data(object_list, n_rows);
+      }
+
+      const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+      SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+      if (field_names == R_NilValue) stop_names_is_null(path);
+
+      const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+      // update order
+      static const int INDEX_SIZE = 256;
+      int ind[INDEX_SIZE];
+
+      R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
+      // TODO
+      // this->check_names(field_names_ptr, n_fields, path);
+
+      R_xlen_t n_rows = get_n_rows(object_list, ind);
+
+      const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+
+      path.down();
+      this->init(n_rows);
+
+      int key_index = 0;
+      for (int field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
+        LOG_DEBUG << "iteration:" << field_index;
+
+        SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+        if (field_nm == *key_names_ptr) {
+          path.replace(*key_names_ptr);
+          SEXP field = ptr_field[ind[field_index]];
+
+          (*this->collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
+          key_names_ptr++; key_index++;
+          field_index++;
+          continue;
+        }
+
+        const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
+        const char* field_nm_char = CHAR(field_nm);
+        if (strcmp(key_char, field_nm_char) < 0) {
+          path.replace(*key_names_ptr);
+          (*this->collector_vec[key_index]).add_default_colmajor(true, path);
+          key_names_ptr++; key_index++;
+          continue;
+        }
+
+        // field_name does not occur in keys
+        // TODO store unused field_name somewhere?
+        field_index++;
+      }
+
+
+      // TODO this could be more efficient with memcopy?
+      for (; key_index < this->n_keys; key_index++) {
+        path.replace(*key_names_ptr);
+        // memset(INTEGER(out), 0, n * sizeof(int));
+        for (R_xlen_t row = 0; row < n_rows; row++) {
+          (*this->collector_vec[key_index]).add_default_colmajor(true, path);
+        }
+        key_names_ptr++;
+      }
+
+      path.up();
+      return this->get_data(object_list, n_rows);
+
+    } else if (input_form == "rowmajor") {
+      R_xlen_t n_rows = short_vec_size(object_list);
+      this->init(n_rows);
+
+      if (Rf_inherits(object_list, "data.frame")) {
+        SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
+        int* slice_index_int_ptr = INTEGER(slice_index_int);
+
+        for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+          path.replace(row_index);
+          *slice_index_int_ptr = row_index + 1;
+          this->add_value(PROTECT(vec_slice_impl2(object_list, slice_index_int)), path);
+          UNPROTECT(1);
+        }
+        UNPROTECT(1);
+      } else if (vec_is_list(object_list)) {
+        const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
+        for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+          path.replace(row_index);
+          this->add_value(ptr_row[row_index], path);
+        }
+      } else {
+        SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
+        int* slice_index_int_ptr = INTEGER(slice_index_int);
+
+        for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+          path.replace(row_index);
+          *slice_index_int_ptr = row_index + 1;
+          this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
+          UNPROTECT(1);
+        }
         UNPROTECT(1);
       }
-      UNPROTECT(1);
-    } else if (vec_is_list(object_list)) {
-      const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
-      for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
-        path.replace(row_index);
-        this->add_value(ptr_row[row_index], path);
-      }
-    } else {
-      SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
-      int* slice_index_int_ptr = INTEGER(slice_index_int);
-
-      for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
-        path.replace(row_index);
-        *slice_index_int_ptr = row_index + 1;
-        this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
-        UNPROTECT(1);
-      }
-      UNPROTECT(1);
+      return this->get_data(object_list, n_rows);
     }
 
-    return this->get_data(object_list, n_rows);
+    cpp11::stop("Unexpected input form");
   }
 };
 
@@ -841,12 +1358,14 @@ public:
 class Collector_List_Of_Tibble : public Collector_Base {
 private:
   const std::unique_ptr<Parser_Object_List> parser_ptr;
+  const std::string input_form;
 
 public:
   Collector_List_Of_Tibble(SEXP keys_, std::vector<Collector_Ptr>& col_vec_, SEXP names_col_,
-                           bool required_, int& col_location_, SEXP name_)
+                           bool required_, int& col_location_, SEXP name_, std::string input_form_)
     : Collector_Base(required_, col_location_, name_,  Field_Args())
-  , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, names_col_)))
+  , parser_ptr(std::unique_ptr<Parser_Object_List>(new Parser_Object_List(keys_, col_vec_, input_form_, names_col_)))
+  , input_form(input_form_)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -870,7 +1389,8 @@ public:
 };
 
 std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_list,
-                                                              bool vector_allows_empty_list) {
+                                                              bool vector_allows_empty_list,
+                                                              std::string input_form) {
   LOG_DEBUG;
 
   cpp11::writable::strings keys;
@@ -883,7 +1403,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     if (type == "sub") {
       cpp11::list sub_spec = elt["spec"];
-      auto spec_pair = parse_fields_spec(sub_spec, vector_allows_empty_list);
+      auto spec_pair = parse_fields_spec(sub_spec, vector_allows_empty_list, input_form);
       col_vec.push_back(Collector_Ptr(new Collector_Same_Key(spec_pair.first, spec_pair.second)));
       continue;
     }
@@ -894,12 +1414,12 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     if (type == "row") {
       cpp11::list fields = elt["fields"];
-      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list);
+      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);
       col_vec.push_back(Collector_Ptr(new Collector_Tibble(spec_pair.first, spec_pair.second, required, location, name)));
       continue;
     } else if (type == "df") {
       cpp11::list fields = elt["fields"];
-      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list);
+      auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);
 
       cpp11::sexp names_col = elt["names_col"];
       if (!Rf_isNull(names_col)) {
@@ -908,7 +1428,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
       col_vec.push_back(
         Collector_Ptr(
-          new Collector_List_Of_Tibble(spec_pair.first, spec_pair.second, names_col, required, location, name)
+          new Collector_List_Of_Tibble(spec_pair.first, spec_pair.second, names_col, required, location, name, input_form)
         )
       );
       continue;
@@ -968,14 +1488,16 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec) {
   cpp11::r_string type = cpp11::strings(spec_list["type"])[0];
 
   bool vector_allows_empty_list = cpp11::r_bool(cpp11::logicals(spec_list["vector_allows_empty_list"])[0]);
-  auto spec_pair = parse_fields_spec(spec_list["fields"], vector_allows_empty_list);
+  std::string input_form = cpp11::r_string(cpp11::strings(spec_list["input_form"])[0]);
+  auto spec_pair = parse_fields_spec(spec_list["fields"], vector_allows_empty_list, input_form);
+
   if (type == "df") {
     cpp11::sexp names_col = spec_list["names_col"];
     if (!Rf_isNull(names_col)) {
       names_col = cpp11::strings(names_col)[0];
     }
 
-    return Parser_Object_List(spec_pair.first, spec_pair.second, names_col).parse(object_list, path);
+    return Parser_Object_List(spec_pair.first, spec_pair.second, input_form, names_col).parse(object_list, path);
   } else if (type == "row" || type == "object") {
     // `path.up()` is needed because `parse()` assumes a list of objects and
     // directly uses `path.down()`

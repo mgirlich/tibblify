@@ -869,3 +869,80 @@ test_that("spec_replace_unspecified works", {
     )
   )
 })
+
+# colmajor ----------------------------------------------------------------
+
+test_that("colmajor works", {
+  tib_cm <- function(x, col) {
+    tibblify(
+      list(x = x),
+      spec_df(x = col, .input_form = "colmajor")
+    )
+  }
+
+  # scalar fields works
+  expect_equal(
+    tib_cm(1:3, tib_int("x")),
+    tibble(x = 1:3)
+  )
+
+  # scalar fields with transform works
+  expect_equal(
+    tib_cm(1:3, tib_chr("x", ptype_inner = integer(), transform = ~ letters[.x])),
+    tibble(x = letters[1:3])
+  )
+
+  # non-base scalar fields work
+  # TODO
+  # expect_equal(
+  #   tib_cm(new_rational(1, 1:3), tib_scalar("x", new_rational())),
+  #   tibble(x = 1:3)
+  # )
+
+  # vector fields works
+  expect_equal(
+    tib_cm(list(1:2, NULL, 3), tib_int_vec("x")),
+    tibble(x = list_of(1:2, NULL, 3))
+  )
+
+  # variant works
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  expect_equal(
+    tib_cm(list(1:2, "a", model), tib_variant("x")),
+    tibble(x = list(1:2, "a", model))
+  )
+
+  # row works
+  expect_equal(
+    tib_cm(
+      list(int = 1:2, chr_vec = list("a", c("b", "c"))),
+      tib_row("x", tib_int("int"), tib_chr_vec("chr_vec"))
+    ),
+    tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
+  )
+
+  # TODO
+  # nested row works
+  expect_equal(
+    tib_cm(
+      list(row = list(int = 1:2, chr_vec = list("a", c("b", "c")))),
+      tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec")))
+    ),
+    tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
+  )
+
+  expect_equal(
+    tib_cm(
+      list(
+        list(int = 1:2),
+        list(int = NULL)
+      ),
+      tib_df("x", tib_int("int"))
+    ),
+    # TODO should this be NULL?
+    tibble(x = list_of(tibble(int = 1:2), tibble(int = integer())))
+  )
+
+  # TODO missing fields
+  # TODO extra fields
+})
