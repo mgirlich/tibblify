@@ -635,6 +635,52 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
   return df;
 }
 
+R_xlen_t get_n_rows(SEXP object_list,
+                    const std::vector<Collector_Ptr>& collector_vec,
+                    int ind[],
+                    SEXP keys,
+                    int n_keys) {
+  const SEXP* key_names_ptr = STRING_PTR_RO(keys);
+  SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+  const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+
+  R_xlen_t n_rows;
+  const R_xlen_t n_fields = short_vec_size(object_list);
+  const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+
+  int key_index = 0;
+  int field_index = 0;
+
+  for (field_index = 0; (field_index < n_fields) && (key_index < n_keys); ) {
+    LOG_DEBUG << "iteration:" << field_index;
+
+    SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+    if (field_nm == *key_names_ptr) {
+      SEXP field = ptr_field[ind[field_index]];
+
+      if ((*collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
+        LOG_DEBUG << "found rows: " << n_rows;
+        return(n_rows);
+      }
+      key_names_ptr++; key_index++;
+      field_index++;
+      continue;
+    }
+
+    const char* key_char = CHAR(*key_names_ptr);
+    const char* field_nm_char = CHAR(field_nm);
+    if (strcmp(key_char, field_nm_char) < 0) {
+      key_names_ptr++; key_index++;
+      continue;
+    }
+
+    // field_name does not occur in keys
+    field_index++;
+  }
+
+  return(0);
+}
+
 class Multi_Collector {
 private:
   cpp11::strings field_names_prev;
@@ -974,7 +1020,30 @@ public:
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
     LOG_DEBUG;
 
-    return(Multi_Collector::colmajor_nrows(value, n_rows));
+    if (Rf_isNull(value)) {
+      return(false);
+    }
+
+    SEXP field_names = Rf_getAttrib(value, R_NamesSymbol);
+    // TODO should this check if no names?
+    // if (field_names == R_NilValue) stop_names_is_null(path);
+
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    R_xlen_t n_fields = short_vec_size(value);
+    // update order
+    static const int INDEX_SIZE = 256;
+    int ind[INDEX_SIZE];
+
+    R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
+
+    n_rows = get_n_rows(value,
+                        this->collector_vec,
+                        ind,
+                        this->keys,
+                        this->n_keys);
+
+    return(true);
+    // return(Multi_Collector::colmajor_nrows(value, n_rows));
   }
 
   inline void add_value(SEXP object, Path& path) {
@@ -1032,48 +1101,6 @@ private:
     return(out);
   }
 
-  R_xlen_t get_n_rows(SEXP object_list, int ind[]) {
-    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
-    SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-
-    R_xlen_t n_rows;
-    const R_xlen_t n_fields = short_vec_size(object_list);
-    const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
-
-    int key_index = 0;
-    int field_index = 0;
-
-    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
-      LOG_DEBUG << "iteration:" << field_index;
-
-      SEXPREC* field_nm = field_names_ptr[ind[field_index]];
-      if (field_nm == *key_names_ptr) {
-        SEXP field = ptr_field[ind[field_index]];
-
-        if ((*this->collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
-          LOG_DEBUG << "found rows: " << n_rows;
-          return(n_rows);
-        }
-        key_names_ptr++; key_index++;
-        field_index++;
-        continue;
-      }
-
-      const char* key_char = CHAR(*key_names_ptr);
-      const char* field_nm_char = CHAR(field_nm);
-      if (strcmp(key_char, field_nm_char) < 0) {
-        key_names_ptr++; key_index++;
-        continue;
-      }
-
-      // field_name does not occur in keys
-      field_index++;
-    }
-
-    return(0);
-  }
-
   R_xlen_t parse_colmajor(SEXP object_list, Path& path) {
     LOG_DEBUG;
 
@@ -1085,7 +1112,6 @@ private:
       return(n_rows);
     }
 
-    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
     if (field_names == R_NilValue) stop_names_is_null(path);
 
@@ -1098,9 +1124,9 @@ private:
     // TODO
     // this->check_names(field_names_ptr, n_fields, path);
 
-    R_xlen_t n_rows = get_n_rows(object_list, ind);
-
+    R_xlen_t n_rows = get_n_rows(object_list, this->collector_vec, ind, this->keys, this->n_keys);
     const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
 
     path.down();
     this->init(n_rows);

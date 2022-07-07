@@ -921,14 +921,13 @@ test_that("colmajor works", {
     tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
   )
 
-  # TODO
   # nested row works
   expect_equal(
     tib_cm(
       list(row = list(int = 1:2, chr_vec = list("a", c("b", "c")))),
       tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec")))
     ),
-    tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
+    tibble(x = tibble(row = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c")))))
   )
 
   expect_equal(
