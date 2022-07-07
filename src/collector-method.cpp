@@ -114,7 +114,7 @@ public:
     LOG_DEBUG;
 
     if (short_vec_size(value) != n_rows) {
-      stop_colmajor_wrong_size_element(path);
+      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
     }
 
     const SEXP* ptr_field = VECTOR_PTR_RO(value);
@@ -365,7 +365,7 @@ public:
     }
 
     if (short_vec_size(value) != n_rows) {
-      stop_colmajor_wrong_size_element(path);
+      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
     }
 
     this->data = vec_cast(value, this->ptype_inner);
@@ -600,8 +600,8 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (n_rows != short_vec_size(this->data)) {
-      stop_colmajor_wrong_size_element(path);
+    if (n_rows != short_vec_size(value)) {
+      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
     }
 
     this->data = value;

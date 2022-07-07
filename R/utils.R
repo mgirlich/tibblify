@@ -77,10 +77,10 @@ stop_vector_wrong_size_element <- function(path, input_form) {
   cli::cli_abort(msg)
 }
 
-stop_colmajor_wrong_size_element <- function(path, input_form) {
+stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
   path_str <- path_to_string(path)
   msg <- c(
-    "Field at path {path_str} has incorrect size.",
+    "Field at path {path_str} has size {.val {size_act}}, not size {.val {size_exp}}.",
     i = 'For {.code input_form = "colmajor"} each field must have the same size.'
   )
   cli::cli_abort(msg)

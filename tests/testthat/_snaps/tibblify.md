@@ -215,3 +215,43 @@
       Error in `stop_required()`:
       ! Required element absent at path [[2]]$x.
 
+# colmajor works
+
+    Code
+      (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[]]$y.
+    Code
+      (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
+    Output
+      <error/rlang_error>
+      Error in `stop_required()`:
+      ! Required element absent at path [[]]$x$y.
+
+# colmajor checks size
+
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
+    Output
+      <error/rlang_error>
+      Error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y has size 3, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
+        x = 1:3))))
+    Output
+      <error/rlang_error>
+      Error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y$x has size 3, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = 1:3)))
+    Output
+      <error/rlang_error>
+      Error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y has size 3, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
+

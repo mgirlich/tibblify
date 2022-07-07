@@ -55,8 +55,11 @@ inline void stop_vector_wrong_size_element(const Path& path, vector_input_form i
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_colmajor_wrong_size_element(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_colmajor_wrong_size_element"),
-                               PROTECT(path.data())));
+inline void stop_colmajor_wrong_size_element(const Path& path, R_xlen_t size_exp, R_xlen_t size_act) {
+  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_colmajor_wrong_size_element"),
+                               PROTECT(path.data()),
+                               cpp11::as_sexp(size_exp),
+                               // cpp11::integers{size_exp},
+                               cpp11::as_sexp(size_act)));
   Rf_eval(call, tibblify_ns_env);
 }

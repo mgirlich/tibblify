@@ -961,13 +961,13 @@ test_that("colmajor works", {
       ),
       list(
         list(row = list(int = 1:2), df = list(list(df_int = 1), list(df_int = 3:4))),
-        list(row = list(int = 3), df = NULL)
+        list(row = list(int = 3), df = list(list()))
       )
     ),
     # TODO should this be NULL?
     tibble(x = list_of(
       tibble(row = tibble(int = 1:2), df = list_of(tibble(df_int = 1), tibble(df_int = 3:4))),
-      tibble(row = tibble(int = 3))
+      tibble(row = tibble(int = 3), df = list_of(tibble(df_int = integer())))
     ))
   )
 
