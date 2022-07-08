@@ -1145,6 +1145,19 @@ public:
     LOG_DEBUG;
 
     if (this->input_form == "colmajor") {
+      SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+      const R_xlen_t n_fields = Rf_length(field_names);
+      if (field_names == R_NilValue) stop_names_is_null(path);
+
+      const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+      // update order
+      static const int INDEX_SIZE = 256;
+      int ind[INDEX_SIZE];
+
+      R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
+
+      check_names_impl(field_names_ptr, ind, n_fields, path);
+
       R_xlen_t n_rows = get_n_rows(object_list, this->collector_vec, this->keys, this->n_keys);
       this->init(n_rows);
 
