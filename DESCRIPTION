@@ -18,9 +18,7 @@ Depends:
     R (>= 3.4.0)
 Imports: 
     cli (>= 3.3.0),
-    cpp11 (>= 0.4.2),
     lifecycle,
-    plogr,
     purrr,
     rlang (>= 1.0.3),
     tibble,
@@ -34,7 +32,7 @@ Suggests:
     spelling,
     testthat (>= 3.1.4)
 LinkingTo: 
-    cpp11,
+    cpp11 (>= 0.4.2),
     plogr,
     vctrs (>= 0.4.1)
 VignetteBuilder: 
