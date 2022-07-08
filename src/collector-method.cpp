@@ -706,7 +706,8 @@ R_xlen_t get_n_rows(SEXP object_list,
     field_index++;
   }
 
-  return(0);
+  // TODO better error
+  cpp11::stop("Could not determine number of rows.");
 }
 
 void parse_colmajor_impl(SEXP object_list,

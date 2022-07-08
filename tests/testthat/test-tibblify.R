@@ -946,7 +946,7 @@ test_that("colmajor works", {
       tib_df("x", tib_int("int")),
       list(
         list(int = 1:2),
-        list(int = NULL)
+        list(int = integer())
       )
     ),
     # TODO should this be NULL?
