@@ -5,6 +5,9 @@
 #' to a one row tibble resp. a list.
 #'
 #' @param ... Column specification created by `tib_*()` or `spec_*()`.
+#' @param .input_form The input form of data frame like lists. Can be one of:
+#'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.
+#'   * `"colmajor"`: The data frame is a named list of columns.
 #' @param .names_to A string giving the name of the column which will contain
 #'   the names of elements of the object list. If `NULL`, the default, no name
 #'   column is created
