@@ -883,7 +883,7 @@ test_that("spec_replace_unspecified works", {
 
 # colmajor ----------------------------------------------------------------
 
-test_that("names are checked", {
+test_that("colmajor: names are checked", {
   spec <- spec_cm(x = tib_int("x", required = FALSE))
 
   expect_snapshot({

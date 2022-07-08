@@ -113,6 +113,10 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
+    if (TYPEOF(value) != VECSXP) {
+      stop_colmajor_non_list_element(path);
+    }
+
     if (short_vec_size(value) != n_rows) {
       stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
     }
@@ -1045,8 +1049,9 @@ public:
     }
 
     if (TYPEOF(value) != VECSXP) {
-      // TODO better error message
-      cpp11::stop("Element must be a list, not a ...");
+      // TODO should pass along path?
+      Path path;
+      stop_colmajor_non_list_element(path);
     }
 
     n_rows = get_n_rows(value,

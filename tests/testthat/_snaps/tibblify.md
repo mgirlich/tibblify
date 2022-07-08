@@ -274,7 +274,9 @@
     Code
       (expect_error(tib_cm(tib_row("x"), 1:3)))
     Output
-      <simpleError: Element must be a list, not a ...>
+      <error/rlang_error>
+      Error in `stop_colmajor_non_list_element()`:
+      ! Element at path [[]] must be a list.
 
 ---
 

@@ -86,6 +86,12 @@ stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
   cli::cli_abort(msg)
 }
 
+stop_colmajor_non_list_element <- function(path) {
+  path_str <- path_to_string(path)
+  msg <- 'Element at path {path_str} must be a list.'
+  cli::cli_abort(msg)
+}
+
 vec_flatten <- function(x, ptype) {
   vctrs::vec_unchop(x, ptype = ptype)
 }

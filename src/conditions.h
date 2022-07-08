@@ -63,3 +63,9 @@ inline void stop_colmajor_wrong_size_element(const Path& path, R_xlen_t size_exp
                                cpp11::as_sexp(size_act)));
   Rf_eval(call, tibblify_ns_env);
 }
+
+inline void stop_colmajor_non_list_element(const Path& path) {
+  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_colmajor_non_list_element"),
+                               PROTECT(path.data())));
+  Rf_eval(call, tibblify_ns_env);
+}
