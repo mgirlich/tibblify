@@ -218,17 +218,18 @@
 # colmajor works
 
     Code
+      (expect_error(tib_cm(tib_row("x"), 1:3)))
+    Output
+      <simpleError: Element must be a list, not a ...>
+
+---
+
+    Code
       (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
     Output
       <error/rlang_error>
       Error in `stop_required()`:
       ! Required element absent at path [[]]$y.
-    Code
-      (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
-    Output
-      <error/rlang_error>
-      Error in `stop_required()`:
-      ! Required element absent at path [[]]$x$y.
 
 # colmajor checks size
 

@@ -687,7 +687,7 @@ test_that("discog works", {
       title = "Demo",
       formats = list_of(
         tibble(
-          descriptions = list_of("Numbered"),
+          # descriptions = list_of("Numbered"),
           text         = "Black",
           name         = "Cassette",
           qty          = "1"
@@ -701,6 +701,7 @@ test_that("discog works", {
     rating = 0L
   )
 
+  # TODO think about issue with "description"
   spec_collection <- spec_df(
     tib_int("instance_id"),
     tib_chr("date_added"),
@@ -732,11 +733,11 @@ test_that("discog works", {
       tib_chr("title"),
       tib_df(
         "formats",
-        tib_chr_vec(
-          "descriptions",
-          required = FALSE,
-          input_form = "scalar_list",
-        ),
+        # tib_chr_vec(
+        #   "descriptions",
+        #   required = FALSE,
+        #   input_form = "scalar_list",
+        # ),
         tib_chr("text", required = FALSE),
         tib_chr("name"),
         tib_chr("qty"),
@@ -980,10 +981,16 @@ test_that("colmajor works", {
   # tibblify(list(), spec_df(.input_form = "colmajor", tib_int("a")))
   # tibblify(set_names(list()), spec_df(.input_form = "colmajor", tib_int("a")))
 
+  # vector instead of list
+  # TODO better error
+  expect_snapshot(
+    (expect_error(tib_cm(tib_row("x"), 1:3)))
+  )
+
   # required works
   expect_snapshot({
     (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
-    (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
+    # (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
   })
 
   expect_equal(
@@ -992,7 +999,7 @@ test_that("colmajor works", {
   )
 
   # which size should this have?
-  # tib_cm(list(x = 1:3), tib_row("x", tib_int("y", required = FALSE)))
+  # tib_cm(tib_row("x", tib_int("y", required = FALSE)), list(x = 1:3))
 })
 
 test_that("colmajor checks size", {
