@@ -1,3 +1,10 @@
+test_that("spec argument is checked", {
+  expect_snapshot({
+    (expect_error(tibblify(list(), "x")))
+    (expect_error(tibblify(list(), tib_int("x"))))
+  })
+})
+
 test_that("names are checked", {
   spec <- spec_object(x = tib_int("x", required = FALSE))
 

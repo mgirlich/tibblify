@@ -45,6 +45,12 @@ tibblify <- function(x,
     unspecified <- unspecified %||% "list"
   }
 
+  if (!inherits(spec, "spec_tib")) {
+    friendly_type <- obj_type_friendly(spec)
+    msg <- "{.arg spec} must be a tibblify spec, not {friendly_type}."
+    cli::cli_abort(msg)
+  }
+
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
   spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
   out <- tibblify_impl(x, spec)
