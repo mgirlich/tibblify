@@ -717,9 +717,9 @@ void parse_colmajor(SEXP object_list,
   path.down();
   int key_index = 0;
   for (int field_index = 0; (field_index < n_fields) && (key_index < n_keys); ) {
-    LOG_DEBUG << "iteration:" << field_index;
-
     SEXPREC* field_nm = field_names_ptr[ind[field_index]];
+    LOG_DEBUG << "field: " << CHAR(field_nm);
+
     if (field_nm == *key_names_ptr) {
       path.replace(*key_names_ptr);
       SEXP field = ptr_field[ind[field_index]];
