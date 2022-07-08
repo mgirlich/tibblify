@@ -5,6 +5,9 @@ test_that("spec argument is checked", {
   })
 })
 
+
+# rowmajor ----------------------------------------------------------------
+
 test_that("names are checked", {
   spec <- spec_object(x = tib_int("x", required = FALSE))
 
@@ -880,6 +883,26 @@ test_that("spec_replace_unspecified works", {
 
 # colmajor ----------------------------------------------------------------
 
+test_that("names are checked", {
+  spec <- spec_cm(x = tib_int("x", required = FALSE))
+
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(1, 2), spec)))
+
+    # partial names
+    (expect_error(tibblify(list(x = 1, 2), spec)))
+    (expect_error(tibblify(list(1, x = 2), spec)))
+    (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+
+    # `NA` name
+    (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+
+    # duplicate name
+    (expect_error(tibblify(list(x = 1, x = 2), spec)))
+  })
+})
+
 test_that("colmajor works", {
   tib_cm <- function(col, x, ...) {
     tibblify(
@@ -1025,6 +1048,6 @@ test_that("colmajor checks size", {
   expect_snapshot({
     (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
     (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(x = 1:3))))
-    (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = 1:3)))
+    (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
   })
 })

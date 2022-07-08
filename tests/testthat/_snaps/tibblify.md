@@ -52,6 +52,45 @@
       Error in `stop_duplicate_name()`:
       ! Element at path <root> has duplicate name "x".
 
+---
+
+    Code
+      (expect_error(tibblify(list(1, 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_names_is_null()`:
+      ! Element at path [[]] has `NULL` names.
+    Code
+      (expect_error(tibblify(list(x = 1, 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 1.
+    Code
+      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 3.
+    Code
+      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(x = 1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_duplicate_name()`:
+      ! Element at path [[]] has duplicate name "x".
+
 # scalar column works
 
     Code
@@ -264,10 +303,10 @@
       ! Field at path [[]]$y$x has size 3, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
     Code
-      (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = 1:3)))
+      (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
     Output
       <error/rlang_error>
       Error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y has size 3, not size 2.
+      ! Field at path [[]]$y has size 1, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
 
