@@ -664,7 +664,6 @@ R_xlen_t get_n_rows(SEXP object_list,
 
   if (n_fields == 0) {
     R_xlen_t n_rows (0);
-    // this->init(n_rows);
     return(n_rows);
   }
 
@@ -847,8 +846,6 @@ public:
     for (const Collector_Ptr& collector : this->collector_vec) {
       (*collector).init(length);
     }
-
-    LOG_DEBUG;
   }
 
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
@@ -1141,6 +1138,12 @@ public:
   , has_names_col(!Rf_isNull(names_col_))
   { }
 
+  inline SEXP get_ptype() {
+    R_xlen_t n_rows = 0;
+    this->init(n_rows);
+    return(collector_vec_to_df(std::move(this->collector_vec), n_rows, 0));
+  }
+
   inline SEXP parse(SEXP object_list, Path& path) {
     LOG_DEBUG;
 
@@ -1233,8 +1236,7 @@ public:
     LOG_DEBUG;
 
     Collector_Base::init(length);
-    Path path;
-    SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_named_list, path);
+    SEXP ptype = (*this->parser_ptr).get_ptype();
     set_list_of_attributes(this->data, ptype);
   }
 
