@@ -28,6 +28,7 @@ extern SEXP tibblify_shared_empty_dbl;
 extern SEXP tibblify_shared_empty_chr;
 // extern SEXP tibblify_shared_empty_raw;
 extern SEXP tibblify_shared_empty_list;
+extern SEXP tibblify_shared_empty_named_list;
 // extern SEXP tibblify_shared_empty_date;
 // extern SEXP tibblify_shared_empty_uns;
 
