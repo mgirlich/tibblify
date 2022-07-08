@@ -629,11 +629,6 @@ test_that("empty spec works", {
     tibble()
   )
 
-  tibblify(
-    list(list(x = list()), list(x = list())),
-    spec_df(x = tib_row("x", a = tib_int("a", required = FALSE)))
-  )
-
   expect_equal(
     tibblify(
       list(list(x = list()), list(x = list())),
@@ -884,7 +879,7 @@ test_that("spec_replace_unspecified works", {
 # colmajor ----------------------------------------------------------------
 
 test_that("colmajor: names are checked", {
-  spec <- spec_cm(x = tib_int("x", required = FALSE))
+  spec <- spec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
 
   expect_snapshot({
     # no names
@@ -957,14 +952,14 @@ test_that("colmajor: record objects work", {
   x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
 
   expect_equal(
-    tib_cm(tib_scalar("x", ptype = x_rcrd), c(x_rcrd, x_rcrd + 1)),
+    tib_cm(tib_scalar("x", ptype = x_rcrd), x = c(x_rcrd, x_rcrd + 1)),
     tibble(x = c(x_rcrd, x_rcrd + 1))
   )
 
   now <- Sys.time()
   td <- now - (now - c(100, 200))
   expect_equal(
-    tib_cm(tib_scalar("x", ptype = td[1]), td),
+    tib_cm(tib_scalar("x", ptype = td[1]), x = td),
     tibble(x = td)
   )
 })
@@ -975,22 +970,22 @@ test_that("colmajor: scalar columns respect ptype_inner", {
     as.Date(x)
   }
 
-  x <- c("2022-06-01", "2022-06-02", "2000-01-01")
+  dates <- c("2022-06-01", "2022-06-02")
   expect_equal(
     tib_cm(
       tib_scalar("x", Sys.Date(), ptype_inner = character(), transform = f),
-      x
+      x = dates
     ),
-    tibble(x = as.Date(x))
+    tibble(x = as.Date(dates))
   )
 
-  x <- as.POSIXct("2022-06-02") + c(-60, 60)
+  date_times <- as.POSIXct("2022-06-02") + c(-60, 60)
   expect_equal(
     tib_cm(
       tib_scalar("x", Sys.Date(), ptype_inner = Sys.time(), transform = as.Date),
-      x
+      x = date_times
     ),
-    tibble(x = as.Date(x))
+    tibble(x = as.Date(date_times))
   )
 })
 
@@ -1036,7 +1031,7 @@ test_that("colmajor: vector column works", {
 test_that("list column works", {
   # can parse
   expect_equal(
-    tib_cm(tib_variant("x"), list(TRUE, 1)),
+    tib_cm(tib_variant("x"), x = list(TRUE, 1)),
     tibble(x = list(TRUE, 1))
   )
 
@@ -1044,53 +1039,67 @@ test_that("list column works", {
   expect_equal(
     tib_cm(
       tib_variant("x", required = FALSE, transform = ~ length(.x)),
-      list(c(TRUE, FALSE), 1)
+      x = list(c(TRUE, FALSE), 1)
     ),
     tibble(x = list(2, 1))
   )
 })
 
-
-test_that("colmajor works", {
-  spec_cm <- function(...) {
-    spec_df(.input_form = "colmajor", ...)
-  }
-
-  # variant works
-  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
-  expect_equal(
-    tib_cm(tib_variant("x"), list(1:2, "a", model)),
-    tibble(x = list(1:2, "a", model))
-  )
-
-  # row works
+test_that("row works", {
+  # can parse
   expect_equal(
     tib_cm(
-      tib_row("x", tib_int("int"), tib_chr_vec("chr_vec")),
-      list(int = 1:2, chr_vec = list("a", c("b", "c")))
+      tib_row("x", a = tib_lgl("a")),
+      x = list(a = c(TRUE, FALSE))
     ),
-    tibble(x = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c"))))
+    tibble(x = tibble(a = c(TRUE, FALSE)))
   )
 
   # nested row works
   expect_equal(
     tib_cm(
       tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec"))),
-      list(row = list(int = 1:2, chr_vec = list("a", c("b", "c"))))
+      x = list(row = list(int = 1:2, chr_vec = list("a", c("b", "c"))))
     ),
     tibble(x = tibble(row = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c")))))
   )
 
-  # df works
+  skip("Unclear if required and default makes sense for colmajor")
+  # errors if required but absent
+  expect_snapshot(
+    (expect_error(tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list()
+      ),
+      spec_df(x = tib_row("x", a = tib_lgl("a")))
+    )))
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+    ),
+    tibble(x = tibble(a = c(TRUE, NA, NA)))
+  )
+})
+
+test_that("list of df column works", {
+  # can parse
   expect_equal(
     tib_cm(
       tib_df("x", tib_int("int")),
-      list(
+      x = list(
         list(int = 1:2),
         list(int = integer())
       )
     ),
-    # TODO should this be NULL?
     tibble(x = list_of(tibble(int = 1:2), tibble(int = integer())))
   )
 
@@ -1101,7 +1110,7 @@ test_that("colmajor works", {
         "x",
         tib_row("row", tib_int("int")), tib_df("df", tib_int("df_int"))
       ),
-      list(
+      x = list(
         list(row = list(int = 1:2), df = list(list(df_int = 1), list(df_int = 3:4))),
         list(row = list(int = 3), df = list(NULL))
         # TODO should this be able to handle an empty unnamed list?
@@ -1114,34 +1123,92 @@ test_that("colmajor works", {
     ))
   )
 
-  # TODO what should happen if no required variable was found?
-  # TODO these two should show the same behaviour...
-  # tibblify(list(b = 1:3), spec_df(.input_form = "colmajor", tib_int("c")))
-  # tibblify(list(b = 1:3), spec_df(.input_form = "colmajor", tib_int("a")))
-
-  # TODO what should happen for an empty list? probably just error
-  # tibblify(list(), spec_df(.input_form = "colmajor", tib_int("a")))
-  # tibblify(set_names(list()), spec_df(.input_form = "colmajor", tib_int("a")))
-
-  # vector instead of list
-  # TODO better error
+  skip("Unclear if required and default makes sense for colmajor")
+  # errors if required but absent
   expect_snapshot(
-    (expect_error(tib_cm(tib_row("x"), 1:3)))
+    (expect_error(tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list()
+      ),
+      spec_df(x = tib_df("x", a = tib_lgl("a")))
+    )))
   )
 
-  # required works
-  expect_snapshot({
-    (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
-    # (expect_error(tib_cm(tib_row("x", tib_int("y")), list(x = 1:3))))
-  })
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+    ),
+    tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
+  )
+})
+
+test_that("tibble with list columns work - #43", {
+  skip("currently crashes")
+  # TODO
+  x <- tibble::tibble(x = list(1:3, NULL, 1:2))
+  expect_equal(
+    tibblify(x, spec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
+    tibble(x = list_of(1:3, NULL, 1:2))
+  )
+
+  y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
+  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
+  expect_equal(
+    tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
+    tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
+  )
+})
+
+test_that("nested keys work", {
+  skip("nested keys don't (yet?) work for colmajor")
+  # TODO
+  expect_equal(
+    tibblify(
+      list(x = list(y = list(z = 1))),
+      spec_df(xyz = tib_int(c("x", "y", "z")), .input_form = "colmajor")
+    ),
+    tibble(xyz = 1)
+  )
+})
+
+test_that("empty spec works", {
+  expect_equal(
+    tibblify(
+      set_names(list()),
+      spec_df(.input_form = "colmajor")
+    ),
+    tibble()
+  )
 
   expect_equal(
-    tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y", required = FALSE))),
-    tibble(x = 1:3, y = NA_integer_)
+    tibblify(
+      list(x = set_names(list())),
+      spec_df(x = tib_row("x"), .input_form = "colmajor")
+    ),
+    tibble(x = tibble(.rows = 0), .rows = 0)
   )
+})
 
-  # which size should this have?
-  # tib_cm(tib_row("x", tib_int("y", required = FALSE)), list(x = 1:3))
+test_that("errors if n_rows cannot be calculated", {
+  expect_snapshot({
+    # after key in alphabet
+    (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
+    # before key in alphabet
+    (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
+  })
 })
 
 test_that("colmajor checks size", {

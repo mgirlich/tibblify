@@ -52,45 +52,6 @@
       Error in `stop_duplicate_name()`:
       ! Element at path <root> has duplicate name "x".
 
----
-
-    Code
-      (expect_error(tibblify(list(1, 2), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_names_is_null()`:
-      ! Element at path [[]] has `NULL` names.
-    Code
-      (expect_error(tibblify(list(x = 1, 2), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_empty_name()`:
-      ! Element at path [[]] has empty name at position 2.
-    Code
-      (expect_error(tibblify(list(1, x = 2), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_empty_name()`:
-      ! Element at path [[]] has empty name at position 1.
-    Code
-      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_empty_name()`:
-      ! Element at path [[]] has empty name at position 3.
-    Code
-      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_empty_name()`:
-      ! Element at path [[]] has empty name at position 2.
-    Code
-      (expect_error(tibblify(list(x = 1, x = 2), spec)))
-    Output
-      <error/rlang_error>
-      Error in `stop_duplicate_name()`:
-      ! Element at path [[]] has duplicate name "x".
-
 # scalar column works
 
     Code
@@ -269,23 +230,88 @@
       Error in `stop_required()`:
       ! Required element absent at path [[2]]$x.
 
-# colmajor works
+# colmajor: names are checked
 
     Code
-      (expect_error(tib_cm(tib_row("x"), 1:3)))
+      (expect_error(tibblify(list(1, 2), spec)))
     Output
       <error/rlang_error>
-      Error in `stop_colmajor_non_list_element()`:
-      ! Element at path [[]] must be a list.
+      Error in `stop_names_is_null()`:
+      ! Element at path [[]] has `NULL` names.
+    Code
+      (expect_error(tibblify(list(x = 1, 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 1.
+    Code
+      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 3.
+    Code
+      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_empty_name()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(x = 1, x = 2), spec)))
+    Output
+      <error/rlang_error>
+      Error in `stop_duplicate_name()`:
+      ! Element at path [[]] has duplicate name "x".
+
+# colmajor: scalar column works
+
+    Code
+      (expect_error(tib_cm(x = "a", tib_lgl("x"))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <character> to <logical>.
 
 ---
 
     Code
-      (expect_error(tibblify(list(x = 1:3), spec_cm(tib_int("x"), tib_int("y")))))
+      (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <double> to <datetime<local>>.
+
+# colmajor: vector column works
+
+    Code
+      (expect_error(tib_cm(tib_lgl_vec("x"), x = "a")))
     Output
       <error/rlang_error>
-      Error in `stop_required()`:
-      ! Required element absent at path [[]]$y.
+      Error in `stop_colmajor_non_list_element()`:
+      ! Element at path [[]]$x must be a list.
+    Code
+      (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
+    Output
+      <error/vctrs_error_incompatible_type>
+      Error:
+      ! Can't convert <character> to <logical>.
+
+# errors if n_rows cannot be calculated
+
+    Code
+      (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
+    Output
+      <simpleError: Could not determine number of rows.>
+    Code
+      (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
+    Output
+      <simpleError: Could not determine number of rows.>
 
 # colmajor checks size
 

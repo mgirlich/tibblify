@@ -25,7 +25,7 @@ tib <- function(x, col) {
   )
 }
 
-tib_cm <- function(x, ..., y = NULL) {
+tib_cm <- function(..., x, y = NULL) {
   if (is_null(y)) {
     object_list <- list(x = x)
   } else {
