@@ -1,3 +1,18 @@
+# spec argument is checked
+
+    Code
+      (expect_error(tibblify(list(), "x")))
+    Output
+      <error/rlang_error>
+      Error in `tibblify()`:
+      ! `spec` must be a tibblify spec, not a string.
+    Code
+      (expect_error(tibblify(list(), tib_int("x"))))
+    Output
+      <error/rlang_error>
+      Error in `tibblify()`:
+      ! `spec` must be a tibblify spec, not a <tib_scalar_integer/tib_scalar/tib_collector> object.
+
 # names are checked
 
     Code
