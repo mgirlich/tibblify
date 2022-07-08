@@ -1117,10 +1117,10 @@ private:
   void parse_colmajor(SEXP object_list, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (n_rows == 0) {
-      this->init(n_rows);
-      return;
-    }
+    // if (n_rows == 0) {
+    //   this->init(n_rows);
+    //   return;
+    // }
 
     parse_colmajor_impl(object_list,
                        this->keys,
