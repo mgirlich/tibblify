@@ -608,7 +608,11 @@ public:
       stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
     }
 
-    this->data = value;
+    if (Rf_isNull(this->transform)) {
+      this->data = value;
+    } else {
+      Collector_Base::add_value_colmajor(value, n_rows, path);
+    }
   }
 };
 

@@ -903,47 +903,158 @@ test_that("colmajor: names are checked", {
   })
 })
 
-test_that("colmajor works", {
-  tib_cm <- function(col, x, ...) {
-    tibblify(
-      list(x = x, ...),
-      spec_df(x = col, .input_form = "colmajor")
-    )
+test_that("colmajor: scalar column works", {
+  dtt <- vctrs::new_datetime(1)
+
+  # can parse
+  expect_equal(tib_cm(x = TRUE, tib_lgl("x")), tibble(x = TRUE))
+  expect_equal(tib_cm(x = dtt, tib_scalar("x", dtt)), tibble(x = dtt))
+
+  # errors if required but absent
+  # expect_snapshot((expect_error(tib2(x = 1:3, tib_lgl("y")))))
+
+  # errors if bad type
+  expect_snapshot((expect_error(tib_cm(x = "a", tib_lgl("x")))))
+  expect_snapshot((expect_error(tib_cm(x = 1, tib_scalar("x", dtt)))))
+
+  # transform works
+  expect_equal(
+    tib_cm(x = TRUE, tib_lgl("x", transform = ~ !.x)),
+    tibble(x = FALSE)
+  )
+  expect_equal(
+    tib_cm(x = dtt, tib_scalar("x", dtt, transform = ~ .x + 1)),
+    tibble(x = vctrs::new_datetime(2))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # fallback default works
+  expect_equal(
+    tib2(x = 1:2, tib_int("x"), tib_lgl("y", required = FALSE)),
+    tibble(x = 1:2, y = NA)
+  )
+  expect_equal(
+    tib2(x = 1:2, tib_int("x"), tib_scalar("y", dtt, required = FALSE)),
+    tibble(x = 1:2, y = vctrs::new_datetime(NA_real_))
+  )
+
+  # use NA if NULL
+  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = NA))
+  expect_equal(
+    tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
+    tibble(x = vec_init(dtt))
+  )
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
+  expect_equal(
+    tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
+    tibble(x = dtt)
+  )
+})
+
+test_that("colmajor: record objects work", {
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+
+  expect_equal(
+    tib_cm(tib_scalar("x", ptype = x_rcrd), c(x_rcrd, x_rcrd + 1)),
+    tibble(x = c(x_rcrd, x_rcrd + 1))
+  )
+
+  now <- Sys.time()
+  td <- now - (now - c(100, 200))
+  expect_equal(
+    tib_cm(tib_scalar("x", ptype = td[1]), td),
+    tibble(x = td)
+  )
+})
+
+test_that("colmajor: scalar columns respect ptype_inner", {
+  f <- function(x) {
+    stopifnot(is.character(x))
+    as.Date(x)
   }
 
+  x <- c("2022-06-01", "2022-06-02", "2000-01-01")
+  expect_equal(
+    tib_cm(
+      tib_scalar("x", Sys.Date(), ptype_inner = character(), transform = f),
+      x
+    ),
+    tibble(x = as.Date(x))
+  )
+
+  x <- as.POSIXct("2022-06-02") + c(-60, 60)
+  expect_equal(
+    tib_cm(
+      tib_scalar("x", Sys.Date(), ptype_inner = Sys.time(), transform = as.Date),
+      x
+    ),
+    tibble(x = as.Date(x))
+  )
+})
+
+test_that("colmajor: vector column works", {
+  dtt <- vctrs::new_datetime(1)
+
+  # can parse
+  expect_equal(tib_cm(tib_lgl_vec("x"), x = list(c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib_cm(tib_vector("x", dtt), x = list(c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+
+  # errors if required but absent
+  # expect_snapshot((expect_error(tib_cm(tib_lgl_vec("x"), list()))))
+  # expect_snapshot((expect_error(tib_cm(tib_vector("x", dtt), list()))))
+
+  # errors if bad type
+  expect_snapshot({
+    # not a list
+    (expect_error(tib_cm(tib_lgl_vec("x"), x = "a")))
+    # list of bad types
+    (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
+  })
+
+  # transform works
+  expect_equal(
+    tib_cm(tib_lgl_vec("x", transform = ~ !.x), x = list(c(TRUE, FALSE))),
+    tibble(x = list_of(c(FALSE, TRUE)))
+  )
+  expect_equal(
+    tib_cm(tib_vector("x", dtt, transform = ~ .x + 1), x = list(c(dtt - 1, dtt))),
+    tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # fallback default works
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE)), tibble(x = list_of(NULL, .ptype = logical())))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE)), tibble(x = list_of(NULL, .ptype = vctrs::new_datetime())))
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, fill = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, fill = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+})
+
+test_that("list column works", {
+  # can parse
+  expect_equal(
+    tib_cm(tib_variant("x"), list(TRUE, 1)),
+    tibble(x = list(TRUE, 1))
+  )
+
+  # transform works
+  expect_equal(
+    tib_cm(
+      tib_variant("x", required = FALSE, transform = ~ length(.x)),
+      list(c(TRUE, FALSE), 1)
+    ),
+    tibble(x = list(2, 1))
+  )
+})
+
+
+test_that("colmajor works", {
   spec_cm <- function(...) {
     spec_df(.input_form = "colmajor", ...)
   }
-
-  # scalar fields works
-  expect_equal(
-    tib_cm(tib_int("x"), 1:3),
-    tibble(x = 1:3)
-  )
-
-  # scalar fields with transform works
-  expect_equal(
-    tib_cm(tib_chr("x", ptype_inner = integer(), transform = ~ letters[.x]), 1:3),
-    tibble(x = letters[1:3])
-  )
-
-  # non-base scalar fields work
-  expect_equal(
-    tib_cm(tib_scalar("x", vctrs::new_date()), vctrs::new_date(1:3 + 0.0)),
-    tibble(x = vctrs::new_date(1:3 + 0.0))
-  )
-
-  # record scalars work
-  expect_equal(
-    tib_cm(tib_scalar("x", new_rational()), new_rational(1, 1:3)),
-    tibble(x = new_rational(1, 1:3))
-  )
-
-  # vector fields works
-  expect_equal(
-    tib_cm(tib_int_vec("x"), list(1:2, NULL, 3)),
-    tibble(x = list_of(1:2, NULL, 3))
-  )
 
   # variant works
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
