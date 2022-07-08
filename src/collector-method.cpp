@@ -697,10 +697,10 @@ void parse_colmajor(SEXP object_list,
                     Path& path) {
   LOG_DEBUG;
 
-  const R_xlen_t n_fields = short_vec_size(object_list);
   //  TODO what if 0 fields?
 
   SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
+  const R_xlen_t n_fields = Rf_length(field_names);
   if (field_names == R_NilValue) stop_names_is_null(path);
 
   const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
