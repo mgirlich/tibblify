@@ -64,6 +64,12 @@ test_that("errors if `.names_to` column name is not unique", {
   expect_snapshot((expect_error(spec_df(x = tib_int("x"), .names_to = "x"))))
 })
 
+test_that("errors if `.names_to` is used with colmajor", {
+  expect_snapshot({
+    (expect_error(spec_df(.names_to = "x", .input_form = "colmajor")))
+  })
+})
+
 
 # tib_* -------------------------------------------------------------------
 

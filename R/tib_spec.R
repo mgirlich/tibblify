@@ -45,9 +45,7 @@ spec_df <- function(...,
                     .names_to = NULL,
                     vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
-  if (!is_null(.names_to)) {
-    check_string(.names_to, what = "a single string or `NULL`")
-  }
+  check_names_to(.names_to, .input_form)
 
   out <- spec_tib(
     list2(...),
@@ -62,6 +60,16 @@ spec_df <- function(...,
   }
 
   out
+}
+
+check_names_to <- function(.names_to, input_form, call = caller_env()) {
+  if (!is_null(.names_to)) {
+    if (input_form == "colmajor") {
+      msg <- 'Cannot use {.arg .names_to} for {.code .input_form = "colmajor"}.'
+      cli::cli_abort(msg, call = call)
+    }
+    check_string(.names_to, what = "a single string or `NULL`", call = call)
+  }
 }
 
 #' @rdname spec_df
