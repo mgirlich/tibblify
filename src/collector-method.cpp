@@ -630,6 +630,27 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
   return df;
 }
 
+inline void check_names_impl(const SEXP* field_names_ptr,
+                             const int ind[],
+                             const int n_fields,
+                             const Path& path) {
+  LOG_DEBUG;
+
+  // this relies on the fields already being in order
+  if (n_fields <= 1) return;
+
+  SEXPREC* field_nm = field_names_ptr[ind[0]];
+  if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[0]);
+
+  for (int field_index = 1; field_index < n_fields; field_index++) {
+    SEXPREC* field_nm_prev = field_nm;
+    field_nm = field_names_ptr[ind[field_index]];
+    if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
+
+    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[field_index]);
+  }
+}
+
 R_xlen_t get_n_rows(SEXP object_list,
                     const std::vector<Collector_Ptr>& collector_vec,
                     SEXP keys,
@@ -689,16 +710,17 @@ R_xlen_t get_n_rows(SEXP object_list,
   return(0);
 }
 
-void parse_colmajor(SEXP object_list,
-                    SEXP keys,
-                    int n_keys,
-                    R_xlen_t& n_rows,
-                    std::vector<Collector_Ptr>& collector_vec,
-                    Path& path) {
+void parse_colmajor_impl(SEXP object_list,
+                         SEXP keys,
+                         int n_keys,
+                         R_xlen_t& n_rows,
+                         std::vector<Collector_Ptr>& collector_vec,
+                         Path& path) {
   LOG_DEBUG;
 
   //  TODO what if 0 fields?
 
+  // TODO duplicated code -> `check_names()` etc
   SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
   const R_xlen_t n_fields = Rf_length(field_names);
   if (field_names == R_NilValue) stop_names_is_null(path);
@@ -784,19 +806,7 @@ private:
   inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
     LOG_DEBUG;
 
-    // this relies on the fields already being in order
-    if (n_fields <= 1) return;
-
-    SEXPREC* field_nm = field_names_ptr[this->ind[0]];
-    if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[0]);
-
-    for (int field_index = 1; field_index < n_fields; field_index++) {
-      SEXPREC* field_nm_prev = field_nm;
-      field_nm = field_names_ptr[this->ind[field_index]];
-      if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
-
-      if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, this->ind[field_index]);
-    }
+    check_names_impl(field_names_ptr, this->ind, n_fields, path);
   }
 
 protected:
@@ -930,12 +940,12 @@ public:
   inline void add_value_colmajor(SEXP object_list, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    parse_colmajor(object_list,
-                   this->keys,
-                   this->n_keys,
-                   n_rows,
-                   this->collector_vec,
-                   path);
+    parse_colmajor_impl(object_list,
+                        this->keys,
+                        this->n_keys,
+                        n_rows,
+                        this->collector_vec,
+                        path);
   }
 };
 
@@ -1104,25 +1114,20 @@ private:
     return(out);
   }
 
-  void parse_colmajor_impl(SEXP object_list, R_xlen_t& n_rows, Path& path) {
+  void parse_colmajor(SEXP object_list, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-   if (n_rows == 0) {
-     this->init(n_rows);
-     return;
-   }
-   // if (n_fields == 0) {
-   //   R_xlen_t n_rows (0);
-   //   this->init(n_rows);
-   //   return(n_rows);
-   // }
+    if (n_rows == 0) {
+      this->init(n_rows);
+      return;
+    }
 
-    parse_colmajor(object_list,
-                   this->keys,
-                   this->n_keys,
-                   n_rows,
-                   this->collector_vec,
-                   path);
+    parse_colmajor_impl(object_list,
+                       this->keys,
+                       this->n_keys,
+                       n_rows,
+                       this->collector_vec,
+                       path);
   }
 
 public:
@@ -1143,7 +1148,7 @@ public:
       R_xlen_t n_rows = get_n_rows(object_list, this->collector_vec, this->keys, this->n_keys);
       this->init(n_rows);
 
-      this->parse_colmajor_impl(object_list, n_rows, path);
+      this->parse_colmajor(object_list, n_rows, path);
       return this->get_data(object_list, n_rows);
     } else if (input_form == "rowmajor") {
       R_xlen_t n_rows = short_vec_size(object_list);
@@ -1152,7 +1157,7 @@ public:
 
       if (Rf_inherits(object_list, "data.frame")) {
         LOG_DEBUG << "===== Start parsing colmajor ======";
-        this->parse_colmajor_impl(object_list, n_rows, path);
+        this->parse_colmajor(object_list, n_rows, path);
         return this->get_data(object_list, n_rows);
       } else if (vec_is_list(object_list)) {
         const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
@@ -1216,7 +1221,7 @@ public:
 
     Collector_Base::init(length);
     Path path;
-    SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_list, path);
+    SEXP ptype = (*this->parser_ptr).parse(tibblify_shared_empty_named_list, path);
     set_list_of_attributes(this->data, ptype);
   }
 
