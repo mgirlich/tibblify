@@ -1,7 +1,10 @@
 #ifndef TIBBLIFY_UTILS_H
 #define TIBBLIFY_UTILS_H
 
+#include <vector>
+
 #include <cpp11.hpp>
+#include <plogr.h>
 #include "tibblify.h"
 
 enum vector_input_form {vector, scalar_list, object};
@@ -147,6 +150,65 @@ SEXP vec_slice_impl2(SEXP x, SEXP index) {
 
   UNPROTECT(1);
   return(row);
+}
+
+inline
+std::vector<int> order_chr(SEXP x) {
+  const int n = Rf_length(x);
+  std::vector<int> out;
+  out.reserve(n);
+  R_orderVector1(out.data(), n, x, FALSE, FALSE);
+  return(out);
+}
+
+inline
+std::vector<int> match_chr(SEXP needles_sorted, SEXP haystack) {
+  LOG_DEBUG;
+
+  // CAREFUL: this assumes needles to be sorted!
+  const SEXP* needles_ptr = STRING_PTR_RO(needles_sorted);
+  const SEXP* haystack_ptr = STRING_PTR_RO(haystack);
+
+  auto haystack_ind = order_chr(haystack);
+  const R_xlen_t n_needles = Rf_length(needles_sorted);
+  const R_xlen_t n_haystack = Rf_length(haystack);
+
+  std::vector<int> indices;
+  indices.reserve(n_needles);
+
+  int i = 0;
+  int j = 0;
+  for (i = 0; (i < n_needles) && (j < n_haystack); ) {
+    SEXPREC* hay = haystack_ptr[haystack_ind[j]];
+    LOG_DEBUG << "needle: " << CHAR(*needles_ptr) << " - hay: " << CHAR(hay);
+
+    if (*needles_ptr == hay) {
+      indices[i] = haystack_ind[j];
+      needles_ptr++;
+      i++; j++;
+      continue;
+    }
+
+    const char* needle_char = CHAR(*needles_ptr);
+    const char* hay_char = CHAR(hay);
+    // needle is too small, so go to next needle
+    if (strcmp(needle_char, hay_char) < 0) {
+      LOG_DEBUG << "needle too small";
+      // needle not found in haystack
+      indices[i] = -1;
+      needles_ptr++; i++;
+    } else {
+      LOG_DEBUG << "hay too small";
+      j++;
+    }
+  }
+
+  // mark remaining needles as not found
+  for (; i < n_needles; i++) {
+    indices[i] = -1;
+  }
+
+  return(indices);
 }
 
 #endif

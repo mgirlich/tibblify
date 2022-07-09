@@ -645,7 +645,7 @@ inline void check_names_impl(const SEXP* field_names_ptr,
   LOG_DEBUG;
 
   // this relies on the fields already being in order
-  if (n_fields <= 1) return;
+  if (n_fields == 0) return;
 
   SEXPREC* field_nm = field_names_ptr[ind[0]];
   if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[0]);
@@ -659,11 +659,14 @@ inline void check_names_impl(const SEXP* field_names_ptr,
   }
 }
 
+// TODO should rename to `object_get_n_rows()` or something like this...
 R_xlen_t get_n_rows(SEXP object_list,
                     const std::vector<Collector_Ptr>& collector_vec,
                     SEXP keys,
                     int n_keys) {
   LOG_DEBUG;
+
+  // CAREFUL this relies on the keys being sorted
 
   // TODO check if list
 
@@ -675,43 +678,23 @@ R_xlen_t get_n_rows(SEXP object_list,
     return(n_rows);
   }
 
-  const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-
-  // update order
-  static const int INDEX_SIZE = 256;
-  int ind[INDEX_SIZE];
-  R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-
   R_xlen_t n_rows;
-  const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+  auto key_match_ind = match_chr(keys, field_names);
+  const SEXP* field_ptr = VECTOR_PTR_RO(object_list);
 
-  const SEXP* key_names_ptr = STRING_PTR_RO(keys);
-  int key_index = 0;
-  for (int field_index = 0; (field_index < n_fields) && (key_index < n_keys); ) {
-    LOG_DEBUG << "iteration:" << field_index;
+  for (int key_index = 0; key_index < n_keys; key_index++) {
+    int loc = key_match_ind[key_index];
+    LOG_DEBUG << "match loc: " << loc << " - " << CHAR(STRING_ELT(keys, key_index));
 
-    SEXPREC* field_nm = field_names_ptr[ind[field_index]];
-    if (field_nm == *key_names_ptr) {
-      SEXP field = ptr_field[ind[field_index]];
-
-      if ((*collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
-        LOG_DEBUG << "found rows: " << n_rows;
-        return(n_rows);
-      }
-      key_names_ptr++; key_index++;
-      field_index++;
+    if (loc < 0) {
       continue;
     }
 
-    const char* key_char = CHAR(*key_names_ptr);
-    const char* field_nm_char = CHAR(field_nm);
-    if (strcmp(key_char, field_nm_char) < 0) {
-      key_names_ptr++; key_index++;
-      continue;
+    SEXP field = field_ptr[loc];
+    if ((*collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
+      LOG_DEBUG << "found rows: " << n_rows;
+      return(n_rows);
     }
-
-    // field_name does not occur in keys
-    field_index++;
   }
 
   // TODO better error
@@ -728,57 +711,27 @@ void parse_colmajor_impl(SEXP object_list,
 
   //  TODO what if 0 fields?
 
-  // TODO duplicated code -> `check_names()` etc
   SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-  const R_xlen_t n_fields = Rf_length(field_names);
+  // TODO `check_names()`
   if (field_names == R_NilValue) stop_names_is_null(path);
 
-  const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-  // update order
-  static const int INDEX_SIZE = 256;
-  int ind[INDEX_SIZE];
-
-  R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-  // TODO this->check_names(field_names_ptr, n_fields, path);
-
-  const SEXP* ptr_field = VECTOR_PTR_RO(object_list);
+  auto key_match_ind = match_chr(keys, field_names);
+  const SEXP* field_ptr = VECTOR_PTR_RO(object_list);
   const SEXP* key_names_ptr = STRING_PTR_RO(keys);
 
   path.down();
-  int key_index = 0;
-  for (int field_index = 0; (field_index < n_fields) && (key_index < n_keys); ) {
-    SEXPREC* field_nm = field_names_ptr[ind[field_index]];
-    LOG_DEBUG << "field: " << CHAR(field_nm);
-
-    if (field_nm == *key_names_ptr) {
-      path.replace(*key_names_ptr);
-      SEXP field = ptr_field[ind[field_index]];
-
-      (*collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
-      key_names_ptr++; key_index++;
-      field_index++;
-      continue;
-    }
-
-    const char* key_char = CHAR(*key_names_ptr);
-    const char* field_nm_char = CHAR(field_nm);
-    if (strcmp(key_char, field_nm_char) < 0) {
-      path.replace(*key_names_ptr);
-      (*collector_vec[key_index]).add_default_colmajor(true, path);
-      key_names_ptr++; key_index++;
-      continue;
-    }
-
-    // field_name does not occur in keys
-      field_index++;
-  }
-
-  for (; key_index < n_keys; key_index++) {
+  for (int key_index = 0; key_index < n_keys; key_index++, key_names_ptr++) {
     path.replace(*key_names_ptr);
-    (*collector_vec[key_index]).add_default_colmajor(true, path);
-    key_names_ptr++;
-  }
+    int loc = key_match_ind[key_index];
+    LOG_DEBUG << "key: " << CHAR(*key_names_ptr);
 
+    if (loc < 0) {
+      (*collector_vec[key_index]).add_default_colmajor(true, path);
+    } else {
+      SEXP field = field_ptr[loc];
+      (*collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
+    }
+  }
   path.up();
 }
 
@@ -788,6 +741,7 @@ private:
   int n_fields_prev = 0;
   static const int INDEX_SIZE = 256;
   int ind[INDEX_SIZE];
+  std::vector<int> key_match_ind;
 
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     LOG_DEBUG << "n_fields: " << n_fields;
@@ -797,8 +751,12 @@ private:
     if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
     const SEXP* nms_ptr = STRING_PTR_RO(field_names);
     const SEXP* nms_ptr_prev = STRING_PTR_RO(this->field_names_prev);
-    for (int i = 0; i < n_fields; i++, nms_ptr++, nms_ptr_prev++)
-      if (*nms_ptr != *nms_ptr_prev) return true;
+    for (int i = 0; i < n_fields & i < this->n_fields_prev; i++, nms_ptr++, nms_ptr_prev++) {
+      LOG_DEBUG << i << " - " << CHAR(*nms_ptr) << " - " << CHAR(*nms_ptr_prev);
+      if (*nms_ptr != *nms_ptr_prev) {
+        return true;
+      }
+    }
 
     return false;
   }
@@ -808,12 +766,15 @@ private:
 
     this->n_fields_prev = n_fields;
     this->field_names_prev = field_names;
-    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
+    this->key_match_ind = match_chr(this->keys, field_names);
   }
 
-  inline void check_names(const SEXP* field_names_ptr, const int n_fields, const Path& path) {
+  inline void check_names(SEXP field_names, const int n_fields, const Path& path) {
     LOG_DEBUG;
 
+    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
+    // TODO use `order_chr()`?
+    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
     check_names_impl(field_names_ptr, this->ind, n_fields, path);
   }
 
@@ -837,9 +798,8 @@ public:
     LOG_DEBUG;
 
     int n_keys = Rf_length(keys_);
+    // TODO should use `order_chr()`?
     R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
-    this->n_fields_prev = Rf_length(keys_);
-    this->field_names_prev = keys_;
 
     this->keys = Rf_allocVector(STRSXP, n_keys);
     for(int i = 0; i < n_keys; i++) {
@@ -847,6 +807,8 @@ public:
       SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
       this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
     }
+
+    this->update_order(keys_, n_keys);
   }
 
   inline void init(R_xlen_t& length) {
@@ -893,53 +855,31 @@ public:
     if (field_names == R_NilValue) stop_names_is_null(path);
 
     const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
     // only update `ind` if necessary as `R_orderVector1()` is pretty slow
     if (fields_have_changed) {
+      LOG_DEBUG << "field have changed";
       this->update_order(field_names, n_fields);
-      this->check_names(field_names_ptr, n_fields, path);
+      this->check_names(field_names, n_fields, path);
     }
 
     // TODO VECTOR_PTR_RO only works if object is a list
     const SEXP* values_ptr = VECTOR_PTR_RO(object);
 
-    // The manual loop is quite a bit faster than the range based loop
     path.down();
-    int key_index = 0;
-    int field_index = 0;
-    for (field_index = 0; (field_index < n_fields) && (key_index < this->n_keys); ) {
-      LOG_DEBUG << field_index;
+    for (int key_index = 0; key_index < this->n_keys; key_index++) {
+      int loc = this->key_match_ind[key_index];
+      SEXPREC* cur_key = key_names_ptr[key_index];
+      LOG_DEBUG << "match loc: " << loc << " - " << CHAR(cur_key);
+      path.replace(cur_key);
 
-      SEXPREC* field_nm = field_names_ptr[this->ind[field_index]];
-
-      if (field_nm == *key_names_ptr) {
-        path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_value(values_ptr[this->ind[field_index]], path);
-        key_names_ptr++; key_index++;
-        field_index++;
-        continue;
-      }
-
-      const char* key_char = CHAR(*key_names_ptr); // TODO might be worth caching
-      const char* field_nm_char = CHAR(field_nm);
-      if (strcmp(key_char, field_nm_char) < 0) {
-        path.replace(*key_names_ptr);
+      if (loc < 0) {
         (*this->collector_vec[key_index]).add_default(true, path);
-        key_names_ptr++; key_index++;
-        continue;
+      } else {
+        LOG_DEBUG << " - " << CHAR(STRING_ELT(field_names, loc));
+        auto cur_value = values_ptr[loc];
+        (*this->collector_vec[key_index]).add_value(cur_value, path);
       }
-
-      // field_name does not occur in keys
-      // TODO store unused field_name somewhere?
-      field_index++;
     }
-
-    for (; key_index < this->n_keys; key_index++) {
-      path.replace(*key_names_ptr);
-      (*this->collector_vec[key_index]).add_default(true, path);
-      key_names_ptr++;
-    }
-
     path.up();
   }
 
