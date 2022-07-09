@@ -92,8 +92,8 @@ stop_colmajor_non_list_element <- function(path) {
   cli::cli_abort(msg)
 }
 
-vec_flatten <- function(x, ptype) {
-  vctrs::vec_unchop(x, ptype = ptype)
+vec_flatten <- function(x, ptype, name_spec = zap()) {
+  vctrs::vec_unchop(x, ptype = ptype, name_spec = name_spec)
 }
 
 list_drop_null <- function(x) {

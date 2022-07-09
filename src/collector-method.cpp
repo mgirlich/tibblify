@@ -423,8 +423,6 @@ private:
     LOG_DEBUG;
 
     if (Rf_isNull(values_to_)) {
-      LOG_DEBUG << "NULL";
-
       return(NULL);
     }
 
@@ -514,24 +512,22 @@ public:
       }
     }
 
-    SEXP names;
-    if (this->uses_names_col || this->input_form == vector_input_form::object) {
-      names = Rf_getAttrib(value, R_NamesSymbol);
-    }
-
+    SEXP names = Rf_getAttrib(value, R_NamesSymbol);
     if (this->input_form == vector_input_form::scalar_list || this->input_form == vector_input_form::object) {
-      // FIXME should check with `vec_is_list()`
+      // FIXME should check with `vec_is_list()`?
       if (TYPEOF(value) != VECSXP) {
         stop_vector_non_list_element(path, this->input_form);
       }
 
-      if (this->input_form == vector_input_form::object) {
-        if (Rf_isNull(names)) {
-          stop_object_vector_names_is_null(path);
-        }
+      if (Rf_isNull(names) && this->input_form == vector_input_form::object) {
+        stop_object_vector_names_is_null(path);
       }
 
       value = unchop_value(value, path);
+    }
+
+    if (Rf_isNull(names)) {
+      names = na_chr(vec_size(value));
     }
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
@@ -542,17 +538,7 @@ public:
       cpp11::writable::list df = init_out_df(size);
 
       if (this->uses_names_col) {
-        // this can only be if `input_form == object` so no need to check
-        if (Rf_isNull(names)) {
-          // TODO unclear what to do in such a case
-          auto names2 = cpp11::writable::strings(size);
-          for (int i = 0; i < size; i++) {
-            names2[i] = cpp11::na<cpp11::r_string>();
-          }
-          df[0] = names2;
-        } else {
-          df[0] = names;
-        }
+        df[0] = names;
         df[1] = value_casted;
       } else {
         df[0] = value_casted;
@@ -624,14 +610,12 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
   return df;
 }
 
-// TODO this should simply take `field_names` instead of a ptr
 inline void check_names(const SEXP field_names,
                         const int ind[],
                         const int n_fields,
                         const Path& path) {
   LOG_DEBUG;
 
-  // this relies on the fields already being in order
   if (n_fields == 0) return;
 
   const SEXP* field_names_ptr = STRING_PTR_RO(field_names);

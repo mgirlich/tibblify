@@ -211,4 +211,14 @@ std::vector<int> match_chr(SEXP needles_sorted, SEXP haystack) {
   return(indices);
 }
 
+inline
+cpp11::writable::strings na_chr(R_xlen_t n) {
+  auto out = cpp11::writable::strings(n);
+  for (int i = 0; i < n; i++) {
+    out[i] = NA_STRING;
+  }
+
+  return(out);
+}
+
 #endif
