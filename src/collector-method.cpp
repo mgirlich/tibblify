@@ -638,15 +638,17 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
   return df;
 }
 
-inline void check_names_impl(const SEXP* field_names_ptr,
-                             const int ind[],
-                             const int n_fields,
-                             const Path& path) {
+// TODO this should simply take `field_names` instead of a ptr
+inline void check_names(const SEXP field_names,
+                        const int ind[],
+                        const int n_fields,
+                        const Path& path) {
   LOG_DEBUG;
 
   // this relies on the fields already being in order
   if (n_fields == 0) return;
 
+  const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
   SEXPREC* field_nm = field_names_ptr[ind[0]];
   if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[0]);
 
@@ -659,11 +661,10 @@ inline void check_names_impl(const SEXP* field_names_ptr,
   }
 }
 
-// TODO should rename to `object_get_n_rows()` or something like this...
-R_xlen_t get_n_rows(SEXP object_list,
-                    const std::vector<Collector_Ptr>& collector_vec,
-                    SEXP keys,
-                    int n_keys) {
+R_xlen_t get_collector_vec_rows(SEXP object_list,
+                                const std::vector<Collector_Ptr>& collector_vec,
+                                SEXP keys,
+                                const int& n_keys) {
   LOG_DEBUG;
 
   // CAREFUL this relies on the keys being sorted
@@ -703,7 +704,7 @@ R_xlen_t get_n_rows(SEXP object_list,
 
 void parse_colmajor_impl(SEXP object_list,
                          SEXP keys,
-                         int n_keys,
+                         const int& n_keys,
                          R_xlen_t& n_rows,
                          std::vector<Collector_Ptr>& collector_vec,
                          Path& path) {
@@ -743,6 +744,21 @@ private:
   int ind[INDEX_SIZE];
   std::vector<int> key_match_ind;
 
+  inline void update_fields(SEXP field_names, const int& n_fields, Path& path) {
+    const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
+    // only update `ind` if necessary as `R_orderVector1()` is pretty slow
+    if (!fields_have_changed) {
+      return;
+    }
+
+    LOG_DEBUG << "field have changed";
+    this->update_order(field_names, n_fields);
+
+    // TODO use `order_chr()`?
+    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
+    check_names(field_names, this->ind, n_fields, path);
+  }
+
   inline bool have_fields_changed(SEXP field_names, const int& n_fields) const {
     LOG_DEBUG << "n_fields: " << n_fields;
 
@@ -751,7 +767,8 @@ private:
     if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
     const SEXP* nms_ptr = STRING_PTR_RO(field_names);
     const SEXP* nms_ptr_prev = STRING_PTR_RO(this->field_names_prev);
-    for (int i = 0; i < n_fields & i < this->n_fields_prev; i++, nms_ptr++, nms_ptr_prev++) {
+    const int n = std::max(n_fields, this->n_fields_prev);
+    for (int i = 0; i < n; i++, nms_ptr++, nms_ptr_prev++) {
       LOG_DEBUG << i << " - " << CHAR(*nms_ptr) << " - " << CHAR(*nms_ptr_prev);
       if (*nms_ptr != *nms_ptr_prev) {
         return true;
@@ -767,15 +784,6 @@ private:
     this->n_fields_prev = n_fields;
     this->field_names_prev = field_names;
     this->key_match_ind = match_chr(this->keys, field_names);
-  }
-
-  inline void check_names(SEXP field_names, const int n_fields, const Path& path) {
-    LOG_DEBUG;
-
-    const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
-    // TODO use `order_chr()`?
-    R_orderVector1(this->ind, n_fields, field_names, FALSE, FALSE);
-    check_names_impl(field_names_ptr, this->ind, n_fields, path);
   }
 
 protected:
@@ -838,11 +846,11 @@ public:
   inline void add_value(SEXP object, Path& path) {
     LOG_DEBUG;
 
-    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     const int n_fields = Rf_length(object);
 
     if (n_fields == 0) {
       path.down();
+      const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
       for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
         path.replace(*key_names_ptr);
         (*this->collector_vec[key_index]).add_default(true, path);
@@ -854,15 +862,10 @@ public:
     SEXP field_names = Rf_getAttrib(object, R_NamesSymbol);
     if (field_names == R_NilValue) stop_names_is_null(path);
 
-    const bool fields_have_changed = this->have_fields_changed(field_names, n_fields);
-    // only update `ind` if necessary as `R_orderVector1()` is pretty slow
-    if (fields_have_changed) {
-      LOG_DEBUG << "field have changed";
-      this->update_order(field_names, n_fields);
-      this->check_names(field_names, n_fields, path);
-    }
+    this->update_fields(field_names, n_fields, path);
 
     // TODO VECTOR_PTR_RO only works if object is a list
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
     const SEXP* values_ptr = VECTOR_PTR_RO(object);
 
     path.down();
@@ -998,10 +1001,10 @@ public:
       stop_colmajor_non_list_element(path);
     }
 
-    n_rows = get_n_rows(value,
-                        this->collector_vec,
-                        this->keys,
-                        this->n_keys);
+    n_rows = get_collector_vec_rows(value,
+                                    this->collector_vec,
+                                    this->keys,
+                                    this->n_keys);
 
     return(true);
   }
@@ -1102,16 +1105,11 @@ public:
       const R_xlen_t n_fields = Rf_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
 
-      const SEXP* field_names_ptr = STRING_PTR_RO(field_names);
       // update order
-      static const int INDEX_SIZE = 256;
-      int ind[INDEX_SIZE];
+      auto ind = order_chr(field_names);
+      check_names(field_names, ind.data(), n_fields, path);
 
-      R_orderVector1(ind, n_fields, field_names, FALSE, FALSE);
-
-      check_names_impl(field_names_ptr, ind, n_fields, path);
-
-      R_xlen_t n_rows = get_n_rows(object_list, this->collector_vec, this->keys, this->n_keys);
+      R_xlen_t n_rows = get_collector_vec_rows(object_list, this->collector_vec, this->keys, this->n_keys);
       this->init(n_rows);
 
       this->parse_colmajor(object_list, n_rows, path);
