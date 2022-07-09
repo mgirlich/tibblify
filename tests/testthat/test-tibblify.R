@@ -1156,8 +1156,6 @@ test_that("list of df column works", {
 })
 
 test_that("tibble with list columns work - #43", {
-  skip("currently crashes")
-  # TODO
   x <- tibble::tibble(x = list(1:3, NULL, 1:2))
   expect_equal(
     tibblify(x, spec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
@@ -1165,7 +1163,7 @@ test_that("tibble with list columns work - #43", {
   )
 
   y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
-  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
+  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE), .input_form = "colmajor")
   expect_equal(
     tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
     tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
@@ -1173,14 +1171,21 @@ test_that("tibble with list columns work - #43", {
 })
 
 test_that("nested keys work", {
-  skip("nested keys don't (yet?) work for colmajor")
-  # TODO
+  spec <- spec_df(
+    xyz = tib_int(c("x", "y", "z")),
+    .input_form = "colmajor"
+  )
   expect_equal(
-    tibblify(
-      list(x = list(y = list(z = 1))),
-      spec_df(xyz = tib_int(c("x", "y", "z")), .input_form = "colmajor")
-    ),
+    tibblify(list(x = list(y = list(z = 1))), spec),
     tibble(xyz = 1)
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  spec2 <- spec
+  spec2$fields$xya <-tib_int(c("x", "y", "a"), required = FALSE, fill = 2)
+  expect_equal(
+    tibblify(list(x = list(y = list(z = 1))), spec2),
+    tibble(xyz = 1, xya = NA_integer_)
   )
 })
 

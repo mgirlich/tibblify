@@ -907,11 +907,10 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  // TODO
   inline void add_value_colmajor(SEXP object, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    // Multi_Collector::add_value_colmajor(object, path);
+    Multi_Collector::add_value_colmajor(object, n_rows, path);
   }
 
   inline void add_default(bool check, Path& path) {
@@ -922,7 +921,6 @@ public:
     }
   }
 
-  // TODO?
   inline void add_default_colmajor(bool check, Path& path) {
     LOG_DEBUG;
 
