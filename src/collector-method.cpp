@@ -419,20 +419,6 @@ private:
   const bool vector_allows_empty_list;
   const SEXP na;
 
-  vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
-    LOG_DEBUG;
-
-    if (input_form_ == "vector") {
-      return(vector);
-    } else if (input_form_ == "scalar_list") {
-      return(scalar_list);
-    } else if (input_form_ == "object") {
-      return(object);
-    } else{
-      cpp11::stop("Internal error.");
-    }
-  }
-
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     LOG_DEBUG;
 
