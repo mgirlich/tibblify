@@ -1238,10 +1238,9 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
 
 [[cpp11::register]]
-SEXP tibblify_impl(SEXP object_list, SEXP spec) {
+SEXP tibblify_impl(SEXP object_list, SEXP spec, cpp11::external_pointer<Path> path_ptr) {
   LOG_DEBUG;
-
-  Path path;
+  Path &path = *path_ptr;
 
   cpp11::list spec_list = spec;
   cpp11::r_string type = cpp11::strings(spec_list["type"])[0];
