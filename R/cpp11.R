@@ -4,6 +4,10 @@ tibblify_impl <- function(object_list, spec, path_ptr) {
   .Call(`_tibblify_tibblify_impl`, object_list, spec, path_ptr)
 }
 
+init_logging <- function(log_level) {
+  invisible(.Call(`_tibblify_init_logging`, log_level))
+}
+
 init_tibblify_path <- function() {
   .Call(`_tibblify_init_tibblify_path`)
 }

@@ -6,14 +6,33 @@
 \alias{spec_row}
 \title{Create a Tibblify Specification}
 \usage{
-spec_df(..., .names_to = NULL, vector_allows_empty_list = FALSE)
+spec_df(
+  ...,
+  .input_form = c("rowmajor", "colmajor"),
+  .names_to = NULL,
+  vector_allows_empty_list = FALSE
+)
 
-spec_object(..., vector_allows_empty_list = FALSE)
+spec_object(
+  ...,
+  .input_form = c("rowmajor", "colmajor"),
+  vector_allows_empty_list = FALSE
+)
 
-spec_row(..., vector_allows_empty_list = FALSE)
+spec_row(
+  ...,
+  .input_form = c("rowmajor", "colmajor"),
+  vector_allows_empty_list = FALSE
+)
 }
 \arguments{
 \item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
+
+\item{.input_form}{The input form of data frame like lists. Can be one of:
+\itemize{
+\item \code{"rowmajor"}: The default. The data frame is formed by a list of rows.
+\item \code{"colmajor"}: The data frame is a named list of columns.
+}}
 
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name

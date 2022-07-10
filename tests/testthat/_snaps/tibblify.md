@@ -1,3 +1,18 @@
+# spec argument is checked
+
+    Code
+      (expect_error(tibblify(list(), "x")))
+    Output
+      <error/rlang_error>
+      Error in `tibblify()`:
+      ! `spec` must be a tibblify spec, not a string.
+    Code
+      (expect_error(tibblify(list(), tib_int("x"))))
+    Output
+      <error/rlang_error>
+      Error in `tibblify()`:
+      ! `spec` must be a tibblify spec, not a <tib_scalar_integer/tib_scalar/tib_collector> object.
+
 # names are checked
 
     Code
@@ -224,4 +239,134 @@
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Required element absent at path [[2]]$x.
+
+# colmajor: names are checked
+
+    Code
+      (expect_error(tibblify(list(1, 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has `NULL` names.
+    Code
+      (expect_error(tibblify(list(x = 1, 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(1, x = 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has empty name at position 1.
+    Code
+      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has empty name at position 3.
+    Code
+      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has empty name at position 2.
+    Code
+      (expect_error(tibblify(list(x = 1, x = 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Element at path [[]] has duplicate name "x".
+
+# colmajor: scalar column works
+
+    Code
+      (expect_error(tib_cm(x = "a", tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$x
+      Caused by error:
+      ! Can't convert <character> to <logical>.
+
+---
+
+    Code
+      (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$x
+      Caused by error:
+      ! Can't convert <double> to <datetime<local>>.
+
+# colmajor: vector column works
+
+    Code
+      (expect_error(tib_cm(tib_lgl_vec("x"), x = "a")))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$x
+      Caused by error in `stop_colmajor_non_list_element()`:
+      ! Element at path [[]]$x must be a list.
+    Code
+      (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$x
+      Caused by error:
+      ! Can't convert <character> to <logical>.
+
+# errors if n_rows cannot be calculated
+
+    Code
+      (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]
+      Caused by error:
+      ! Could not determine number of rows.
+    Code
+      (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]
+      Caused by error:
+      ! Could not determine number of rows.
+
+# colmajor checks size
+
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$y
+      Caused by error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y has size 3, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
+        x = 1:3))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$y$x
+      Caused by error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y$x has size 3, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
+    Code
+      (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Cannot `tibblify()` field [[]]$y
+      Caused by error in `stop_colmajor_wrong_size_element()`:
+      ! Field at path [[]]$y has size 1, not size 2.
+      i For `input_form = "colmajor"` each field must have the same size.
 

@@ -1,0 +1,2 @@
+# Uncomment this to enable plogr:
+# PKG_CPPFLAGS=-DPLOGR_ENABLE

@@ -1,3 +1,13 @@
+test_that("spec argument is checked", {
+  expect_snapshot({
+    (expect_error(tibblify(list(), "x")))
+    (expect_error(tibblify(list(), tib_int("x"))))
+  })
+})
+
+
+# rowmajor ----------------------------------------------------------------
+
 test_that("names are checked", {
   spec <- spec_object(x = tib_int("x", required = FALSE))
 
@@ -619,11 +629,6 @@ test_that("empty spec works", {
     tibble()
   )
 
-  tibblify(
-    list(list(x = list()), list(x = list())),
-    spec_df(x = tib_row("x", a = tib_int("a", required = FALSE)))
-  )
-
   expect_equal(
     tibblify(
       list(list(x = list()), list(x = list())),
@@ -687,7 +692,7 @@ test_that("discog works", {
       title = "Demo",
       formats = list_of(
         tibble(
-          descriptions = list_of("Numbered"),
+          # descriptions = list_of("Numbered"),
           text         = "Black",
           name         = "Cassette",
           qty          = "1"
@@ -701,6 +706,7 @@ test_that("discog works", {
     rating = 0L
   )
 
+  # TODO think about issue with "description"
   spec_collection <- spec_df(
     tib_int("instance_id"),
     tib_chr("date_added"),
@@ -732,11 +738,11 @@ test_that("discog works", {
       tib_chr("title"),
       tib_df(
         "formats",
-        tib_chr_vec(
-          "descriptions",
-          required = FALSE,
-          input_form = "scalar_list",
-        ),
+        # tib_chr_vec(
+        #   "descriptions",
+        #   required = FALSE,
+        #   input_form = "scalar_list",
+        # ),
         tib_chr("text", required = FALSE),
         tib_chr("name"),
         tib_chr("qty"),
@@ -868,4 +874,363 @@ test_that("spec_replace_unspecified works", {
       )
     )
   )
+})
+
+# colmajor ----------------------------------------------------------------
+
+test_that("colmajor: names are checked", {
+  spec <- spec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
+
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(1, 2), spec)))
+
+    # partial names
+    (expect_error(tibblify(list(x = 1, 2), spec)))
+    (expect_error(tibblify(list(1, x = 2), spec)))
+    (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+
+    # `NA` name
+    (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+
+    # duplicate name
+    (expect_error(tibblify(list(x = 1, x = 2), spec)))
+  })
+})
+
+test_that("colmajor: scalar column works", {
+  dtt <- vctrs::new_datetime(1)
+
+  # can parse
+  expect_equal(tib_cm(x = TRUE, tib_lgl("x")), tibble(x = TRUE))
+  expect_equal(tib_cm(x = dtt, tib_scalar("x", dtt)), tibble(x = dtt))
+
+  # errors if required but absent
+  # expect_snapshot((expect_error(tib2(x = 1:3, tib_lgl("y")))))
+
+  # errors if bad type
+  expect_snapshot((expect_error(tib_cm(x = "a", tib_lgl("x")))))
+  expect_snapshot((expect_error(tib_cm(x = 1, tib_scalar("x", dtt)))))
+
+  # transform works
+  expect_equal(
+    tib_cm(x = TRUE, tib_lgl("x", transform = ~ !.x)),
+    tibble(x = FALSE)
+  )
+  expect_equal(
+    tib_cm(x = dtt, tib_scalar("x", dtt, transform = ~ .x + 1)),
+    tibble(x = vctrs::new_datetime(2))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # fallback default works
+  expect_equal(
+    tib2(x = 1:2, tib_int("x"), tib_lgl("y", required = FALSE)),
+    tibble(x = 1:2, y = NA)
+  )
+  expect_equal(
+    tib2(x = 1:2, tib_int("x"), tib_scalar("y", dtt, required = FALSE)),
+    tibble(x = 1:2, y = vctrs::new_datetime(NA_real_))
+  )
+
+  # use NA if NULL
+  expect_equal(tib(list(x = NULL), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = NA))
+  expect_equal(
+    tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
+    tibble(x = vec_init(dtt))
+  )
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
+  expect_equal(
+    tib(list(), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
+    tibble(x = dtt)
+  )
+})
+
+test_that("colmajor: record objects work", {
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+
+  expect_equal(
+    tib_cm(tib_scalar("x", ptype = x_rcrd), x = c(x_rcrd, x_rcrd + 1)),
+    tibble(x = c(x_rcrd, x_rcrd + 1))
+  )
+
+  now <- Sys.time()
+  td <- now - (now - c(100, 200))
+  expect_equal(
+    tib_cm(tib_scalar("x", ptype = td[1]), x = td),
+    tibble(x = td)
+  )
+})
+
+test_that("colmajor: scalar columns respect ptype_inner", {
+  f <- function(x) {
+    stopifnot(is.character(x))
+    as.Date(x)
+  }
+
+  dates <- c("2022-06-01", "2022-06-02")
+  expect_equal(
+    tib_cm(
+      tib_scalar("x", Sys.Date(), ptype_inner = character(), transform = f),
+      x = dates
+    ),
+    tibble(x = as.Date(dates))
+  )
+
+  date_times <- as.POSIXct("2022-06-02") + c(-60, 60)
+  expect_equal(
+    tib_cm(
+      tib_scalar("x", Sys.Date(), ptype_inner = Sys.time(), transform = as.Date),
+      x = date_times
+    ),
+    tibble(x = as.Date(date_times))
+  )
+})
+
+test_that("colmajor: vector column works", {
+  dtt <- vctrs::new_datetime(1)
+
+  # can parse
+  expect_equal(tib_cm(tib_lgl_vec("x"), x = list(c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib_cm(tib_vector("x", dtt), x = list(c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+
+  # errors if required but absent
+  # expect_snapshot((expect_error(tib_cm(tib_lgl_vec("x"), list()))))
+  # expect_snapshot((expect_error(tib_cm(tib_vector("x", dtt), list()))))
+
+  # errors if bad type
+  expect_snapshot({
+    # not a list
+    (expect_error(tib_cm(tib_lgl_vec("x"), x = "a")))
+    # list of bad types
+    (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
+  })
+
+  # transform works
+  expect_equal(
+    tib_cm(tib_lgl_vec("x", transform = ~ !.x), x = list(c(TRUE, FALSE))),
+    tibble(x = list_of(c(FALSE, TRUE)))
+  )
+  expect_equal(
+    tib_cm(tib_vector("x", dtt, transform = ~ .x + 1), x = list(c(dtt - 1, dtt))),
+    tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # fallback default works
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE)), tibble(x = list_of(NULL, .ptype = logical())))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE)), tibble(x = list_of(NULL, .ptype = vctrs::new_datetime())))
+
+  # specified default works
+  expect_equal(tib(list(), tib_lgl_vec("x", required = FALSE, fill = c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
+  expect_equal(tib(list(), tib_vector("x", dtt, required = FALSE, fill = c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
+})
+
+test_that("list column works", {
+  # can parse
+  expect_equal(
+    tib_cm(tib_variant("x"), x = list(TRUE, 1)),
+    tibble(x = list(TRUE, 1))
+  )
+
+  # transform works
+  expect_equal(
+    tib_cm(
+      tib_variant("x", required = FALSE, transform = ~ length(.x)),
+      x = list(c(TRUE, FALSE), 1)
+    ),
+    tibble(x = list(2, 1))
+  )
+})
+
+test_that("row works", {
+  # can parse
+  expect_equal(
+    tib_cm(
+      tib_row("x", a = tib_lgl("a")),
+      x = list(a = c(TRUE, FALSE))
+    ),
+    tibble(x = tibble(a = c(TRUE, FALSE)))
+  )
+
+  # nested row works
+  expect_equal(
+    tib_cm(
+      tib_row("x", tib_row("row", tib_int("int"), tib_chr_vec("chr_vec"))),
+      x = list(row = list(int = 1:2, chr_vec = list("a", c("b", "c"))))
+    ),
+    tibble(x = tibble(row = tibble(int = 1:2, chr_vec = list_of("a", c("b", "c")))))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # errors if required but absent
+  expect_snapshot(
+    (expect_error(tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list()
+      ),
+      spec_df(x = tib_row("x", a = tib_lgl("a")))
+    )))
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(a = TRUE)),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+    ),
+    tibble(x = tibble(a = c(TRUE, NA, NA)))
+  )
+})
+
+test_that("list of df column works", {
+  # can parse
+  expect_equal(
+    tib_cm(
+      tib_df("x", tib_int("int")),
+      x = list(
+        list(int = 1:2),
+        list(int = integer())
+      )
+    ),
+    tibble(x = list_of(tibble(int = 1:2), tibble(int = integer())))
+  )
+
+  # nested df works
+  expect_equal(
+    tib_cm(
+      tib_df(
+        "x",
+        tib_row("row", tib_int("int")), tib_df("df", tib_int("df_int"))
+      ),
+      x = list(
+        list(row = list(int = 1:2), df = list(list(df_int = 1), list(df_int = 3:4))),
+        list(row = list(int = 3), df = list(NULL))
+        # TODO should this be able to handle an empty unnamed list?
+        # list(row = list(int = 3), df = list(list()))
+      )
+    ),
+    tibble(x = list_of(
+      tibble(row = tibble(int = 1:2), df = list_of(tibble(df_int = 1), tibble(df_int = 3:4))),
+      tibble(row = tibble(int = 3), df = list_of(NULL, .ptype = tibble(df_int = integer())))
+    ))
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  # errors if required but absent
+  expect_snapshot(
+    (expect_error(tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list()
+      ),
+      spec_df(x = tib_df("x", a = tib_lgl("a")))
+    )))
+  )
+
+  # fallback default works
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list(a = FALSE)
+        )),
+        list(x = list()),
+        list()
+      ),
+      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+    ),
+    tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
+  )
+})
+
+test_that("tibble with list columns work - #43", {
+  x <- tibble::tibble(x = list(1:3, NULL, 1:2))
+  expect_equal(
+    tibblify(x, spec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
+    tibble(x = list_of(1:3, NULL, 1:2))
+  )
+
+  y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
+  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE), .input_form = "colmajor")
+  expect_equal(
+    tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
+    tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
+  )
+})
+
+test_that("nested keys work", {
+  spec <- spec_df(
+    xyz = tib_int(c("x", "y", "z")),
+    .input_form = "colmajor"
+  )
+  expect_equal(
+    tibblify(list(x = list(y = list(z = 1))), spec),
+    tibble(xyz = 1)
+  )
+
+  skip("Unclear if required and default makes sense for colmajor")
+  spec2 <- spec
+  spec2$fields$xya <-tib_int(c("x", "y", "a"), required = FALSE, fill = 2)
+  expect_equal(
+    tibblify(list(x = list(y = list(z = 1))), spec2),
+    tibble(xyz = 1, xya = NA_integer_)
+  )
+})
+
+test_that("empty spec works", {
+  expect_equal(
+    tibblify(
+      set_names(list()),
+      spec_df(.input_form = "colmajor")
+    ),
+    tibble()
+  )
+
+  expect_equal(
+    tibblify(
+      list(x = set_names(list())),
+      spec_df(x = tib_row("x"), .input_form = "colmajor")
+    ),
+    tibble(x = tibble(.rows = 0), .rows = 0)
+  )
+})
+
+test_that("errors if n_rows cannot be calculated", {
+  expect_snapshot({
+    # after key in alphabet
+    (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
+    # before key in alphabet
+    (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
+  })
+})
+
+test_that("colmajor checks size", {
+  tib_cm <- function(col1, col2, x, y) {
+    tibblify(
+      list(x = x, y = y),
+      spec_df(col1, col2, .input_form = "colmajor")
+    )
+  }
+
+  spec_cm <- function(...) {
+    spec_df(.input_form = "colmajor", ...)
+  }
+
+  expect_snapshot({
+    (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
+    (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(x = 1:3))))
+    (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
+  })
 })

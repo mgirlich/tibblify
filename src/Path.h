@@ -1,3 +1,6 @@
+#ifndef TIBBLIFY_PATH_H
+#define TIBBLIFY_PATH_H
+
 #include <cpp11.hpp>
 #include "tibblify.h"
 
@@ -57,3 +60,4 @@ SEXP init_tibblify_path() {
 SEXP get_path_data(cpp11::external_pointer<Path> path_ptr) {
   return path_ptr->data();
 }
+#endif
