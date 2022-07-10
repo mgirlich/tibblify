@@ -78,6 +78,15 @@
       Error in `spec_df()`:
       ! The column name of `.names_to` is already specified in `...`.
 
+# errors if `.names_to` is used with colmajor
+
+    Code
+      (expect_error(spec_df(.names_to = "x", .input_form = "colmajor")))
+    Output
+      <error/rlang_error>
+      Error in `spec_df()`:
+      ! Cannot use `.names_to` for `.input_form = "colmajor"`.
+
 # errors on invalid `key`
 
     Code

@@ -5,6 +5,9 @@
 #' to a one row tibble resp. a list.
 #'
 #' @param ... Column specification created by `tib_*()` or `spec_*()`.
+#' @param .input_form The input form of data frame like lists. Can be one of:
+#'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.
+#'   * `"colmajor"`: The data frame is a named list of columns.
 #' @param .names_to A string giving the name of the column which will contain
 #'   the names of elements of the object list. If `NULL`, the default, no name
 #'   column is created
@@ -37,14 +40,17 @@
 #' )
 #'
 #' spec_df(spec1, spec2)
-spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
-  if (!is_null(.names_to)) {
-    check_string(.names_to, what = "a single string or `NULL`")
-  }
+spec_df <- function(...,
+                    .input_form = c("rowmajor", "colmajor"),
+                    .names_to = NULL,
+                    vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
+  check_names_to(.names_to, .input_form)
 
   out <- spec_tib(
     list2(...),
     "df",
+    input_form = .input_form,
     names_col = .names_to,
     vector_allows_empty_list = vector_allows_empty_list
   )
@@ -56,22 +62,40 @@ spec_df <- function(..., .names_to = NULL, vector_allows_empty_list = FALSE) {
   out
 }
 
+check_names_to <- function(.names_to, input_form, call = caller_env()) {
+  if (!is_null(.names_to)) {
+    if (input_form == "colmajor") {
+      msg <- 'Cannot use {.arg .names_to} for {.code .input_form = "colmajor"}.'
+      cli::cli_abort(msg, call = call)
+    }
+    check_string(.names_to, what = "a single string or `NULL`", call = call)
+  }
+}
+
 #' @rdname spec_df
 #' @export
-spec_object <- function(..., vector_allows_empty_list = FALSE) {
+spec_object <- function(...,
+                        .input_form = c("rowmajor", "colmajor"),
+                        vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
   spec_tib(
     list2(...),
     "object",
+    input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
   )
 }
 
 #' @rdname spec_df
 #' @export
-spec_row <- function(..., vector_allows_empty_list = FALSE) {
+spec_row <- function(...,
+                     .input_form = c("rowmajor", "colmajor"),
+                     vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
   spec_tib(
     list2(...),
     "row",
+    input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
   )
 }

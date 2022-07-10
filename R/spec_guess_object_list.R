@@ -99,7 +99,7 @@ guess_object_list_field_spec <- function(value,
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
-  value_flat <- vec_flatten(value, ptype)
+  value_flat <- vec_flatten(value, ptype, name_spec = NULL)
   if (is_object_list(value_flat)) {
     spec <- guess_make_tib_df(
       name,

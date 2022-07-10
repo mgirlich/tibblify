@@ -77,8 +77,23 @@ stop_vector_wrong_size_element <- function(path, input_form) {
   cli::cli_abort(msg)
 }
 
-vec_flatten <- function(x, ptype) {
-  vctrs::vec_unchop(x, ptype = ptype)
+stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
+  path_str <- path_to_string(path)
+  msg <- c(
+    "Field at path {path_str} has size {.val {size_act}}, not size {.val {size_exp}}.",
+    i = 'For {.code input_form = "colmajor"} each field must have the same size.'
+  )
+  cli::cli_abort(msg)
+}
+
+stop_colmajor_non_list_element <- function(path) {
+  path_str <- path_to_string(path)
+  msg <- 'Element at path {path_str} must be a list.'
+  cli::cli_abort(msg)
+}
+
+vec_flatten <- function(x, ptype, name_spec = zap()) {
+  vctrs::vec_unchop(x, ptype = ptype, name_spec = name_spec)
 }
 
 list_drop_null <- function(x) {
