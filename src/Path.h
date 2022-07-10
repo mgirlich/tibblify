@@ -55,5 +55,5 @@ SEXP init_tibblify_path() {
 
 [[cpp11::register]]
 SEXP get_path_data(cpp11::external_pointer<Path> path_ptr) {
-  return (*path_ptr).data();
+  return path_ptr->data();
 }
