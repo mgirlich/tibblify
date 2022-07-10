@@ -223,7 +223,17 @@ test_that("format for empty tib_df works", {
   expect_equal(format(tib_row("x")), "tib_row(\n  \"x\",\n)")
 })
 
-test_that("prints x$vector_allows_empty_list", {
+test_that("prints arguments of spec_*", {
+  expect_equal(
+    format(spec_df(tib_int("a"), .input_form = "colmajor")),
+    'spec_df(\n  .input_form = "colmajor",\n  tib_int("a"),\n)'
+  )
+
+  expect_equal(
+    format(spec_df(tib_int("a"), .names_to = "nms")),
+    'spec_df(\n  .names_to = "nms",\n  tib_int("a"),\n)'
+  )
+
   expect_equal(
     format(spec_df(tib_int("a"), vector_allows_empty_list = TRUE)),
     'spec_df(\n  vector_allows_empty_list = TRUE,\n  tib_int("a"),\n)'

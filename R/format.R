@@ -44,7 +44,8 @@ format.spec_df <- function(x, width = NULL, ..., names = NULL) {
     width = width,
     args = list(
       .names_to = if (!is.null(x$names_col)) deparse(x$names_col),
-      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list
+      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list,
+      .input_form = if (x$input_form != "rowmajor") double_tick(x$input_form)
     ),
     force_names = names
   )
@@ -60,7 +61,8 @@ format.spec_row <- function(x, width = NULL, ..., names = NULL) {
     fields = x$fields,
     width = width,
     args = list(
-      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list
+      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list,
+      .input_form = if (x$input_form != "rowmajor") double_tick(x$input_form)
     ),
     force_names = names
   )
@@ -76,7 +78,8 @@ format.spec_object <- function(x, width = NULL, ..., names = NULL) {
     fields = x$fields,
     width = width,
     args = list(
-      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list
+      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list,
+      .input_form = if (x$input_form != "rowmajor") double_tick(x$input_form)
     ),
     force_names = names
   )
