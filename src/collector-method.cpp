@@ -38,6 +38,16 @@ inline SEXP vec_flatten(SEXP value, SEXP ptype) {
   return(out);
 }
 
+inline SEXP vec_init_along(SEXP ptype, SEXP along) {
+  SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(short_vec_size(along)));
+  SEXP call = PROTECT(Rf_lang3(Rf_install("vec_init"),
+                               ptype,
+                               n_rows_sexp));
+  SEXP out = Rf_eval(call, tibblify_ns_env);
+  UNPROTECT(2);
+  return(out);
+}
+
 class Collector {
 public:
   virtual ~ Collector() {};
@@ -117,10 +127,7 @@ public:
       stop_colmajor_non_list_element(path);
     }
 
-    if (short_vec_size(value) != n_rows) {
-      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
-    }
-
+    check_colmajor_size(value, n_rows, path);
     const SEXP* ptr_field = VECTOR_PTR_RO(value);
 
     for (R_xlen_t row = 0; row < n_rows; row++) {
@@ -214,14 +221,7 @@ public:
     this->colmajor = true;
 
     if (check && this->required) stop_required(path);
-
-    R_xlen_t n_rows = short_vec_size(data);
-    SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
-    SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
-                                 this->na,
-                                 n_rows_sexp));
-    this->data_colmajor = Rf_eval(call, tibblify_ns_env);
-    UNPROTECT(2);
+    this->data_colmajor = vec_init_along(this->ptype, this->data);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -368,10 +368,7 @@ public:
       return;
     }
 
-    if (short_vec_size(value) != n_rows) {
-      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
-    }
-
+    check_colmajor_size(value, n_rows, path);
     this->data = vec_cast(value, this->ptype_inner);
   }
 
@@ -387,14 +384,7 @@ public:
     LOG_DEBUG;
 
     if (check && this->required) stop_required(path);
-
-    R_xlen_t n_rows = short_vec_size(this->data);
-    SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(n_rows));
-    SEXP call = PROTECT(Rf_lang3(Rf_install("vec_rep"),
-                                 cpp11::as_sexp(cpp11::na<CPP11_TYPE>()),
-                                 n_rows_sexp));
-    this->data = Rf_eval(call, tibblify_ns_env);
-    UNPROTECT(2);
+    this->data = vec_init_along(this->ptype_inner, this->data);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -576,10 +566,7 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (n_rows != short_vec_size(value)) {
-      stop_colmajor_wrong_size_element(path, n_rows, short_vec_size(value));
-    }
-
+    check_colmajor_size(value, n_rows, path);
     if (Rf_isNull(this->transform)) {
       this->data = value;
     } else {
@@ -761,7 +748,6 @@ protected:
   std::vector<Collector_Ptr> collector_vec;
   const int n_keys;
 
-  // TODO duplicate of Collector_Tibble Method
   inline SEXP get_data(SEXP object_list, R_xlen_t n_rows) {
     LOG_DEBUG;
 
@@ -1035,11 +1021,6 @@ private:
   void parse_colmajor(SEXP object_list, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    // if (n_rows == 0) {
-    //   this->init(n_rows);
-    //   return;
-    // }
-
     parse_colmajor_impl(object_list,
                        this->keys,
                        this->n_keys,
@@ -1073,7 +1054,6 @@ public:
       const R_xlen_t n_fields = Rf_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
 
-      // update order
       auto ind = order_chr(field_names);
       check_names(field_names, ind.data(), n_fields, path);
 
