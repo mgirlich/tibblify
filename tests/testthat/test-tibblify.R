@@ -246,7 +246,7 @@ test_that("vector column respects vector_allows_empty_list", {
 
   expect_equal(
     tibblify(x, tspec_df(tib_int_vec("x"), vector_allows_empty_list = TRUE)),
-    tibble(x = list_of(1, NULL, 1:3))
+    tibble(x = list_of(1, integer(), 1:3))
   )
 })
 
