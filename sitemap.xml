@@ -49,6 +49,9 @@
     <loc>/reference/got_chars.html</loc>
   </url>
   <url>
+    <loc>/reference/guess_tspec.html</loc>
+  </url>
+  <url>
     <loc>/reference/index.html</loc>
   </url>
   <url>
@@ -67,12 +70,6 @@
     <loc>/reference/should_inform_unspecified.html</loc>
   </url>
   <url>
-    <loc>/reference/spec_df.html</loc>
-  </url>
-  <url>
-    <loc>/reference/spec_guess.html</loc>
-  </url>
-  <url>
     <loc>/reference/tib_scalar.html</loc>
   </url>
   <url>
@@ -80,6 +77,9 @@
   </url>
   <url>
     <loc>/reference/tibblify.html</loc>
+  </url>
+  <url>
+    <loc>/reference/tspec_df.html</loc>
   </url>
   <url>
     <loc>/reference/untibblify.html</loc>

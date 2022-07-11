@@ -66,12 +66,12 @@
 
 
 <dt>spec</dt>
-<dd><p>A specification how to convert <code>x</code>. Generated with <code><a href="spec_df.html">spec_row()</a></code>
-or <code><a href="spec_df.html">spec_df()</a></code>.</p></dd>
+<dd><p>A specification how to convert <code>x</code>. Generated with <code><a href="tspec_df.html">tspec_row()</a></code>
+or <code><a href="tspec_df.html">tspec_df()</a></code>.</p></dd>
 
 
 <dt>names_to</dt>
-<dd><p>Deprecated. Use <code>spec_df(.names_to)</code> instead.</p></dd>
+<dd><p>Deprecated. Use <code>tspec_df(.names_to)</code> instead.</p></dd>
 
 
 <dt>unspecified</dt>
@@ -104,7 +104,7 @@ contains unspecified fields. Can be one of</p><ul><li><p><code>"error"</code>: T
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2 Victarion Greyjoy</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Provide a specification</span></span></span>
-<span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="spec_df.html">spec_df</a></span><span class="op">(</span></span></span>
+<span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="tspec_df.html">tspec_df</a></span><span class="op">(</span></span></span>
 <span class="r-in"><span>  id <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>  name <span class="op">=</span> <span class="fu"><a href="tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="op">)</span></span></span>
@@ -116,7 +116,7 @@ contains unspecified fields. Can be one of</p><ul><li><p><code>"error"</code>: T
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>     2 Victarion Greyjoy</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Provide a specification for a single object</span></span></span>
-<span class="r-in"><span><span class="fu">tibblify</span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="spec_df.html">spec_object</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">tibblify</span><span class="op">(</span><span class="va">x</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span>, <span class="fu"><a href="tspec_df.html">tspec_object</a></span><span class="op">(</span><span class="va">spec</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $id</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] 1</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
