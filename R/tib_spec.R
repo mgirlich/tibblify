@@ -124,7 +124,7 @@ prep_spec_fields <- function(fields, call) {
     return(list())
   }
 
-  bad_idx <- purrr::detect_index(fields, ~ !inherits(.x, "tib_collector"))
+  bad_idx <- purrr::detect_index(fields, ~ !is_tib(.x))
   if (bad_idx != 0) {
     name <- names2(fields)[[bad_idx]]
     if (name == "") {
@@ -812,6 +812,34 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
 
 
 # helpers -----------------------------------------------------------------
+
+is_tib <- function(x) {
+  inherits(x, "tib_collector")
+}
+
+is_tib_unspecified <- function(x) {
+  inherits(x, "tib_unspecified")
+}
+
+is_tib_scalar <- function(x) {
+  inherits(x, "tib_scalar")
+}
+
+is_tib_vector <- function(x) {
+  inherits(x, "tib_vector")
+}
+
+is_tib_variant <- function(x) {
+  inherits(x, "tib_variant")
+}
+
+is_tib_row <- function(x) {
+  inherits(x, "tib_row")
+}
+
+is_tib_df <- function(x) {
+  inherits(x, "tib_df")
+}
 
 prep_transform <- function(f, call) {
   if (is_null(f)) {

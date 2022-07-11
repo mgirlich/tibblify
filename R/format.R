@@ -358,13 +358,13 @@ format_fill_arg <- function(x, fill) {
 
   if (is_null(x$fill)) return(NULL)
 
-  if (inherits(x, "tib_variant") || inherits(x, "tib_unspecified")) {
+  if (is_tib_variant(x) || is_tib_unspecified(x)) {
     return(deparse(x$fill))
   }
 
-  if (inherits(x, "tib_scalar")) {
+  if (is_tib_scalar(x)) {
     canonical_default <- vec_init(x$ptype_inner)
-  } else if (inherits(x, "tib_vector")) {
+  } else if (is_tib_vector(x)) {
     canonical_default <- vec_init(x$ptype)
   } else {
     cli::cli_abort("{.arg x} has unexpected type {.cls class(x)}.", .internal = TRUE)
