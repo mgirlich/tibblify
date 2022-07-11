@@ -58,12 +58,15 @@ test_that("can combine type", {
   spec_unspecified <- tspec_df(a = tib_unspecified("a"))
   spec_scalar <- tspec_df(a = tib_int("a"))
   spec_vec <- tspec_df(a = tib_int_vec("a"))
+  spec_variant <- tspec_df(a = tib_variant("a"))
   tspec_row <- tspec_df(a = tib_row("a"))
   tspec_df <- tspec_df(a = tib_df("a"))
 
   expect_equal(tspec_combine(spec_unspecified, spec_unspecified), spec_unspecified)
   expect_equal(tspec_combine(spec_unspecified, spec_scalar), spec_scalar)
   expect_equal(tspec_combine(spec_unspecified, spec_scalar, spec_vec), spec_vec)
+  expect_equal(tspec_combine(spec_unspecified, spec_variant), spec_variant)
+  expect_equal(tspec_combine(spec_scalar, spec_vec, spec_variant), spec_variant)
 
   expect_equal(tspec_combine(spec_unspecified, tspec_row), tspec_row)
   expect_equal(tspec_combine(spec_unspecified, tspec_df), tspec_df)

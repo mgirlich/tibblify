@@ -1,3 +1,34 @@
+#' Combine multiple specifications
+#'
+#' @param ... Specifications to combine.
+#'
+#' @return A tibblify specification.
+#' @export
+#'
+#' @examples
+#' # union of fields
+#' tspec_combine(
+#'   tspec_df(tib_int("a")),
+#'   tspec_df(tib_chr("b"))
+#' )
+#'
+#' # unspecified + x -> x
+#' tspec_combine(
+#'   tspec_df(tib_unspecified("a"), tib_chr("b")),
+#'   tspec_df(tib_int("a"), tib_variant("b"))
+#' )
+#'
+#' # scalar + vector -> vector
+#' tspec_combine(
+#'   tspec_df(tib_chr("a")),
+#'   tspec_df(tib_chr_vec("a"))
+#' )
+#'
+#' # scalar/vector + variant -> variant
+#' tspec_combine(
+#'   tspec_df(tib_chr("a")),
+#'   tspec_df(tib_variant("a"))
+#' )
 tspec_combine <- function(...) {
   spec_list <- check_tspec_combine_dots(...)
   type <- check_tspec_combine_type(spec_list)
@@ -70,6 +101,16 @@ tib_combine <- function(tib_list, call) {
     return(tib_unspecified(key, required = required))
   }
 
+  if (type == "variant") {
+    out <- tib_variant(
+      key,
+      required = required,
+      fill = tib_combine_fill(tib_list, type, NULL, call),
+      transform = tib_combine_transform(tib_list, call)
+    )
+    return(out)
+  }
+
   if (type %in% c("scalar", "vector")) {
     ptype <- tib_combine_ptype(tib_list, call)
     fill <- tib_combine_fill(tib_list, type, ptype, call)
@@ -123,6 +164,10 @@ tib_combine_type <- function(tib_list, call) {
 
   if (all(types %in% c("scalar", "vector"))) {
     return("vector")
+  }
+
+  if (all(types %in% c("scalar", "vector", "variant"))) {
+    return("variant")
   }
 
   # TODO error message should include path...
