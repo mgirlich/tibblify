@@ -20,7 +20,13 @@ library(tibblify)
 
 ## Supported input for `tibblify()`
 
-There are three types of valid input to `tibblify()`:
+The idea of `tibblify()` is to make it easier and more robust to convert lists
+of lists into tibbles. This is a typical task after receiving API responses in
+JSON format.
+The following provides an overview which kind of R objects are supported and
+the JSON they correspond to.
+
+`tibblify()` supports four formats:
 
 ### 1. Object
 
@@ -54,11 +60,11 @@ x <- list(
 
 ::::
 
-They can be parsed with `spec_object()` to produce a list or with `spec_row()`
+They can be parsed with `tspec_object()` to produce a list or with `tspec_row()`
 to produce a 1 row tibble
 
 ```{r}
-object_spec <- spec_object(
+object_spec <- tspec_object(
   tib_int("a"),
   tib_lgl("b")
 )
@@ -67,7 +73,7 @@ tibblify(x, object_spec)
 ```
 
 ```{r}
-row_spec <- spec_row(
+row_spec <- tspec_row(
   tib_int("a"),
   tib_lgl("b")
 )
@@ -93,8 +99,8 @@ tibblify(x, row_spec)
 
 ::: {}
 
-```{r eval=FALSE}
-list(
+```{r results='hide'}
+x <- list(
   list(a = 1, b = TRUE),
   list(a = 2, b = FALSE)
 )
@@ -104,7 +110,98 @@ list(
 
 ::::
 
-They are parsed with `spec_df()`
+They are parsed with `tspec_df()`
+
+```{r}
+df_spec <- tspec_df(
+  tib_int("a"),
+  tib_lgl("b")
+)
+
+tibblify(x, df_spec)
+```
+
+### 3.  Object of homogeneous objects
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "object1": {"a": 1, "b": true},
+  "object2": {"b": 2, "b": false}
+}
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+x <- list(
+  object1 = list(a = 1, b = TRUE),
+  object2 = list(a = 2, b = FALSE)
+)
+```
+
+:::
+
+::::
+
+They are also parsed with `tspec_df()` but you can parse the names into an extra
+column via the `.names_to` argument:
+
+```{r}
+df_spec <- tspec_df(
+  tib_int("a"),
+  tib_lgl("b"),
+  .names_to = "name"
+)
+
+tibblify(x, df_spec)
+```
+
+
+### 4.  Object in column major format
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "a": [1, 2],
+  "b": [true, false]
+}
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+x <- list(
+  a = c(1, 2),
+  b = c(TRUE, FALSE)
+)
+```
+
+:::
+
+::::
+
+They are also parsed with `tspec_df()` but you need to use `.input_form = "colmajor"`:
+
+```{r}
+df_spec <- tspec_df(
+  tib_int("a"),
+  tib_lgl("b"),
+  .input_form = "colmajor"
+)
+
+tibblify(x, df_spec)
+```
 
 ## Supported fields
 
@@ -149,16 +246,14 @@ Other R vectors without JSON equivalent are also supported as long as they are
 a scalar according to `vctrs::vec_is(size = 1)`. For example
 
 ```{r}
-x <- as.Date("2022-07-01")
+x <- as.POSIXct("2022-07-01 10:27:30")
 ```
 
 can be parsed with
 
 ```{r eval=FALSE}
-tib_scalar(ptype = vctrs::new_date())
+tib_scalar(ptype = vctrs::new_datetime())
 ```
-
-<!-- TODO: add `tib_date()`, `tib_dtt()` -->
 
 
 ### Homogeneous JSON arrays of scalars and R vectors
@@ -205,41 +300,85 @@ They can be parsed with
 * `tib_dbl_vec()`
 * `tib_chr_vec()`
 
+There are two compatibility switches:
 
-<!-- |                     |                                    |                                       | -->
-<!-- |                     | Analogue to scalars                | Analogue to scalars                   | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
-<!-- |                     | List of scalars                    | `tib_vector()` with argument          | -->
-<!-- |                     |                                    |                                       | -->
-<!-- |                     | `fromJSON(simplifyVector = FALSE)` | `input_form = "scalar_list"`          | -->
-<!-- |                     |                                    |                                       | -->
-<!-- |                     | ``` r                              | ``` r                                 | -->
-<!-- |                     | list(TRUE, NULL, FALSE)            | tib_lgl_vec(                          | -->
-<!-- |                     | ```                                |   input_form = "scalar_list"          | -->
-<!-- |                     |                                    | )                                     | -->
-<!-- |                     |                                    | ```                                   | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
-<!-- | Object of scalars   | Named list of scalar               | `input_form = "object"`               | -->
-<!-- |                     |                                    |                                       | -->
-<!-- | ``` json            | ``` r                              | ``` r                                 | -->
-<!-- | {                   | list(                              | tib_lgl_vec(                          | -->
-<!-- |   "a": true,        |   a = TRUE,                        |   input_form = "object"               | -->
-<!-- |   "b": null,        |   b = NA,                          | )                                     | -->
-<!-- |   "c": false        |   c = FALSE                        | ```                                   | -->
-<!-- | }                   | )                                  |                                       | -->
-<!-- | ```                 | ```                                |                                       | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
-<!-- | Object              | Named list                         | `tib_row()`                           | -->
-<!-- |                     |                                    |                                       | -->
-<!-- | ``` json            | ``` r                              | ``` r                                 | -->
-<!-- | {                   | list(                              | tib_row(                              | -->
-<!-- |   "a": 1,           |   a = 1L,                          |   tib_int("a"),                       | -->
-<!-- |   "b": "a",         |   b = "a",                         |   tib_chr("b"),                       | -->
-<!-- |   "c": [1, 2, 3]    |   c = c(1L, 2L, 3L)                |   tib_int_vec("c")                    | -->
-<!-- | }                   | )                                  | )                                     | -->
-<!-- | ```                 | ```                                | ```                                   | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
-<!-- |                     |                                    |                                       | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
-<!-- |                     |                                    |                                       | -->
-<!-- +---------------------+------------------------------------+---------------------------------------+ -->
+* The `vector_allows_empty_list` argument of `tspec_*()` which is needed when
+there are empty lists that should be treated as empty vector:
+
+```{r error=TRUE}
+x_json <- '[
+  {"a": [1, 2]},
+  {"a": []}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyDataFrame = FALSE)
+str(x)
+
+tibblify(x, tspec_df(tib_int_vec("a")))
+```
+
+```{r}
+tibblify(x, tspec_df(tib_int_vec("a"), vector_allows_empty_list = TRUE))$a
+```
+
+* The `input_form` argument of `tib_vector()` to support converting lists:
+
+```{r error=TRUE}
+x_json <- '[
+  {"a": [1, 2]},
+  {"a": [1, 2, 3]}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyVector = FALSE)
+str(x)
+
+tibblify(x, tspec_df(tib_int_vec("a")))
+```
+
+```{r}
+tibblify(x, tspec_df(tib_int_vec("a", input_form = "scalar_list")))$a
+```
+
+```{r}
+x_json <- '[
+  {"a": {"x": 1, "y": 2}},
+  {"a": {"a": 1, "b": 2, "b": 3}}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyVector = FALSE)
+str(x)
+
+tibblify(x, tspec_df(tib_int_vec("a", input_form = "object")))$a
+```
+
+### Varying
+
+Lists where elements do not have a common type but vary:
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[1, "a", true]
+```
+
+:::
+
+::: {}
+
+```{r eval=FALSE}
+list(1, "a", TRUE)
+```
+
+:::
+
+::::
+
+can be parsed with `tib_variant()`.
+
+
+### 
+
+
+### NULL
