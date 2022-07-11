@@ -41,9 +41,9 @@
 #'
 #' tspec_df(spec1, spec2)
 tspec_df <- function(...,
-                    .input_form = c("rowmajor", "colmajor"),
-                    .names_to = NULL,
-                    vector_allows_empty_list = FALSE) {
+                     .input_form = c("rowmajor", "colmajor"),
+                     .names_to = NULL,
+                     vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
   check_names_to(.names_to, .input_form)
 
@@ -75,8 +75,8 @@ check_names_to <- function(.names_to, input_form, call = caller_env()) {
 #' @rdname tspec_df
 #' @export
 tspec_object <- function(...,
-                        .input_form = c("rowmajor", "colmajor"),
-                        vector_allows_empty_list = FALSE) {
+                         .input_form = c("rowmajor", "colmajor"),
+                         vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
   tspec(
     list2(...),

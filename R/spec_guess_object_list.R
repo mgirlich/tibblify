@@ -1,4 +1,4 @@
-spec_guess_object_list <- function(x,
+tspec_guess_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
@@ -8,7 +8,7 @@ spec_guess_object_list <- function(x,
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
-      i = "Did you want to use {.fn spec_guess_df} instead?"
+      i = "Did you want to use {.fn tspec_guess_df} instead?"
     )
     cli::cli_abort(msg, call = call)
   }

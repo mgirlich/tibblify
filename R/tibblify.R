@@ -41,7 +41,7 @@ tibblify <- function(x,
   }
 
   if (is_null(spec)) {
-    spec <- spec_guess(x, inform_unspecified = TRUE, call = current_call())
+    spec <- tspec_guess(x, inform_unspecified = TRUE, call = current_call())
     unspecified <- unspecified %||% "list"
   }
 

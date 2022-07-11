@@ -1,8 +1,8 @@
 #' Guess the `tibblify()` Specification
 #'
-#' Use `spec_guess()` if you don't know the input type.
-#' Use `spec_guess_df()` if the input is a data frame or an object list.
-#' Use `spec_guess_objecte()` is the input is an object.
+#' Use `tspec_guess()` if you don't know the input type.
+#' Use `tspec_guess_df()` if the input is a data frame or an object list.
+#' Use `tspec_guess_objecte()` is the input is an object.
 #'
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
@@ -19,19 +19,19 @@
 #' @export
 #'
 #' @examples
-#' spec_guess(list(x = 1, y = "a"))
-#' spec_guess(list(list(x = 1), list(x = 2)))
+#' tspec_guess(list(x = 1, y = "a"))
+#' tspec_guess(list(list(x = 1), list(x = 2)))
 #'
-#' spec_guess(gh_users)
-spec_guess <- function(x,
-                       ...,
-                       empty_list_unspecified = FALSE,
-                       simplify_list = FALSE,
-                       inform_unspecified = should_inform_unspecified(),
-                       call = current_call()) {
+#' tspec_guess(gh_users)
+tspec_guess <- function(x,
+                        ...,
+                        empty_list_unspecified = FALSE,
+                        simplify_list = FALSE,
+                        inform_unspecified = should_inform_unspecified(),
+                        call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
-    spec_guess_df(
+    tspec_guess_df(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -39,7 +39,7 @@ spec_guess <- function(x,
       call = call
     )
   } else if (is.list(x)) {
-    spec_guess_list(
+    tspec_guess_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -52,12 +52,12 @@ spec_guess <- function(x,
   }
 }
 
-spec_guess_list <- function(x,
-                            ...,
-                            empty_list_unspecified = FALSE,
-                            simplify_list = FALSE,
-                            inform_unspecified = should_inform_unspecified(),
-                            call = current_call()) {
+tspec_guess_list <- function(x,
+                             ...,
+                             empty_list_unspecified = FALSE,
+                             simplify_list = FALSE,
+                             inform_unspecified = should_inform_unspecified(),
+                             call = current_call()) {
   check_dots_empty()
   check_flag(empty_list_unspecified, call = call)
   check_flag(simplify_list, call = call)
@@ -80,7 +80,7 @@ spec_guess_list <- function(x,
   }
 
   if (is_object_list(x)) {
-    spec <- spec_guess_object_list(
+    spec <- tspec_guess_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -91,7 +91,7 @@ spec_guess_list <- function(x,
   }
 
   if (is_object(x)) {
-    spec <- spec_guess_object(
+    spec <- tspec_guess_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -118,11 +118,11 @@ guess_make_tib_df <- function(name,
   list_of_null <- all(purrr::map_lgl(values_flat, is_null))
   if (list_of_null) {
     if (is_named(values_flat) && !is_empty(values_flat)) {
-        fields <- purrr::map(set_names(names(values_flat)), tib_unspecified)
-        return(maybe_tib_row(name, fields, required))
-      }
+      fields <- purrr::map(set_names(names(values_flat)), tib_unspecified)
+      return(maybe_tib_row(name, fields, required))
+    }
 
-      return(tib_unspecified(name, required = required))
+    return(tib_unspecified(name, required = required))
   }
 
   fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)
@@ -219,8 +219,8 @@ spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()
   )
 
   switch (action,
-    inform = cli::cli_inform(msg),
-    error = cli::cli_abort(msg, call = call)
+          inform = cli::cli_inform(msg),
+          error = cli::cli_abort(msg, call = call)
   )
 
   invisible(spec)
