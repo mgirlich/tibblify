@@ -408,6 +408,7 @@ private:
   const SEXP output_col_names;
   const bool vector_allows_empty_list;
   const SEXP na;
+  const cpp11::sexp empty_element;
 
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     LOG_DEBUG;
@@ -463,6 +464,7 @@ public:
   , output_col_names(get_output_col_names(vector_args.names_to, vector_args.values_to))
   , vector_allows_empty_list(vector_args.vector_allows_empty_list)
   , na(vector_args.na)
+  , empty_element(vec_init_along(field_args.ptype, R_NilValue))
   { }
 
   inline void init(R_xlen_t& length) {
@@ -496,8 +498,7 @@ public:
 
     if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
       if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
-        // TODO this should probably be `vec_init(this->ptype, 0)`
-        SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+        SET_VECTOR_ELT(this->data, this->current_row++, this->empty_element);
         return;
       }
     }
