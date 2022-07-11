@@ -26,7 +26,7 @@ tspec_row(
 )
 }
 \arguments{
-\item{...}{Column specification created by \verb{tib_*()} or \verb{spec_*()}.}
+\item{...}{Column specification created by \verb{tib_*()} or \verb{tspec_*()}.}
 
 \item{.input_form}{The input form of data frame like lists. Can be one of:
 \itemize{
@@ -60,7 +60,7 @@ tspec_df(
   !!!purrr::map(purrr::set_names(c("name", "title")), tib_chr)
 )
 
-# The `spec_*()` functions can also be nested
+# The `tspec_*()` functions can also be nested
 spec1 <- tspec_object(
   int = tib_int("int"),
   chr = tib_chr("chr")
