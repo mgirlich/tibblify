@@ -49,7 +49,7 @@ test_that("can guess spec for twitter", {
 })
 
 test_that("informing about unspecified looks good", {
-  spec <- spec_df(
+  spec <- tspec_df(
     tib_int("1int"),
     tib_unspecified("1un"),
     tib_df(

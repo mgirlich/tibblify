@@ -76,7 +76,7 @@ spec_guess_list <- function(x,
 
   if (is_empty(x)) {
     # TODO not completely sure about this
-    return(spec_object())
+    return(tspec_object())
   }
 
   if (is_object_list(x)) {

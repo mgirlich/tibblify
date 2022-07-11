@@ -21,7 +21,7 @@
       The spec contains 1 unspecified field:
       * lgl
     Output
-      spec_df(
+      tspec_df(
         tib_unspecified("lgl"),
       )
 

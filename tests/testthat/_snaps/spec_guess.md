@@ -3,7 +3,7 @@
     Code
       spec_guess(discog) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_int("instance_id"),
         tib_chr("date_added"),
         tib_row(
@@ -52,7 +52,7 @@
     Code
       spec_guess(gh_users) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_chr("login"),
         tib_int("id"),
         tib_chr("avatar_url"),
@@ -90,7 +90,7 @@
     Code
       spec_guess(gh_repos) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_int("id"),
         tib_chr("name"),
         tib_chr("full_name"),
@@ -185,7 +185,7 @@
     Code
       spec
     Output
-      spec_df(
+      tspec_df(
         tib_chr("url"),
         tib_int("id"),
         tib_chr("name"),
@@ -211,7 +211,7 @@
     Code
       spec_guess(x)
     Output
-      spec_object(
+      tspec_object(
         tib_row(
           "areaNames",
           tib_chr("205705993"),
@@ -298,7 +298,7 @@
     Code
       spec_guess_list(x, simplify_list = FALSE)
     Output
-      spec_object(
+      tspec_object(
         tib_row(
           "areaNames",
           tib_chr("205705993"),
@@ -385,7 +385,7 @@
     Code
       spec_guess(x)
     Output
-      spec_df(
+      tspec_df(
         .names_to = ".names",
         tib_chr("@context"),
         tib_chr("@type"),
@@ -412,7 +412,7 @@
     Code
       spec_guess(x)
     Output
-      spec_object(
+      tspec_object(
         tib_df(
           "statuses",
           tib_row(

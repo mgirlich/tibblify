@@ -14,7 +14,7 @@ spec_guess_df <- function(x,
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
-    spec <- spec_df(
+    spec <- tspec_df(
       !!!fields,
       vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
     )

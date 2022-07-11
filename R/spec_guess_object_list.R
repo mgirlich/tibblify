@@ -30,7 +30,7 @@ spec_guess_object_list <- function(x,
     names_to <- ".names"
   }
 
-  spec_df(
+  tspec_df(
     !!!fields,
     .names_to = names_to,
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))

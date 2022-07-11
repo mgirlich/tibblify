@@ -60,7 +60,7 @@ spec_guess(gh_users_small)
 If we are only interested in some of the fields we can easily adapt the specification
 
 ```{r}
-spec <- spec_df(
+spec <- tspec_df(
   login = tib_chr("login"),
   name = tib_chr("name"),
   public_gists = tib_int("public_gists")
@@ -103,7 +103,7 @@ Providing an explicit specification has a couple of advantages:
 * you can specify what happens if a value is missing.
 
 
-As seen before the specification for a collection is done with `spec_df()`. The
+As seen before the specification for a collection is done with `tspec_df()`. The
 columns of the output tibble are describe with the `tib_*()` functions. They
 describe the path to the field to extract and the output type of the field. There
 are the following five types of functions:
@@ -133,7 +133,7 @@ tibblify(
     list(id = 1, name = "Peter"),
     list(id = 2, name = "Lilly")
   ),
-  spec_df(
+  tspec_df(
     id = tib_int("id"),
     name = tib_chr("name")
   )
@@ -157,7 +157,7 @@ and then use it in `tib_scalar()`
 ```{r}
 tibblify(
   x,
-  spec_df(
+  tspec_df(
     id = tib_int("id"),
     duration = tib_scalar("duration", ptype = vctrs::new_duration())
   )
@@ -179,7 +179,7 @@ x <- list(
 
 tibblify(
   x,
-  spec_df(
+  tspec_df(
     id = tib_int("id"),
     children = tib_chr_vec("children")
   )
@@ -224,7 +224,7 @@ Alternatively, if you only want to extract some of the fields in `owner` you
 can use a nested path
 
 ```{r}
-spec2 <- spec_df(
+spec2 <- tspec_df(
   id = tib_int("id"),
   name = tib_chr("name"),
   owner_id = tib_int(c("owner", "id")),
@@ -247,7 +247,7 @@ x <- list(
   list(x = 2)
 )
 
-spec <- spec_df(
+spec <- tspec_df(
   x = tib_int("x"),
   y = tib_chr("y")
 )
@@ -258,7 +258,7 @@ tibblify(x, spec)
 You can mark a field as optional with the argument `required = FALSE`:
 
 ```{r}
-spec <- spec_df(
+spec <- tspec_df(
   x = tib_int("x"),
   y = tib_chr("y", required = FALSE)
 )
@@ -269,7 +269,7 @@ tibblify(x, spec)
 You can specify the value to use with the `fill` argument
 
 ```{r}
-spec <- spec_df(
+spec <- tspec_df(
   x = tib_int("x"),
   y = tib_chr("y", required = FALSE, fill = "missing")
 )
@@ -280,8 +280,8 @@ tibblify(x, spec)
 
 ## Converting a Single Object
 
-To rectangle a single object you have two options: `spec_object()` which produces
-a list or `spec_row()` which produces a tibble with one row.
+To rectangle a single object you have two options: `tspec_object()` which produces
+a list or `tspec_row()` which produces a tibble with one row.
 
 While tibbles are great for a single object it often makes more sense to convert
 them to a list.
@@ -303,7 +303,7 @@ api_output <- list(
 To convert to a one row tibble
 
 ```{r}
-row_spec <- spec_row(
+row_spec <- tspec_row(
   status = tib_chr("status"),
   data = tib_df(
     "data",
@@ -319,7 +319,7 @@ it is necessary to wrap `data` in a list. To access `data` one has to use
 `api_output_df$data[[1]]` which is not very nice.
 
 ```{r}
-object_spec <- spec_object(
+object_spec <- tspec_object(
   status = tib_chr("status"),
   data = tib_df(
     "data",

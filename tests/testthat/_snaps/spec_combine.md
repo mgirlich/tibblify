@@ -32,31 +32,31 @@
 # can combine type
 
     Code
-      (expect_error(spec_combine(spec_row, spec_scalar)))
+      (expect_error(spec_combine(tspec_row, spec_scalar)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
       ! Can't combine tibs `..1` <row> and `..2` <scalar>
     Code
-      (expect_error(spec_combine(spec_row, spec_vec)))
+      (expect_error(spec_combine(tspec_row, spec_vec)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
       ! Can't combine tibs `..1` <row> and `..2` <vector>
     Code
-      (expect_error(spec_combine(spec_row, spec_df)))
+      (expect_error(spec_combine(tspec_row, tspec_df)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
       ! Can't combine tibs `..1` <row> and `..2` <df>
     Code
-      (expect_error(spec_combine(spec_df, spec_scalar)))
+      (expect_error(spec_combine(tspec_df, spec_scalar)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:
       ! Can't combine tibs `..1` <df> and `..2` <scalar>
     Code
-      (expect_error(spec_combine(spec_df, spec_vec)))
+      (expect_error(spec_combine(tspec_df, spec_vec)))
     Output
       <error/rlang_error>
       Error in `spec_combine()`:

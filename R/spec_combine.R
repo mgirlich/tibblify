@@ -4,12 +4,12 @@ spec_combine <- function(...) {
   fields <- spec_combine_field_list(spec_list, call = current_env())
 
   if (type == "row") {
-    return(spec_row(!!!fields))
+    return(tspec_row(!!!fields))
   } else if (type == "object") {
-    return(spec_object(!!!fields))
+    return(tspec_object(!!!fields))
   } else if( type == "df") {
     # TODO .names_to
-    return(spec_df(!!!fields))
+    return(tspec_df(!!!fields))
   }
 
   cli::cli_abort("Unknown spec type", .internal = TRUE)
@@ -17,7 +17,7 @@ spec_combine <- function(...) {
 
 check_spec_combine_dots <- function(..., .call = caller_env()) {
   spec_list <- list2(...)
-  bad_idx <- purrr::detect_index(spec_list, ~ !is(.x, "spec_tib"))
+  bad_idx <- purrr::detect_index(spec_list, ~ !is_tspec(.x))
   if (bad_idx != 0) {
     cls1 <- class(spec_list[[bad_idx]])[[1]]
     msg <- c(

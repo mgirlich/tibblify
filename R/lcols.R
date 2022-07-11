@@ -21,12 +21,12 @@
 #'   !!!purrr::map(chr_cols, lcol_chr)
 #' )
 lcols <- function(..., .default = zap()) {
-  lifecycle::deprecate_warn("0.2.0", "lcols()", "spec_df()")
+  lifecycle::deprecate_warn("0.2.0", "lcols()", "tspec_df()")
   if (!is_zap(.default)) {
     lifecycle::deprecate_stop("0.2.0", "lcols(.default)")
   }
 
-  spec_df(...)
+  tspec_df(...)
 }
 
 #' Create column specificcation

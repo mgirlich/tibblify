@@ -24,7 +24,7 @@ spec_guess_object <- function(x,
   check_object_names(x, call)
 
   if (is_empty(x)) {
-    return(spec_object())
+    return(tspec_object())
   }
 
   fields <- purrr::imap(
@@ -34,7 +34,7 @@ spec_guess_object <- function(x,
     simplify_list = simplify_list
   )
 
-  spec_object(
+  tspec_object(
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg")),
     !!!fields
   )

@@ -151,7 +151,7 @@
 # vector column respects vector_allows_empty_list
 
     Code
-      (expect_error(tibblify(x, spec_df(tib_int_vec("x")))))
+      (expect_error(tibblify(x, tspec_df(tib_int_vec("x")))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
@@ -168,7 +168,7 @@
       Error in `tibblify()`:
       ! Element at path [[1]]$x must be a list for `input_form = "scalar_list"`
     Code
-      (expect_error(tib(list(x = 1), spec_object)))
+      (expect_error(tib(list(x = 1), tspec_object)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
@@ -213,7 +213,7 @@
 # list column works
 
     Code
-      (expect_error(tibblify(list(list(x = TRUE), list(zzz = 1)), spec_df(x = tib_variant(
+      (expect_error(tibblify(list(list(x = TRUE), list(zzz = 1)), tspec_df(x = tib_variant(
         "x")))))
     Output
       <error/tibblify_error>
@@ -223,7 +223,7 @@
 # df column works
 
     Code
-      (expect_error(tibblify(list(list(x = list(a = TRUE)), list()), spec_df(x = tib_row(
+      (expect_error(tibblify(list(list(x = list(a = TRUE)), list()), tspec_df(x = tib_row(
         "x", a = tib_lgl("a"))))))
     Output
       <error/tibblify_error>
@@ -234,7 +234,7 @@
 
     Code
       (expect_error(tibblify(list(list(x = list(list(a = TRUE), list(a = FALSE))),
-      list()), spec_df(x = tib_df("x", a = tib_lgl("a"))))))
+      list()), tspec_df(x = tib_df("x", a = tib_lgl("a"))))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:

@@ -90,8 +90,8 @@ test_that("can untibblify a list of tibble column", {
   )
 })
 
-test_that("can rename according to spec_df", {
-  spec <- spec_df(
+test_that("can rename according to tspec_df", {
+  spec <- tspec_df(
     x2 = tib_df(
       "x",
       int2 = tib_int("int"),
@@ -162,12 +162,12 @@ test_that("can untibblify object", {
 
 test_that("can rename according to spec", {
   expect_equal(
-    untibblify(list(x = 1), spec_object(x = tib_int("a"))),
+    untibblify(list(x = 1), tspec_object(x = tib_int("a"))),
     list(a = 1)
   )
 
   x <- list(x = list(a = 1, b = 2))
-  spec <- spec_object(
+  spec <- tspec_object(
     x2 = tib_row(
       "x",
       a2 = tib_dbl("a"),
