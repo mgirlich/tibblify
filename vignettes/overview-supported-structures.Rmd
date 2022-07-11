@@ -372,17 +372,12 @@ spec <- tspec_df(
   )
 )
 
-tibblify(x, spec)
+tibblify(x, spec)$df
 ```
 
+#### Column major format
 
-
-### NULL
-
-`tibblify()` supports four formats:
-
-
-### 4.  Object in column major format
+The column major format is also supported
 
 :::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
 
@@ -410,7 +405,7 @@ x <- list(
 
 ::::
 
-They are also parsed with `tspec_df()` but you need to use `.input_form = "colmajor"`:
+via setting the `.input_form` argument of `tspec_*()` to `"colmajor"`:
 
 ```{r}
 df_spec <- tspec_df(
@@ -421,3 +416,4 @@ df_spec <- tspec_df(
 
 tibblify(x, df_spec)
 ```
+
