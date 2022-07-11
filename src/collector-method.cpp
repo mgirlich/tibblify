@@ -1044,7 +1044,20 @@ public:
   inline SEXP get_ptype() {
     R_xlen_t n_rows = 0;
     this->init(n_rows);
-    return(collector_vec_to_df(std::move(this->collector_vec), n_rows, 0));
+
+    int n_extra_cols = this->has_names_col ? 1 : 0;
+
+    SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
+    SEXP names = Rf_getAttrib(out, R_NamesSymbol);
+
+    if (this->has_names_col) {
+      SET_VECTOR_ELT(out, 0, tibblify_shared_empty_chr);
+      SET_STRING_ELT(names, 0, this->names_col);
+    }
+
+    UNPROTECT(1);
+
+    return(out);
   }
 
   inline SEXP parse(SEXP object_list, Path& path) {
@@ -1130,7 +1143,7 @@ public:
   { }
 
   inline void init(R_xlen_t& length) {
-    LOG_DEBUG;
+    LOG_DEBUG << length;
 
     Collector_Base::init(length);
     SEXP ptype = (*this->parser_ptr).get_ptype();
