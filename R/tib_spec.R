@@ -4,7 +4,7 @@
 #' Use `tspec_row()` resp. `tspec_object()` to specify how to convert an object
 #' to a one row tibble resp. a list.
 #'
-#' @param ... Column specification created by `tib_*()` or `spec_*()`.
+#' @param ... Column specification created by `tib_*()` or `tspec_*()`.
 #' @param .input_form The input form of data frame like lists. Can be one of:
 #'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.
 #'   * `"colmajor"`: The data frame is a named list of columns.
@@ -29,7 +29,7 @@
 #'   !!!purrr::map(purrr::set_names(c("name", "title")), tib_chr)
 #' )
 #'
-#' # The `spec_*()` functions can also be nested
+#' # The `tspec_*()` functions can also be nested
 #' spec1 <- tspec_object(
 #'   int = tib_int("int"),
 #'   chr = tib_chr("chr")
