@@ -517,6 +517,22 @@ test_that("list of df column works", {
   )
 })
 
+test_that("list of df column can use names_to", {
+  spec <- tspec_df(x = tib_df("x", a = tib_lgl("a"), .names_to = "name"))
+  expect_equal(
+    tibblify(
+      list(
+        list(x = list(
+          a = list(a = TRUE),
+          b = list(a = FALSE)
+        ))
+      ),
+      spec
+    ),
+    tibble(x = list_of(tibble(name = c("a", "b"), a = c(TRUE, FALSE))))
+  )
+})
+
 test_that("names_to works", {
   # can parse
   expect_equal(
