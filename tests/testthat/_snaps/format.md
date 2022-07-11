@@ -336,7 +336,7 @@
 # can force to print canonical names
 
     Code
-      format(spec_df(a = tib_int("a"), b = tib_df("b", x = tib_int("x"))))
+      format(tspec_df(a = tib_int("a"), b = tib_df("b", x = tib_int("x"))))
     Output
-      [1] "spec_df(\n  a = tib_int(\"a\"),\n  b = tib_df(\n    \"b\",\n    x = tib_int(\"x\"),\n  ),\n)"
+      [1] "tspec_df(\n  a = tib_int(\"a\"),\n  b = tib_df(\n    \"b\",\n    x = tib_int(\"x\"),\n  ),\n)"
 

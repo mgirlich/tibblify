@@ -9,7 +9,7 @@ test_that("spec argument is checked", {
 # rowmajor ----------------------------------------------------------------
 
 test_that("names are checked", {
-  spec <- spec_object(x = tib_int("x", required = FALSE))
+  spec <- tspec_object(x = tib_int("x", required = FALSE))
 
   expect_snapshot({
     # no names
@@ -90,7 +90,7 @@ test_that("record objects work", {
         list(x = x_rcrd),
         list(x = x_rcrd + 1)
       ),
-      spec_df(
+      tspec_df(
         x = tib_scalar("x", ptype = x_rcrd)
       )
     ),
@@ -107,7 +107,7 @@ test_that("record objects work", {
         list(timediff = td1),
         list(timediff = td2)
       ),
-      spec_df(
+      tspec_df(
         timediff = tib_scalar("timediff", ptype = td1)
       )
     ),
@@ -120,7 +120,7 @@ test_that("scalar columns respect ptype_inner", {
     stopifnot(is.character(x))
     as.Date(x)
   }
-  spec <- spec_df(
+  spec <- tspec_df(
     tib_scalar(
       "x", Sys.Date(),
       required = FALSE,
@@ -138,7 +138,7 @@ test_that("scalar columns respect ptype_inner", {
     tibble(x = as.Date(c("2022-06-01", "2022-06-02", "2000-01-01")))
   )
 
-  spec2 <- spec_df(
+  spec2 <- tspec_df(
     tib_scalar(
       "x", Sys.Date(),
       required = FALSE,
@@ -195,7 +195,7 @@ test_that("vector column works", {
 })
 
 test_that("vector columns respect ptype_inner", {
-  spec <- spec_df(
+  spec <- tspec_df(
     tib_vector(
       "x", Sys.Date(),
       required = FALSE,
@@ -228,7 +228,7 @@ test_that("explicit NULL work", {
   )
 
   expect_equal(
-    tibblify(x, spec_df(tib_int("x", required = FALSE))),
+    tibblify(x, tspec_df(tib_int("x", required = FALSE))),
     tibble(x = c(NA, 3L, NA))
   )
 })
@@ -241,11 +241,11 @@ test_that("vector column respects vector_allows_empty_list", {
   )
 
   expect_snapshot({
-    (expect_error(tibblify(x, spec_df(tib_int_vec("x")))))
+    (expect_error(tibblify(x, tspec_df(tib_int_vec("x")))))
   })
 
   expect_equal(
-    tibblify(x, spec_df(tib_int_vec("x"), vector_allows_empty_list = TRUE)),
+    tibblify(x, tspec_df(tib_int_vec("x"), vector_allows_empty_list = TRUE)),
     tibble(x = list_of(1, NULL, 1:3))
   )
 })
@@ -288,7 +288,7 @@ test_that("vector column can parse scalar list", {
   expect_equal(
     tibblify(
       list(list(x = list(1, 2)), list(x = NULL)),
-      spec_df(x = spec)
+      tspec_df(x = spec)
     ),
     tibble(x = list_of(1:2, NULL))
   )
@@ -297,16 +297,16 @@ test_that("vector column can parse scalar list", {
   expect_equal(
     tibblify(
       list(list(x = list(1, 2)), list(x = list())),
-      spec_df(x = spec)
+      tspec_df(x = spec)
     ),
     tibble(x = list_of(1:2, integer()))
   )
 
-  spec_object <- spec
-  spec_object$input_form <- "object"
+  tspec_object <- spec
+  tspec_object$input_form <- "object"
   expect_snapshot({
     (expect_error(tib(list(x = 1), spec)))
-    (expect_error(tib(list(x = 1), spec_object)))
+    (expect_error(tib(list(x = 1), tspec_object)))
   })
 
   expect_snapshot({
@@ -375,7 +375,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = TRUE), list(x = 1)),
-      spec_df(x = tib_variant("x"))
+      tspec_df(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE, 1))
   )
@@ -383,7 +383,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(x = TRUE),
-      spec_row(x = tib_variant("x"))
+      tspec_row(x = tib_variant("x"))
     ),
     tibble(x = list(TRUE))
   )
@@ -392,7 +392,7 @@ test_that("list column works", {
   expect_snapshot(
     (expect_error(tibblify(
       list(list(x = TRUE), list(zzz = 1)),
-      spec_df(x = tib_variant("x"))
+      tspec_df(x = tib_variant("x"))
     )))
   )
 
@@ -400,7 +400,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(), list(x = 1)),
-      spec_df(x = tib_variant("x", required = FALSE))
+      tspec_df(x = tib_variant("x", required = FALSE))
     ),
     tibble(x = list(NULL, 1))
   )
@@ -409,7 +409,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list()),
-      spec_df(x = tib_variant("x", required = FALSE, fill = 1))
+      tspec_df(x = tib_variant("x", required = FALSE, fill = 1))
     ),
     tibble(x = list(1))
   )
@@ -418,7 +418,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = NULL)),
-      spec_df(x = tib_variant("x", fill = 1))
+      tspec_df(x = tib_variant("x", fill = 1))
     ),
     tibble(x = list(NULL))
   )
@@ -427,7 +427,7 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = c(TRUE, FALSE)), list(x = 1)),
-      spec_df(x = tib_variant("x", required = FALSE, transform = ~ length(.x)))
+      tspec_df(x = tib_variant("x", required = FALSE, transform = ~ length(.x)))
     ),
     tibble(x = list(2, 1))
   )
@@ -441,7 +441,7 @@ test_that("df column works", {
         list(x = list(a = TRUE)),
         list(x = list(a = FALSE))
       ),
-      spec_df(x = tib_row("x", a = tib_lgl("a")))
+      tspec_df(x = tib_row("x", a = tib_lgl("a")))
     ),
     tibble(x = tibble(a = c(TRUE, FALSE)))
   )
@@ -453,7 +453,7 @@ test_that("df column works", {
         list(x = list(a = TRUE)),
         list()
       ),
-      spec_df(x = tib_row("x", a = tib_lgl("a")))
+      tspec_df(x = tib_row("x", a = tib_lgl("a")))
     )))
   )
 
@@ -465,7 +465,7 @@ test_that("df column works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+      tspec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = tibble(a = c(TRUE, NA, NA)))
   )
@@ -481,7 +481,7 @@ test_that("list of df column works", {
           list(a = FALSE)
         ))
       ),
-      spec_df(x = tib_df("x", a = tib_lgl("a")))
+      tspec_df(x = tib_df("x", a = tib_lgl("a")))
     ),
     tibble(x = list_of(tibble(a = c(TRUE, FALSE))))
   )
@@ -496,7 +496,7 @@ test_that("list of df column works", {
         )),
         list()
       ),
-      spec_df(x = tib_df("x", a = tib_lgl("a")))
+      tspec_df(x = tib_df("x", a = tib_lgl("a")))
     )))
   )
 
@@ -511,7 +511,7 @@ test_that("list of df column works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+      tspec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
   )
@@ -525,7 +525,7 @@ test_that("names_to works", {
         a = list(x = TRUE),
         b = list(x = FALSE)
       ),
-      spec_df(x = tib_lgl("x"), .names_to = "nms")
+      tspec_df(x = tib_lgl("x"), .names_to = "nms")
     ),
     tibble(nms = c("a", "b"), x = c(TRUE, FALSE))
   )
@@ -537,7 +537,7 @@ test_that("names_to works", {
         a = list(x = TRUE),
         list(x = FALSE)
       ),
-      spec_df(x = tib_lgl("x"), .names_to = "nms")
+      tspec_df(x = tib_lgl("x"), .names_to = "nms")
     ),
     tibble(nms = c("a", ""), x = c(TRUE, FALSE))
   )
@@ -549,7 +549,7 @@ test_that("names_to works", {
         list(x = TRUE),
         list(x = FALSE)
       ),
-      spec_df(x = tib_lgl("x"), .names_to = "nms")
+      tspec_df(x = tib_lgl("x"), .names_to = "nms")
     ),
     tibble(nms = c("", ""), x = c(TRUE, FALSE))
   )
@@ -561,7 +561,7 @@ test_that("tibble input works", {
   expect_equal(
     tibblify(
       df,
-      spec_df(
+      tspec_df(
         x = tib_int("x"),
         y = tib_chr("y")
       )
@@ -574,7 +574,7 @@ test_that("tibble input works", {
   expect_equal(
     tibblify(
       df2,
-      spec_df(
+      tspec_df(
         x = tib_int("x"),
         y = tib_chr("y"),
         df = tib_row(
@@ -590,14 +590,14 @@ test_that("tibble input works", {
 test_that("tibble with list columns work - #43", {
   x <- tibble::tibble(x = list(1:3, NULL, 1:2))
   expect_equal(
-    tibblify(x, spec_df(x = tib_int_vec("x"))),
+    tibblify(x, tspec_df(x = tib_int_vec("x"))),
     tibble(x = list_of(1:3, NULL, 1:2))
   )
 
   y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
-  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
+  spec <- tspec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE))
   expect_equal(
-    tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
+    tibblify(y, tspec_df(x = tib_df("x", tib_dbl("a")))),
     tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
   )
 })
@@ -606,7 +606,7 @@ test_that("nested keys work", {
   expect_equal(
     tibblify(
       list(list(x = list(y = list(z = 1)))),
-      spec_df(xyz = tib_int(c("x", "y", "z")))
+      tspec_df(xyz = tib_int(c("x", "y", "z")))
     ),
     tibble(xyz = 1)
   )
@@ -616,7 +616,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       list(list(), list()),
-      spec_df()
+      tspec_df()
     ),
     tibble(.rows = 2)
   )
@@ -624,7 +624,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       list(),
-      spec_df()
+      tspec_df()
     ),
     tibble()
   )
@@ -632,7 +632,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       list(list(x = list()), list(x = list())),
-      spec_df(x = tib_row("x"))
+      tspec_df(x = tib_row("x"))
     ),
     tibble(x = tibble(.rows = 2), .rows = 2)
   )
@@ -640,7 +640,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       list(),
-      spec_df(x = tib_row("x", .required = FALSE))
+      tspec_df(x = tib_row("x", .required = FALSE))
     ),
     tibble(x = tibble())
   )
@@ -649,7 +649,7 @@ test_that("empty spec works", {
 test_that("does not confuse key order due to case - #96", {
   skip_on_cran()
   withr::local_locale(c(LC_COLLATE = "en_US"))
-  spec <- spec_object(
+  spec <- tspec_object(
     B = tib_int("B", required = FALSE),
     a = tib_int("a", required = FALSE),
   )
@@ -707,7 +707,7 @@ test_that("discog works", {
   )
 
   # TODO think about issue with "description"
-  spec_collection <- spec_df(
+  spec_collection <- tspec_df(
     tib_int("instance_id"),
     tib_chr("date_added"),
     tib_row(
@@ -758,21 +758,21 @@ test_that("discog works", {
   expect_equal(tibblify(discog[1], spec_collection), row1)
   expect_equal(tibblify(row1, spec_collection), row1)
 
-  specs_object <- spec_row(!!!spec_collection$fields)
+  specs_object <- tspec_row(!!!spec_collection$fields)
   expect_equal(tibblify(discog[[1]], specs_object), row1)
   expect_equal(tibblify(row1, specs_object), row1)
 })
 
-test_that("spec_object() works", {
+test_that("tspec_object() works", {
   x <- list(a = 1, b = 1:3)
-  spec <- spec_row(a = tib_int("a"), b = tib_int_vec("b"))
+  spec <- tspec_row(a = tib_int("a"), b = tib_int_vec("b"))
 
   expect_equal(
     tibblify(x, spec),
     tibble(a = 1L, b = list_of(1:3))
   )
   expect_equal(
-    tibblify(x, spec_object(spec)),
+    tibblify(x, tspec_object(spec)),
     list(a = 1L, b = 1:3)
   )
 
@@ -787,7 +787,7 @@ test_that("spec_object() works", {
     )
   )
 
-  spec2 <- spec_row(
+  spec2 <- tspec_row(
     a = tib_row(
       "a",
       x = tib_int("x"),
@@ -807,7 +807,7 @@ test_that("spec_object() works", {
     )
   )
   expect_equal(
-    tibblify(x2, spec_object(spec2)),
+    tibblify(x2, tspec_object(spec2)),
     list(
       a = list(
         x = 1L,
@@ -819,7 +819,7 @@ test_that("spec_object() works", {
 })
 
 test_that("spec_replace_unspecified works", {
-  spec <- spec_df(
+  spec <- tspec_df(
     tib_int("1int"),
     tib_unspecified("1un"),
     tib_df(
@@ -841,7 +841,7 @@ test_that("spec_replace_unspecified works", {
 
   expect_equal(
     spec_replace_unspecified(spec, unspecified = "drop"),
-    spec_df(
+    tspec_df(
       tib_int("1int"),
       tib_df(
         "1df",
@@ -854,7 +854,7 @@ test_that("spec_replace_unspecified works", {
   )
   expect_equal(
     spec_replace_unspecified(spec, unspecified = "list"),
-    spec_df(
+    tspec_df(
       tib_int("1int"),
       tib_variant("1un"),
       tib_df(
@@ -879,7 +879,7 @@ test_that("spec_replace_unspecified works", {
 # colmajor ----------------------------------------------------------------
 
 test_that("colmajor: names are checked", {
-  spec <- spec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
+  spec <- tspec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
 
   expect_snapshot({
     # no names
@@ -1072,7 +1072,7 @@ test_that("row works", {
         list(x = list(a = TRUE)),
         list()
       ),
-      spec_df(x = tib_row("x", a = tib_lgl("a")))
+      tspec_df(x = tib_row("x", a = tib_lgl("a")))
     )))
   )
 
@@ -1084,7 +1084,7 @@ test_that("row works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+      tspec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = tibble(a = c(TRUE, NA, NA)))
   )
@@ -1134,7 +1134,7 @@ test_that("list of df column works", {
         )),
         list()
       ),
-      spec_df(x = tib_df("x", a = tib_lgl("a")))
+      tspec_df(x = tib_df("x", a = tib_lgl("a")))
     )))
   )
 
@@ -1149,7 +1149,7 @@ test_that("list of df column works", {
         list(x = list()),
         list()
       ),
-      spec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+      tspec_df(x = tib_df("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
     ),
     tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
   )
@@ -1158,20 +1158,20 @@ test_that("list of df column works", {
 test_that("tibble with list columns work - #43", {
   x <- tibble::tibble(x = list(1:3, NULL, 1:2))
   expect_equal(
-    tibblify(x, spec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
+    tibblify(x, tspec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
     tibble(x = list_of(1:3, NULL, 1:2))
   )
 
   y <- tibble::tibble(x = list(tibble(a = 1:2), NULL, tibble(a = 1)))
-  spec <- spec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE), .input_form = "colmajor")
+  spec <- tspec_df(x = tib_df("x", tib_dbl("a"), .required = FALSE), .input_form = "colmajor")
   expect_equal(
-    tibblify(y, spec_df(x = tib_df("x", tib_dbl("a")))),
+    tibblify(y, tspec_df(x = tib_df("x", tib_dbl("a")))),
     tibble(x = list_of(tibble(a = 1:2), NULL, tibble(a = 1)))
   )
 })
 
 test_that("nested keys work", {
-  spec <- spec_df(
+  spec <- tspec_df(
     xyz = tib_int(c("x", "y", "z")),
     .input_form = "colmajor"
   )
@@ -1193,7 +1193,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       set_names(list()),
-      spec_df(.input_form = "colmajor")
+      tspec_df(.input_form = "colmajor")
     ),
     tibble()
   )
@@ -1201,7 +1201,7 @@ test_that("empty spec works", {
   expect_equal(
     tibblify(
       list(x = set_names(list())),
-      spec_df(x = tib_row("x"), .input_form = "colmajor")
+      tspec_df(x = tib_row("x"), .input_form = "colmajor")
     ),
     tibble(x = tibble(.rows = 0), .rows = 0)
   )
@@ -1220,12 +1220,12 @@ test_that("colmajor checks size", {
   tib_cm <- function(col1, col2, x, y) {
     tibblify(
       list(x = x, y = y),
-      spec_df(col1, col2, .input_form = "colmajor")
+      tspec_df(col1, col2, .input_form = "colmajor")
     )
   }
 
   spec_cm <- function(...) {
-    spec_df(.input_form = "colmajor", ...)
+    tspec_df(.input_form = "colmajor", ...)
   }
 
   expect_snapshot({

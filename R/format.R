@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-#' spec <- spec_df(
+#' spec <- tspec_df(
 #'   a = tib_int("a"),
 #'   new_name = tib_chr("b"),
 #'   row = tib_row(
@@ -24,7 +24,7 @@
 #' )
 #' print(spec, names = FALSE)
 #' print(spec, names = TRUE)
-print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
+print.tspec <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
   cat(format(x, width = width, ..., names = names))
@@ -34,12 +34,12 @@ print.spec_tib <- function(x, width = NULL, ..., names = NULL) {
 
 #' @rdname formatting
 #' @export
-format.spec_df <- function(x, width = NULL, ..., names = NULL) {
+format.tspec_df <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
 
   format_fields(
-    "spec_df",
+    "tspec_df",
     fields = x$fields,
     width = width,
     args = list(
@@ -52,12 +52,12 @@ format.spec_df <- function(x, width = NULL, ..., names = NULL) {
 }
 
 #' @export
-format.spec_row <- function(x, width = NULL, ..., names = NULL) {
+format.tspec_row <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
 
   format_fields(
-    "spec_row",
+    "tspec_row",
     fields = x$fields,
     width = width,
     args = list(
@@ -69,12 +69,12 @@ format.spec_row <- function(x, width = NULL, ..., names = NULL) {
 }
 
 #' @export
-format.spec_object <- function(x, width = NULL, ..., names = NULL) {
+format.tspec_object <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
 
   format_fields(
-    "spec_object",
+    "tspec_object",
     fields = x$fields,
     width = width,
     args = list(

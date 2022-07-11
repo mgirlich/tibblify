@@ -1,9 +1,9 @@
 #' Rectangle a nested list
 #'
 #' @param x A nested list.
-#' @param spec A specification how to convert `x`. Generated with `spec_row()`
-#'   or `spec_df()`.
-#' @param names_to Deprecated. Use `spec_df(.names_to)` instead.
+#' @param spec A specification how to convert `x`. Generated with `tspec_row()`
+#'   or `tspec_df()`.
+#' @param names_to Deprecated. Use `tspec_df(.names_to)` instead.
 #' @param unspecified A string that describes what happens if the specification
 #'   contains unspecified fields. Can be one of
 #'   * `"error"`: Throw an error.
@@ -22,14 +22,14 @@
 #' tibblify(x)
 #'
 #' # Provide a specification
-#' spec <- spec_df(
+#' spec <- tspec_df(
 #'   id = tib_int("id"),
 #'   name = tib_chr("name")
 #' )
 #' tibblify(x, spec)
 #'
 #' # Provide a specification for a single object
-#' tibblify(x[[1]], spec_object(spec))
+#' tibblify(x[[1]], tspec_object(spec))
 tibblify <- function(x,
                      spec = NULL,
                      names_to = NULL,
@@ -41,11 +41,11 @@ tibblify <- function(x,
   }
 
   if (is_null(spec)) {
-    spec <- spec_guess(x, inform_unspecified = TRUE, call = current_call())
+    spec <- guess_tspec(x, inform_unspecified = TRUE, call = current_call())
     unspecified <- unspecified %||% "list"
   }
 
-  if (!inherits(spec, "spec_tib")) {
+  if (!is_tspec(spec)) {
     friendly_type <- obj_type_friendly(spec)
     msg <- "{.arg spec} must be a tibblify spec, not {friendly_type}."
     cli::cli_abort(msg)
@@ -72,44 +72,44 @@ tibblify <- function(x,
     }
   )
 
-  if (inherits(spec, "spec_object")) {
-    out <- purrr::map2(spec$fields, out, finalize_spec_object)
+  if (inherits(spec, "tspec_object")) {
+    out <- purrr::map2(spec$fields, out, finalize_tspec_object)
   }
 
   out
 }
 
-finalize_spec_object <- function(field_spec, field) {
-  UseMethod("finalize_spec_object")
+finalize_tspec_object <- function(field_spec, field) {
+  UseMethod("finalize_tspec_object")
 }
 
 #' @export
-finalize_spec_object.tib_scalar <- function(field_spec, field) {
+finalize_tspec_object.tib_scalar <- function(field_spec, field) {
   field
 }
 
 #' @export
-finalize_spec_object.tib_df <- function(field_spec, field) {
+finalize_tspec_object.tib_df <- function(field_spec, field) {
   field[[1]]
 }
 
 #' @export
-finalize_spec_object.tib_row <- function(field_spec, field) {
-  purrr::map2(field_spec$fields, field, finalize_spec_object)
+finalize_tspec_object.tib_row <- function(field_spec, field) {
+  purrr::map2(field_spec$fields, field, finalize_tspec_object)
 }
 
 #' @export
-finalize_spec_object.tib_variant <- function(field_spec, field) {
+finalize_tspec_object.tib_variant <- function(field_spec, field) {
   field[[1]]
 }
 
 #' @export
-finalize_spec_object.tib_unspecified<- function(field_spec, field) {
+finalize_tspec_object.tib_unspecified<- function(field_spec, field) {
   field[[1]]
 }
 
 #' @export
-finalize_spec_object.tib_vector <- function(field_spec, field) {
+finalize_tspec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
 

@@ -1,10 +1,10 @@
 #' Create a Tibblify Specification
 #'
-#' Use `spec_df()` to specify how to convert a list of objects to a tibble.
-#' Use `spec_row()` resp. `spec_object()` to specify how to convert an object
+#' Use `tspec_df()` to specify how to convert a list of objects to a tibble.
+#' Use `tspec_row()` resp. `tspec_object()` to specify how to convert an object
 #' to a one row tibble resp. a list.
 #'
-#' @param ... Column specification created by `tib_*()` or `spec_*()`.
+#' @param ... Column specification created by `tib_*()` or `tspec_*()`.
 #' @param .input_form The input form of data frame like lists. Can be one of:
 #'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.
 #'   * `"colmajor"`: The data frame is a named list of columns.
@@ -16,7 +16,7 @@
 #'
 #' @export
 #' @examples
-#' spec_df(
+#' tspec_df(
 #'   id = tib_int("id"),
 #'   name = tib_chr("name"),
 #'   aliases = tib_chr_vec("aliases")
@@ -24,30 +24,30 @@
 #'
 #' # To create multiple columns of the same type use the bang-bang-bang (!!!)
 #' # operator together with `purrr::map()`
-#' spec_df(
+#' tspec_df(
 #'   !!!purrr::map(purrr::set_names(c("id", "age")), tib_int),
 #'   !!!purrr::map(purrr::set_names(c("name", "title")), tib_chr)
 #' )
 #'
-#' # The `spec_*()` functions can also be nested
-#' spec1 <- spec_object(
+#' # The `tspec_*()` functions can also be nested
+#' spec1 <- tspec_object(
 #'   int = tib_int("int"),
 #'   chr = tib_chr("chr")
 #' )
-#' spec2 <- spec_object(
+#' spec2 <- tspec_object(
 #'   int2 = tib_int("int2"),
 #'   chr2 = tib_chr("chr2")
 #' )
 #'
-#' spec_df(spec1, spec2)
-spec_df <- function(...,
-                    .input_form = c("rowmajor", "colmajor"),
-                    .names_to = NULL,
-                    vector_allows_empty_list = FALSE) {
+#' tspec_df(spec1, spec2)
+tspec_df <- function(...,
+                     .input_form = c("rowmajor", "colmajor"),
+                     .names_to = NULL,
+                     vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
   check_names_to(.names_to, .input_form)
 
-  out <- spec_tib(
+  out <- tspec(
     list2(...),
     "df",
     input_form = .input_form,
@@ -72,13 +72,13 @@ check_names_to <- function(.names_to, input_form, call = caller_env()) {
   }
 }
 
-#' @rdname spec_df
+#' @rdname tspec_df
 #' @export
-spec_object <- function(...,
-                        .input_form = c("rowmajor", "colmajor"),
-                        vector_allows_empty_list = FALSE) {
+tspec_object <- function(...,
+                         .input_form = c("rowmajor", "colmajor"),
+                         vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
-  spec_tib(
+  tspec(
     list2(...),
     "object",
     input_form = .input_form,
@@ -86,13 +86,13 @@ spec_object <- function(...,
   )
 }
 
-#' @rdname spec_df
+#' @rdname tspec_df
 #' @export
-spec_row <- function(...,
-                     .input_form = c("rowmajor", "colmajor"),
-                     vector_allows_empty_list = FALSE) {
+tspec_row <- function(...,
+                      .input_form = c("rowmajor", "colmajor"),
+                      vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
-  spec_tib(
+  tspec(
     list2(...),
     "row",
     input_form = .input_form,
@@ -100,7 +100,7 @@ spec_row <- function(...,
   )
 }
 
-spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
+tspec <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
   check_bool(vector_allows_empty_list)
 
   structure(
@@ -110,8 +110,12 @@ spec_tib <- function(fields, type, ..., vector_allows_empty_list = FALSE, call =
       ...,
       vector_allows_empty_list = vector_allows_empty_list
     ),
-    class = c(paste0("spec_", type), "spec_tib")
+    class = c(paste0("tspec_", type), "tspec")
   )
+}
+
+is_tspec <- function(x) {
+  inherits(x, "tspec")
 }
 
 prep_spec_fields <- function(fields, call) {
@@ -165,7 +169,7 @@ flatten_fields <- function(fields) {
   fields_nested <- purrr::map(
     fields,
     function(x) {
-      if (inherits(x, "spec_tib")) {
+      if (is_tspec(x)) {
         x$fields
       } else {
         list(x)
@@ -317,7 +321,7 @@ tib_native_ptype.Date <- function(ptype, class, fields) {
 #'     or `"vector"` and 2) `values_to` is a string. The inner names of the
 #'     field go into the specified column.
 #' @param format Optional, a string passed to the `format` argument of `as.Date()`.
-#' @inheritParams spec_df
+#' @inheritParams tspec_df
 #'
 #' @details There are basically five different `tib_*()` functions
 #'

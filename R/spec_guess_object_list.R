@@ -1,4 +1,4 @@
-spec_guess_object_list <- function(x,
+guess_tspec_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
@@ -8,7 +8,7 @@ spec_guess_object_list <- function(x,
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
-      i = "Did you want to use {.fn spec_guess_df} instead?"
+      i = "Did you want to use {.fn guess_tspec_df} instead?"
     )
     cli::cli_abort(msg, call = call)
   }
@@ -30,7 +30,7 @@ spec_guess_object_list <- function(x,
     names_to <- ".names"
   }
 
-  spec_df(
+  tspec_df(
     !!!fields,
     .names_to = names_to,
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))

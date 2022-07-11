@@ -9,10 +9,10 @@ tibblify(x, spec = NULL, names_to = NULL, unspecified = NULL)
 \arguments{
 \item{x}{A nested list.}
 
-\item{spec}{A specification how to convert \code{x}. Generated with \code{spec_row()}
-or \code{spec_df()}.}
+\item{spec}{A specification how to convert \code{x}. Generated with \code{tspec_row()}
+or \code{tspec_df()}.}
 
-\item{names_to}{Deprecated. Use \code{spec_df(.names_to)} instead.}
+\item{names_to}{Deprecated. Use \code{tspec_df(.names_to)} instead.}
 
 \item{unspecified}{A string that describes what happens if the specification
 contains unspecified fields. Can be one of
@@ -37,12 +37,12 @@ x <- list(
 tibblify(x)
 
 # Provide a specification
-spec <- spec_df(
+spec <- tspec_df(
   id = tib_int("id"),
   name = tib_chr("name")
 )
 tibblify(x, spec)
 
 # Provide a specification for a single object
-tibblify(x[[1]], spec_object(spec))
+tibblify(x[[1]], tspec_object(spec))
 }

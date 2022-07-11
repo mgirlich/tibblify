@@ -21,7 +21,7 @@ read_sample_json <- function(x) {
 tib <- function(x, col) {
   tibblify(
     list(x),
-    spec_df(x = col)
+    tspec_df(x = col)
   )
 }
 
@@ -33,6 +33,6 @@ tib_cm <- function(..., x, y = NULL) {
   }
   tibblify(
     object_list,
-    spec_df(.input_form = "colmajor", ...)
+    tspec_df(.input_form = "colmajor", ...)
   )
 }
