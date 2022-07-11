@@ -29,7 +29,8 @@ the JSON they correspond to.
 
 ### Scalars
 
-There are 4 basic types of scalars coming from JSON: boolean, integer, float, string
+There are 4 basic types of scalars coming from JSON: boolean, integer, float, string.
+In R there are not really scalars but only vectors of length 1.
 
 :::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
 
@@ -62,7 +63,7 @@ Other R vectors without JSON equivalent are also supported as long as they:
 * are a vector in the vctrs definition and
 * have size one, i.e. `vctrs::vec_size(x)` is 1.
 
-Examples are `Date` or `POSIXct`
+Examples are `Date` or `POSIXct`.
 
 In general a scalar can be parsed with `tib_scalar()`. There are some special
 functions for common types:
@@ -72,12 +73,6 @@ functions for common types:
 * `tib_dbl()`
 * `tib_chr()`
 * `tib_date()`
-
-can be parsed with
-
-```{r eval=FALSE}
-tib_scalar(ptype = vctrs::new_datetime())
-```
 
 
 ### Vectors
@@ -120,6 +115,9 @@ list("a", NULL, "c")
 :::
 
 ::::
+
+As for scalars other types are also supported as long as they are a vector in the
+vctrs definition.
 
 They can be parsed with `tib_vector()`. As for scalars there are shortcuts for
 some common types, e.g. `tib_lgl_vec()`.
@@ -205,12 +203,13 @@ spec <- tspec_df(
     values_to = "value"
   )
 )
-tibblify(x, )$a
+
+tibblify(x, spec)$a
 ```
 
 ### Varying
 
-Lists where elements do not have a common type but vary:
+Lists where elements do not have a common type but vary. For example:
 
 :::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
 
@@ -235,14 +234,7 @@ list(1, "a", TRUE)
 can be parsed with `tib_variant()`.
 
 
-### 
-
-
-### NULL
-
-`tibblify()` supports four formats:
-
-### 1. Object
+### Object
 
 The R equivalent to a JSON object is a named list where the names fulfill the
 requirements of `vctrs::vec_as_names(repair = "check_unique")`.
@@ -274,29 +266,29 @@ x <- list(
 
 ::::
 
-They can be parsed with `tspec_object()` to produce a list or with `tspec_row()`
-to produce a 1 row tibble
+They can be parsed with `tib_row()`. For example
 
 ```{r}
-object_spec <- tspec_object(
-  tib_int("a"),
-  tib_lgl("b")
+x <- list(
+  list(row = list(a = 1, b = TRUE)),
+  list(row = list(a = 2, b = FALSE))
 )
 
-tibblify(x, object_spec)
-```
-
-```{r}
-row_spec <- tspec_row(
-  tib_int("a"),
-  tib_lgl("b")
+spec <- tspec_df(
+  tib_row(
+    "row",
+    tib_int("a"),
+    tib_lgl("b")
+  )
 )
 
-tibblify(x, row_spec)
+tibblify(x, spec)
 ```
 
 
-### 2.  List of homogeneous objects
+### Data Frames
+
+List of objects
 
 :::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
 
@@ -324,18 +316,12 @@ x <- list(
 
 ::::
 
-They are parsed with `tspec_df()`
+They can be parsed with `tib_df()`.
 
-```{r}
-df_spec <- tspec_df(
-  tib_int("a"),
-  tib_lgl("b")
-)
+#### Object of objects
 
-tibblify(x, df_spec)
-```
-
-### 3.  Object of homogeneous objects
+A special form are named lists of object. In JSON they are represented as objects
+where each element is an object.
 
 :::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
 
@@ -363,18 +349,37 @@ x <- list(
 
 ::::
 
-They are also parsed with `tspec_df()` but you can parse the names into an extra
+They are also parsed with `tib_df()` but you can parse the names into an extra
 column via the `.names_to` argument:
 
 ```{r}
-df_spec <- tspec_df(
-  tib_int("a"),
-  tib_lgl("b"),
-  .names_to = "name"
+x_json <- '[
+{
+  "df": {
+    "object1": {"a": 1, "b": true},
+    "object2": {"a": 2, "b": false}
+  }
+}]'
+
+x <- jsonlite::fromJSON(x_json, simplifyDataFrame = FALSE)
+
+spec <- tspec_df(
+  tib_df(
+    "df",
+    tib_int("a"),
+    tib_lgl("b"),
+    .names_to = "name"
+  )
 )
 
-tibblify(x, df_spec)
+tibblify(x, spec)
 ```
+
+
+
+### NULL
+
+`tibblify()` supports four formats:
 
 
 ### 4.  Object in column major format
