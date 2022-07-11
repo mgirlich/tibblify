@@ -1,8 +1,8 @@
 #' Guess the `tibblify()` Specification
 #'
-#' Use `tspec_guess()` if you don't know the input type.
-#' Use `tspec_guess_df()` if the input is a data frame or an object list.
-#' Use `tspec_guess_objecte()` is the input is an object.
+#' Use `guess_tspec()` if you don't know the input type.
+#' Use `guess_tspec_df()` if the input is a data frame or an object list.
+#' Use `guess_tspec_objecte()` is the input is an object.
 #'
 #' @param x A nested list.
 #' @param ... These dots are for future extensions and must be empty.
@@ -19,11 +19,11 @@
 #' @export
 #'
 #' @examples
-#' tspec_guess(list(x = 1, y = "a"))
-#' tspec_guess(list(list(x = 1), list(x = 2)))
+#' guess_tspec(list(x = 1, y = "a"))
+#' guess_tspec(list(list(x = 1), list(x = 2)))
 #'
-#' tspec_guess(gh_users)
-tspec_guess <- function(x,
+#' guess_tspec(gh_users)
+guess_tspec <- function(x,
                         ...,
                         empty_list_unspecified = FALSE,
                         simplify_list = FALSE,
@@ -31,7 +31,7 @@ tspec_guess <- function(x,
                         call = current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
-    tspec_guess_df(
+    guess_tspec_df(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -39,7 +39,7 @@ tspec_guess <- function(x,
       call = call
     )
   } else if (is.list(x)) {
-    tspec_guess_list(
+    guess_tspec_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -52,7 +52,7 @@ tspec_guess <- function(x,
   }
 }
 
-tspec_guess_list <- function(x,
+guess_tspec_list <- function(x,
                              ...,
                              empty_list_unspecified = FALSE,
                              simplify_list = FALSE,
@@ -80,7 +80,7 @@ tspec_guess_list <- function(x,
   }
 
   if (is_object_list(x)) {
-    spec <- tspec_guess_object_list(
+    spec <- guess_tspec_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
@@ -91,7 +91,7 @@ tspec_guess_list <- function(x,
   }
 
   if (is_object(x)) {
-    spec <- tspec_guess_object(
+    spec <- guess_tspec_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,

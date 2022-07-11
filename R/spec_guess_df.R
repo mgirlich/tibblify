@@ -1,6 +1,6 @@
 #' @export
-#' @rdname tspec_guess
-tspec_guess_df <- function(x,
+#' @rdname guess_tspec
+guess_tspec_df <- function(x,
                           ...,
                           empty_list_unspecified = FALSE,
                           simplify_list = FALSE,
@@ -24,7 +24,7 @@ tspec_guess_df <- function(x,
       cli::cli_abort(msg, call = call)
     }
 
-    spec <- tspec_guess_object_list(
+    spec <- guess_tspec_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
