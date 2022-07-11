@@ -15,6 +15,13 @@
 ---
 
     Code
+      tib_date("a") %>% print()
+    Output
+      tib_date("a")
+
+---
+
+    Code
       tib_dbl("a") %>% print()
     Output
       tib_dbl("a")
@@ -88,6 +95,17 @@
         tib_chr("z", fill = "abc"),
       )
 
+---
+
+    Code
+      tib_int(key = "x", ptype_inner = character(), fill = "a")
+    Output
+      tib_int(
+        "x",
+        fill = "a",
+        ptype_inner = character(0),
+      )
+
 # format breaks long lines
 
     Code
@@ -123,19 +141,19 @@
 ---
 
     Code
-      tib_vector("a", ptype = Sys.Date()) %>% print()
+      tib_vector("a", ptype = vctrs::new_duration()) %>% print()
     Output
-      tib_vector("a", ptype = vctrs::new_date())
+      tib_vector("a", ptype = vctrs::new_duration())
 
 ---
 
     Code
-      tib_vector("a", ptype = Sys.Date(), input_form = "object", values_to = "vals",
-      names_to = "names") %>% print()
+      tib_vector("a", ptype = vctrs::new_duration(), input_form = "object",
+      values_to = "vals", names_to = "names") %>% print()
     Output
       tib_vector(
         "a",
-        ptype = vctrs::new_date(),
+        ptype = vctrs::new_duration(),
         input_form = "object",
         values_to = "vals",
         names_to = "names",
@@ -147,6 +165,49 @@
       tib_int_vec("a", fill = 1:2) %>% print()
     Output
       tib_int_vec("a", fill = 1:2)
+
+---
+
+    Code
+      tib_int_vec(key = "x", ptype_inner = character(), fill = 1:2)
+    Output
+      tib_int_vec(
+        "x",
+        fill = 1:2,
+        ptype_inner = character(0),
+      )
+
+# format for tib_chr_date works
+
+    Code
+      tib_chr_date("a")
+    Output
+      tib_chr_date("a")
+    Code
+      tib_chr_date("a", required = FALSE, fill = "2022-01-01", format = "%Y")
+    Output
+      tib_chr_date(
+        "a",
+        required = FALSE,
+        fill = "2022-01-01",
+        format = "%Y",
+      )
+
+---
+
+    Code
+      tib_chr_date_vec("a")
+    Output
+      tib_chr_date_vec("a")
+    Code
+      tib_chr_date_vec("a", required = FALSE, fill = as.Date("2022-01-01"), format = "%Y")
+    Output
+      tib_chr_date_vec(
+        "a",
+        required = FALSE,
+        fill = as.Date("2022-01-01"),
+        format = "%Y",
+      )
 
 # format for tib_row works
 
@@ -275,7 +336,7 @@
 # can force to print canonical names
 
     Code
-      format(spec_df(a = tib_int("a"), b = tib_df("b", x = tib_int("x"))))
+      format(tspec_df(a = tib_int("a"), b = tib_df("b", x = tib_int("x"))))
     Output
-      [1] "spec_df(\n  a = tib_int(\"a\"),\n  b = tib_df(\n    \"b\",\n    x = tib_int(\"x\"),\n  ),\n)"
+      [1] "tspec_df(\n  a = tib_int(\"a\"),\n  b = tib_df(\n    \"b\",\n    x = tib_int(\"x\"),\n  ),\n)"
 

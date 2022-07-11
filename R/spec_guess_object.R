@@ -1,6 +1,6 @@
-#' @rdname spec_guess
+#' @rdname guess_tspec
 #' @export
-spec_guess_object <- function(x,
+guess_tspec_object <- function(x,
                               ...,
                               empty_list_unspecified = FALSE,
                               simplify_list = FALSE,
@@ -10,7 +10,7 @@ spec_guess_object <- function(x,
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
-      i = "Did you want to use {.fn spec_guess_df} instead?"
+      i = "Did you want to use {.fn guess_tspec_df} instead?"
     )
     cli::cli_abort(msg, call = call)
   }
@@ -24,7 +24,7 @@ spec_guess_object <- function(x,
   check_object_names(x, call)
 
   if (is_empty(x)) {
-    return(spec_object())
+    return(tspec_object())
   }
 
   fields <- purrr::imap(
@@ -34,7 +34,7 @@ spec_guess_object <- function(x,
     simplify_list = simplify_list
   )
 
-  spec_object(
+  tspec_object(
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg")),
     !!!fields
   )

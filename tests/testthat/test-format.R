@@ -8,7 +8,7 @@ test_that("format for scalars works", {
   local_options(cli.num_colors = 1)
 
   expect_snapshot(tib_chr("a") %>% print())
-  # expect_snapshot(tib_dat("a") %>% print())
+  expect_snapshot(tib_date("a") %>% print())
   expect_snapshot(tib_dbl("a") %>% print())
   # expect_snapshot(tib_dtt("a") %>% print())
   expect_snapshot(tib_int("a") %>% print())
@@ -31,6 +31,14 @@ test_that("format for scalars works", {
       y = tib_dbl("y", fill = NA_real_),
       z = tib_chr("z", fill = "abc")
     ) %>% print()
+  )
+
+  expect_snapshot(
+    tib_int(
+      key = "x",
+      ptype_inner = character(),
+      fill = "a"
+    )
   )
 })
 
@@ -58,12 +66,12 @@ test_that("format breaks long lines", {
 test_that("format for tib_vector works", {
   local_options(cli.num_colors = 1)
   expect_snapshot(tib_chr_vec("a") %>% print())
-  expect_snapshot(tib_vector("a", ptype = Sys.Date()) %>% print())
+  expect_snapshot(tib_vector("a", ptype = vctrs::new_duration()) %>% print())
 
   expect_snapshot(
     tib_vector(
       "a",
-      ptype = Sys.Date(),
+      ptype = vctrs::new_duration(),
       input_form = "object",
       values_to = "vals",
       names_to = "names"
@@ -73,6 +81,26 @@ test_that("format for tib_vector works", {
 
   # multi value default
   expect_snapshot(tib_int_vec("a", fill = 1:2) %>% print())
+
+  expect_snapshot(
+    tib_int_vec(
+      key = "x",
+      ptype_inner = character(),
+      fill = 1:2
+    )
+  )
+})
+
+test_that("format for tib_chr_date works", {
+  expect_snapshot({
+    tib_chr_date("a")
+    tib_chr_date("a", required = FALSE, fill = "2022-01-01", format = "%Y")
+  })
+
+  expect_snapshot({
+    tib_chr_date_vec("a")
+    tib_chr_date_vec("a", required = FALSE, fill = as.Date("2022-01-01"), format = "%Y")
+  })
 })
 
 test_that("format for tib_row works", {
@@ -177,7 +205,7 @@ test_that("can force to print canonical names", {
   withr::local_options(list(tibblify.print_names = TRUE))
 
   expect_snapshot(format(
-    spec_df(
+    tspec_df(
       a = tib_int("a"),
       b = tib_df(
         "b",
@@ -188,17 +216,27 @@ test_that("can force to print canonical names", {
 })
 
 test_that("format for empty tib_df works", {
-  expect_equal(format(spec_df()), "spec_df()")
-  expect_equal(format(spec_row()), "spec_row()")
-  expect_equal(format(spec_object()), "spec_object()")
+  expect_equal(format(tspec_df()), "tspec_df()")
+  expect_equal(format(tspec_row()), "tspec_row()")
+  expect_equal(format(tspec_object()), "tspec_object()")
   expect_equal(format(tib_df("x")), "tib_df(\n  \"x\",\n)")
   expect_equal(format(tib_row("x")), "tib_row(\n  \"x\",\n)")
 })
 
-test_that("prints x$vector_allows_empty_list", {
+test_that("prints arguments of spec_*", {
   expect_equal(
-    format(spec_df(tib_int("a"), vector_allows_empty_list = TRUE)),
-    'spec_df(\n  vector_allows_empty_list = TRUE,\n  tib_int("a"),\n)'
+    format(tspec_df(tib_int("a"), .input_form = "colmajor")),
+    'tspec_df(\n  .input_form = "colmajor",\n  tib_int("a"),\n)'
+  )
+
+  expect_equal(
+    format(tspec_df(tib_int("a"), .names_to = "nms")),
+    'tspec_df(\n  .names_to = "nms",\n  tib_int("a"),\n)'
+  )
+
+  expect_equal(
+    format(tspec_df(tib_int("a"), vector_allows_empty_list = TRUE)),
+    'tspec_df(\n  vector_allows_empty_list = TRUE,\n  tib_int("a"),\n)'
   )
 })
 

@@ -1,8 +1,10 @@
 Package: tibblify
 Title: Rectangle Nested Lists
 Version: 0.1.0.9000
-Authors@R: 
-    person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre"))
+Authors@R: c(
+    person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre")),
+    person("Kirill", "Müller", role = "ctb")
+  )
 Description: A tool to rectangle a nested list, that is to convert it into
     a tibble. This is done automatically or according to a given
     specification.  A common use case is for nested lists coming from
@@ -18,7 +20,7 @@ Imports:
     cli (>= 3.3.0),
     lifecycle,
     purrr,
-    rlang (>= 1.0.2),
+    rlang (>= 1.0.3),
     tibble,
     vctrs (>= 0.4.1),
     withr (>= 2.5.0)
@@ -28,9 +30,10 @@ Suggests:
     knitr,
     rmarkdown,
     spelling,
-    testthat (>= 3.0.0)
+    testthat (>= 3.1.4)
 LinkingTo: 
-    cpp11,
+    cpp11 (>= 0.4.2),
+    plogr,
     vctrs (>= 0.4.1)
 VignetteBuilder: 
     knitr

@@ -2,13 +2,13 @@
 % Please edit documentation in R/format.R
 \name{formatting}
 \alias{formatting}
-\alias{print.spec_tib}
-\alias{format.spec_df}
+\alias{print.tspec}
+\alias{format.tspec_df}
 \title{Printing tibblify specifications}
 \usage{
-\method{print}{spec_tib}(x, width = NULL, ..., names = NULL)
+\method{print}{tspec}(x, width = NULL, ..., names = NULL)
 
-\method{format}{spec_df}(x, width = NULL, ..., names = NULL)
+\method{format}{tspec_df}(x, width = NULL, ..., names = NULL)
 }
 \arguments{
 \item{x}{Spec to format or print}
@@ -27,7 +27,7 @@ spec?}
 Printing tibblify specifications
 }
 \examples{
-spec <- spec_df(
+spec <- tspec_df(
   a = tib_int("a"),
   new_name = tib_chr("b"),
   row = tib_row(

@@ -1,4 +1,4 @@
-spec_guess_object_list <- function(x,
+guess_tspec_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
@@ -8,7 +8,7 @@ spec_guess_object_list <- function(x,
   if (is.data.frame(x)) {
     msg <- c(
       "{.arg x} must not be a dataframe.",
-      i = "Did you want to use {.fn spec_guess_df} instead?"
+      i = "Did you want to use {.fn guess_tspec_df} instead?"
     )
     cli::cli_abort(msg, call = call)
   }
@@ -30,7 +30,7 @@ spec_guess_object_list <- function(x,
     names_to <- ".names"
   }
 
-  spec_df(
+  tspec_df(
     !!!fields,
     .names_to = names_to,
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
@@ -99,7 +99,7 @@ guess_object_list_field_spec <- function(value,
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
-  value_flat <- vec_flatten(value, ptype)
+  value_flat <- vec_flatten(value, ptype, name_spec = NULL)
   if (is_object_list(value_flat)) {
     spec <- guess_make_tib_df(
       name,

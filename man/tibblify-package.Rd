@@ -19,5 +19,10 @@ Useful links:
 \author{
 \strong{Maintainer}: Maximilian Girlich \email{maximilian.girlich@outlook.com}
 
+Other contributors:
+\itemize{
+  \item Kirill Müller [contributor]
+}
+
 }
 \keyword{internal}

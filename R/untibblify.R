@@ -92,7 +92,7 @@ untibblify_list_elt <- function(x, field_spec, call) {
       return(x)
     }
 
-    if (inherits(field_spec, "tib_row") || inherits(field_spec, "tib_object")) {
+    if (is_tib_row(field_spec)) {
       x <- new_data_frame(x, n = 1L)
       out <- untibblify_df(x, field_spec, call)
       return(out[[1]])

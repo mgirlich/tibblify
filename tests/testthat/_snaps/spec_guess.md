@@ -1,9 +1,9 @@
 # can guess spec for discog
 
     Code
-      spec_guess(discog) %>% print()
+      guess_tspec(discog) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_int("instance_id"),
         tib_chr("date_added"),
         tib_row(
@@ -50,9 +50,9 @@
 # can guess spec for gh_users
 
     Code
-      spec_guess(gh_users) %>% print()
+      guess_tspec(gh_users) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_chr("login"),
         tib_int("id"),
         tib_chr("avatar_url"),
@@ -88,9 +88,9 @@
 # can guess spec for gh_repos
 
     Code
-      spec_guess(gh_repos) %>% print()
+      guess_tspec(gh_repos) %>% print()
     Output
-      spec_df(
+      tspec_df(
         tib_int("id"),
         tib_chr("name"),
         tib_chr("full_name"),
@@ -185,7 +185,7 @@
     Code
       spec
     Output
-      spec_df(
+      tspec_df(
         tib_chr("url"),
         tib_int("id"),
         tib_chr("name"),
@@ -209,9 +209,9 @@
 # can guess spec for citm_catalog
 
     Code
-      spec_guess(x)
+      guess_tspec(x)
     Output
-      spec_object(
+      tspec_object(
         tib_row(
           "areaNames",
           tib_chr("205705993"),
@@ -296,9 +296,9 @@
 ---
 
     Code
-      spec_guess_list(x, simplify_list = FALSE)
+      guess_tspec_list(x, simplify_list = FALSE)
     Output
-      spec_object(
+      tspec_object(
         tib_row(
           "areaNames",
           tib_chr("205705993"),
@@ -383,9 +383,9 @@
 # can guess spec for gsoc-2018
 
     Code
-      spec_guess(x)
+      guess_tspec(x)
     Output
-      spec_df(
+      tspec_df(
         .names_to = ".names",
         tib_chr("@context"),
         tib_chr("@type"),
@@ -410,9 +410,9 @@
 # can guess spec for twitter
 
     Code
-      spec_guess(x)
+      guess_tspec(x)
     Output
-      spec_object(
+      tspec_object(
         tib_df(
           "statuses",
           tib_row(

@@ -1,23 +1,54 @@
-spec_combine <- function(...) {
-  spec_list <- check_spec_combine_dots(...)
-  type <- check_spec_combine_type(spec_list)
-  fields <- spec_combine_field_list(spec_list, call = current_env())
+#' Combine multiple specifications
+#'
+#' @param ... Specifications to combine.
+#'
+#' @return A tibblify specification.
+#' @export
+#'
+#' @examples
+#' # union of fields
+#' tspec_combine(
+#'   tspec_df(tib_int("a")),
+#'   tspec_df(tib_chr("b"))
+#' )
+#'
+#' # unspecified + x -> x
+#' tspec_combine(
+#'   tspec_df(tib_unspecified("a"), tib_chr("b")),
+#'   tspec_df(tib_int("a"), tib_variant("b"))
+#' )
+#'
+#' # scalar + vector -> vector
+#' tspec_combine(
+#'   tspec_df(tib_chr("a")),
+#'   tspec_df(tib_chr_vec("a"))
+#' )
+#'
+#' # scalar/vector + variant -> variant
+#' tspec_combine(
+#'   tspec_df(tib_chr("a")),
+#'   tspec_df(tib_variant("a"))
+#' )
+tspec_combine <- function(...) {
+  spec_list <- check_tspec_combine_dots(...)
+  type <- check_tspec_combine_type(spec_list)
+  fields <- tspec_combine_field_list(spec_list, call = current_env())
 
   if (type == "row") {
-    return(spec_row(!!!fields))
+    return(tspec_row(!!!fields))
   } else if (type == "object") {
-    return(spec_object(!!!fields))
+    return(tspec_object(!!!fields))
   } else if( type == "df") {
     # TODO .names_to
-    return(spec_df(!!!fields))
+    return(tspec_df(!!!fields))
   }
 
   cli::cli_abort("Unknown spec type", .internal = TRUE)
 }
 
-check_spec_combine_dots <- function(..., .call = caller_env()) {
+check_tspec_combine_dots <- function(..., .call = caller_env()) {
   spec_list <- list2(...)
-  bad_idx <- purrr::detect_index(spec_list, ~ !is(.x, "spec_tib"))
+  bad_idx <- purrr::detect_index(spec_list, ~ !is_tspec(.x))
   if (bad_idx != 0) {
     cls1 <- class(spec_list[[bad_idx]])[[1]]
     msg <- c(
@@ -30,7 +61,7 @@ check_spec_combine_dots <- function(..., .call = caller_env()) {
   spec_list
 }
 
-check_spec_combine_type <- function(spec_list, call = caller_env()) {
+check_tspec_combine_type <- function(spec_list, call = caller_env()) {
   types <- purrr::map_chr(spec_list, "type")
   type_locs <- vec_unique_loc(types)
 
@@ -41,7 +72,7 @@ check_spec_combine_type <- function(spec_list, call = caller_env()) {
   types[[type_locs]]
 }
 
-spec_combine_field_list <- function(spec_list, call) {
+tspec_combine_field_list <- function(spec_list, call) {
   fields_list <- purrr::map(spec_list, "fields")
   empty_idx <- lengths(fields_list) == 0
   nms_list <- purrr::map(fields_list, names)
@@ -70,6 +101,16 @@ tib_combine <- function(tib_list, call) {
     return(tib_unspecified(key, required = required))
   }
 
+  if (type == "variant") {
+    out <- tib_variant(
+      key,
+      required = required,
+      fill = tib_combine_fill(tib_list, type, NULL, call),
+      transform = tib_combine_transform(tib_list, call)
+    )
+    return(out)
+  }
+
   if (type %in% c("scalar", "vector")) {
     ptype <- tib_combine_ptype(tib_list, call)
     fill <- tib_combine_fill(tib_list, type, ptype, call)
@@ -92,7 +133,7 @@ tib_combine <- function(tib_list, call) {
   }
 
   if (type %in% c("row", "df")) {
-    fields <- spec_combine_field_list(tib_list, call)
+    fields <- tspec_combine_field_list(tib_list, call)
 
     if (type == "row") {
       return(tib_row(key, !!!fields, .required = required))
@@ -123,6 +164,10 @@ tib_combine_type <- function(tib_list, call) {
 
   if (all(types %in% c("scalar", "vector"))) {
     return("vector")
+  }
+
+  if (all(types %in% c("scalar", "vector", "variant"))) {
+    return("variant")
   }
 
   # TODO error message should include path...
