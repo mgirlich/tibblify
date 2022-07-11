@@ -1,7 +1,7 @@
-spec_combine <- function(...) {
-  spec_list <- check_spec_combine_dots(...)
-  type <- check_spec_combine_type(spec_list)
-  fields <- spec_combine_field_list(spec_list, call = current_env())
+tspec_combine <- function(...) {
+  spec_list <- check_tspec_combine_dots(...)
+  type <- check_tspec_combine_type(spec_list)
+  fields <- tspec_combine_field_list(spec_list, call = current_env())
 
   if (type == "row") {
     return(tspec_row(!!!fields))
@@ -15,7 +15,7 @@ spec_combine <- function(...) {
   cli::cli_abort("Unknown spec type", .internal = TRUE)
 }
 
-check_spec_combine_dots <- function(..., .call = caller_env()) {
+check_tspec_combine_dots <- function(..., .call = caller_env()) {
   spec_list <- list2(...)
   bad_idx <- purrr::detect_index(spec_list, ~ !is_tspec(.x))
   if (bad_idx != 0) {
@@ -30,7 +30,7 @@ check_spec_combine_dots <- function(..., .call = caller_env()) {
   spec_list
 }
 
-check_spec_combine_type <- function(spec_list, call = caller_env()) {
+check_tspec_combine_type <- function(spec_list, call = caller_env()) {
   types <- purrr::map_chr(spec_list, "type")
   type_locs <- vec_unique_loc(types)
 
@@ -41,7 +41,7 @@ check_spec_combine_type <- function(spec_list, call = caller_env()) {
   types[[type_locs]]
 }
 
-spec_combine_field_list <- function(spec_list, call) {
+tspec_combine_field_list <- function(spec_list, call) {
   fields_list <- purrr::map(spec_list, "fields")
   empty_idx <- lengths(fields_list) == 0
   nms_list <- purrr::map(fields_list, names)
@@ -92,7 +92,7 @@ tib_combine <- function(tib_list, call) {
   }
 
   if (type %in% c("row", "df")) {
-    fields <- spec_combine_field_list(tib_list, call)
+    fields <- tspec_combine_field_list(tib_list, call)
 
     if (type == "row") {
       return(tib_row(key, !!!fields, .required = required))
