@@ -1,4 +1,4 @@
-# tibblify (development version)
+# tibblify 0.2.0
 
 * `tibblify()` gains the argument `names_to` to store the names of a recordlist
   in a column.
