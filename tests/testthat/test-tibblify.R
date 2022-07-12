@@ -675,6 +675,19 @@ test_that("does not confuse key order due to case - #96", {
   )
 })
 
+test_that("default for same key collector works", {
+  expect_equal(
+    tibblify(
+      list(list(x = list(a = 1, b = 2)), list()),
+      tspec_df(
+        a = tib_int(c("x", "a"), required = FALSE),
+        b = tib_int(c("x", "b"), required = FALSE),
+      )
+    ),
+    tibble(a = c(1L, NA), b = c(2L, NA))
+  )
+})
+
 test_that("discog works", {
   row1 <- tibble(
     instance_id = 354823933L,
@@ -1227,6 +1240,25 @@ test_that("nested keys work", {
   )
 })
 
+test_that("default for same key collector works", {
+  skip("undecided whether this should work")
+  expect_equal(
+    tibblify(
+      list(
+        x = list(),
+        y = 1:2
+      ),
+      tspec_df(
+        tib_int("y"),
+        a = tib_int(c("x", "a"), required = FALSE),
+        b = tib_int(c("x", "b"), required = FALSE),
+        .input_form = "colmajor"
+      )
+    ),
+    tibble(a = c(1L, NA), b = c(2L, NA))
+  )
+})
+
 test_that("empty spec works", {
   expect_equal(
     tibblify(
@@ -1252,6 +1284,40 @@ test_that("errors if n_rows cannot be calculated", {
     # before key in alphabet
     (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
   })
+})
+
+test_that("colmajor can calculate size", {
+  expect_equal(
+    tibblify(
+      list(
+        x = NULL,
+        y = 1:2
+      ),
+      tspec_df(tib_int("x"), tib_int("y"), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = 1:2)
+  )
+
+  expect_snapshot(
+    expect_error(
+      tibblify(
+        list(row = "a"),
+        tspec_df(tib_row("row", tib_int("x")), .input_form = "colmajor")
+      )
+    )
+  )
+
+  skip("undecided whether this should work")
+  expect_equal(
+    tibblify(
+      list(
+        row = NULL,
+        x = 1:2
+      ),
+      tspec_df(tib_row("row", tib_int("x")), tib_int("x"), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = 1:2)
+  )
 })
 
 test_that("colmajor checks size", {

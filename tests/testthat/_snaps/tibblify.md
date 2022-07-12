@@ -339,6 +339,12 @@
       Caused by error:
       ! Could not determine number of rows.
 
+# colmajor can calculate size
+
+    Code
+      expect_error(tibblify(list(row = "a"), tspec_df(tib_row("row", tib_int("x")),
+      .input_form = "colmajor")))
+
 # colmajor checks size
 
     Code
