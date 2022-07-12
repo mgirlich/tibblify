@@ -50,6 +50,18 @@
 <li>
   <a href="reference/index.html">Reference</a>
 </li>
+<li class="dropdown">
+  <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    Articles
+     
+    <span class="caret"></span>
+  </a>
+  <ul class="dropdown-menu" role="menu">
+<li>
+      <a href="articles/overview-supported-structures.html">Overview supported structures</a>
+    </li>
+  </ul>
+</li>
 <li>
   <a href="news/index.html">Changelog</a>
 </li>
@@ -82,308 +94,424 @@
 <h2 id="installation">Installation<a class="anchor" aria-label="anchor" href="#installation"></a>
 </h2>
 <p>You can install the released version of tibblify from <a href="https://CRAN.R-project.org" class="external-link">CRAN</a> with:</p>
-<div class="sourceCode" id="cb1"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1"></a><span class="kw">install.packages</span>(<span class="st">"tibblify"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/install.packages.html" class="external-link">install.packages</a></span><span class="op">(</span><span class="st">"tibblify"</span><span class="op">)</span></span></code></pre></div>
 <p>Or install the development version from GitHub with:</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1"></a><span class="co"># install.packages("devtools")</span></span>
-<span id="cb2-2"><a href="#cb2-2"></a>devtools<span class="op">::</span><span class="kw">install_github</span>(<span class="st">"mgirlich/tibblify"</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># install.packages("devtools")</span></span>
+<span><span class="fu">devtools</span><span class="fu">::</span><span class="fu">install_github</span><span class="op">(</span><span class="st">"mgirlich/tibblify"</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="usage">Usage<a class="anchor" aria-label="anchor" href="#usage"></a>
+<h2 id="introduction">Introduction<a class="anchor" aria-label="anchor" href="#introduction"></a>
 </h2>
-<p>Let’s convert the Leaders dataset into a tibble. It is a list with one element per character:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1"></a><span class="kw">library</span>(tibblify)</span>
-<span id="cb3-2"><a href="#cb3-2"></a></span>
-<span id="cb3-3"><a href="#cb3-3"></a><span class="kw">str</span>(politicians[<span class="dv">1</span>])</span>
-<span id="cb3-4"><a href="#cb3-4"></a><span class="co">#&gt; List of 1</span></span>
-<span id="cb3-5"><a href="#cb3-5"></a><span class="co">#&gt;  $ :List of 8</span></span>
-<span id="cb3-6"><a href="#cb3-6"></a><span class="co">#&gt;   ..$ id        : int 1</span></span>
-<span id="cb3-7"><a href="#cb3-7"></a><span class="co">#&gt;   ..$ name      : chr "Barack"</span></span>
-<span id="cb3-8"><a href="#cb3-8"></a><span class="co">#&gt;   ..$ surname   : chr "Obama"</span></span>
-<span id="cb3-9"><a href="#cb3-9"></a><span class="co">#&gt;   ..$ dob       : chr "1961-08-04"</span></span>
-<span id="cb3-10"><a href="#cb3-10"></a><span class="co">#&gt;   ..$ n_children: num 2</span></span>
-<span id="cb3-11"><a href="#cb3-11"></a><span class="co">#&gt;   ..$ parents   :List of 2</span></span>
-<span id="cb3-12"><a href="#cb3-12"></a><span class="co">#&gt;   .. ..$ mother: chr "Ann Dunham"</span></span>
-<span id="cb3-13"><a href="#cb3-13"></a><span class="co">#&gt;   .. ..$ father: chr "Barack Obama Sr."</span></span>
-<span id="cb3-14"><a href="#cb3-14"></a><span class="co">#&gt;   ..$ spouses   :List of 1</span></span>
-<span id="cb3-15"><a href="#cb3-15"></a><span class="co">#&gt;   .. ..$ : chr "Michelle Robinson"</span></span>
-<span id="cb3-16"><a href="#cb3-16"></a><span class="co">#&gt;   ..$ offices   :List of 2</span></span>
-<span id="cb3-17"><a href="#cb3-17"></a><span class="co">#&gt;   .. ..$ :List of 2</span></span>
-<span id="cb3-18"><a href="#cb3-18"></a><span class="co">#&gt;   .. .. ..$ name : chr "President of the United States"</span></span>
-<span id="cb3-19"><a href="#cb3-19"></a><span class="co">#&gt;   .. .. ..$ start: chr "2009-01-20"</span></span>
-<span id="cb3-20"><a href="#cb3-20"></a><span class="co">#&gt;   .. ..$ :List of 2</span></span>
-<span id="cb3-21"><a href="#cb3-21"></a><span class="co">#&gt;   .. .. ..$ name : chr "United States Senator from Illinois"</span></span>
-<span id="cb3-22"><a href="#cb3-22"></a><span class="co">#&gt;   .. .. ..$ start: chr "2005-01-03"</span></span></code></pre></div>
-<p>We can let <code><a href="reference/tibblify.html">tibblify()</a></code> automatically recognize the structure of the list and find an appropriate presentation as a tibble:</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1"></a>politicians_tibble &lt;-<span class="st"> </span><span class="kw">tibblify</span>(politicians)</span>
-<span id="cb4-2"><a href="#cb4-2"></a>politicians_tibble</span>
-<span id="cb4-3"><a href="#cb4-3"></a><span class="co">#&gt; # A tibble: 2 x 8</span></span>
-<span id="cb4-4"><a href="#cb4-4"></a><span class="co">#&gt;      id name   surname dob    n_children parents$mother $father spouses  offices</span></span>
-<span id="cb4-5"><a href="#cb4-5"></a><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;chr&gt;          &lt;chr&gt;   &lt;list&lt;&gt; &lt;list&lt;t&gt;</span></span>
-<span id="cb4-6"><a href="#cb4-6"></a><span class="co">#&gt; 1     1 Barack Obama   1961-…          2 Ann Dunham     Barack…     [1]  [2 × 2]</span></span>
-<span id="cb4-7"><a href="#cb4-7"></a><span class="co">#&gt; 2     2 Boris  Johnson 1964-…         NA &lt;NA&gt;           Stanle…     [2]  [3 × 2]</span></span></code></pre></div>
-<p>The <code>parents</code> column is a tibble with the columns <code>mother</code> and <code>father</code> because in the original list <code>leader1</code> the field <code>parents</code> is a named list.</p>
-<div class="sourceCode" id="cb5"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1"></a>politicians_tibble<span class="op">$</span>parents</span>
-<span id="cb5-2"><a href="#cb5-2"></a><span class="co">#&gt; # A tibble: 2 x 2</span></span>
-<span id="cb5-3"><a href="#cb5-3"></a><span class="co">#&gt;   mother     father          </span></span>
-<span id="cb5-4"><a href="#cb5-4"></a><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;           </span></span>
-<span id="cb5-5"><a href="#cb5-5"></a><span class="co">#&gt; 1 Ann Dunham Barack Obama Sr.</span></span>
-<span id="cb5-6"><a href="#cb5-6"></a><span class="co">#&gt; 2 &lt;NA&gt;       Stanley Johnson</span></span></code></pre></div>
-<p>and the <code>spouses</code> column is a <a href="https://vctrs.r-lib.org/reference/list_of.html" class="external-link"><code>list_of</code></a> character because the <code>spouses</code> field is a list and all elements are characters</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1"></a>politicians_tibble<span class="op">$</span>spouses</span>
-<span id="cb6-2"><a href="#cb6-2"></a><span class="co">#&gt; &lt;list_of&lt;character&gt;[2]&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3"></a><span class="co">#&gt; [[1]]</span></span>
-<span id="cb6-4"><a href="#cb6-4"></a><span class="co">#&gt; [1] "Michelle Robinson"</span></span>
-<span id="cb6-5"><a href="#cb6-5"></a><span class="co">#&gt; </span></span>
-<span id="cb6-6"><a href="#cb6-6"></a><span class="co">#&gt; [[2]]</span></span>
-<span id="cb6-7"><a href="#cb6-7"></a><span class="co">#&gt; [1] "Allegra Mostyn-Owen" "Marina Wheeler"</span></span></code></pre></div>
+<p>With <code><a href="reference/tibblify.html">tibblify()</a></code> you can rectangle deeply nested lists into a tidy tibble. These lists might come from an API in the form of JSON or from scraping XML. The reasons to use <code><a href="reference/tibblify.html">tibblify()</a></code> over other tools like <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">jsonlite::fromJSON()</a></code> or <code>tidyr::hoist()</code> are:</p>
+<ul>
+<li>It can guess the output format like <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">jsonlite::fromJSON()</a></code>.</li>
+<li>You can also provide a specification how to rectangle.</li>
+<li>The specification is easy to understand.</li>
+<li>You can bring most inputs into the shape you want in a single step.</li>
+<li>Rectangling is much faster than with <code><a href="https://rdrr.io/pkg/jsonlite/man/fromJSON.html" class="external-link">jsonlite::fromJSON()</a></code>.</li>
+</ul>
+</div>
+<div class="section level2">
+<h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
+</h2>
+<p>Let’s start with <code>gh_users</code>, which is a list containing information about six GitHub users.</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mgirlich/tibblify" class="external-link">tibblify</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">gh_users_small</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">gh_users</span>, <span class="op">~</span> <span class="va">.x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"followers"</span>, <span class="st">"login"</span>, <span class="st">"url"</span>, <span class="st">"name"</span>, <span class="st">"location"</span>, <span class="st">"email"</span>, <span class="st">"public_gists"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/names.html" class="external-link">names</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="co">#&gt; [1] "followers"    "login"        "url"          "name"         "location"    </span></span>
+<span><span class="co">#&gt; [6] "email"        "public_gists"</span></span></code></pre></div>
+<p>Quickly rectangling <code>gh_users_small</code> is as easy as applying <code><a href="reference/tibblify.html">tibblify()</a></code> to it:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 7</span></span>
+<span><span class="co">#&gt;   followers login       url                    name  location email public_gists</span></span>
+<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;                  &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1       303 gaborcsardi https://api.github.co… Gábo… Chippen… csar…            6</span></span>
+<span><span class="co">#&gt; 2       780 jennybc     https://api.github.co… Jenn… Vancouv… &lt;NA&gt;            54</span></span>
+<span><span class="co">#&gt; 3      3958 jtleek      https://api.github.co… Jeff… Baltimo… &lt;NA&gt;            12</span></span>
+<span><span class="co">#&gt; 4       115 juliasilge  https://api.github.co… Juli… Salt La… &lt;NA&gt;             4</span></span>
+<span><span class="co">#&gt; 5       213 leeper      https://api.github.co… Thom… London,… &lt;NA&gt;            46</span></span>
+<span><span class="co">#&gt; 6        34 masalmon    https://api.github.co… Maël… Barcelo… &lt;NA&gt;             0</span></span></code></pre></div>
+<p>We can now look at the specification <code><a href="reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
+<span><span class="co">#&gt; tspec_df(</span></span>
+<span><span class="co">#&gt;   tib_int("followers"),</span></span>
+<span><span class="co">#&gt;   tib_chr("login"),</span></span>
+<span><span class="co">#&gt;   tib_chr("url"),</span></span>
+<span><span class="co">#&gt;   tib_chr("name"),</span></span>
+<span><span class="co">#&gt;   tib_chr("location"),</span></span>
+<span><span class="co">#&gt;   tib_chr("email"),</span></span>
+<span><span class="co">#&gt;   tib_int("public_gists"),</span></span>
+<span><span class="co">#&gt; )</span></span></code></pre></div>
+<p>If we are only interested in some of the fields we can easily adapt the specification</p>
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>  login_name <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"login"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"public_gists"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span>, <span class="va">spec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 6 × 3</span></span>
+<span><span class="co">#&gt;   login_name  name                   public_gists</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;       &lt;chr&gt;                         &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 gaborcsardi Gábor Csárdi                      6</span></span>
+<span><span class="co">#&gt; 2 jennybc     Jennifer (Jenny) Bryan           54</span></span>
+<span><span class="co">#&gt; 3 jtleek      Jeff L.                          12</span></span>
+<span><span class="co">#&gt; 4 juliasilge  Julia Silge                       4</span></span>
+<span><span class="co">#&gt; 5 leeper      Thomas J. Leeper                 46</span></span>
+<span><span class="co">#&gt; 6 masalmon    Maëlle Salmon                     0</span></span></code></pre></div>
+</div>
+<div class="section level2">
+<h2 id="objects">Objects<a class="anchor" aria-label="anchor" href="#objects"></a>
+</h2>
+<p>We refer to lists like <code>gh_users_small</code> as <em>collection</em> and <em>objects</em> are the elements of such lists. Objects and collections are the typical input for <code><a href="reference/tibblify.html">tibblify()</a></code>.</p>
+<p>Basically, an <em>object</em> is simply something that can be converted to a one row tibble. This boils down to a condition on the names of the object:</p>
+<ul>
+<li>the <code>object</code> must have names (the <code>names</code> attribute must not be <code>NULL</code>),</li>
+<li>every element must be named (no name can be <code>NA</code> or <code>""</code>),</li>
+<li>and the names must be unique.</li>
+</ul>
+<p>In other words, the names must fulfill <code>vec_as_names(repair = "check_unique")</code>. The name-value pairs of an object are the <em>fields</em>.</p>
+<p>For example <code>list(x = 1, y = "a")</code> is an object with the fields <code>(x, 1)</code> and <code>(y, "a")</code> but <code>list(1, z = 3)</code> is not an object because it is not fully named.</p>
+<p>A <em>collection</em> is basically just a list of similar objects so that the fields can become the columns in a tibble.</p>
 </div>
 <div class="section level2">
 <h2 id="specification">Specification<a class="anchor" aria-label="anchor" href="#specification"></a>
 </h2>
-<p>In the above example we used <code><a href="reference/tibblify.html">tibblify()</a></code> without any further specification on how to convert the list into a tibble. This is quite useful in an interactive session but often you want to provide a specification yourself. Some of the reasons are:</p>
+<p>Providing an explicit specification has a couple of advantages:</p>
 <ul>
-<li>to ensure type and shape stability of the resulting tibble in automated scripts.</li>
-<li>to use a different type of a column.</li>
-<li>to use different names.</li>
-<li>to parse only a subset of columns.</li>
-<li>to specify what happens if a value is missing.</li>
+<li>you can ensure type and shape stability of the resulting tibble in automated scripts.</li>
+<li>you can give the columns different names.</li>
+<li>you can restrict to parsing only the fields you need.</li>
+<li>you can specify what happens if a value is missing.</li>
 </ul>
-<p>First, we use <code><a href="reference/get_spec.html">get_spec()</a></code> to view the specification used to convert our list to a tibble:</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1"></a><span class="kw">get_spec</span>(politicians_tibble)</span>
-<span id="cb7-2"><a href="#cb7-2"></a><span class="co">#&gt; lcols(</span></span>
-<span id="cb7-3"><a href="#cb7-3"></a><span class="co">#&gt;   id = lcol_int("id"),</span></span>
-<span id="cb7-4"><a href="#cb7-4"></a><span class="co">#&gt;   name = lcol_chr("name"),</span></span>
-<span id="cb7-5"><a href="#cb7-5"></a><span class="co">#&gt;   surname = lcol_chr("surname"),</span></span>
-<span id="cb7-6"><a href="#cb7-6"></a><span class="co">#&gt;   dob = lcol_chr("dob"),</span></span>
-<span id="cb7-7"><a href="#cb7-7"></a><span class="co">#&gt;   n_children = lcol_dbl("n_children", .default = NA),</span></span>
-<span id="cb7-8"><a href="#cb7-8"></a><span class="co">#&gt;   parents = lcol_df(</span></span>
-<span id="cb7-9"><a href="#cb7-9"></a><span class="co">#&gt;     "parents",</span></span>
-<span id="cb7-10"><a href="#cb7-10"></a><span class="co">#&gt;     mother = lcol_chr("mother", .default = NA),</span></span>
-<span id="cb7-11"><a href="#cb7-11"></a><span class="co">#&gt;     father = lcol_chr("father")</span></span>
-<span id="cb7-12"><a href="#cb7-12"></a><span class="co">#&gt;   ),</span></span>
-<span id="cb7-13"><a href="#cb7-13"></a><span class="co">#&gt;   spouses = lcol_lst_of(</span></span>
-<span id="cb7-14"><a href="#cb7-14"></a><span class="co">#&gt;     "spouses",</span></span>
-<span id="cb7-15"><a href="#cb7-15"></a><span class="co">#&gt;     .ptype = character(0),</span></span>
-<span id="cb7-16"><a href="#cb7-16"></a><span class="co">#&gt;     .parser = ~vec_c(!!!.x, .ptype = character()),</span></span>
-<span id="cb7-17"><a href="#cb7-17"></a><span class="co">#&gt;     .default = NULL</span></span>
-<span id="cb7-18"><a href="#cb7-18"></a><span class="co">#&gt;   ),</span></span>
-<span id="cb7-19"><a href="#cb7-19"></a><span class="co">#&gt;   offices = lcol_df_lst(</span></span>
-<span id="cb7-20"><a href="#cb7-20"></a><span class="co">#&gt;     "offices",</span></span>
-<span id="cb7-21"><a href="#cb7-21"></a><span class="co">#&gt;     name = lcol_chr("name"),</span></span>
-<span id="cb7-22"><a href="#cb7-22"></a><span class="co">#&gt;     start = lcol_chr("start")</span></span>
-<span id="cb7-23"><a href="#cb7-23"></a><span class="co">#&gt;   )</span></span>
-<span id="cb7-24"><a href="#cb7-24"></a><span class="co">#&gt; )</span></span></code></pre></div>
-<p>A specification always starts with a call to <code><a href="reference/lcols.html">lcols()</a></code> (similar to <a href="https://readr.tidyverse.org/reference/cols.html" class="external-link"><code>readr::cols()</code></a>). Then you specify the columns you want with name-value pairs. The name is the name of the resulting column and the value is a specification created with one of the <code>lcol_*()</code> functions.</p>
-</div>
-<div class="section level2">
-<h2 id="path">Path<a class="anchor" aria-label="anchor" href="#path"></a>
-</h2>
-<p>The first argument to <code>lcol_*()</code> is always a <code>path</code> which describes where to find the element. The syntax is the same as in <code><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">purrr::map()</a></code> used to extract fields. Some examples</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1"></a>leader &lt;-<span class="st"> </span>politicians[[<span class="dv">1</span>]]</span>
-<span id="cb8-2"><a href="#cb8-2"></a></span>
-<span id="cb8-3"><a href="#cb8-3"></a><span class="co"># get the element `id`</span></span>
-<span id="cb8-4"><a href="#cb8-4"></a>path &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">"id"</span>)</span>
-<span id="cb8-5"><a href="#cb8-5"></a>leader[[<span class="st">"id"</span>]]</span>
-<span id="cb8-6"><a href="#cb8-6"></a><span class="co">#&gt; [1] 1</span></span>
-<span id="cb8-7"><a href="#cb8-7"></a></span>
-<span id="cb8-8"><a href="#cb8-8"></a><span class="co"># get the element `father` in the element `parents`</span></span>
-<span id="cb8-9"><a href="#cb8-9"></a>path &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">"parents"</span>, <span class="st">"father"</span>)</span>
-<span id="cb8-10"><a href="#cb8-10"></a>leader[[<span class="st">"parents"</span>]][[<span class="st">"mother"</span>]]</span>
-<span id="cb8-11"><a href="#cb8-11"></a><span class="co">#&gt; [1] "Ann Dunham"</span></span>
-<span id="cb8-12"><a href="#cb8-12"></a></span>
-<span id="cb8-13"><a href="#cb8-13"></a><span class="co"># get the first element in the element `spouses`</span></span>
-<span id="cb8-14"><a href="#cb8-14"></a>path &lt;-<span class="st"> </span><span class="kw">list</span>(<span class="st">"spouses"</span>, <span class="dv">1</span>)</span>
-<span id="cb8-15"><a href="#cb8-15"></a>leader[[<span class="st">"spouses"</span>]][[<span class="dv">1</span>]]</span>
-<span id="cb8-16"><a href="#cb8-16"></a><span class="co">#&gt; [1] "Michelle Robinson"</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="vector-columns">Vector Columns<a class="anchor" aria-label="anchor" href="#vector-columns"></a>
-</h2>
-<p>A couple of typical vector types have a predefined extractor:</p>
+<p>As seen before the specification for a collection is done with <code><a href="reference/tspec_df.html">tspec_df()</a></code>. The columns of the output tibble are describe with the <code>tib_*()</code> functions. They describe the path to the field to extract and the output type of the field. There are the following five types of functions:</p>
 <ul>
 <li>
-<code><a href="reference/lcol_lgl.html">lcol_chr()</a></code>: create a character column.</li>
+<code>tib_scalar(ptype)</code>: a length one vector with type <code>ptype</code>
+</li>
 <li>
-<code><a href="reference/lcol_lgl.html">lcol_lgl()</a></code>: create a logical column.</li>
+<code>tib_vector(ptype)</code>: a vector of arbitrary length with type <code>ptype</code>
+</li>
 <li>
-<code><a href="reference/lcol_lgl.html">lcol_int()</a></code>: create an integer column.</li>
+<code><a href="reference/tib_scalar.html">tib_variant()</a></code>: a vector of arbitrary length and type; you should barely ever need this</li>
 <li>
-<code><a href="reference/lcol_lgl.html">lcol_dbl()</a></code>: create a double column.</li>
+<code>tib_row(...)</code>: an object with the fields <code>...</code>
+</li>
 <li>
-<code><a href="reference/lcol_lgl.html">lcol_dat()</a></code>: create a date column.</li>
-<li>
-<code><a href="reference/lcol_lgl.html">lcol_dtt()</a></code>: create a datetime column.</li>
+<code>tib_df(...)</code>: a collection where the objects have the fields <code>...</code>
+</li>
 </ul>
-<p>See <a href="#parsing-other-types">parsing other types</a> to create a column of your own prototype.</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a><span class="kw">tibblify</span>(</span>
-<span id="cb9-2"><a href="#cb9-2"></a>  politicians,</span>
-<span id="cb9-3"><a href="#cb9-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb9-4"><a href="#cb9-4"></a>    <span class="kw">lcol_int</span>(<span class="st">"id"</span>),</span>
-<span id="cb9-5"><a href="#cb9-5"></a>    <span class="kw">lcol_chr</span>(<span class="st">"name"</span>),</span>
-<span id="cb9-6"><a href="#cb9-6"></a>    <span class="st">`</span><span class="dt">family name</span><span class="st">`</span> =<span class="st"> </span><span class="kw">lcol_chr</span>(<span class="st">"surname"</span>)</span>
-<span id="cb9-7"><a href="#cb9-7"></a>  )</span>
-<span id="cb9-8"><a href="#cb9-8"></a>)</span>
-<span id="cb9-9"><a href="#cb9-9"></a><span class="co">#&gt; # A tibble: 2 x 3</span></span>
-<span id="cb9-10"><a href="#cb9-10"></a><span class="co">#&gt;      id name   `family name`</span></span>
-<span id="cb9-11"><a href="#cb9-11"></a><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;        </span></span>
-<span id="cb9-12"><a href="#cb9-12"></a><span class="co">#&gt; 1     1 Barack Obama        </span></span>
-<span id="cb9-13"><a href="#cb9-13"></a><span class="co">#&gt; 2     2 Boris  Johnson</span></span></code></pre></div>
+<p>For convenience there are shortcuts for <code><a href="reference/tib_scalar.html">tib_scalar()</a></code> and <code><a href="reference/tib_scalar.html">tib_vector()</a></code> for the most common prototypes:</p>
+<ul>
+<li>
+<code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code>: <code><a href="reference/tib_scalar.html">tib_lgl()</a></code> and <code><a href="reference/tib_scalar.html">tib_lgl_vec()</a></code>
+</li>
+<li>
+<code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>: <code><a href="reference/tib_scalar.html">tib_int()</a></code> and <code><a href="reference/tib_scalar.html">tib_int_vec()</a></code>
+</li>
+<li>
+<code><a href="https://rdrr.io/r/base/double.html" class="external-link">double()</a></code>: <code><a href="reference/tib_scalar.html">tib_dbl()</a></code> and <code><a href="reference/tib_scalar.html">tib_dbl_vec()</a></code>
+</li>
+<li>
+<code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code>: <code><a href="reference/tib_scalar.html">tib_chr()</a></code> and <code><a href="reference/tib_scalar.html">tib_chr_vec()</a></code>
+</li>
+<li>
+<code>Date</code>: <code><a href="reference/tib_scalar.html">tib_date()</a></code> and <code><a href="reference/tib_scalar.html">tib_date_vec()</a></code>
+</li>
+<li>
+<code>Date</code> encoded as character: <code><a href="reference/tib_scalar.html">tib_chr_date()</a></code> and <code><a href="reference/tib_scalar.html">tib_chr_date_vec()</a></code>
+</li>
+</ul>
+<div class="section level3">
+<h3 id="scalar-elements">Scalar Elements<a class="anchor" aria-label="anchor" href="#scalar-elements"></a>
+</h3>
+<p>Scalar elements are the most common case and result in a normal vector column</p>
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span>, name <span class="op">=</span> <span class="st">"Peter"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">2</span>, name <span class="op">=</span> <span class="st">"Lilly"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;      id name </span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1     1 Peter</span></span>
+<span><span class="co">#&gt; 2     2 Lilly</span></span></code></pre></div>
+<p>With <code><a href="reference/tib_scalar.html">tib_scalar()</a></code> you can also provide your own prototype</p>
+<p>Let’s say you have a list with durations</p>
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span>, duration <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html" class="external-link">new_duration</a></span><span class="op">(</span><span class="fl">100</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">2</span>, duration <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html" class="external-link">new_duration</a></span><span class="op">(</span><span class="fl">200</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">x</span></span>
+<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; [[1]]$id</span></span>
+<span><span class="co">#&gt; [1] 1</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[1]]$duration</span></span>
+<span><span class="co">#&gt; Time difference of 100 secs</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]</span></span>
+<span><span class="co">#&gt; [[2]]$id</span></span>
+<span><span class="co">#&gt; [1] 2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; [[2]]$duration</span></span>
+<span><span class="co">#&gt; Time difference of 200 secs</span></span></code></pre></div>
+<p>and then use it in <code><a href="reference/tib_scalar.html">tib_scalar()</a></code></p>
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_scalar</a></span><span class="op">(</span><span class="st">"duration"</span>, ptype <span class="op">=</span> <span class="fu">vctrs</span><span class="fu">::</span><span class="fu"><a href="https://vctrs.r-lib.org/reference/new_date.html" class="external-link">new_duration</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;      id duration</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;drtn&gt;  </span></span>
+<span><span class="co">#&gt; 1     1 100 secs</span></span>
+<span><span class="co">#&gt; 2     2 200 secs</span></span></code></pre></div>
 </div>
-<div class="section level2">
-<h2 id="missing-elements">Missing Elements<a class="anchor" aria-label="anchor" href="#missing-elements"></a>
-</h2>
-<p>If an element doesn’t exist an error is thrown as in <code><a href="https://purrr.tidyverse.org/reference/pluck.html" class="external-link">purrr::chuck()</a></code>. To use a default value instead of throwing an error use the <code>.default</code> argument. The <code>.default</code> value is also used in case the element at the path is empty:</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1"></a>list_default &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
-<span id="cb10-2"><a href="#cb10-2"></a>  <span class="kw">list</span>(<span class="dt">a =</span> <span class="dv">1</span>),</span>
-<span id="cb10-3"><a href="#cb10-3"></a>  <span class="kw">list</span>(<span class="dt">a =</span> <span class="ot">NULL</span>),</span>
-<span id="cb10-4"><a href="#cb10-4"></a>  <span class="kw">list</span>(<span class="dt">a =</span> <span class="kw">integer</span>()),</span>
-<span id="cb10-5"><a href="#cb10-5"></a>  <span class="kw">list</span>()</span>
-<span id="cb10-6"><a href="#cb10-6"></a>)</span>
-<span id="cb10-7"><a href="#cb10-7"></a></span>
-<span id="cb10-8"><a href="#cb10-8"></a><span class="kw">tibblify</span>(</span>
-<span id="cb10-9"><a href="#cb10-9"></a>  list_default,</span>
-<span id="cb10-10"><a href="#cb10-10"></a>  <span class="kw">lcols</span>(<span class="kw">lcol_int</span>(<span class="st">"a"</span>))</span>
-<span id="cb10-11"><a href="#cb10-11"></a>)</span>
-<span id="cb10-12"><a href="#cb10-12"></a><span class="co">#&gt; Error: empty or absent element at path a</span></span>
-<span id="cb10-13"><a href="#cb10-13"></a></span>
-<span id="cb10-14"><a href="#cb10-14"></a><span class="kw">tibblify</span>(</span>
-<span id="cb10-15"><a href="#cb10-15"></a>  list_default,</span>
-<span id="cb10-16"><a href="#cb10-16"></a>  <span class="kw">lcols</span>(<span class="kw">lcol_int</span>(<span class="st">"a"</span>, <span class="dt">.default =</span> <span class="dv">0</span>))</span>
-<span id="cb10-17"><a href="#cb10-17"></a>)</span>
-<span id="cb10-18"><a href="#cb10-18"></a><span class="co">#&gt; # A tibble: 4 x 1</span></span>
-<span id="cb10-19"><a href="#cb10-19"></a><span class="co">#&gt;       a</span></span>
-<span id="cb10-20"><a href="#cb10-20"></a><span class="co">#&gt;   &lt;int&gt;</span></span>
-<span id="cb10-21"><a href="#cb10-21"></a><span class="co">#&gt; 1     1</span></span>
-<span id="cb10-22"><a href="#cb10-22"></a><span class="co">#&gt; 2     0</span></span>
-<span id="cb10-23"><a href="#cb10-23"></a><span class="co">#&gt; 3     0</span></span>
-<span id="cb10-24"><a href="#cb10-24"></a><span class="co">#&gt; 4     0</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="parser">Parser<a class="anchor" aria-label="anchor" href="#parser"></a>
-</h2>
-<p>When the cast is not possible with <code><a href="https://vctrs.r-lib.org/reference/vec_cast.html" class="external-link">vctrs::vec_cast()</a></code> you can use the <code>.parser</code> argument to supply a custom parser. It is passed to <code><a href="https://rlang.r-lib.org/reference/as_function.html" class="external-link">rlang::as_function()</a></code> so you can use a function or a formula. A typical use case are dates stored as strings.</p>
-<div class="sourceCode" id="cb11"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1"></a><span class="kw">tibblify</span>(</span>
-<span id="cb11-2"><a href="#cb11-2"></a>  politicians,</span>
-<span id="cb11-3"><a href="#cb11-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb11-4"><a href="#cb11-4"></a>    <span class="kw">lcol_chr</span>(<span class="st">"surname"</span>),</span>
-<span id="cb11-5"><a href="#cb11-5"></a>    <span class="kw">lcol_dat</span>(<span class="st">"dob"</span>, <span class="dt">.parser =</span> <span class="op">~</span><span class="st"> </span><span class="kw">as.Date</span>(.x, <span class="dt">format =</span> <span class="st">"%Y-%m-%d"</span>))</span>
-<span id="cb11-6"><a href="#cb11-6"></a>  )</span>
-<span id="cb11-7"><a href="#cb11-7"></a>)</span>
-<span id="cb11-8"><a href="#cb11-8"></a><span class="co">#&gt; # A tibble: 2 x 2</span></span>
-<span id="cb11-9"><a href="#cb11-9"></a><span class="co">#&gt;   surname dob       </span></span>
-<span id="cb11-10"><a href="#cb11-10"></a><span class="co">#&gt;   &lt;chr&gt;   &lt;date&gt;    </span></span>
-<span id="cb11-11"><a href="#cb11-11"></a><span class="co">#&gt; 1 Obama   1961-08-04</span></span>
-<span id="cb11-12"><a href="#cb11-12"></a><span class="co">#&gt; 2 Johnson 1964-06-19</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="list-and-list-of-columns">List and List Of Columns<a class="anchor" aria-label="anchor" href="#list-and-list-of-columns"></a>
-</h2>
-<p>A <code>list_of</code> is a list where each element in the list has the same prototype. It is useful when you have fields with more than one element as in the <code>spouses</code> field.</p>
-<div class="sourceCode" id="cb12"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>spouses_tbl &lt;-<span class="st"> </span><span class="kw">tibblify</span>(</span>
-<span id="cb12-2"><a href="#cb12-2"></a>  politicians,</span>
-<span id="cb12-3"><a href="#cb12-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb12-4"><a href="#cb12-4"></a>    <span class="kw">lcol_chr</span>(<span class="st">"surname"</span>),</span>
-<span id="cb12-5"><a href="#cb12-5"></a>    <span class="kw">lcol_lst_of</span>(<span class="st">"spouses"</span>, <span class="dt">.ptype =</span> <span class="kw">character</span>())</span>
-<span id="cb12-6"><a href="#cb12-6"></a>  )</span>
-<span id="cb12-7"><a href="#cb12-7"></a>)</span>
-<span id="cb12-8"><a href="#cb12-8"></a></span>
-<span id="cb12-9"><a href="#cb12-9"></a>spouses_tbl<span class="op">$</span>spouses</span>
-<span id="cb12-10"><a href="#cb12-10"></a><span class="co">#&gt; &lt;list_of&lt;character&gt;[2]&gt;</span></span>
-<span id="cb12-11"><a href="#cb12-11"></a><span class="co">#&gt; [[1]]</span></span>
-<span id="cb12-12"><a href="#cb12-12"></a><span class="co">#&gt; [[1]][[1]]</span></span>
-<span id="cb12-13"><a href="#cb12-13"></a><span class="co">#&gt; [1] "Michelle Robinson"</span></span>
-<span id="cb12-14"><a href="#cb12-14"></a><span class="co">#&gt; </span></span>
-<span id="cb12-15"><a href="#cb12-15"></a><span class="co">#&gt; </span></span>
-<span id="cb12-16"><a href="#cb12-16"></a><span class="co">#&gt; [[2]]</span></span>
-<span id="cb12-17"><a href="#cb12-17"></a><span class="co">#&gt; [[2]][[1]]</span></span>
-<span id="cb12-18"><a href="#cb12-18"></a><span class="co">#&gt; [1] "Allegra Mostyn-Owen"</span></span>
-<span id="cb12-19"><a href="#cb12-19"></a><span class="co">#&gt; </span></span>
-<span id="cb12-20"><a href="#cb12-20"></a><span class="co">#&gt; [[2]][[2]]</span></span>
-<span id="cb12-21"><a href="#cb12-21"></a><span class="co">#&gt; [1] "Marina Wheeler"</span></span></code></pre></div>
+<div class="section level3">
+<h3 id="vector-elements">Vector Elements<a class="anchor" aria-label="anchor" href="#vector-elements"></a>
+</h3>
+<p>If an element does not always have size one then it is a vector element. If it still always has the same type <code>ptype</code> then it produces a list of <code>ptype</code> column:</p>
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">1</span>, children <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Peter"</span>, <span class="st">"Lilly"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">2</span>, children <span class="op">=</span> <span class="st">"James"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>id <span class="op">=</span> <span class="fl">3</span>, children <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Emma"</span>, <span class="st">"Noah"</span>, <span class="st">"Charlotte"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span></span>
+<span>  <span class="va">x</span>,</span>
+<span>  <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="reference/tib_scalar.html">tib_chr_vec</a></span><span class="op">(</span><span class="st">"children"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 3 × 2</span></span>
+<span><span class="co">#&gt;      id    children</span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;list&lt;chr&gt;&gt;</span></span>
+<span><span class="co">#&gt; 1     1         [2]</span></span>
+<span><span class="co">#&gt; 2     2         [1]</span></span>
+<span><span class="co">#&gt; 3     3         [3]</span></span></code></pre></div>
 <p>You can use <a href="https://tidyr.tidyverse.org/reference/nest.html" class="external-link"><code>tidyr::unnest()</code></a> or <a href="https://tidyr.tidyverse.org/reference/hoist.html" class="external-link"><code>tidyr::unnest_longer()</code></a> to flatten these columns to regular columns.</p>
-<p>A list column is used when you have a field with mixed elements.</p>
+</div>
+<div class="section level3">
+<h3 id="object-elements">Object Elements<a class="anchor" aria-label="anchor" href="#object-elements"></a>
+</h3>
+<p>For example in <code>gh_repos_small</code></p>
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">gh_repos_small</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span><span class="va">gh_repos</span>, <span class="op">~</span> <span class="va">.x</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"id"</span>, <span class="st">"name"</span>, <span class="st">"owner"</span><span class="op">)</span><span class="op">]</span><span class="op">)</span></span>
+<span><span class="va">gh_repos_small</span> <span class="op">&lt;-</span> <span class="fu">purrr</span><span class="fu">::</span><span class="fu"><a href="https://purrr.tidyverse.org/reference/map.html" class="external-link">map</a></span><span class="op">(</span></span>
+<span>  <span class="va">gh_repos_small</span>,</span>
+<span>  <span class="kw">function</span><span class="op">(</span><span class="va">repo</span><span class="op">)</span> <span class="op">{</span></span>
+<span>    <span class="va">repo</span><span class="op">$</span><span class="va">owner</span> <span class="op">&lt;-</span> <span class="va">repo</span><span class="op">$</span><span class="va">owner</span><span class="op">[</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"login"</span>, <span class="st">"id"</span>, <span class="st">"url"</span><span class="op">)</span><span class="op">]</span></span>
+<span>    <span class="va">repo</span></span>
+<span>  <span class="op">}</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">gh_repos_small</span><span class="op">[[</span><span class="fl">1</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="co">#&gt; $id</span></span>
+<span><span class="co">#&gt; [1] 61160198</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $name</span></span>
+<span><span class="co">#&gt; [1] "after"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $owner</span></span>
+<span><span class="co">#&gt; $owner$login</span></span>
+<span><span class="co">#&gt; [1] "gaborcsardi"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $owner$id</span></span>
+<span><span class="co">#&gt; [1] 660288</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $owner$url</span></span>
+<span><span class="co">#&gt; [1] "https://api.github.com/users/gaborcsardi"</span></span></code></pre></div>
+<p>the field <code>owner</code> is an object itself. The specification to extract it uses <code><a href="reference/tib_scalar.html">tib_row()</a></code></p>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_repos_small</span><span class="op">)</span></span>
+<span><span class="va">spec</span></span>
+<span><span class="co">#&gt; tspec_df(</span></span>
+<span><span class="co">#&gt;   tib_int("id"),</span></span>
+<span><span class="co">#&gt;   tib_chr("name"),</span></span>
+<span><span class="co">#&gt;   tib_row(</span></span>
+<span><span class="co">#&gt;     "owner",</span></span>
+<span><span class="co">#&gt;     tib_chr("login"),</span></span>
+<span><span class="co">#&gt;     tib_int("id"),</span></span>
+<span><span class="co">#&gt;     tib_chr("url"),</span></span>
+<span><span class="co">#&gt;   ),</span></span>
+<span><span class="co">#&gt; )</span></span></code></pre></div>
+<p>and results in a tibble column</p>
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_repos_small</span>, <span class="va">spec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 30 × 3</span></span>
+<span><span class="co">#&gt;          id name        owner$login    $id $url                                 </span></span>
+<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;        &lt;int&gt; &lt;chr&gt;                                </span></span>
+<span><span class="co">#&gt;  1 61160198 after       gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  2 40500181 argufy      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  3 36442442 ask         gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  4 34924886 baseimports gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  5 61620661 citest      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  6 33907457 clisymbols  gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  7 37236467 cmaker      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  8 67959624 cmark       gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt;  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt; 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
+<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+<p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>  id <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"id"</span><span class="op">)</span>,</span>
+<span>  name <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"name"</span><span class="op">)</span>,</span>
+<span>  owner_id <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"id"</span><span class="op">)</span><span class="op">)</span>,</span>
+<span>  owner_login <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"owner"</span>, <span class="st">"login"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span><span class="va">spec2</span></span>
+<span><span class="co">#&gt; tspec_df(</span></span>
+<span><span class="co">#&gt;   tib_int("id"),</span></span>
+<span><span class="co">#&gt;   tib_chr("name"),</span></span>
+<span><span class="co">#&gt;   owner_id = tib_int(c("owner", "id")),</span></span>
+<span><span class="co">#&gt;   owner_login = tib_chr(c("owner", "login")),</span></span>
+<span><span class="co">#&gt; )</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_repos_small</span>, <span class="va">spec2</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 30 × 4</span></span>
+<span><span class="co">#&gt;          id name        owner_id owner_login</span></span>
+<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;          &lt;int&gt; &lt;chr&gt;      </span></span>
+<span><span class="co">#&gt;  1 61160198 after         660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  2 40500181 argufy        660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  3 36442442 ask           660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  4 34924886 baseimports   660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  5 61620661 citest        660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  6 33907457 clisymbols    660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  7 37236467 cmaker        660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  8 67959624 cmark         660288 gaborcsardi</span></span>
+<span><span class="co">#&gt;  9 63152619 conditions    660288 gaborcsardi</span></span>
+<span><span class="co">#&gt; 10 24343686 crayon        660288 gaborcsardi</span></span>
+<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+</div>
 </div>
 <div class="section level2">
-<h2 id="guess-and-skip">Guess and Skip<a class="anchor" aria-label="anchor" href="#guess-and-skip"></a>
+<h2 id="required-and-optional-fields">Required and Optional Fields<a class="anchor" aria-label="anchor" href="#required-and-optional-fields"></a>
 </h2>
-<p>Analogue to <code>readr::col_guess()</code> and <code>readr::col_skip()</code> you can specify that you want to guess the column type with <code><a href="reference/lcol_lgl.html">lcol_guess()</a></code> respectively skip a field with <code><a href="reference/lcol_lgl.html">lcol_skip()</a></code>. Skipping a column can be useful when you set a default column type or you want to make clear that you know about the field and intentionally skip it.</p>
-<p>Guessing a column is useful in interactive sessions but you shouldn’t rely on it in automated scripts.</p>
+<p>Objects usually have some fields that always exist and some that are optional. By default <code>tib_*()</code> demands that a field exists</p>
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">x</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span>, y <span class="op">=</span> <span class="st">"a"</span><span class="op">)</span>,</span>
+<span>  <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Error in `tibblify()`:</span></span>
+<span><span class="co">#&gt; ! Required element absent at path [[2]]$y.</span></span></code></pre></div>
+<p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;       x y    </span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;</span></span>
+<span><span class="co">#&gt; 1     1 a    </span></span>
+<span><span class="co">#&gt; 2     2 &lt;NA&gt;</span></span></code></pre></div>
+<p>You can specify the value to use with the <code>fill</code> argument</p>
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
+<span>  x <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span>,</span>
+<span>  y <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"y"</span>, required <span class="op">=</span> <span class="cn">FALSE</span>, fill <span class="op">=</span> <span class="st">"missing"</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 2</span></span>
+<span><span class="co">#&gt;       x y      </span></span>
+<span><span class="co">#&gt;   &lt;int&gt; &lt;chr&gt;  </span></span>
+<span><span class="co">#&gt; 1     1 a      </span></span>
+<span><span class="co">#&gt; 2     2 missing</span></span></code></pre></div>
 </div>
 <div class="section level2">
-<h2 id="tibble-columns-and-list-of-tibble-columns">Tibble Columns and List Of Tibble Columns<a class="anchor" aria-label="anchor" href="#tibble-columns-and-list-of-tibble-columns"></a>
+<h2 id="converting-a-single-object">Converting a Single Object<a class="anchor" aria-label="anchor" href="#converting-a-single-object"></a>
 </h2>
-<p>If a field contains is a named list where each element has length 1 or 0 the field is converted to a tibble column. This is for example the case for the <code>parents</code> field:</p>
-<div class="sourceCode" id="cb13"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>leaders_tibble &lt;-<span class="st"> </span><span class="kw">tibblify</span>(</span>
-<span id="cb13-2"><a href="#cb13-2"></a>  politicians,</span>
-<span id="cb13-3"><a href="#cb13-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb13-4"><a href="#cb13-4"></a>    <span class="kw">lcol_chr</span>(<span class="st">"surname"</span>),</span>
-<span id="cb13-5"><a href="#cb13-5"></a>    <span class="kw">lcol_guess</span>(<span class="st">"parents"</span>)</span>
-<span id="cb13-6"><a href="#cb13-6"></a>  )</span>
-<span id="cb13-7"><a href="#cb13-7"></a>)</span>
-<span id="cb13-8"><a href="#cb13-8"></a></span>
-<span id="cb13-9"><a href="#cb13-9"></a>leaders_tibble</span>
-<span id="cb13-10"><a href="#cb13-10"></a><span class="co">#&gt; # A tibble: 2 x 2</span></span>
-<span id="cb13-11"><a href="#cb13-11"></a><span class="co">#&gt;   surname parents$mother $father         </span></span>
-<span id="cb13-12"><a href="#cb13-12"></a><span class="co">#&gt;   &lt;chr&gt;   &lt;chr&gt;          &lt;chr&gt;           </span></span>
-<span id="cb13-13"><a href="#cb13-13"></a><span class="co">#&gt; 1 Obama   Ann Dunham     Barack Obama Sr.</span></span>
-<span id="cb13-14"><a href="#cb13-14"></a><span class="co">#&gt; 2 Johnson &lt;NA&gt;           Stanley Johnson</span></span></code></pre></div>
-<p>Tibble columns are a relatively new concept in the tidyverse. You can unpack a tibble column into regular columns with <code>tidyr::unpack()</code>.</p>
-</div>
-<div class="section level2">
-<h2 id="parsing-other-types">Parsing other types<a class="anchor" aria-label="anchor" href="#parsing-other-types"></a>
-</h2>
-<p><code>tibblify</code> provides shortcuts for a couple of common types. To parse a vector or record type without a parser use <code><a href="reference/lcol_lgl.html">lcol_vec()</a></code>. Let’s say you have a list with <code>difftimes</code></p>
-<div class="sourceCode" id="cb14"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>now &lt;-<span class="st"> </span><span class="kw">Sys.time</span>()</span>
-<span id="cb14-2"><a href="#cb14-2"></a>past &lt;-<span class="st"> </span>now <span class="op">-</span><span class="st"> </span><span class="kw">c</span>(<span class="dv">100</span>, <span class="dv">200</span>)</span>
-<span id="cb14-3"><a href="#cb14-3"></a></span>
-<span id="cb14-4"><a href="#cb14-4"></a>x &lt;-<span class="st"> </span><span class="kw">list</span>(</span>
-<span id="cb14-5"><a href="#cb14-5"></a>  <span class="kw">list</span>(<span class="dt">timediff =</span> now <span class="op">-</span><span class="st"> </span>past[<span class="dv">1</span>]),</span>
-<span id="cb14-6"><a href="#cb14-6"></a>  <span class="kw">list</span>(<span class="dt">timediff =</span> now <span class="op">-</span><span class="st"> </span>past[<span class="dv">2</span>])</span>
-<span id="cb14-7"><a href="#cb14-7"></a>)</span>
-<span id="cb14-8"><a href="#cb14-8"></a></span>
-<span id="cb14-9"><a href="#cb14-9"></a>x</span>
-<span id="cb14-10"><a href="#cb14-10"></a><span class="co">#&gt; [[1]]</span></span>
-<span id="cb14-11"><a href="#cb14-11"></a><span class="co">#&gt; [[1]]$timediff</span></span>
-<span id="cb14-12"><a href="#cb14-12"></a><span class="co">#&gt; Time difference of 1.666667 mins</span></span>
-<span id="cb14-13"><a href="#cb14-13"></a><span class="co">#&gt; </span></span>
-<span id="cb14-14"><a href="#cb14-14"></a><span class="co">#&gt; </span></span>
-<span id="cb14-15"><a href="#cb14-15"></a><span class="co">#&gt; [[2]]</span></span>
-<span id="cb14-16"><a href="#cb14-16"></a><span class="co">#&gt; [[2]]$timediff</span></span>
-<span id="cb14-17"><a href="#cb14-17"></a><span class="co">#&gt; Time difference of 3.333333 mins</span></span></code></pre></div>
-<p>You need to define a prototype</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1"></a>ptype &lt;-<span class="st"> </span><span class="kw">as.difftime</span>(<span class="dv">0</span>, <span class="dt">units =</span> <span class="st">"secs"</span>)</span>
-<span id="cb15-2"><a href="#cb15-2"></a>ptype</span>
-<span id="cb15-3"><a href="#cb15-3"></a><span class="co">#&gt; Time difference of 0 secs</span></span></code></pre></div>
-<p>and then use it in <code><a href="reference/lcol_lgl.html">lcol_vec()</a></code></p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1"></a><span class="kw">tibblify</span>(</span>
-<span id="cb16-2"><a href="#cb16-2"></a>  x,</span>
-<span id="cb16-3"><a href="#cb16-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb16-4"><a href="#cb16-4"></a>    <span class="kw">lcol_vec</span>(<span class="st">"timediff"</span>, <span class="dt">ptype =</span> ptype)</span>
-<span id="cb16-5"><a href="#cb16-5"></a>  )</span>
-<span id="cb16-6"><a href="#cb16-6"></a>)</span>
-<span id="cb16-7"><a href="#cb16-7"></a><span class="co">#&gt; # A tibble: 2 x 1</span></span>
-<span id="cb16-8"><a href="#cb16-8"></a><span class="co">#&gt;   timediff</span></span>
-<span id="cb16-9"><a href="#cb16-9"></a><span class="co">#&gt;   &lt;drtn&gt;  </span></span>
-<span id="cb16-10"><a href="#cb16-10"></a><span class="co">#&gt; 1 100 secs</span></span>
-<span id="cb16-11"><a href="#cb16-11"></a><span class="co">#&gt; 2 200 secs</span></span></code></pre></div>
-</div>
-<div class="section level2">
-<h2 id="default-column-type">Default Column Type<a class="anchor" aria-label="anchor" href="#default-column-type"></a>
-</h2>
-<p>You can use the <code>.default</code> argument of <code><a href="reference/lcols.html">lcols()</a></code> to define a parser used for all unspecified fields.</p>
-<div class="sourceCode" id="cb17"><pre class="sourceCode R"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1"></a><span class="kw">tibblify</span>(</span>
-<span id="cb17-2"><a href="#cb17-2"></a>  politicians,</span>
-<span id="cb17-3"><a href="#cb17-3"></a>  <span class="kw">lcols</span>(</span>
-<span id="cb17-4"><a href="#cb17-4"></a>    <span class="kw">lcol_chr</span>(<span class="st">"name"</span>),</span>
-<span id="cb17-5"><a href="#cb17-5"></a>    <span class="kw">lcol_chr</span>(<span class="st">"surname"</span>),</span>
-<span id="cb17-6"><a href="#cb17-6"></a>    <span class="dt">.default =</span> <span class="kw">lcol_lst</span>(<span class="dt">path =</span> <span class="kw">zap</span>(), <span class="dt">.default =</span> <span class="ot">NULL</span>)</span>
-<span id="cb17-7"><a href="#cb17-7"></a>  )</span>
-<span id="cb17-8"><a href="#cb17-8"></a>)</span>
-<span id="cb17-9"><a href="#cb17-9"></a><span class="co">#&gt; # A tibble: 2 x 8</span></span>
-<span id="cb17-10"><a href="#cb17-10"></a><span class="co">#&gt;   name   surname id       dob      n_children parents        spouses   offices  </span></span>
-<span id="cb17-11"><a href="#cb17-11"></a><span class="co">#&gt;   &lt;chr&gt;  &lt;chr&gt;   &lt;list&gt;   &lt;list&gt;   &lt;list&gt;     &lt;list&gt;         &lt;list&gt;    &lt;list&gt;   </span></span>
-<span id="cb17-12"><a href="#cb17-12"></a><span class="co">#&gt; 1 Barack Obama   &lt;int [1… &lt;chr [1… &lt;dbl [1]&gt;  &lt;named list [… &lt;list [1… &lt;list [2…</span></span>
-<span id="cb17-13"><a href="#cb17-13"></a><span class="co">#&gt; 2 Boris  Johnson &lt;int [1… &lt;chr [1… &lt;NULL&gt;     &lt;named list [… &lt;list [2… &lt;list [3…</span></span></code></pre></div>
+<p>To rectangle a single object you have two options: <code><a href="reference/tspec_df.html">tspec_object()</a></code> which produces a list or <code><a href="reference/tspec_df.html">tspec_row()</a></code> which produces a tibble with one row.</p>
+<p>While tibbles are great for a single object it often makes more sense to convert them to a list.</p>
+<p>For example a typical API response might be something like</p>
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">api_output</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  status <span class="op">=</span> <span class="st">"success"</span>,</span>
+<span>  requested_at <span class="op">=</span> <span class="st">"2021-10-26 09:17:12"</span>,</span>
+<span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">1</span><span class="op">)</span>,</span>
+<span>    <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fl">2</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>To convert to a one row tibble</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">row_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_row</a></span><span class="op">(</span></span>
+<span>  status <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_df</a></span><span class="op">(</span></span>
+<span>    <span class="st">"data"</span>,</span>
+<span>    x <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">api_output_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">api_output</span>, <span class="va">row_spec</span><span class="op">)</span></span>
+<span><span class="va">api_output_df</span></span>
+<span><span class="co">#&gt; # A tibble: 1 × 2</span></span>
+<span><span class="co">#&gt;   status                data</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;   &lt;list&lt;tibble[,1]&gt;&gt;</span></span>
+<span><span class="co">#&gt; 1 success            [2 × 1]</span></span></code></pre></div>
+<p>it is necessary to wrap <code>data</code> in a list. To access <code>data</code> one has to use <code>api_output_df$data[[1]]</code> which is not very nice.</p>
+<div class="sourceCode" id="cb20"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">object_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_object</a></span><span class="op">(</span></span>
+<span>  status <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_chr</a></span><span class="op">(</span><span class="st">"status"</span><span class="op">)</span>,</span>
+<span>  data <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_df</a></span><span class="op">(</span></span>
+<span>    <span class="st">"data"</span>,</span>
+<span>    x <span class="op">=</span> <span class="fu"><a href="reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"x"</span><span class="op">)</span></span>
+<span>  <span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">api_output_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">api_output</span>, <span class="va">object_spec</span><span class="op">)</span></span>
+<span><span class="va">api_output_list</span></span>
+<span><span class="co">#&gt; $status</span></span>
+<span><span class="co">#&gt; [1] "success"</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; $data</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 1</span></span>
+<span><span class="co">#&gt;       x</span></span>
+<span><span class="co">#&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1     1</span></span>
+<span><span class="co">#&gt; 2     2</span></span></code></pre></div>
+<p>Now accessing <code>data</code> does not required an extra subsetting step</p>
+<div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">api_output_list</span><span class="op">$</span><span class="va">data</span></span>
+<span><span class="co">#&gt; # A tibble: 2 × 1</span></span>
+<span><span class="co">#&gt;       x</span></span>
+<span><span class="co">#&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1     1</span></span>
+<span><span class="co">#&gt; 2     2</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="code-of-conduct">Code of Conduct<a class="anchor" aria-label="anchor" href="#code-of-conduct"></a>
