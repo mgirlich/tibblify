@@ -487,7 +487,7 @@ test_that("list of df column works", {
   )
 
   # errors if required but absent
-  expect_snapshot(
+  expect_snapshot({
     (expect_error(tibblify(
       list(
         list(x = list(
@@ -498,7 +498,20 @@ test_that("list of df column works", {
       ),
       tspec_df(x = tib_df("x", a = tib_lgl("a")))
     )))
-  )
+
+    # correct path `[[1]]$x[[2]]$a`
+    (expect_error(tibblify(
+      list(
+        list(x = list(
+          list(a = TRUE),
+          list()
+        ))
+      ),
+      tspec_df(x = tib_df("x", a = tib_lgl("a")))
+    )))
+  })
+
+
 
   # fallback default works
   expect_equal(

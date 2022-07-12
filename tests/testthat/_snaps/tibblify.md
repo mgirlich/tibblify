@@ -239,6 +239,13 @@
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Required element absent at path [[2]]$x.
+    Code
+      (expect_error(tibblify(list(list(x = list(list(a = TRUE), list()))), tspec_df(
+        x = tib_df("x", a = tib_lgl("a"))))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Required element absent at path [[1]]$x[[2]]$a.
 
 # colmajor: names are checked
 
