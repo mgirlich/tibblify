@@ -333,10 +333,32 @@
         tib_chr("text"),
       )
 
+# prints non-canonical names
+
+    Code
+      tspec_df(b = tib_int("a")) %>% format()
+    Output
+      [1] "tspec_df(\n  b = tib_int(\"a\"),\n)"
+    Code
+      tspec_df(b = tib_int(c("a", "b"))) %>% format()
+    Output
+      [1] "tspec_df(\n  b = tib_int(c(\"a\", \"b\")),\n)"
+
 # can force to print canonical names
 
     Code
       format(tspec_df(a = tib_int("a"), b = tib_df("b", x = tib_int("x"))))
     Output
       [1] "tspec_df(\n  a = tib_int(\"a\"),\n  b = tib_df(\n    \"b\",\n    x = tib_int(\"x\"),\n  ),\n)"
+
+# special ptypes correctly formatted
+
+    Code
+      tib_scalar("a", ptype = character(), ptype_inner = Sys.Date()) %>% format()
+    Output
+      [1] "tib_chr(\"a\", ptype_inner = vctrs::new_date())"
+    Code
+      tib_scalar("a", ptype = character(), ptype_inner = Sys.time()) %>% format()
+    Output
+      [1] "tib_chr(\"a\", ptype_inner = vctrs::new_datetime(tzone = \"\"))"
 

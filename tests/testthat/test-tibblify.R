@@ -792,6 +792,16 @@ test_that("tspec_object() works", {
     list(a = 1L, b = 1:3)
   )
 
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  expect_equal(
+    tibblify(
+      list(x = model, y = NULL),
+      tspec_object(tib_variant("x"), tib_unspecified("y")),
+      unspecified = "list"
+    ),
+    list(x = model, y = NULL)
+  )
+
   x2 <- list(
     a = list(
       x = 1,
@@ -856,7 +866,7 @@ test_that("spec_replace_unspecified works", {
   )
 
   expect_equal(
-    spec_replace_unspecified(spec, unspecified = "drop"),
+    tibblify_prepare_unspecified(spec, unspecified = "drop", current_call()),
     tspec_df(
       tib_int("1int"),
       tib_df(
@@ -869,7 +879,7 @@ test_that("spec_replace_unspecified works", {
     ignore_attr = "names"
   )
   expect_equal(
-    spec_replace_unspecified(spec, unspecified = "list"),
+    tibblify_prepare_unspecified(spec, unspecified = "list", current_call()),
     tspec_df(
       tib_int("1int"),
       tib_variant("1un"),
@@ -889,6 +899,18 @@ test_that("spec_replace_unspecified works", {
         `2un3` = tib_variant("key")
       )
     )
+  )
+})
+
+test_that("guesses spec by default", {
+  expect_equal(
+    tibblify(
+      list(
+        list(a = 1L),
+        list(a = 2L)
+      )
+    ),
+    tibble(a = 1:2)
   )
 })
 
