@@ -16,6 +16,17 @@ struct Vector_Args
   SEXP names_to;
   SEXP values_to;
   SEXP na;
+
+  Vector_Args(vector_input_form input_form_,
+              bool vector_allows_empty_list_,
+              SEXP names_to_,
+              SEXP values_to_,
+              SEXP na_)
+    : input_form(input_form_)
+    , vector_allows_empty_list(vector_allows_empty_list_)
+    , names_to(names_to_)
+    , values_to(values_to_)
+    , na(na_) { }
 };
 
 struct Field_Args
