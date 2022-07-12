@@ -116,6 +116,7 @@ test_that("record objects work", {
 })
 
 test_that("scalar columns respect ptype_inner", {
+  withr::local_timezone("UTC")
   f <- function(x) {
     stopifnot(is.character(x))
     as.Date(x)
@@ -143,7 +144,7 @@ test_that("scalar columns respect ptype_inner", {
       "x", Sys.Date(),
       required = FALSE,
       ptype_inner = Sys.time(),
-      fill = as.POSIXct("2000-01-01"),
+      fill = as.POSIXct("2000-01-01", tz = "UTC"),
       transform = as.Date
     ),
   )
