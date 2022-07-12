@@ -6,11 +6,11 @@
 <!-- badges: start -->
 
 [![Lifecycle:
-experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html)
 [![CRAN
 status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.org/package=tibblify)
 [![Codecov test
-coverage](https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg)](https://codecov.io/gh/mgirlich/tibblify?branch=master)
+coverage](https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg)](https://app.codecov.io/gh/mgirlich/tibblify?branch=master)
 [![R build
 status](https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg)](https://github.com/mgirlich/tibblify/actions)
 <!-- badges: end -->

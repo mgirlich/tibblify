@@ -2,7 +2,7 @@ Package: tibblify
 Title: Rectangle Nested Lists
 Version: 0.1.0.9000
 Authors@R: c(
-    person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre")),
+    person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre", "cph")),
     person("Kirill", "Müller", role = "ctb")
   )
 Description: A tool to rectangle a nested list, that is to convert it into

@@ -14,6 +14,7 @@
 #' @param vector_allows_empty_list Should empty lists for `input_form = "vector"`
 #'   be accepted and treated as empty vector?
 #'
+#' @return A tibblify specification.
 #' @export
 #' @examples
 #' tspec_df(
@@ -343,6 +344,7 @@ tib_native_ptype.Date <- function(ptype, class, fields) {
 #' Further, there is also a special shortcut for dates encoded as character:
 #' `tib_chr_date()` resp. `tib_chr_date_vec()`.
 #'
+#' @return A tibblify field collector.
 #' @export
 #'
 #' @examples

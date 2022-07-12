@@ -17,7 +17,7 @@ Useful links:
 
 }
 \author{
-\strong{Maintainer}: Maximilian Girlich \email{maximilian.girlich@outlook.com}
+\strong{Maintainer}: Maximilian Girlich \email{maximilian.girlich@outlook.com} [copyright holder]
 
 Other contributors:
 \itemize{

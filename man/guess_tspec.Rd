@@ -13,7 +13,7 @@ guess_tspec(
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   inform_unspecified = should_inform_unspecified(),
-  call = current_call()
+  call = rlang::current_call()
 )
 
 guess_tspec_df(
@@ -22,7 +22,7 @@ guess_tspec_df(
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   inform_unspecified = should_inform_unspecified(),
-  call = current_call()
+  call = rlang::current_call()
 )
 
 guess_tspec_object(
@@ -30,7 +30,7 @@ guess_tspec_object(
   ...,
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
-  call = current_call()
+  call = rlang::current_call()
 )
 }
 \arguments{

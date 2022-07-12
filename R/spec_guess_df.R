@@ -5,7 +5,7 @@ guess_tspec_df <- function(x,
                           empty_list_unspecified = FALSE,
                           simplify_list = FALSE,
                           inform_unspecified = should_inform_unspecified(),
-                          call = current_call()) {
+                          call = rlang::current_call()) {
   check_dots_empty()
   check_flag(empty_list_unspecified, call = call)
   check_flag(simplify_list, call = call)

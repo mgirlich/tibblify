@@ -219,6 +219,9 @@ field go into the specified column.
 the names of elements of the object list. If \code{NULL}, the default, no name
 column is created}
 }
+\value{
+A tibblify field collector.
+}
 \description{
 Use these functions to specify how to convert the fields of an object.
 }

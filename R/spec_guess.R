@@ -28,7 +28,7 @@ guess_tspec <- function(x,
                         empty_list_unspecified = FALSE,
                         simplify_list = FALSE,
                         inform_unspecified = should_inform_unspecified(),
-                        call = current_call()) {
+                        call = rlang::current_call()) {
   check_dots_empty()
   if (is.data.frame(x)) {
     guess_tspec_df(

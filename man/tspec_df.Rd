@@ -41,6 +41,9 @@ column is created}
 \item{vector_allows_empty_list}{Should empty lists for \code{input_form = "vector"}
 be accepted and treated as empty vector?}
 }
+\value{
+A tibblify specification.
+}
 \description{
 Use \code{tspec_df()} to specify how to convert a list of objects to a tibble.
 Use \code{tspec_row()} resp. \code{tspec_object()} to specify how to convert an object
