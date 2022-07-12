@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">tibblify</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.1.0.9000</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">0.2.0</span>
       </span>
     </div>
 
@@ -61,14 +61,27 @@
     </div>
 
     <div class="section level2">
-<h2 class="page-header" data-toc-text="development version" id="tibblify-development-version">tibblify (development version)<a class="anchor" aria-label="anchor" href="#tibblify-development-version"></a></h2>
+<h2 class="page-header" data-toc-text="0.2.0" id="tibblify-020">tibblify 0.2.0<a class="anchor" aria-label="anchor" href="#tibblify-020"></a></h2>
+<p>Major rewrite of the tibblify package with lots of benefits:</p>
+<ul><li><p><code><a href="../reference/tibblify.html">tibblify()</a></code> is now implemented in C and therefore way faster.</p></li>
+<li><p>Support of column major format.</p></li>
+<li><p>Support for vectors as scalar lists and objects.</p></li>
+<li>
+<p>Specification functions have been renamed</p>
 <ul><li>
-<code><a href="../reference/tibblify.html">tibblify()</a></code> gains the argument <code>names_to</code> to store the names of a recordlist in a column.</li>
-<li>Guessed spec uses <code>vctrs</code> namespace so that <code>vctrs</code> doesn’t need to be loaded for the spec to work.</li>
-</ul><div class="section level3">
-<h3 id="bugfixes-development-version">Bugfixes<a class="anchor" aria-label="anchor" href="#bugfixes-development-version"></a></h3>
-<ul><li>The <code>.default</code> argument of <code><a href="../reference/lcol_lgl.html">lcol_df()</a></code> and <code><a href="../reference/lcol_lgl.html">lcol_df_lst()</a></code> is now printed. This bug caused some copy-pasted specs, for example after guessing, to not work correctly and complain about missing paths.</li></ul></div>
-</div>
+<code><a href="../reference/lcols.html">lcols()</a></code> to <code><a href="../reference/tspec_df.html">tspec_df()</a></code>
+</li>
+<li>new specs <code><a href="../reference/tspec_df.html">tspec_object()</a></code> and <code><a href="../reference/tspec_df.html">tspec_row()</a></code>
+</li>
+<li>
+<code><a href="../reference/lcol_lgl.html">lcol_int()</a></code> to <code><a href="../reference/tib_scalar.html">tib_int()</a></code> etc</li>
+</ul></li>
+<li><p><code><a href="../reference/tspec_df.html">tspec_df()</a></code> gains an argument <code>.names_to</code> to store the names of a recordlist in a column.</p></li>
+<li><p>Added <code><a href="../reference/untibblify.html">untibblify()</a></code> to turn a tibble into a nested list, i.e. to reverse the action fo <code><a href="../reference/tibblify.html">tibblify()</a></code>.</p></li>
+<li><p>Added <code>spec_combine()</code> to combine multiple specifications.</p></li>
+<li><p>Added argument <code>unspecified</code> to <code><a href="../reference/tibblify.html">tibblify()</a></code> to control how to handle unspecified fields.</p></li>
+<li><p>Many bugfixes.</p></li>
+</ul></div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="0.1.0" id="tibblify-010">tibblify 0.1.0<small>2020-09-23</small><a class="anchor" aria-label="anchor" href="#tibblify-010"></a></h2>
 <ul><li>First CRAN release.</li></ul></div>
