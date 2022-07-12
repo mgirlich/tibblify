@@ -803,8 +803,14 @@ public:
   inline void add_value(SEXP object, Path& path) {
     LOG_DEBUG;
 
-    const int n_fields = Rf_length(object);
+    if (Rf_isNull(object)) {
+      LOG_DEBUG << "NULL";
 
+      this->add_default(false, path);
+      return;
+    }
+
+    const int n_fields = Rf_length(object);
     if (n_fields == 0) {
       path.down();
       const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
@@ -852,6 +858,18 @@ public:
                         n_rows,
                         this->collector_vec,
                         path);
+  }
+
+  inline void add_default(bool check, Path& path) {
+    LOG_DEBUG;
+
+    path.down();
+    const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
+    for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
+      path.replace(*key_names_ptr);
+      (*this->collector_vec[key_index]).add_default(check, path);
+    }
+    path.up();
   }
 };
 

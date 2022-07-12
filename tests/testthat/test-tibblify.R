@@ -515,6 +515,15 @@ test_that("list of df column works", {
     ),
     tibble(x = list_of(tibble(a = c(TRUE, FALSE)), tibble(a = logical()), NULL))
   )
+
+  # can handle NULL
+  expect_equal(
+    tibblify(
+      list(list(x = NULL)),
+      tspec_df(tib_df("x", tib_lgl("a")))
+    ),
+    tibble(x = list_of(NULL, .ptype = tibble(a = logical())))
+  )
 })
 
 test_that("list of df column can use names_to", {
