@@ -1253,13 +1253,13 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       }
     } else if (type == "vector") {
       cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
-      Vector_Args vector_args {
+      Vector_Args vector_args = Vector_Args(
         string_to_form_enum(input_form),
         vector_allows_empty_list,
-        .names_to = elt["names_to"],
-        .values_to = elt["values_to"],
-        .na = elt["na"]
-      };
+        elt["names_to"],
+        elt["values_to"],
+        elt["na"]
+      );
 
       col_vec.push_back(Collector_Ptr(new Collector_Vector(required, location, name, field_args, vector_args))
       );
