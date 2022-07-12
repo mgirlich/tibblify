@@ -73,6 +73,7 @@ functions for common types:
 * `tib_dbl()`
 * `tib_chr()`
 * `tib_date()`
+* `tib_chr_date()` to parse dates encoded as string.
 
 
 ### Vectors
@@ -101,15 +102,6 @@ c(TRUE, NA, FALSE)
 c(1L, NA, 2L)
 c(1.5, NA, 2.5)
 c("a", NA, "c")
-```
-
-Or if parsed with `jsonlite::fromJSON(simplifyVector = FALSE)`
-
-```{r eval=FALSE}
-list(TRUE, NULL, FALSE)
-list(1L, NULL, 2L)
-list(1.5, NULL, 2.5)
-list("a", NULL, "c")
 ```
 
 :::
@@ -143,7 +135,7 @@ By default they are not supported but produce an error:
 tibblify(x, tspec_df(tib_int_vec("a")))
 ```
 
-Use `vector_allows_empty_list` argument of `tspec_*()` so that they are converted
+Use `vector_allows_empty_list = TRUE` in `tspec_*()` so that they are converted
 to an empty vector instead:
 
 ```{r}
@@ -153,7 +145,7 @@ tibblify(x, tspec_df(tib_int_vec("a"), vector_allows_empty_list = TRUE))$a
 #### Homogeneous R lists of scalars
 
 When using `jsonlite::fromJSON(simplifyVector = FALSE)` to parse JSON to an R
-object one does not get R vectors but lists of scalars:
+object one does not get R vectors but homogeneous lists of scalars:
 
 ```{r error=TRUE}
 x_json <- '[
@@ -171,7 +163,7 @@ By default they cannot be parsed with `tib_vector()`
 tibblify(x, tspec_df(tib_int_vec("a")))
 ```
 
-Set the argument `input_form` to `"scalar_list"` to parse them:
+Use `input_form = "scalar_list"` in `tib_vector()` to parse them:
 
 ```{r}
 tibblify(x, tspec_df(tib_int_vec("a", input_form = "scalar_list")))$a
@@ -180,7 +172,7 @@ tibblify(x, tspec_df(tib_int_vec("a", input_form = "scalar_list")))$a
 
 ### Homogeneous JSON objects of scalars
 
-To parse vector like structures which are encoded as JSON objects:
+Sometimes vectors are encoded as objects in JSON:
 
 ```{r}
 x_json <- '[
@@ -192,7 +184,7 @@ x <- jsonlite::fromJSON(x_json, simplifyVector = FALSE)
 str(x)
 ```
 
-set the argument `input_form` to `"object"`. To actually store the names use the `names_to` and `values_to` argument:
+Use `input_form = "object"` in `tib_vector()` to parse them. To actually store the names use the `names_to` and `values_to` argument:
 
 ```{r}
 spec <- tspec_df(
@@ -405,7 +397,7 @@ x <- list(
 
 ::::
 
-via setting the `.input_form` argument of `tspec_*()` to `"colmajor"`:
+via `.input_form = "colmajor"` in `tspec_*()`:
 
 ```{r}
 df_spec <- tspec_df(
