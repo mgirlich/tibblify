@@ -812,13 +812,7 @@ public:
 
     const int n_fields = Rf_length(object);
     if (n_fields == 0) {
-      path.down();
-      const SEXP* key_names_ptr = STRING_PTR_RO(this->keys);
-      for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-        path.replace(*key_names_ptr);
-        (*this->collector_vec[key_index]).add_default(true, path);
-      }
-      path.up();
+      this->add_default(true, path);
       return;
     }
 
@@ -997,10 +991,13 @@ public:
   inline void add_default(bool check, Path& path) {
     LOG_DEBUG;
 
-    if (required) stop_required(path);
+    if (check && required) stop_required(path);
+    path.down();
     for (int i = 0; i < this->n_keys; i++) {
-      (*this->collector_vec[i]).add_default(check, path);
+      path.replace((cpp11::r_string) this->keys[i]);
+      (*this->collector_vec[i]).add_default(false, path);
     }
+    path.up();
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -1104,6 +1101,7 @@ public:
         this->parse_colmajor(object_list, n_rows, path);
         return this->get_data(object_list, n_rows);
       } else if (vec_is_list(object_list)) {
+        LOG_DEBUG << "===== Start parsing rowmajor - list ======";
         const SEXP* ptr_row = VECTOR_PTR_RO(object_list);
         for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
           path.replace(row_index);
@@ -1138,7 +1136,10 @@ public:
     LOG_DEBUG;
 
     R_xlen_t n_rows = 1;
+    LOG_DEBUG << "====== Object -> init ======";
     this->init(n_rows);
+
+    LOG_DEBUG << "====== Object -> parse ======";
     this->add_value(object, path);
 
     SEXP out = collector_vec_to_df(std::move(this->collector_vec), n_rows, 0);
@@ -1174,7 +1175,9 @@ public:
     if (Rf_isNull(value)) {
       SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
     } else {
+      path.down();
       SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
+      path.up();
     }
   }
 };
@@ -1286,13 +1289,20 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec, cpp11::external_pointer<Path> pa
     if (!Rf_isNull(names_col)) {
       names_col = cpp11::strings(names_col)[0];
     }
+    LOG_DEBUG << "============ create parser ============";
+    auto parser = Parser_Object_List(spec_pair.first, spec_pair.second, input_form, names_col);
 
-    return Parser_Object_List(spec_pair.first, spec_pair.second, input_form, names_col).parse(object_list, path);
+    LOG_DEBUG << "============ parse ============";
+    return parser.parse(object_list, path);
   } else if (type == "row" || type == "object") {
+    LOG_DEBUG << "============ create parser ============";
+    auto parser = Parser_Object(spec_pair.first, spec_pair.second);
+
     // `path.up()` is needed because `parse()` assumes a list of objects and
     // directly uses `path.down()`
+    LOG_DEBUG << "============ parse ============";
     path.up();
-    return Parser_Object(spec_pair.first, spec_pair.second).parse(object_list, path);
+    return parser.parse(object_list, path);
   } else {
     cpp11::stop("Internal Error: Unexpected type");
   }
