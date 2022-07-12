@@ -87,6 +87,21 @@
       Error in `tspec_df()`:
       ! Cannot use `.names_to` for `.input_form = "colmajor"`.
 
+# errors if `vector_allows_empty_list` is invalid
+
+    Code
+      (expect_error(tspec_df(vector_allows_empty_list = NA)))
+    Output
+      <error/rlang_error>
+      Error in `tspec_df()`:
+      ! `vector_allows_empty_list` must be `TRUE` or `FALSE`, not `NA`.
+    Code
+      (expect_error(tspec_df(vector_allows_empty_list = "a")))
+    Output
+      <error/rlang_error>
+      Error in `tspec_df()`:
+      ! `vector_allows_empty_list` must be `TRUE` or `FALSE`, not a string.
+
 # errors on invalid `key`
 
     Code
@@ -96,11 +111,11 @@
       Error in `tib_int()`:
       ! `key` must not be empty.
     Code
-      (expect_error(tib_int(NA)))
+      (expect_error(tib_int(NA_character_)))
     Output
       <error/rlang_error>
       Error in `tib_int()`:
-      ! `key` must be a character vector, not `NA`.
+      ! `key` must not be "NA".
     Code
       (expect_error(tib_int("")))
     Output

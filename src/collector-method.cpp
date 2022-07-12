@@ -1122,7 +1122,7 @@ public:
       return this->get_data(object_list, n_rows);
     }
 
-    cpp11::stop("Unexpected input form");
+    cpp11::stop("Unexpected input form"); // # nocov
   }
 };
 
@@ -1264,7 +1264,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       col_vec.push_back(Collector_Ptr(new Collector_Vector(required, location, name, field_args, vector_args))
       );
     } else {
-      cpp11::stop("Internal Error: Unsupported type");
+      cpp11::stop("Internal Error: Unsupported type"); // # nocov
     }
   }
 
@@ -1304,11 +1304,13 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec, cpp11::external_pointer<Path> pa
     path.up();
     return parser.parse(object_list, path);
   } else {
-    cpp11::stop("Internal Error: Unexpected type");
+    cpp11::stop("Internal Error: Unexpected type"); // # nocov
   }
 }
 
+// # nocov start
 [[cpp11::register]]
 void init_logging(const std::string& log_level) {
   plog::init_r(log_level);
 }
+// # nocov end

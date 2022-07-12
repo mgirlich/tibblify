@@ -1,0 +1,411 @@
+---
+title: "Overview supported structures"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overview supported structures}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(tibblify)
+```
+
+## Supported input for `tibblify()`
+
+The idea of `tibblify()` is to make it easier and more robust to convert lists
+of lists into tibbles. This is a typical task after receiving API responses in
+JSON format.
+The following provides an overview which kind of R objects are supported and
+the JSON they correspond to.
+
+
+### Scalars
+
+There are 4 basic types of scalars coming from JSON: boolean, integer, float, string.
+In R there are not really scalars but only vectors of length 1.
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+true
+1
+1.5
+"a"
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+TRUE
+1
+1.5
+"a"
+```
+
+:::
+
+::::
+
+Other R vectors without JSON equivalent are also supported as long as they:
+
+* are a vector in the vctrs definition and
+* have size one, i.e. `vctrs::vec_size(x)` is 1.
+
+Examples are `Date` or `POSIXct`.
+
+In general a scalar can be parsed with `tib_scalar()`. There are some special
+functions for common types:
+
+* `tib_lgl()`
+* `tib_int()`
+* `tib_dbl()`
+* `tib_chr()`
+* `tib_date()`
+* `tib_chr_date()` to parse dates encoded as string.
+
+
+### Vectors
+
+A homogeneous JSON array is an array of scalar where each scalar has the same type.
+In R they correspond to a `logical()`, `integer()`, `double()` or `character()`
+vector:
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[true, null, false]
+[1, null, 3]
+[1.5, null, 3.5]
+["a", null, "c"]
+```
+
+:::
+
+::: {}
+
+```{r eval=FALSE}
+c(TRUE, NA, FALSE)
+c(1L, NA, 2L)
+c(1.5, NA, 2.5)
+c("a", NA, "c")
+```
+
+:::
+
+::::
+
+As for scalars other types are also supported as long as they are a vector in the
+vctrs definition.
+
+They can be parsed with `tib_vector()`. As for scalars there are shortcuts for
+some common types, e.g. `tib_lgl_vec()`.
+
+#### Empty lists
+
+A special case are empty lists `list()`. They might appear when parsing an empty
+JSON array:
+
+```{r error=TRUE}
+x_json <- '[
+  {"a": [1, 2]},
+  {"a": []}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyDataFrame = FALSE)
+str(x)
+```
+
+By default they are not supported but produce an error:
+
+```{r error=TRUE}
+tibblify(x, tspec_df(tib_int_vec("a")))
+```
+
+Use `vector_allows_empty_list = TRUE` in `tspec_*()` so that they are converted
+to an empty vector instead:
+
+```{r}
+tibblify(x, tspec_df(tib_int_vec("a"), vector_allows_empty_list = TRUE))$a
+```
+
+#### Homogeneous R lists of scalars
+
+When using `jsonlite::fromJSON(simplifyVector = FALSE)` to parse JSON to an R
+object one does not get R vectors but homogeneous lists of scalars:
+
+```{r error=TRUE}
+x_json <- '[
+  {"a": [1, 2]},
+  {"a": [1, 2, 3]}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyVector = FALSE)
+str(x)
+```
+
+By default they cannot be parsed with `tib_vector()`
+
+```{r error=TRUE}
+tibblify(x, tspec_df(tib_int_vec("a")))
+```
+
+Use `input_form = "scalar_list"` in `tib_vector()` to parse them:
+
+```{r}
+tibblify(x, tspec_df(tib_int_vec("a", input_form = "scalar_list")))$a
+```
+
+
+### Homogeneous JSON objects of scalars
+
+Sometimes vectors are encoded as objects in JSON:
+
+```{r}
+x_json <- '[
+  {"a": {"x": 1, "y": 2}},
+  {"a": {"a": 1, "b": 2, "b": 3}}
+]'
+
+x <- jsonlite::fromJSON(x_json, simplifyVector = FALSE)
+str(x)
+```
+
+Use `input_form = "object"` in `tib_vector()` to parse them. To actually store the names use the `names_to` and `values_to` argument:
+
+```{r}
+spec <- tspec_df(
+  tib_int_vec(
+    "a",
+    input_form = "object",
+    names_to = "name",
+    values_to = "value"
+  )
+)
+
+tibblify(x, spec)$a
+```
+
+### Varying
+
+Lists where elements do not have a common type but vary. For example:
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[1, "a", true]
+```
+
+:::
+
+::: {}
+
+```{r eval=FALSE}
+list(1, "a", TRUE)
+```
+
+:::
+
+::::
+
+can be parsed with `tib_variant()`.
+
+
+### Object
+
+The R equivalent to a JSON object is a named list where the names fulfill the
+requirements of `vctrs::vec_as_names(repair = "check_unique")`.
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "a": 1,
+  "b": true
+}
+```
+
+:::
+
+::: {}
+
+
+```{r results='hide'}
+x <- list(
+  a = 1,
+  b = TRUE
+)
+```
+
+:::
+
+::::
+
+They can be parsed with `tib_row()`. For example
+
+```{r}
+x <- list(
+  list(row = list(a = 1, b = TRUE)),
+  list(row = list(a = 2, b = FALSE))
+)
+
+spec <- tspec_df(
+  tib_row(
+    "row",
+    tib_int("a"),
+    tib_lgl("b")
+  )
+)
+
+tibblify(x, spec)
+```
+
+
+### Data Frames
+
+List of objects
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+[
+  {"a": 1, "b": true},
+  {"b": 2, "b": false}
+]
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+x <- list(
+  list(a = 1, b = TRUE),
+  list(a = 2, b = FALSE)
+)
+```
+
+:::
+
+::::
+
+They can be parsed with `tib_df()`.
+
+#### Object of objects
+
+A special form are named lists of object. In JSON they are represented as objects
+where each element is an object.
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "object1": {"a": 1, "b": true},
+  "object2": {"b": 2, "b": false}
+}
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+x <- list(
+  object1 = list(a = 1, b = TRUE),
+  object2 = list(a = 2, b = FALSE)
+)
+```
+
+:::
+
+::::
+
+They are also parsed with `tib_df()` but you can parse the names into an extra
+column via the `.names_to` argument:
+
+```{r}
+x_json <- '[
+{
+  "df": {
+    "object1": {"a": 1, "b": true},
+    "object2": {"a": 2, "b": false}
+  }
+}]'
+
+x <- jsonlite::fromJSON(x_json, simplifyDataFrame = FALSE)
+
+spec <- tspec_df(
+  tib_df(
+    "df",
+    tib_int("a"),
+    tib_lgl("b"),
+    .names_to = "name"
+  )
+)
+
+tibblify(x, spec)$df
+```
+
+#### Column major format
+
+The column major format is also supported
+
+:::: {style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;"}
+
+::: {}
+
+```{json}
+{
+  "a": [1, 2],
+  "b": [true, false]
+}
+```
+
+:::
+
+::: {}
+
+```{r results='hide'}
+x <- list(
+  a = c(1, 2),
+  b = c(TRUE, FALSE)
+)
+```
+
+:::
+
+::::
+
+via `.input_form = "colmajor"` in `tspec_*()`:
+
+```{r}
+df_spec <- tspec_df(
+  tib_int("a"),
+  tib_lgl("b"),
+  .input_form = "colmajor"
+)
+
+tibblify(x, df_spec)
+```
+

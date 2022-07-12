@@ -76,6 +76,8 @@ tibblify <- function(x,
     out <- purrr::map2(spec$fields, out, finalize_tspec_object)
   }
 
+  set_spec(out, spec)
+
   out
 }
 
@@ -100,11 +102,6 @@ finalize_tspec_object.tib_row <- function(field_spec, field) {
 
 #' @export
 finalize_tspec_object.tib_variant <- function(field_spec, field) {
-  field[[1]]
-}
-
-#' @export
-finalize_tspec_object.tib_unspecified<- function(field_spec, field) {
   field[[1]]
 }
 

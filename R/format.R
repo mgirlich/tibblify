@@ -367,7 +367,7 @@ format_fill_arg <- function(x, fill) {
   } else if (is_tib_vector(x)) {
     canonical_default <- vec_init(x$ptype)
   } else {
-    cli::cli_abort("{.arg x} has unexpected type {.cls class(x)}.", .internal = TRUE)
+    cli::cli_abort("{.arg x} has unexpected type {.cls class(x)}.", .internal = TRUE) # nocov
   }
 
   canonical <- vec_size(x$fill) == 1 && vec_equal(x$fill, canonical_default, na_equal = TRUE)

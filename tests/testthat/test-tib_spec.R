@@ -70,6 +70,13 @@ test_that("errors if `.names_to` is used with colmajor", {
   })
 })
 
+test_that("errors if `vector_allows_empty_list` is invalid", {
+  expect_snapshot({
+    (expect_error(tspec_df(vector_allows_empty_list = NA)))
+    (expect_error(tspec_df(vector_allows_empty_list = "a")))
+  })
+})
+
 
 # tib_* -------------------------------------------------------------------
 
@@ -77,7 +84,7 @@ test_that("errors on invalid `key`", {
   expect_snapshot({
     (expect_error(tib_int(character())))
 
-    (expect_error(tib_int(NA)))
+    (expect_error(tib_int(NA_character_)))
     (expect_error(tib_int("")))
     (expect_error(tib_int(1L)))
 
@@ -211,4 +218,20 @@ test_that("tib_df() checks arguments", {
   expect_snapshot({
     (expect_error(tib_df("x", .names_to = 1)))
   })
+})
+
+test_that("special ptypes are not incorrectly recognized", {
+  check_native <- function(ptype) {
+    expect_s3_class(
+      tib_scalar("a", ptype = vctrs::new_vctr(ptype, inherit_base_type = TRUE)),
+      c("tib_scalar", "tib_collector"),
+      exact = TRUE
+    )
+  }
+
+  check_native(logical())
+  check_native(character())
+  check_native(integer())
+  check_native(double())
+  check_native(vctrs::new_date())
 })

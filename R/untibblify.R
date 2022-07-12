@@ -125,26 +125,3 @@ apply_spec_renaming <- function(x, spec) {
 
   out
 }
-
-get_names_map <- function(spec) {
-  fields <- spec$fields
-
-  nms_map_inverted <- set_names(names(fields))
-  for (i in seq_along(fields)) {
-    nm <- names(fields)[[i]]
-    key <- fields[[i]]$key
-    if (length(key) > 1) {
-      msg <- "{.fn untibblify} does not support specs with nested keys"
-      cli::cli_abort(msg, call = call)
-    }
-
-    if (!is.character(key)) {
-      msg <- "{.fn untibblify} does not support specs with non-character keys"
-      cli::cli_abort(msg, call = call)
-    }
-
-    nms_map_inverted[[nm]] <- key
-  }
-
-  set_names(names(nms_map_inverted), nms_map_inverted)
-}

@@ -43,7 +43,7 @@ tspec_combine <- function(...) {
     return(tspec_df(!!!fields))
   }
 
-  cli::cli_abort("Unknown spec type", .internal = TRUE)
+  cli::cli_abort("Unknown spec type", .internal = TRUE) # nocov
 }
 
 check_tspec_combine_dots <- function(..., .call = caller_env()) {
@@ -79,7 +79,7 @@ tspec_combine_field_list <- function(spec_list, call) {
   nms <- vec_unique(vec_flatten(nms_list, character()))
   fields_list_t <- purrr::transpose(fields_list[!empty_idx], nms)
 
-  out <- purrr::map(fields_list_t, tib_combine, call)
+  out <- purrr::imap(fields_list_t, ~ tib_combine(.x, .y, call))
   if (any(empty_idx)) {
     for (i in seq_along(out)) {
       out[[i]]$required <- FALSE
@@ -89,13 +89,13 @@ tspec_combine_field_list <- function(spec_list, call) {
   out
 }
 
-tib_combine <- function(tib_list, call) {
+tib_combine <- function(tib_list, name, call) {
   required <- tib_combine_required(tib_list)
 
   # `required` needs to be calculated beforehand
   tib_list <- tib_list[lengths(tib_list) > 0]
   type <- tib_combine_type(tib_list, call)
-  key <- tib_combine_key(tib_list, call)
+  key <- tib_combine_key(tib_list, name, call)
 
   if (type == "unspecified") {
     return(tib_unspecified(key, required = required))
@@ -143,7 +143,7 @@ tib_combine <- function(tib_list, call) {
     }
   }
 
-  cli::cli_abort("Unknown tib type", .internal = TRUE)
+  cli::cli_abort("Unknown tib type", .internal = TRUE) # nocov
 }
 
 tib_combine_type <- function(tib_list, call) {
@@ -175,14 +175,14 @@ tib_combine_type <- function(tib_list, call) {
   cli::cli_abort("Can't combine tibs {type_infos}", call = call)
 }
 
-tib_combine_key <- function(tib_list, call) {
+tib_combine_key <- function(tib_list, name, call) {
   key_list <- purrr::map(tib_list, "key")
   key_locs <- vec_unique_loc(key_list)
 
   if (length(key_locs) > 1) {
-    # TODO better error message
+    # TODO error message should mention spec path (or at least name)
     keys <- key_list[key_locs]
-    cli::cli_abort("Cannot combine tibs of different keys {keys}", call = call, .internal = TRUE)
+    cli::cli_abort("Cannot combine tibs of different keys {keys}", call = call)
   }
 
   key_list[[1]]
@@ -219,10 +219,6 @@ tib_combine_ptype <- function(tib_list, call) {
 }
 
 tib_combine_fill <- function(tib_list, type, ptype, call) {
-  if (type == "unspecified") {
-    return(NULL)
-  }
-
   types <- purrr::map_chr(tib_list, "type")
   unspecified_locs <- which(types == "unspecified")
 

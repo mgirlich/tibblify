@@ -44,7 +44,7 @@ gh_users_small <- purrr::map(gh_users, ~ .x[c("followers", "login", "url", "name
 names(gh_users_small[[1]])
 ```
 
-Quickly rectangling `gh_users` is as easy as applying `tibblify()` to it:
+Quickly rectangling `gh_users_small` is as easy as applying `tibblify()` to it:
 
 ```{r}
 tibblify(gh_users_small)
@@ -61,9 +61,9 @@ If we are only interested in some of the fields we can easily adapt the specific
 
 ```{r}
 spec <- tspec_df(
-  login = tib_chr("login"),
-  name = tib_chr("name"),
-  public_gists = tib_int("public_gists")
+  login_name = tib_chr("login"),
+  tib_chr("name"),
+  tib_int("public_gists")
 )
 
 tibblify(gh_users_small, spec)
@@ -121,6 +121,8 @@ the most common prototypes:
 * `integer()`: `tib_int()` and `tib_int_vec()`
 * `double()`: `tib_dbl()` and `tib_dbl_vec()`
 * `character()`: `tib_chr()` and `tib_chr_vec()`
+* `Date`: `tib_date()` and `tib_date_vec()`
+* `Date` encoded as character: `tib_chr_date()` and `tib_chr_date_vec()`
 
 
 ### Scalar Elements
@@ -134,8 +136,8 @@ tibblify(
     list(id = 2, name = "Lilly")
   ),
   tspec_df(
-    id = tib_int("id"),
-    name = tib_chr("name")
+    tib_int("id"),
+    tib_chr("name")
   )
 )
 ```
@@ -158,8 +160,8 @@ and then use it in `tib_scalar()`
 tibblify(
   x,
   tspec_df(
-    id = tib_int("id"),
-    duration = tib_scalar("duration", ptype = vctrs::new_duration())
+    tib_int("id"),
+    tib_scalar("duration", ptype = vctrs::new_duration())
   )
 )
 ```
@@ -180,8 +182,8 @@ x <- list(
 tibblify(
   x,
   tspec_df(
-    id = tib_int("id"),
-    children = tib_chr_vec("children")
+    tib_int("id"),
+    tib_chr_vec("children")
   )
 )
 ```

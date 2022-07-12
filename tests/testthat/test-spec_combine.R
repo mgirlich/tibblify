@@ -10,6 +10,12 @@ test_that("cannot combine different types of spec", {
   })
 })
 
+test_that("cannot combine different keys", {
+  expect_snapshot({
+    (expect_error(tspec_combine(tspec_df(tib_int("a")), tspec_df(a = tib_int("b")))))
+  })
+})
+
 test_that("nice error when combining non-specs", {
   df_spec <- tspec_df(a = tib_int("a"))
 
@@ -105,6 +111,17 @@ test_that("can't combine different defaults", {
   expect_snapshot({
     (expect_error(tspec_combine(spec_no_default, spec_default1)))
     (expect_error(tspec_combine(spec_default1, spec_default2)))
+  })
+
+  spec_no_default_vec <- tspec_df(a = tib_int_vec("a"))
+  spec_default1_vec <- tspec_df(a = tib_int_vec("a", fill = 1))
+  spec_default2_vec <- tspec_df(a = tib_int_vec("a", fill = 2))
+
+  expect_equal(tspec_combine(spec_default1_vec, spec_default1_vec), spec_default1_vec)
+
+  expect_snapshot({
+    (expect_error(tspec_combine(spec_no_default_vec, spec_default1_vec)))
+    (expect_error(tspec_combine(spec_default1_vec, spec_default2_vec)))
   })
 })
 

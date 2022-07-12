@@ -101,7 +101,7 @@ tspec_row <- function(...,
 }
 
 tspec <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
-  check_bool(vector_allows_empty_list)
+  check_bool(vector_allows_empty_list, call = call)
 
   structure(
     list2(
@@ -564,21 +564,6 @@ tib_check_names_to <- function(names_to, values_to, input_form, call) {
   names_to
 }
 
-tib_has_special_vector <- function(ptype) {
-  UseMethod("tib_has_special_vector")
-}
-
-#' @export
-tib_has_special_vector.default <- function(ptype) FALSE
-#' @export
-tib_has_special_vector.logical <- function(ptype) vec_is(ptype, logical())
-#' @export
-tib_has_special_vector.integer <- function(ptype) vec_is(ptype, integer())
-#' @export
-tib_has_special_vector.double <- function(ptype) vec_is(ptype, double())
-#' @export
-tib_has_special_vector.character <- function(ptype) vec_is(ptype, character())
-
 #' @rdname tib_scalar
 #' @export
 tib_vector <- function(key,
@@ -858,12 +843,12 @@ check_key <- function(key, call = caller_env()) {
   }
 
   if (n == 1) {
-    if (key == "") {
-      cli::cli_abort("{.arg key} must not be an empty string.", call = call)
-    }
-
     if (is.na(key)) {
       cli::cli_abort("{.arg key} must not be {.val NA}.", call = call)
+    }
+
+    if (key == "") {
+      cli::cli_abort("{.arg key} must not be an empty string.", call = call)
     }
   }
 

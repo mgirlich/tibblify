@@ -19,6 +19,16 @@
       Error in `tspec_combine()`:
       ! Can't combine specs `..1` <row> and `..2` <object>
 
+# cannot combine different keys
+
+    Code
+      (expect_error(tspec_combine(tspec_df(tib_int("a")), tspec_df(a = tib_int("b"))))
+      )
+    Output
+      <error/rlang_error>
+      Error in `tspec_combine()`:
+      ! Cannot combine tibs of different keys a and b
+
 # nice error when combining non-specs
 
     Code
@@ -85,6 +95,21 @@
       <error/rlang_error>
       Error in `tspec_combine()`:
       ! Can't combine fill `..1` <1L> and `..2` <2L>
+
+---
+
+    Code
+      (expect_error(tspec_combine(spec_no_default_vec, spec_default1_vec)))
+    Output
+      <error/rlang_error>
+      Error in `tspec_combine()`:
+      ! Cannot combine fill NULL and 1
+    Code
+      (expect_error(tspec_combine(spec_default1_vec, spec_default2_vec)))
+    Output
+      <error/rlang_error>
+      Error in `tspec_combine()`:
+      ! Cannot combine fill 1 and 2
 
 # can't combine different transforms
 

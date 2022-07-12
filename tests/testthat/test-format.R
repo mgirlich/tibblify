@@ -201,6 +201,13 @@ test_that("format for tib_df works", {
   )
 })
 
+test_that("prints non-canonical names", {
+  expect_snapshot({
+    tspec_df(b = tib_int("a")) %>% format()
+    tspec_df(b = tib_int(c("a", "b"))) %>% format()
+  })
+})
+
 test_that("can force to print canonical names", {
   withr::local_options(list(tibblify.print_names = TRUE))
 
@@ -213,6 +220,13 @@ test_that("can force to print canonical names", {
       )
     )
   ))
+})
+
+test_that("special ptypes correctly formatted", {
+  expect_snapshot({
+    tib_scalar("a", ptype = character(), ptype_inner = Sys.Date()) %>% format()
+    tib_scalar("a", ptype = character(), ptype_inner = Sys.time()) %>% format()
+  })
 })
 
 test_that("format for empty tib_df works", {

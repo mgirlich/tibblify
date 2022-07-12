@@ -697,6 +697,19 @@ test_that("does not confuse key order due to case - #96", {
   )
 })
 
+test_that("default for same key collector works", {
+  expect_equal(
+    tibblify(
+      list(list(x = list(a = 1, b = 2)), list()),
+      tspec_df(
+        a = tib_int(c("x", "a"), required = FALSE),
+        b = tib_int(c("x", "b"), required = FALSE),
+      )
+    ),
+    tibble(a = c(1L, NA), b = c(2L, NA))
+  )
+})
+
 test_that("discog works", {
   row1 <- tibble(
     instance_id = 354823933L,
@@ -814,6 +827,16 @@ test_that("tspec_object() works", {
     list(a = 1L, b = 1:3)
   )
 
+  model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
+  expect_equal(
+    tibblify(
+      list(x = model, y = NULL),
+      tspec_object(tib_variant("x"), tib_unspecified("y")),
+      unspecified = "list"
+    ),
+    list(x = model, y = NULL)
+  )
+
   x2 <- list(
     a = list(
       x = 1,
@@ -878,7 +901,7 @@ test_that("spec_replace_unspecified works", {
   )
 
   expect_equal(
-    spec_replace_unspecified(spec, unspecified = "drop"),
+    tibblify_prepare_unspecified(spec, unspecified = "drop", current_call()),
     tspec_df(
       tib_int("1int"),
       tib_df(
@@ -891,7 +914,7 @@ test_that("spec_replace_unspecified works", {
     ignore_attr = "names"
   )
   expect_equal(
-    spec_replace_unspecified(spec, unspecified = "list"),
+    tibblify_prepare_unspecified(spec, unspecified = "list", current_call()),
     tspec_df(
       tib_int("1int"),
       tib_variant("1un"),
@@ -911,6 +934,18 @@ test_that("spec_replace_unspecified works", {
         `2un3` = tib_variant("key")
       )
     )
+  )
+})
+
+test_that("guesses spec by default", {
+  expect_equal(
+    tibblify(
+      list(
+        list(a = 1L),
+        list(a = 2L)
+      )
+    ),
+    tibble(a = 1:2)
   )
 })
 
@@ -1227,6 +1262,25 @@ test_that("nested keys work", {
   )
 })
 
+test_that("default for same key collector works", {
+  skip("undecided whether this should work")
+  expect_equal(
+    tibblify(
+      list(
+        x = list(),
+        y = 1:2
+      ),
+      tspec_df(
+        tib_int("y"),
+        a = tib_int(c("x", "a"), required = FALSE),
+        b = tib_int(c("x", "b"), required = FALSE),
+        .input_form = "colmajor"
+      )
+    ),
+    tibble(a = c(1L, NA), b = c(2L, NA))
+  )
+})
+
 test_that("empty spec works", {
   expect_equal(
     tibblify(
@@ -1252,6 +1306,40 @@ test_that("errors if n_rows cannot be calculated", {
     # before key in alphabet
     (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
   })
+})
+
+test_that("colmajor can calculate size", {
+  expect_equal(
+    tibblify(
+      list(
+        x = NULL,
+        y = 1:2
+      ),
+      tspec_df(tib_int("x"), tib_int("y"), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = 1:2)
+  )
+
+  expect_snapshot(
+    expect_error(
+      tibblify(
+        list(row = "a"),
+        tspec_df(tib_row("row", tib_int("x")), .input_form = "colmajor")
+      )
+    )
+  )
+
+  skip("undecided whether this should work")
+  expect_equal(
+    tibblify(
+      list(
+        row = NULL,
+        x = 1:2
+      ),
+      tspec_df(tib_row("row", tib_int("x")), tib_int("x"), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = 1:2)
+  )
 })
 
 test_that("colmajor checks size", {
