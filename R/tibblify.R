@@ -65,7 +65,7 @@ tibblify <- function(x,
 
       path <- format_path(path_ptr)
       tibblify_abort(
-        "Problem while tibblifying {.field {path}}",
+        "Problem while tibblifying {.arg {path}}",
         parent = cnd,
         call = call
       )

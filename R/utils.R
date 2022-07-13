@@ -7,12 +7,12 @@ check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
 }
 
 format_path <- function(path_ptr) {
-  paste0("x", path_to_string(get_path_data(path_ptr)))
+  path_to_string(get_path_data(path_ptr))
 }
 
 path_to_string <- function(path) {
   if (length(path) == 0) {
-    return("<root>")
+    return("x")
   }
 
   path_elements <- purrr::map_chr(
@@ -26,15 +26,7 @@ path_to_string <- function(path) {
     }
   )
 
-  paste0(path_elements, collapse = "")
-}
-
-path_to_string2 <- function(path) {
-  if (is_empty(path)) {
-    return("x")
-  }
-
-  paste0("x", path_to_string(path))
+  paste0("x", paste0(path_elements, collapse = ""))
 }
 
 tibblify_abort <- function(..., .envir = caller_env()) {
@@ -43,7 +35,7 @@ tibblify_abort <- function(..., .envir = caller_env()) {
 
 stop_required <- function(path) {
   n <- length(path)
-  path_str <- path_to_string2(path[-n])
+  path_str <- path_to_string(path[-n])
   msg <- c(
     "Field {.field {path[[n]]}} is required but does not exist in {.arg {path_str}}.",
     i = "Use {.code required = FALSE} if the field is optional."
@@ -52,7 +44,7 @@ stop_required <- function(path) {
 }
 
 stop_scalar <- function(path, size_act) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "{.arg {path_str}} must have size {.val 1}, not size {.val {size_act}}.",
     i = "You specified that the field is a scalar.",
@@ -62,7 +54,7 @@ stop_scalar <- function(path, size_act) {
 }
 
 stop_duplicate_name <- function(path, name) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "The names of an object must be unique.",
     x = "{.arg {path_str}} has the duplicated name {.val {name}}."
@@ -71,7 +63,7 @@ stop_duplicate_name <- function(path, name) {
 }
 
 stop_empty_name <- function(path, index) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "The names of an object can't be empty.",
     x = "{.arg {path_str}} has an empty name at location {index + 1}."
@@ -80,7 +72,7 @@ stop_empty_name <- function(path, index) {
 }
 
 stop_names_is_null <- function(path) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "An object must be named.",
     x = "{.arg {path_str}} is not named."
@@ -89,7 +81,7 @@ stop_names_is_null <- function(path) {
 }
 
 stop_object_vector_names_is_null <- function(path) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     'A vector must be a named list for {.code input_form = "object."}',
     x = "{.arg {path_str}} is not named."
@@ -99,7 +91,7 @@ stop_object_vector_names_is_null <- function(path) {
 
 stop_vector_non_list_element <- function(path, input_form, x) {
   # FIXME {.code} cannot be interpolated correctly
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}.",
     x = '`input_form = "{input_form}"` can only parse lists.',
@@ -109,7 +101,7 @@ stop_vector_non_list_element <- function(path, input_form, x) {
 }
 
 stop_vector_wrong_size_element <- function(path, input_form, x) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   sizes <- list_sizes(x)
   idx <- which(sizes != 1)
   if (input_form == "scalar_list") {
@@ -126,7 +118,7 @@ stop_vector_wrong_size_element <- function(path, input_form, x) {
 
 stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
   n <- length(path)
-  path_str <- path_to_string2(path[-n])
+  path_str <- path_to_string(path[-n])
   msg <- c(
     "Not all fields of {.arg {path_str}} have the same size.",
     x = "Field {.field {path[[n]]}} has size {.val {size_act}}.",
@@ -136,7 +128,7 @@ stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
 }
 
 stop_colmajor_non_list_element <- function(path, x) {
-  path_str <- path_to_string2(path)
+  path_str <- path_to_string(path)
   msg <- c(
     "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}."
   )

@@ -154,7 +154,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x[[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
     Code
@@ -162,7 +162,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x[[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -190,7 +190,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x[[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -201,7 +201,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x[[2]]$x
+      ! Problem while tibblifying `x[[2]]$x`
       Caused by error:
       ! Can't convert <list> to <integer>.
 
@@ -248,7 +248,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x[[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <integer>.
 
@@ -355,7 +355,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
     Code
@@ -363,7 +363,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -380,7 +380,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -391,7 +391,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x<root>
+      ! Problem while tibblifying `x`
       Caused by error:
       ! Could not determine number of rows.
     Code
@@ -399,7 +399,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x<root>
+      ! Problem while tibblifying `x`
       Caused by error:
       ! Could not determine number of rows.
 
