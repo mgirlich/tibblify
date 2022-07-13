@@ -110,16 +110,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tib(list(), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
 
 ---
 
@@ -174,16 +173,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tib(list(), tib_vector("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
 
 ---
 
@@ -266,7 +264,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # df column works
 
@@ -276,7 +275,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # list of df column works
 
@@ -286,14 +286,16 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tibblify(list(list(x = list(list(a = TRUE), list()))), tspec_df(
         x = tib_df("x", a = tib_lgl("a"))))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x[[2]]$a.
+      ! Field a is required but does not exist in `x[[1]]$x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # colmajor: names are checked
 

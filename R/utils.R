@@ -42,8 +42,12 @@ tibblify_abort <- function(..., .envir = caller_env()) {
 }
 
 stop_required <- function(path) {
-  path_str <- path_to_string(path)
-  msg <- "Required element absent at path {path_str}."
+  n <- length(path)
+  path_str <- path_to_string2(path[-n])
+  msg <- c(
+    "Field {.field {path[[n]]}} is required but does not exist in {.arg {path_str}}.",
+    i = "Use {.code required = FALSE} if the field is optional."
+  )
   tibblify_abort(msg)
 }
 
