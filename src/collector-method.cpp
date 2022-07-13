@@ -507,7 +507,7 @@ public:
     if (this->input_form == vector_input_form::scalar_list || this->input_form == vector_input_form::object) {
       // FIXME should check with `vec_is_list()`?
       if (TYPEOF(value) != VECSXP) {
-        stop_vector_non_list_element(path, this->input_form);
+        stop_vector_non_list_element(path, this->input_form, value);
       }
 
       if (Rf_isNull(names) && this->input_form == vector_input_form::object) {

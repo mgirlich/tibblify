@@ -97,10 +97,14 @@ stop_object_vector_names_is_null <- function(path) {
   tibblify_abort(msg)
 }
 
-stop_vector_non_list_element <- function(path, input_form) {
+stop_vector_non_list_element <- function(path, input_form, x) {
   # FIXME {.code} cannot be interpolated correctly
-  path_str <- path_to_string(path)
-  msg <- 'Element at path {path_str} must be a list for `input_form = "{input_form}"`'
+  path_str <- path_to_string2(path)
+  msg <- c(
+    "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}.",
+    x = '`input_form = "{input_form}"` can only parse lists.',
+    i = 'Use `input_form = "vector"` (the default) if the field is already a vector.'
+  )
   tibblify_abort(msg)
 }
 

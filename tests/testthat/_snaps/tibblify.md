@@ -212,13 +212,17 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must be a list for `input_form = "scalar_list"`
+      ! `x[[1]]$x` must be a list, not a number.
+      x `input_form = "scalar_list"` can only parse lists.
+      i Use `input_form = "vector"` (the default) if the field is already a vector.
     Code
       (expect_error(tib(list(x = 1), tspec_object)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must be a list for `input_form = "object"`
+      ! `x[[1]]$x` must be a list, not a number.
+      x `input_form = "object"` can only parse lists.
+      i Use `input_form = "vector"` (the default) if the field is already a vector.
 
 ---
 

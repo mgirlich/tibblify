@@ -41,11 +41,12 @@ inline void stop_object_vector_names_is_null(const Path& path) {
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form) {
+inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form, SEXP x) {
   cpp11::sexp input_form_string = vector_input_form_to_sexp(input_form);
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_non_list_element"),
+  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_vector_non_list_element"),
                                PROTECT(path.data()),
-                               input_form_string));
+                               input_form_string,
+                               x));
   Rf_eval(call, tibblify_ns_env);
 }
 
