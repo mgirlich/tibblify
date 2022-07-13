@@ -418,27 +418,24 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$y
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path $y has size 3, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x` have the same size.
+      x Field y has size 3.
+      x Other fields have size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
         x = 1:3))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$y$x
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path $y$x has size 3, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x$y` have the same size.
+      x Field x has size 3.
+      x Other fields have size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$y
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path $y has size 1, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x` have the same size.
+      x Field y has size 1.
+      x Other fields have size 2.
 

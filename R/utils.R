@@ -125,12 +125,14 @@ stop_vector_wrong_size_element <- function(path, input_form, x) {
 }
 
 stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
-  path_str <- path_to_string(path)
+  n <- length(path)
+  path_str <- path_to_string2(path[-n])
   msg <- c(
-    "Field at path {path_str} has size {.val {size_act}}, not size {.val {size_exp}}.",
-    i = 'For {.code input_form = "colmajor"} each field must have the same size.'
+    "Not all fields of {.arg {path_str}} have the same size.",
+    x = "Field {.field {path[[n]]}} has size {.val {size_act}}.",
+    x = "Other fields have size {.val {size_exp}}."
   )
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
 stop_colmajor_non_list_element <- function(path) {
