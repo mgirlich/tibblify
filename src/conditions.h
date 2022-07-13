@@ -2,9 +2,10 @@
 #include "utils.h"
 #include "Path.h"
 
-inline void stop_scalar(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_scalar"),
-                               PROTECT(path.data())));
+inline void stop_scalar(const Path& path, R_xlen_t size_act) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_scalar"),
+                               PROTECT(path.data()),
+                               cpp11::as_sexp(size_act)));
   Rf_eval(call, tibblify_ns_env);
 }
 

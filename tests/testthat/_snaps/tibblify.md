@@ -127,16 +127,25 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
-
----
-
+      ! `x[[1]]$x` must have size "1", not size 2.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
+    Code
+      (expect_error(tib(list(x = logical()), tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! `x[[1]]$x` must have size "1", not size 0.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
     Code
       (expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` must have size "1", not size 2.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
 
 ---
 
@@ -156,15 +165,6 @@
       ! Problem while tibblifying x[[1]]$x
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
-
----
-
-    Code
-      (expect_error(tib(list(x = integer()), tib_int("x", required = FALSE))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
 
 # vector column works
 

@@ -51,9 +51,13 @@ stop_required <- function(path) {
   tibblify_abort(msg)
 }
 
-stop_scalar <- function(path) {
-  path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} must have size 1."
+stop_scalar <- function(path, size_act) {
+  path_str <- path_to_string2(path)
+  msg <- c(
+    "{.arg {path_str}} must have size {.val 1}, not size {.val {size_act}}.",
+    i = "You specified that the field is a scalar.",
+    i = "Use {.fn tib_vector} if the field is a vector instead."
+  )
   tibblify_abort(msg)
 }
 

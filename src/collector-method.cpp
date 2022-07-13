@@ -197,7 +197,7 @@ public:
     SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
-      stop_scalar(path);
+      stop_scalar(path, size);
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
@@ -352,7 +352,7 @@ public:
     SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
-      stop_scalar(path);
+      stop_scalar(path, size);
     }
 
     *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
