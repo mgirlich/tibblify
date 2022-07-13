@@ -89,10 +89,10 @@ stop_names_is_null <- function(path) {
 }
 
 stop_object_vector_names_is_null <- function(path) {
-  path_str <- path_to_string(path)
+  path_str <- path_to_string2(path)
   msg <- c(
-    "Element at path {.field {path_str}} has {.code NULL} names.",
-    i = 'Element must be named for {.code tib_vector(input_form = "object")}.'
+    'A vector must be a named list for {.code input_form = "object."}',
+    x = "{.arg {path_str}} is not named."
   )
   tibblify_abort(msg)
 }

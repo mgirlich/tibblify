@@ -259,8 +259,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x has `NULL` names.
-      i Element must be named for `tib_vector(input_form = "object")`.
+      ! A vector must be a named list for `input_form = "object."`
+      x `x[[1]]$x` is not named.
 
 # list column works
 
