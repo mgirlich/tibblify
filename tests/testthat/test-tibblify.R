@@ -64,8 +64,10 @@ test_that("scalar column works", {
   expect_snapshot((expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))))
 
   # errors if bad type
-  expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(x = 1), tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib(list(x = "a"), tib_lgl("x"))))
+    (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
+  })
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
@@ -1003,8 +1005,10 @@ test_that("colmajor: scalar column works", {
   # expect_snapshot((expect_error(tib2(x = 1:3, tib_lgl("y")))))
 
   # errors if bad type
-  expect_snapshot((expect_error(tib_cm(x = "a", tib_lgl("x")))))
-  expect_snapshot((expect_error(tib_cm(x = 1, tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib_cm(x = "a", tib_lgl("x"))))
+    (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
+  })
 
   # transform works
   expect_equal(

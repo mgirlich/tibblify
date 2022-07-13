@@ -146,18 +146,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying x[[1]]$x
       Caused by error:
       ! Can't convert <character> to <logical>.
-
----
-
     Code
       (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying x[[1]]$x
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -195,7 +192,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying x[[1]]$x
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -206,7 +203,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[2]]$x
+      ! Problem while tibblifying x[[2]]$x
       Caused by error:
       ! Can't convert <list> to <integer>.
 
@@ -247,7 +244,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying x[[1]]$x
       Caused by error:
       ! Can't convert <character> to <integer>.
 
@@ -350,18 +347,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $x
+      ! Problem while tibblifying x$x
       Caused by error:
       ! Can't convert <character> to <logical>.
-
----
-
     Code
       (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $x
+      ! Problem while tibblifying x$x
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -372,7 +366,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $x
+      ! Problem while tibblifying x$x
       Caused by error in `stop_colmajor_non_list_element()`:
       ! Element at path $x must be a list.
     Code
@@ -380,7 +374,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $x
+      ! Problem while tibblifying x$x
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -391,7 +385,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field <root>
+      ! Problem while tibblifying x<root>
       Caused by error:
       ! Could not determine number of rows.
     Code
@@ -399,7 +393,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field <root>
+      ! Problem while tibblifying x<root>
       Caused by error:
       ! Could not determine number of rows.
 
@@ -416,7 +410,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $y
+      ! Problem while tibblifying x$y
       Caused by error in `stop_colmajor_wrong_size_element()`:
       ! Field at path $y has size 3, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
@@ -426,7 +420,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $y$x
+      ! Problem while tibblifying x$y$x
       Caused by error in `stop_colmajor_wrong_size_element()`:
       ! Field at path $y$x has size 3, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
@@ -435,7 +429,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field $y
+      ! Problem while tibblifying x$y
       Caused by error in `stop_colmajor_wrong_size_element()`:
       ! Field at path $y has size 1, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
