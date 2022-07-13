@@ -414,7 +414,8 @@
 <span></span>
 <span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00; font-weight: bold;">Error</span><span style="font-weight: bold;"> in `tibblify()`:</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Required element absent at path [[2]]$y.</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Field <span style="color: #00BB00;">y</span> is required but does not exist in `x[[2]]`.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use `required = FALSE` if the field is optional.</span></span></code></pre></div>
 <p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
