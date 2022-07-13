@@ -1079,6 +1079,8 @@ public:
     LOG_DEBUG;
 
     if (this->input_form == "colmajor") {
+      // FIXME path handling is quite confusing here...
+      path.up();
       SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
       const R_xlen_t n_fields = Rf_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
@@ -1090,7 +1092,9 @@ public:
       this->init(n_rows);
 
       this->parse_colmajor(object_list, n_rows, path);
-      return this->get_data(object_list, n_rows);
+      auto out = this->get_data(object_list, n_rows);
+      path.down();
+      return(out);
     } else if (input_form == "rowmajor") {
       R_xlen_t n_rows = short_vec_size(object_list);
       LOG_DEBUG << "===== Start init ======";

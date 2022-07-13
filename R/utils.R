@@ -29,6 +29,14 @@ path_to_string <- function(path) {
   paste0(path_elements, collapse = "")
 }
 
+path_to_string2 <- function(path) {
+  if (is_empty(path)) {
+    return("x")
+  }
+
+  paste0("x", path_to_string(path))
+}
+
 tibblify_abort <- function(..., .envir = caller_env()) {
   cli::cli_abort(..., class = "tibblify_error", .envir = .envir)
 }
@@ -46,20 +54,29 @@ stop_scalar <- function(path) {
 }
 
 stop_duplicate_name <- function(path, name) {
-  path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has duplicate name {.val {name}}."
+  path_str <- path_to_string2(path)
+  msg <- c(
+    "The names of an object must be unique.",
+    x = "{.arg {path_str}} has the duplicated name {.val {name}}."
+  )
   tibblify_abort(msg)
 }
 
 stop_empty_name <- function(path, index) {
-  path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has empty name at position {index + 1}."
+  path_str <- path_to_string2(path)
+  msg <- c(
+    "The names of an object can't be empty.",
+    x = "{.arg {path_str}} has an empty name at location {index + 1}."
+  )
   tibblify_abort(msg)
 }
 
 stop_names_is_null <- function(path) {
-  path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has {.code NULL} names."
+  path_str <- path_to_string2(path)
+  msg <- c(
+    "An object must be named.",
+    x = "{.arg {path_str}} is not named."
+  )
   tibblify_abort(msg)
 }
 

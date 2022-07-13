@@ -26,6 +26,26 @@ test_that("names are checked", {
     # duplicate name
     (expect_error(tibblify(list(x = 1, x = 2), spec)))
   })
+
+  spec2 <- tspec_object(
+    tib_row("row", tib_int("x"), .required = FALSE)
+  )
+
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(row = list(1, 2)), spec2)))
+
+    # partial names
+    (expect_error(tibblify(list(row = list(x = 1, 2)), spec2)))
+    (expect_error(tibblify(list(row = list(1, x = 2)), spec2)))
+    (expect_error(tibblify(list(row = list(z = 1, y = 2, 3, a = 4)), spec2)))
+
+    # `NA` name
+    (expect_error(tibblify(list(row = set_names(list(1, 2), c("x", NA))), spec2)))
+
+    # duplicate name
+    (expect_error(tibblify(list(row = list(x = 1, x = 2)), spec2)))
+  })
 })
 
 test_that("scalar column works", {

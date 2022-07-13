@@ -16,13 +16,13 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! Element ..1 must be a tib collector, not a number.
+      ! ..1 must be a tib collector, not a number.
     Code
       (expect_error(tspec_df(x = tib_int("x"), y = "a")))
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! Element y must be a tib collector, not a string.
+      ! y must be a tib collector, not a string.
 
 # can infer name from key
 
@@ -31,8 +31,8 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! Can't infer name if key is not a single string
-      x `key` of element ..1 has length 2.
+      ! `key` must be a single string to infer name.
+      x `key` of ..1 has length 2.
     Code
       (expect_error(tspec_df(y = tib_int("x"), tib_int("y"))))
     Output
@@ -85,7 +85,7 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! Cannot use `.names_to` for `.input_form = "colmajor"`.
+      ! Can't use `.names_to` with `.input_form = "colmajor"`.
 
 # errors if `vector_allows_empty_list` is invalid
 
