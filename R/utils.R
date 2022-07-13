@@ -12,7 +12,7 @@ format_path <- function(path_ptr) {
 
 path_to_string <- function(path) {
   if (length(path) == 0) {
-    return("<root>")
+    return("x")
   }
 
   path_elements <- purrr::map_chr(
@@ -26,7 +26,7 @@ path_to_string <- function(path) {
     }
   )
 
-  paste0(path_elements, collapse = "")
+  paste0("x", paste0(path_elements, collapse = ""))
 }
 
 tibblify_abort <- function(..., .envir = caller_env()) {
@@ -34,70 +34,105 @@ tibblify_abort <- function(..., .envir = caller_env()) {
 }
 
 stop_required <- function(path) {
-  path_str <- path_to_string(path)
-  msg <- "Required element absent at path {path_str}."
+  n <- length(path)
+  path_str <- path_to_string(path[-n])
+  msg <- c(
+    "Field {.field {path[[n]]}} is required but does not exist in {.arg {path_str}}.",
+    i = "Use {.code required = FALSE} if the field is optional."
+  )
   tibblify_abort(msg)
 }
 
-stop_scalar <- function(path) {
+stop_scalar <- function(path, size_act) {
   path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} must have size 1."
+  msg <- c(
+    "{.arg {path_str}} must have size {.val 1}, not size {.val {size_act}}.",
+    i = "You specified that the field is a scalar.",
+    i = "Use {.fn tib_vector} if the field is a vector instead."
+  )
   tibblify_abort(msg)
 }
 
 stop_duplicate_name <- function(path, name) {
   path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has duplicate name {.val {name}}."
+  msg <- c(
+    "The names of an object must be unique.",
+    x = "{.arg {path_str}} has the duplicated name {.val {name}}."
+  )
   tibblify_abort(msg)
 }
 
 stop_empty_name <- function(path, index) {
   path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has empty name at position {index + 1}."
+  msg <- c(
+    "The names of an object can't be empty.",
+    x = "{.arg {path_str}} has an empty name at location {index + 1}."
+  )
   tibblify_abort(msg)
 }
 
 stop_names_is_null <- function(path) {
   path_str <- path_to_string(path)
-  msg <- "Element at path {path_str} has {.code NULL} names."
+  msg <- c(
+    "An object must be named.",
+    x = "{.arg {path_str}} is not named."
+  )
   tibblify_abort(msg)
 }
 
 stop_object_vector_names_is_null <- function(path) {
   path_str <- path_to_string(path)
   msg <- c(
-    "Element at path {.field {path_str}} has {.code NULL} names.",
-    i = 'Element must be named for {.code tib_vector(input_form = "object")}.'
+    'A vector must be a named list for {.code input_form = "object."}',
+    x = "{.arg {path_str}} is not named."
   )
   tibblify_abort(msg)
 }
 
-stop_vector_non_list_element <- function(path, input_form) {
+stop_vector_non_list_element <- function(path, input_form, x) {
   # FIXME {.code} cannot be interpolated correctly
   path_str <- path_to_string(path)
-  msg <- 'Element at path {path_str} must be a list for `input_form = "{input_form}"`'
+  msg <- c(
+    "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}.",
+    x = '`input_form = "{input_form}"` can only parse lists.',
+    i = 'Use `input_form = "vector"` (the default) if the field is already a vector.'
+  )
   tibblify_abort(msg)
 }
 
-stop_vector_wrong_size_element <- function(path, input_form) {
+stop_vector_wrong_size_element <- function(path, input_form, x) {
   path_str <- path_to_string(path)
-  msg <- 'Each element in list at path {path_str} must have size 1.'
+  sizes <- list_sizes(x)
+  idx <- which(sizes != 1)
+  if (input_form == "scalar_list") {
+    desc <- "a list of scalars"
+  } else {
+    desc <- "an object"
+  }
+  msg <- c(
+    "{.arg {path_str}} is not {desc}.",
+    x = "Element {.field {idx}} must have size {.val {1}}, not size {.val {sizes[idx]}}."
+  )
   tibblify_abort(msg)
 }
 
 stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
-  path_str <- path_to_string(path)
+  n <- length(path)
+  path_str <- path_to_string(path[-n])
   msg <- c(
-    "Field at path {path_str} has size {.val {size_act}}, not size {.val {size_exp}}.",
-    i = 'For {.code input_form = "colmajor"} each field must have the same size.'
+    "Not all fields of {.arg {path_str}} have the same size.",
+    x = "Field {.field {path[[n]]}} has size {.val {size_act}}.",
+    x = "Other fields have size {.val {size_exp}}."
   )
-  cli::cli_abort(msg)
+  tibblify_abort(msg)
 }
 
-stop_colmajor_non_list_element <- function(path) {
+stop_colmajor_non_list_element <- function(path, x) {
   path_str <- path_to_string(path)
-  msg <- 'Element at path {path_str} must be a list.'
-  cli::cli_abort(msg)
+  msg <- c(
+    "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}."
+  )
+  tibblify_abort(msg)
 }
 
 vec_flatten <- function(x, ptype, name_spec = zap()) {

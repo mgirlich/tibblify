@@ -3,6 +3,7 @@
 
 test_that("errors on invalid names", {
   expect_snapshot({
+    # duplicated name
     (expect_error(tspec_df(x = tib_int("x"), x = tib_int("y"))))
   })
 })

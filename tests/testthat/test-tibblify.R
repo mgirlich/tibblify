@@ -26,6 +26,26 @@ test_that("names are checked", {
     # duplicate name
     (expect_error(tibblify(list(x = 1, x = 2), spec)))
   })
+
+  spec2 <- tspec_object(
+    tib_row("row", tib_int("x"), .required = FALSE)
+  )
+
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(row = list(1, 2)), spec2)))
+
+    # partial names
+    (expect_error(tibblify(list(row = list(x = 1, 2)), spec2)))
+    (expect_error(tibblify(list(row = list(1, x = 2)), spec2)))
+    (expect_error(tibblify(list(row = list(z = 1, y = 2, 3, a = 4)), spec2)))
+
+    # `NA` name
+    (expect_error(tibblify(list(row = set_names(list(1, 2), c("x", NA))), spec2)))
+
+    # duplicate name
+    (expect_error(tibblify(list(row = list(x = 1, x = 2)), spec2)))
+  })
 })
 
 test_that("scalar column works", {
@@ -36,16 +56,24 @@ test_that("scalar column works", {
   expect_equal(tib(list(x = dtt), tib_scalar("x", dtt)), tibble(x = dtt))
 
   # errors if required but absent
-  expect_snapshot((expect_error(tib(list(), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(), tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib(list(), tib_lgl("x"))))
+    (expect_error(tib(list(), tib_scalar("x", dtt))))
+  })
 
   # errors if bad size
-  expect_snapshot((expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib(list(x = c(TRUE, TRUE)), tib_lgl("x"))))
+    # empty element
+    (expect_error(tib(list(x = logical()), tib_lgl("x"))))
+    (expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt))))
+  })
 
   # errors if bad type
-  expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl("x")))))
-  expect_snapshot((expect_error(tib(list(x = 1), tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib(list(x = "a"), tib_lgl("x"))))
+    (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
+  })
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
@@ -57,11 +85,6 @@ test_that("scalar column works", {
     tib(list(x = NULL), tib_scalar("x", vec_ptype(dtt), required = FALSE, fill = dtt)),
     tibble(x = vec_init(dtt))
   )
-
-  # errors if empty element
-  expect_snapshot({
-    (expect_error(tib(list(x = integer()), tib_int("x", required = FALSE))))
-  })
 
   # specified default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE, fill = FALSE)), tibble(x = FALSE))
@@ -167,8 +190,10 @@ test_that("vector column works", {
   expect_equal(tib(list(x = c(dtt, dtt + 1)), tib_vector("x", dtt)), tibble(x = list_of(c(dtt, dtt + 1))))
 
   # errors if required but absent
-  expect_snapshot((expect_error(tib(list(), tib_lgl_vec("x")))))
-  expect_snapshot((expect_error(tib(list(), tib_vector("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib(list(), tib_lgl_vec("x"))))
+    (expect_error(tib(list(), tib_vector("x", dtt))))
+  })
 
   # errors if bad type
   expect_snapshot((expect_error(tib(list(x = "a"), tib_lgl_vec("x")))))
@@ -983,8 +1008,10 @@ test_that("colmajor: scalar column works", {
   # expect_snapshot((expect_error(tib2(x = 1:3, tib_lgl("y")))))
 
   # errors if bad type
-  expect_snapshot((expect_error(tib_cm(x = "a", tib_lgl("x")))))
-  expect_snapshot((expect_error(tib_cm(x = 1, tib_scalar("x", dtt)))))
+  expect_snapshot({
+    (expect_error(tib_cm(x = "a", tib_lgl("x"))))
+    (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
+  })
 
   # transform works
   expect_equal(

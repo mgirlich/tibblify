@@ -124,7 +124,7 @@ public:
     LOG_DEBUG;
 
     if (TYPEOF(value) != VECSXP) {
-      stop_colmajor_non_list_element(path);
+      stop_colmajor_non_list_element(path, value);
     }
 
     check_colmajor_size(value, n_rows, path);
@@ -197,7 +197,7 @@ public:
     SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
-      stop_scalar(path);
+      stop_scalar(path, size);
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
@@ -352,7 +352,7 @@ public:
     SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
-      stop_scalar(path);
+      stop_scalar(path, size);
     }
 
     *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
@@ -446,7 +446,7 @@ private:
       }
 
       if (vec_size(*ptr_row) != 1) {
-        stop_vector_wrong_size_element(path, this->input_form);
+        stop_vector_wrong_size_element(path, this->input_form, value);
       }
 
       out_list[i] = *ptr_row;
@@ -507,7 +507,7 @@ public:
     if (this->input_form == vector_input_form::scalar_list || this->input_form == vector_input_form::object) {
       // FIXME should check with `vec_is_list()`?
       if (TYPEOF(value) != VECSXP) {
-        stop_vector_non_list_element(path, this->input_form);
+        stop_vector_non_list_element(path, this->input_form, value);
       }
 
       if (Rf_isNull(names) && this->input_form == vector_input_form::object) {
@@ -965,7 +965,7 @@ public:
     if (TYPEOF(value) != VECSXP) {
       // TODO should pass along path?
       Path path;
-      stop_colmajor_non_list_element(path);
+      stop_colmajor_non_list_element(path, value);
     }
 
     n_rows = get_collector_vec_rows(value,
@@ -1079,6 +1079,8 @@ public:
     LOG_DEBUG;
 
     if (this->input_form == "colmajor") {
+      // FIXME path handling is quite confusing here...
+      path.up();
       SEXP field_names = Rf_getAttrib(object_list, R_NamesSymbol);
       const R_xlen_t n_fields = Rf_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
@@ -1090,7 +1092,9 @@ public:
       this->init(n_rows);
 
       this->parse_colmajor(object_list, n_rows, path);
-      return this->get_data(object_list, n_rows);
+      auto out = this->get_data(object_list, n_rows);
+      path.down();
+      return(out);
     } else if (input_form == "rowmajor") {
       R_xlen_t n_rows = short_vec_size(object_list);
       LOG_DEBUG << "===== Start init ======";

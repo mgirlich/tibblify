@@ -20,37 +20,88 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has `NULL` names.
+      ! An object must be named.
+      x `x` is not named.
     Code
       (expect_error(tibblify(list(x = 1, 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 1.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 1.
     Code
       (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 3.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 3.
     Code
       (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(x = 1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has duplicate name "x".
+      ! The names of an object must be unique.
+      x `x` has the duplicated name "x".
+
+---
+
+    Code
+      (expect_error(tibblify(list(row = list(1, 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! An object must be named.
+      x `x$row` is not named.
+    Code
+      (expect_error(tibblify(list(row = list(x = 1, 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(row = list(1, x = 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 1.
+    Code
+      (expect_error(tibblify(list(row = list(z = 1, y = 2, 3, a = 4)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 3.
+    Code
+      (expect_error(tibblify(list(row = set_names(list(1, 2), c("x", NA))), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(row = list(x = 1, x = 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object must be unique.
+      x `x$row` has the duplicated name "x".
 
 # scalar column works
 
@@ -59,16 +110,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tib(list(), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
 
 ---
 
@@ -77,16 +127,25 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
-
----
-
+      ! `x[[1]]$x` must have size "1", not size 2.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
+    Code
+      (expect_error(tib(list(x = logical()), tib_lgl("x"))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! `x[[1]]$x` must have size "1", not size 0.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
     Code
       (expect_error(tib(list(x = c(dtt, dtt)), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` must have size "1", not size 2.
+      i You specified that the field is a scalar.
+      i Use `tib_vector()` if the field is a vector instead.
 
 ---
 
@@ -95,29 +154,17 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
-
----
-
     Code
       (expect_error(tib(list(x = 1), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
-
----
-
-    Code
-      (expect_error(tib(list(x = integer()), tib_int("x", required = FALSE))))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! Element at path [[1]]$x must have size 1.
 
 # vector column works
 
@@ -126,16 +173,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
-
----
-
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tib(list(), tib_vector("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x.
+      ! Field x is required but does not exist in `x[[1]]`.
+      i Use `required = FALSE` if the field is optional.
 
 ---
 
@@ -144,7 +190,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -155,7 +201,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[2]]$x
+      ! Problem while tibblifying `x[[2]]$x`
       Caused by error:
       ! Can't convert <list> to <integer>.
 
@@ -166,13 +212,17 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must be a list for `input_form = "scalar_list"`
+      ! `x[[1]]$x` must be a list, not a number.
+      x `input_form = "scalar_list"` can only parse lists.
+      i Use `input_form = "vector"` (the default) if the field is already a vector.
     Code
       (expect_error(tib(list(x = 1), tspec_object)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x must be a list for `input_form = "object"`
+      ! `x[[1]]$x` must be a list, not a number.
+      x `input_form = "object"` can only parse lists.
+      i Use `input_form = "vector"` (the default) if the field is already a vector.
 
 ---
 
@@ -181,13 +231,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Each element in list at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` is not a list of scalars.
+      x Element 2 must have size 1, not size 2.
     Code
       (expect_error(tib(list(x = list(integer())), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Each element in list at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` is not a list of scalars.
+      x Element 1 must have size 1, not size 0.
 
 ---
 
@@ -196,7 +248,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[1]]$x
+      ! Problem while tibblifying `x[[1]]$x`
       Caused by error:
       ! Can't convert <character> to <integer>.
 
@@ -207,8 +259,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[1]]$x has `NULL` names.
-      i Element must be named for `tib_vector(input_form = "object")`.
+      ! A vector must be a named list for `input_form = "object."`
+      x `x[[1]]$x` is not named.
 
 # list column works
 
@@ -218,7 +270,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # df column works
 
@@ -228,7 +281,8 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # list of df column works
 
@@ -238,14 +292,16 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[2]]$x.
+      ! Field x is required but does not exist in `x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
     Code
       (expect_error(tibblify(list(list(x = list(list(a = TRUE), list()))), tspec_df(
         x = tib_df("x", a = tib_lgl("a"))))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Required element absent at path [[1]]$x[[2]]$a.
+      ! Field a is required but does not exist in `x[[1]]$x[[2]]`.
+      i Use `required = FALSE` if the field is optional.
 
 # colmajor: names are checked
 
@@ -254,37 +310,43 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has `NULL` names.
+      ! An object must be named.
+      x `x` is not named.
     Code
       (expect_error(tibblify(list(x = 1, 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 1.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 1.
     Code
       (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 3.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 3.
     Code
       (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(x = 1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has duplicate name "x".
+      ! The names of an object must be unique.
+      x `x` has the duplicated name "x".
 
 # colmajor: scalar column works
 
@@ -293,18 +355,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
-
----
-
     Code
       (expect_error(tib_cm(x = 1, tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -315,15 +374,13 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
-      Caused by error in `stop_colmajor_non_list_element()`:
-      ! Element at path [[]]$x must be a list.
+      ! `x$x` must be a list, not a string.
     Code
       (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Problem while tibblifying `x$x`
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -334,7 +391,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]
+      ! Problem while tibblifying `x`
       Caused by error:
       ! Could not determine number of rows.
     Code
@@ -342,7 +399,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]
+      ! Problem while tibblifying `x`
       Caused by error:
       ! Could not determine number of rows.
 
@@ -359,27 +416,24 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y has size 3, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x` have the same size.
+      x Field y has size 3.
+      x Other fields have size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
         x = 1:3))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y$x
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y$x has size 3, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x$y` have the same size.
+      x Field x has size 3.
+      x Other fields have size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y
-      Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y has size 1, not size 2.
-      i For `input_form = "colmajor"` each field must have the same size.
+      ! Not all fields of `x` have the same size.
+      x Field y has size 1.
+      x Other fields have size 2.
 
