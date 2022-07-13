@@ -108,9 +108,19 @@ stop_vector_non_list_element <- function(path, input_form, x) {
   tibblify_abort(msg)
 }
 
-stop_vector_wrong_size_element <- function(path, input_form) {
-  path_str <- path_to_string(path)
-  msg <- 'Each element in list at path {path_str} must have size 1.'
+stop_vector_wrong_size_element <- function(path, input_form, x) {
+  path_str <- path_to_string2(path)
+  sizes <- list_sizes(x)
+  idx <- which(sizes != 1)
+  if (input_form == "scalar_list") {
+    desc <- "a list of scalars"
+  } else {
+    desc <- "an object"
+  }
+  msg <- c(
+    "{.arg {path_str}} is not {desc}.",
+    x = "Element {.field {idx}} must have size {.val {1}}, not size {.val {sizes[idx]}}."
+  )
   tibblify_abort(msg)
 }
 

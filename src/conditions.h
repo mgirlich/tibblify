@@ -50,10 +50,11 @@ inline void stop_vector_non_list_element(const Path& path, vector_input_form inp
   Rf_eval(call, tibblify_ns_env);
 }
 
-inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form) {
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_vector_wrong_size_element"),
+inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form, SEXP x) {
+  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_vector_wrong_size_element"),
                                PROTECT(path.data()),
-                               vector_input_form_to_sexp(input_form)));
+                               vector_input_form_to_sexp(input_form),
+                               x));
   Rf_eval(call, tibblify_ns_env);
 }
 

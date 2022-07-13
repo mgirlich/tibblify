@@ -231,13 +231,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Each element in list at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` is not a list of scalars.
+      x Element 2 must have size 1, not size 2.
     Code
       (expect_error(tib(list(x = list(integer())), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Each element in list at path [[1]]$x must have size 1.
+      ! `x[[1]]$x` is not a list of scalars.
+      x Element 1 must have size 1, not size 0.
 
 ---
 

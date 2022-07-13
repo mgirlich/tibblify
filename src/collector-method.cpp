@@ -446,7 +446,7 @@ private:
       }
 
       if (vec_size(*ptr_row) != 1) {
-        stop_vector_wrong_size_element(path, this->input_form);
+        stop_vector_wrong_size_element(path, this->input_form, value);
       }
 
       out_list[i] = *ptr_row;
