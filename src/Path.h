@@ -2,6 +2,7 @@
 #define TIBBLIFY_PATH_H
 
 #include <cpp11.hpp>
+#include <plogr.h>
 #include "tibblify.h"
 
 class Path {
@@ -19,11 +20,13 @@ public:
   ~ Path() {}
 
   inline void down() {
+    LOG_DEBUG;
     // FIXME: fail if diving too deep
     this->depth++;
   }
 
   inline void up() {
+    LOG_DEBUG;
     this->depth--;
   }
 
