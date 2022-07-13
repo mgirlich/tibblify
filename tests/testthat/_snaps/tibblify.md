@@ -374,9 +374,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying x$x
-      Caused by error in `stop_colmajor_non_list_element()`:
-      ! Element at path $x must be a list.
+      ! `x$x` must be a list, not a string.
     Code
       (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
     Output

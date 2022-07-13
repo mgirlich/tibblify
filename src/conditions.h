@@ -74,8 +74,9 @@ inline void check_colmajor_size(SEXP value, R_xlen_t n_rows, const Path& path) {
   }
 }
 
-inline void stop_colmajor_non_list_element(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_colmajor_non_list_element"),
-                               PROTECT(path.data())));
+inline void stop_colmajor_non_list_element(const Path& path, SEXP x) {
+  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_colmajor_non_list_element"),
+                               PROTECT(path.data()),
+                               x));
   Rf_eval(call, tibblify_ns_env);
 }

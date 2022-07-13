@@ -124,7 +124,7 @@ public:
     LOG_DEBUG;
 
     if (TYPEOF(value) != VECSXP) {
-      stop_colmajor_non_list_element(path);
+      stop_colmajor_non_list_element(path, value);
     }
 
     check_colmajor_size(value, n_rows, path);
@@ -965,7 +965,7 @@ public:
     if (TYPEOF(value) != VECSXP) {
       // TODO should pass along path?
       Path path;
-      stop_colmajor_non_list_element(path);
+      stop_colmajor_non_list_element(path, value);
     }
 
     n_rows = get_collector_vec_rows(value,
