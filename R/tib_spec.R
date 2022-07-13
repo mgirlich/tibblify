@@ -66,7 +66,7 @@ tspec_df <- function(...,
 check_names_to <- function(.names_to, input_form, call = caller_env()) {
   if (!is_null(.names_to)) {
     if (input_form == "colmajor") {
-      msg <- 'Cannot use {.arg .names_to} for {.code .input_form = "colmajor"}.'
+      msg <- 'Can\'t use {.arg .names_to} with {.code .input_form = "colmajor"}.'
       cli::cli_abort(msg, call = call)
     }
     check_string(.names_to, what = "a single string or `NULL`", call = call)
@@ -133,7 +133,7 @@ prep_spec_fields <- function(fields, call) {
     }
     friendly_type <- obj_type_friendly(fields[[bad_idx]])
 
-    msg <- "Element {.field {name}} must be a tib collector, not {friendly_type}."
+    msg <- "{.field {name}} must be a tib collector, not {friendly_type}."
     cli::cli_abort(msg, call = call)
   }
 
@@ -151,8 +151,8 @@ spec_auto_name_fields <- function(fields, call) {
       if (!is_string(key)) {
         loc <- paste0("..", .y)
         msg <- c(
-          "Can't infer name if key is not a single string",
-          x = "{.arg key} of element {.field {loc}} has length {length(key)}."
+          "{.arg key} must be a single string to infer name.",
+          x = "{.arg key} of {.field {loc}} has length {length(key)}."
         )
         cli::cli_abort(msg, call = call)
       }

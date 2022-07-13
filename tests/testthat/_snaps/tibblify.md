@@ -20,37 +20,88 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has `NULL` names.
+      ! An object must be named.
+      x `x` is not named.
     Code
       (expect_error(tibblify(list(x = 1, 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 1.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 1.
     Code
       (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 3.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 3.
     Code
       (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(x = 1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path <root> has duplicate name "x".
+      ! The names of an object must be unique.
+      x `x` has the duplicated name "x".
+
+---
+
+    Code
+      (expect_error(tibblify(list(row = list(1, 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! An object must be named.
+      x `x$row` is not named.
+    Code
+      (expect_error(tibblify(list(row = list(x = 1, 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(row = list(1, x = 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 1.
+    Code
+      (expect_error(tibblify(list(row = list(z = 1, y = 2, 3, a = 4)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 3.
+    Code
+      (expect_error(tibblify(list(row = set_names(list(1, 2), c("x", NA))), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x$row` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(row = list(x = 1, x = 2)), spec2)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object must be unique.
+      x `x$row` has the duplicated name "x".
 
 # scalar column works
 
@@ -254,37 +305,43 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has `NULL` names.
+      ! An object must be named.
+      x `x` is not named.
     Code
       (expect_error(tibblify(list(x = 1, 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 1.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 1.
     Code
       (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 3.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 3.
     Code
       (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has empty name at position 2.
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
     Code
       (expect_error(tibblify(list(x = 1, x = 2), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Element at path [[]] has duplicate name "x".
+      ! The names of an object must be unique.
+      x `x` has the duplicated name "x".
 
 # colmajor: scalar column works
 
@@ -293,7 +350,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Cannot `tibblify()` field $x
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -304,7 +361,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Cannot `tibblify()` field $x
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
@@ -315,15 +372,15 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Cannot `tibblify()` field $x
       Caused by error in `stop_colmajor_non_list_element()`:
-      ! Element at path [[]]$x must be a list.
+      ! Element at path $x must be a list.
     Code
       (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$x
+      ! Cannot `tibblify()` field $x
       Caused by error:
       ! Can't convert <character> to <logical>.
 
@@ -334,7 +391,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]
+      ! Cannot `tibblify()` field <root>
       Caused by error:
       ! Could not determine number of rows.
     Code
@@ -342,7 +399,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]
+      ! Cannot `tibblify()` field <root>
       Caused by error:
       ! Could not determine number of rows.
 
@@ -359,9 +416,9 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y
+      ! Cannot `tibblify()` field $y
       Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y has size 3, not size 2.
+      ! Field at path $y has size 3, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
@@ -369,17 +426,17 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y$x
+      ! Cannot `tibblify()` field $y$x
       Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y$x has size 3, not size 2.
+      ! Field at path $y$x has size 3, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Cannot `tibblify()` field [[]]$y
+      ! Cannot `tibblify()` field $y
       Caused by error in `stop_colmajor_wrong_size_element()`:
-      ! Field at path [[]]$y has size 1, not size 2.
+      ! Field at path $y has size 1, not size 2.
       i For `input_form = "colmajor"` each field must have the same size.
 
