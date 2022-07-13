@@ -1,11 +1,9 @@
-Bugfixes
 Codecov
 JSON
 Lifecycle
 POV
 Rectangling
-Tibble
-datetime
+bugfixes
 durations
 px
 recordlist
@@ -14,5 +12,4 @@ repurrrsive
 specificcation
 tibble
 tibbles
-tidyverse
 vctrs
