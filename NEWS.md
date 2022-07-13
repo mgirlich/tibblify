@@ -16,7 +16,7 @@ Major rewrite of the tibblify package with lots of benefits:
 * `tspec_df()` gains an argument `.names_to` to store the names of a recordlist
   in a column.
 
-* Added `untibblify()` to turn a tibble into a nested list, i.e. to reverse the action fo `tibblify()`.
+* Added `untibblify()` to turn a tibble into a nested list, i.e. to reverse the action of `tibblify()`.
 
 * Added `spec_combine()` to combine multiple specifications.
 
