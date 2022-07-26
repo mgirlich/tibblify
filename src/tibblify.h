@@ -1,5 +1,5 @@
-#ifndef SLIDER_H
-#define SLIDER_H
+#ifndef TIBBLIFY_H
+#define TIBBLIFY_H
 
 #define R_NO_REMAP
 #include <R.h>
