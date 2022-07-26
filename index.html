@@ -116,7 +116,7 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Let’s start with <code>gh_users</code>, which is a list containing information about six GitHub users.</p>
+<p>Let’s start with <code>gh_users</code>, which is a list containing information about four GitHub users.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mgirlich/tibblify" class="external-link">tibblify</a></span><span class="op">)</span></span>
 <span></span>
@@ -128,25 +128,28 @@
 <p>Quickly rectangling <code>gh_users_small</code> is as easy as applying <code><a href="reference/tibblify.html">tibblify()</a></code> to it:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 7</span></span>
-<span><span class="co">#&gt;   followers login       url                    name  location email public_gists</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;       &lt;chr&gt;                  &lt;chr&gt; &lt;chr&gt;    &lt;chr&gt;        &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1       303 gaborcsardi https://api.github.co… Gábo… Chippen… csar…            6</span></span>
-<span><span class="co">#&gt; 2       780 jennybc     https://api.github.co… Jenn… Vancouv… &lt;NA&gt;            54</span></span>
-<span><span class="co">#&gt; 3      3958 jtleek      https://api.github.co… Jeff… Baltimo… &lt;NA&gt;            12</span></span>
-<span><span class="co">#&gt; 4       115 juliasilge  https://api.github.co… Juli… Salt La… &lt;NA&gt;             4</span></span>
-<span><span class="co">#&gt; 5       213 leeper      https://api.github.co… Thom… London,… &lt;NA&gt;            46</span></span>
-<span><span class="co">#&gt; 6        34 masalmon    https://api.github.co… Maël… Barcelo… &lt;NA&gt;             0</span></span></code></pre></div>
+<span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
+<span><span class="co">#&gt; • email</span></span>
+<span><span class="co">#&gt; # A tibble: 4 × 7</span></span>
+<span><span class="co">#&gt;   followers login      url                          name  locat…¹ email  publi…²</span></span>
+<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;                        &lt;chr&gt; &lt;chr&gt;   &lt;list&gt;   &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1       780 jennybc    https://api.github.com/user… Jenn… Vancou… &lt;NULL&gt;      54</span></span>
+<span><span class="co">#&gt; 2      3958 jtleek     https://api.github.com/user… Jeff… Baltim… &lt;NULL&gt;      12</span></span>
+<span><span class="co">#&gt; 3       115 juliasilge https://api.github.com/user… Juli… Salt L… &lt;NULL&gt;       4</span></span>
+<span><span class="co">#&gt; 4       213 leeper     https://api.github.com/user… Thom… London… &lt;NULL&gt;      46</span></span>
+<span><span class="co">#&gt; # … with abbreviated variable names ¹​location, ²​public_gists</span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
+<span><span class="co">#&gt; • email</span></span>
 <span><span class="co">#&gt; tspec_df(</span></span>
 <span><span class="co">#&gt;   tib_int("followers"),</span></span>
 <span><span class="co">#&gt;   tib_chr("login"),</span></span>
 <span><span class="co">#&gt;   tib_chr("url"),</span></span>
 <span><span class="co">#&gt;   tib_chr("name"),</span></span>
 <span><span class="co">#&gt;   tib_chr("location"),</span></span>
-<span><span class="co">#&gt;   tib_chr("email"),</span></span>
+<span><span class="co">#&gt;   tib_unspecified("email"),</span></span>
 <span><span class="co">#&gt;   tib_int("public_gists"),</span></span>
 <span><span class="co">#&gt; )</span></span></code></pre></div>
 <p>If we are only interested in some of the fields we can easily adapt the specification</p>
@@ -158,15 +161,13 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span>, <span class="va">spec</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 3</span></span>
-<span><span class="co">#&gt;   login_name  name                   public_gists</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;       &lt;chr&gt;                         &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1 gaborcsardi Gábor Csárdi                      6</span></span>
-<span><span class="co">#&gt; 2 jennybc     Jennifer (Jenny) Bryan           54</span></span>
-<span><span class="co">#&gt; 3 jtleek      Jeff L.                          12</span></span>
-<span><span class="co">#&gt; 4 juliasilge  Julia Silge                       4</span></span>
-<span><span class="co">#&gt; 5 leeper      Thomas J. Leeper                 46</span></span>
-<span><span class="co">#&gt; 6 masalmon    Maëlle Salmon                     0</span></span></code></pre></div>
+<span><span class="co">#&gt; # A tibble: 4 × 3</span></span>
+<span><span class="co">#&gt;   login_name name                   public_gists</span></span>
+<span><span class="co">#&gt;   &lt;chr&gt;      &lt;chr&gt;                         &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1 jennybc    Jennifer (Jenny) Bryan           54</span></span>
+<span><span class="co">#&gt; 2 jtleek     Jeff L.                          12</span></span>
+<span><span class="co">#&gt; 3 juliasilge Julia Silge                       4</span></span>
+<span><span class="co">#&gt; 4 leeper     Thomas J. Leeper                 46</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="objects">Objects<a class="anchor" aria-label="anchor" href="#objects"></a>
@@ -373,7 +374,8 @@
 <span><span class="co">#&gt;  8 67959624 cmark       gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # … with 20 more rows</span></span>
+<span><span class="co">#&gt; # ℹ Use `print(n = ...)` to see more rows</span></span></code></pre></div>
 <p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
@@ -404,7 +406,8 @@
 <span><span class="co">#&gt;  8 67959624 cmark         660288 gaborcsardi</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions    660288 gaborcsardi</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon        660288 gaborcsardi</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # … with 20 more rows</span></span>
+<span><span class="co">#&gt; # ℹ Use `print(n = ...)` to see more rows</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -424,7 +427,8 @@
 <span></span>
 <span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error in `tibblify()`:</span></span>
-<span><span class="co">#&gt; ! Required element absent at path [[2]]$y.</span></span></code></pre></div>
+<span><span class="co">#&gt; ! Field y is required but does not exist in `x[[2]]`.</span></span>
+<span><span class="co">#&gt; ℹ Use `required = FALSE` if the field is optional.</span></span></code></pre></div>
 <p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>

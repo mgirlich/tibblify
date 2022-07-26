@@ -106,7 +106,7 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>Let’s start with <code>gh_users</code>, which is a list containing information about six GitHub users.</p>
+<p>Let’s start with <code>gh_users</code>, which is a list containing information about four GitHub users.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/mgirlich/tibblify" class="external-link">tibblify</a></span><span class="op">)</span></span>
 <span></span>
@@ -118,26 +118,28 @@
 <p>Quickly rectangling <code>gh_users_small</code> is as easy as applying <code><a href="../reference/tibblify.html">tibblify()</a></code> to it:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   followers login       url                          name  locat…¹ email publi…²</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       303 gaborcsardi https://api.github.com/user… Gábo… Chippe… csar…       6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       780 jennybc     https://api.github.com/user… Jenn… Vancou… <span style="color: #BB0000;">NA</span>         54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      <span style="text-decoration: underline;">3</span>958 jtleek      https://api.github.com/user… Jeff… Baltim… <span style="color: #BB0000;">NA</span>         12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       115 juliasilge  https://api.github.com/user… Juli… Salt L… <span style="color: #BB0000;">NA</span>          4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       213 leeper      https://api.github.com/user… Thom… London… <span style="color: #BB0000;">NA</span>         46</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.com/user… Maël… Barcel… <span style="color: #BB0000;">NA</span>          0</span></span>
+<span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="font-weight: bold;">email</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
+<span><span class="co">#&gt;   followers login      url                          name  locat…¹ email  publi…²</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       780 jennybc    https://api.github.com/user… Jenn… Vancou… <span style="color: #949494;">&lt;NULL&gt;</span>      54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      <span style="text-decoration: underline;">3</span>958 jtleek     https://api.github.com/user… Jeff… Baltim… <span style="color: #949494;">&lt;NULL&gt;</span>      12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       115 juliasilge https://api.github.com/user… Juli… Salt L… <span style="color: #949494;">&lt;NULL&gt;</span>       4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       213 leeper     https://api.github.com/user… Thom… London… <span style="color: #949494;">&lt;NULL&gt;</span>      46</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​location, ²​public_gists</span></span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="../reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
+<span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="font-weight: bold;">email</span></span></span>
 <span><span class="co">#&gt; tspec_df(</span></span>
 <span><span class="co">#&gt;   <span style="color: #00BB00;">tib_int</span>("followers"),</span></span>
 <span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("login"),</span></span>
 <span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("url"),</span></span>
 <span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("name"),</span></span>
 <span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("location"),</span></span>
-<span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("email"),</span></span>
+<span><span class="co">#&gt;   tib_unspecified("email"),</span></span>
 <span><span class="co">#&gt;   <span style="color: #00BB00;">tib_int</span>("public_gists"),</span></span>
 <span><span class="co">#&gt; )</span></span></code></pre></div>
 <p>If we are only interested in some of the fields we can easily adapt the specification</p>
@@ -149,15 +151,13 @@
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span>, <span class="va">spec</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 3</span></span></span>
-<span><span class="co">#&gt;   login_name  name                   public_gists</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> gaborcsardi Gábor Csárdi                      6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> jennybc     Jennifer (Jenny) Bryan           54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> jtleek      Jeff L.                          12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> juliasilge  Julia Silge                       4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> leeper      Thomas J. Leeper                 46</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> masalmon    Maëlle Salmon                     0</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 3</span></span></span>
+<span><span class="co">#&gt;   login_name name                   public_gists</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> jennybc    Jennifer (Jenny) Bryan           54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> jtleek     Jeff L.                          12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> juliasilge Julia Silge                       4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> leeper     Thomas J. Leeper                 46</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="objects">Objects<a class="anchor" aria-label="anchor" href="#objects"></a>
