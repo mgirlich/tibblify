@@ -33,7 +33,7 @@ are:
 
 ## Example
 
-Let's start with `gh_users`, which is a list containing information about six
+Let's start with `gh_users`, which is a list containing information about four
 GitHub users.
 
 ```{r}
