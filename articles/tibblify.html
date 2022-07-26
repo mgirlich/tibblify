@@ -119,14 +119,15 @@
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
-<span><span class="co">#&gt;   followers login       url                    name  location email public_gists</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       303 gaborcsardi https://api.github.co… Gábo… Chippen… csar…            6</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       780 jennybc     https://api.github.co… Jenn… Vancouv… <span style="color: #BB0000;">NA</span>              54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      <span style="text-decoration: underline;">3</span>958 jtleek      https://api.github.co… Jeff… Baltimo… <span style="color: #BB0000;">NA</span>              12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       115 juliasilge  https://api.github.co… Juli… Salt La… <span style="color: #BB0000;">NA</span>               4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       213 leeper      https://api.github.co… Thom… London,… <span style="color: #BB0000;">NA</span>              46</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.co… Maël… Barcelo… <span style="color: #BB0000;">NA</span>               0</span></span></code></pre></div>
+<span><span class="co">#&gt;   followers login       url                          name  locat…¹ email publi…²</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       303 gaborcsardi https://api.github.com/user… Gábo… Chippe… csar…       6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>       780 jennybc     https://api.github.com/user… Jenn… Vancou… <span style="color: #BB0000;">NA</span>         54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>      <span style="text-decoration: underline;">3</span>958 jtleek      https://api.github.com/user… Jeff… Baltim… <span style="color: #BB0000;">NA</span>         12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       115 juliasilge  https://api.github.com/user… Juli… Salt L… <span style="color: #BB0000;">NA</span>          4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>       213 leeper      https://api.github.com/user… Thom… London… <span style="color: #BB0000;">NA</span>         46</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>        34 masalmon    https://api.github.com/user… Maël… Barcel… <span style="color: #BB0000;">NA</span>          0</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​location, ²​public_gists</span></span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="../reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
@@ -363,7 +364,8 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 67<span style="text-decoration: underline;">959</span>624 cmark       gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 63<span style="text-decoration: underline;">152</span>619 conditions  gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 24<span style="text-decoration: underline;">343</span>686 crayon      gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
 <p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
 <div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
@@ -394,7 +396,8 @@
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 67<span style="text-decoration: underline;">959</span>624 cmark         <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 63<span style="text-decoration: underline;">152</span>619 conditions    <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 24<span style="text-decoration: underline;">343</span>686 crayon        <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ Use `print(n = ...)` to see more rows</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -523,7 +526,7 @@
 
 <div class="pkgdown">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.5.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
 </div>
 
       </footer>
