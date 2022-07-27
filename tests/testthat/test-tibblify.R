@@ -209,14 +209,23 @@ test_that("vector column works", {
   # uses NULL for NULL
   expect_equal(tib(list(x = NULL), tib_int_vec("x", fill = 1:2)), tibble(x = list_of(NULL, .ptype = integer())))
 
-  # transform works
+  # elt_transform works
   expect_equal(
-    tib(list(x = c(TRUE, FALSE)), tib_lgl_vec("x", transform = ~ !.x)),
+    tib(list(x = c(TRUE, FALSE)), tib_lgl_vec("x", elt_transform = ~ !.x)),
     tibble(x = list_of(c(FALSE, TRUE)))
   )
   expect_equal(
-    tib(list(x = c(dtt - 1, dtt)), tib_vector("x", dtt, transform = ~ .x + 1)),
+    tib(list(x = c(dtt - 1, dtt)), tib_vector("x", dtt, elt_transform = ~ .x + 1)),
     tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+
+  # transform works
+  expect_equal(
+    tib(
+      list(x = c(TRUE, FALSE)),
+      tib_lgl_vec("x", transform = ~ vctrs::new_list_of(purrr::map(.x, `!`), ptype = logical()))
+    ),
+    tibble(x = list_of(c(FALSE, TRUE)))
   )
 })
 
@@ -227,7 +236,7 @@ test_that("vector columns respect ptype_inner", {
       required = FALSE,
       ptype_inner = character(),
       fill = as.Date("2000-01-01"),
-      transform = as.Date
+      elt_transform = as.Date
     ),
   )
 
@@ -453,7 +462,16 @@ test_that("list column works", {
   expect_equal(
     tibblify(
       list(list(x = c(TRUE, FALSE)), list(x = 1)),
-      tspec_df(x = tib_variant("x", required = FALSE, transform = ~ length(.x)))
+      tspec_df(x = tib_variant("x", required = FALSE, transform = lengths))
+    ),
+    tibble(x = c(2L, 1L))
+  )
+
+  # elt_transform works
+  expect_equal(
+    tibblify(
+      list(list(x = c(TRUE, FALSE)), list(x = 1)),
+      tspec_df(x = tib_variant("x", required = FALSE, elt_transform = ~ length(.x)))
     ),
     tibble(x = list(2, 1))
   )
@@ -1111,12 +1129,24 @@ test_that("colmajor: vector column works", {
 
   # transform works
   expect_equal(
-    tib_cm(tib_lgl_vec("x", transform = ~ !.x), x = list(c(TRUE, FALSE))),
+    tib_cm(
+      tib_lgl_vec("x", transform = ~ vctrs::new_list_of(purrr::map(.x, `!`), logical())),
+      x = list(c(TRUE, FALSE))
+    ),
     tibble(x = list_of(c(FALSE, TRUE)))
   )
   expect_equal(
-    tib_cm(tib_vector("x", dtt, transform = ~ .x + 1), x = list(c(dtt - 1, dtt))),
+    tib_cm(
+      tib_vector("x", dtt, transform = ~ vctrs::new_list_of(purrr::map(.x, ~ .x + 1), vctrs::vec_ptype(dtt))),
+      x = list(c(dtt - 1, dtt))
+    ),
     tibble(x = list_of(c(dtt, dtt + 1)))
+  )
+
+  # elt_transform works
+  expect_equal(
+    tib_cm(tib_lgl_vec("x", elt_transform = ~ !.x), x = list(c(TRUE, FALSE))),
+    tibble(x = list_of(c(FALSE, TRUE)))
   )
 
   skip("Unclear if required and default makes sense for colmajor")
@@ -1139,7 +1169,17 @@ test_that("list column works", {
   # transform works
   expect_equal(
     tib_cm(
-      tib_variant("x", required = FALSE, transform = ~ length(.x)),
+      tib_variant("x", required = FALSE, transform = lengths),
+      x = list(c(TRUE, FALSE), 1)
+    ),
+    tibble(x = c(2L, 1L))
+  )
+
+  skip("elt_transform not supported for colmajor and lists")
+  # elt_transform works
+  expect_equal(
+    tib_cm(
+      tib_variant("x", required = FALSE, elt_transform = ~ length(.x)),
       x = list(c(TRUE, FALSE), 1)
     ),
     tibble(x = list(2, 1))
