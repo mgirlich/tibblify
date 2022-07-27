@@ -38,6 +38,24 @@ inline SEXP vec_flatten(SEXP value, SEXP ptype) {
   return(out);
 }
 
+inline bool is_list_of(SEXP value, SEXP ptype) {
+  if (!Rf_inherits(value, "vctrs_list_of")) {
+    LOG_DEBUG << "not a list_of";
+    return false;
+  }
+
+  SEXP value_ptype = Rf_getAttrib(value, Rf_install("ptype"));
+
+  if (vec_is(value_ptype, ptype)) {
+    LOG_DEBUG << "correct ptype";
+    return true;
+  } else {
+    LOG_DEBUG << "not correct ptype";
+    return false;
+  }
+  // return vec_is(value_ptype, ptype);
+}
+
 inline SEXP vec_init_along(SEXP ptype, SEXP along) {
   SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(short_vec_size(along)));
   SEXP call = PROTECT(Rf_lang3(Rf_install("vec_init"),
@@ -157,8 +175,13 @@ public:
   inline void assign_data(SEXP list, SEXP names) const {
     LOG_DEBUG;
 
-    SET_VECTOR_ELT(list, this->col_location, this->data);
+    SEXP data = this->data;
+    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+    PROTECT(data);
+
+    SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
+    UNPROTECT(1);
   }
 };
 
@@ -409,6 +432,24 @@ private:
   const bool vector_allows_empty_list;
   const SEXP na;
   const cpp11::sexp empty_element;
+  const cpp11::sexp elt_transform;
+
+  SEXP get_list_of_ptype() const {
+    LOG_DEBUG;
+
+    if (this->uses_values_col) {
+      auto ptype_df = init_out_df(0);
+      if (this->uses_names_col) {
+        ptype_df[0] = tibblify_shared_empty_chr;
+        ptype_df[1] = this->ptype;
+      } else {
+        ptype_df[0] = this->ptype;
+      }
+      return ptype_df;
+    } else {
+      return this->ptype;
+    }
+  }
 
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     LOG_DEBUG;
@@ -427,7 +468,7 @@ private:
     }
   }
 
-  cpp11::writable::list init_out_df(R_xlen_t n_rows) {
+  cpp11::writable::list init_out_df(R_xlen_t n_rows) const {
     return(init_df(n_rows, this->output_col_names));
   }
 
@@ -465,6 +506,7 @@ public:
   , vector_allows_empty_list(vector_args.vector_allows_empty_list)
   , na(vector_args.na)
   , empty_element(vec_init_along(field_args.ptype, R_NilValue))
+  , elt_transform(vector_args.elt_transform)
   { }
 
   inline void init(R_xlen_t& length) {
@@ -472,18 +514,8 @@ public:
 
     Collector_Base::init(length);
 
-    if (this->uses_values_col) {
-      auto ptype_df = init_out_df(0);
-      if (this->uses_names_col) {
-        ptype_df[0] = tibblify_shared_empty_chr;
-        ptype_df[1] = this->ptype;
-      } else {
-        ptype_df[0] = this->ptype;
-      }
-      set_list_of_attributes(this->data, ptype_df);
-    } else {
-      set_list_of_attributes(this->data, this->ptype);
-    }
+    cpp11::sexp list_of_ptype = get_list_of_ptype();
+    set_list_of_attributes(this->data, list_of_ptype);
   }
 
   inline void add_value(SEXP value, Path& path) {
@@ -521,8 +553,8 @@ public:
       names = na_chr(vec_size(value));
     }
 
-    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), ptype));
+    if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
+    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));
 
     if (this->uses_values_col) {
       R_len_t size = short_vec_size(value_casted);
@@ -541,13 +573,47 @@ public:
     }
     UNPROTECT(2);
   }
+
+  inline void assign_data(SEXP list, SEXP names) const {
+    LOG_DEBUG;
+
+    SEXP data = this->data;
+    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+    PROTECT(data);
+
+    cpp11::writable::list out_ptype;
+    if (this->uses_values_col) {
+      auto ptype_df = init_out_df(0);
+      if (this->uses_names_col) {
+        ptype_df[0] = tibblify_shared_empty_chr;
+        ptype_df[1] = this->ptype;
+      } else {
+        ptype_df[0] = this->ptype;
+      }
+      set_list_of_attributes(out_ptype, ptype_df);
+    } else {
+      set_list_of_attributes(out_ptype, this->ptype);
+    }
+
+    if (!is_list_of(data, out_ptype)) {
+      LOG_DEBUG << "cast";
+      data = vec_cast(data, out_ptype);
+    }
+    PROTECT(data);
+    SET_VECTOR_ELT(list, this->col_location, data);
+    SET_STRING_ELT(names, this->col_location, this->name);
+    UNPROTECT(2);
+  }
 };
 
 
 class Collector_List : public Collector_Base {
+private:
+  cpp11::sexp elt_transform;
 public:
-  Collector_List(bool required_, int col_location_, SEXP name_, Field_Args& field_args)
+  Collector_List(bool required_, int col_location_, SEXP name_, Field_Args& field_args, cpp11::sexp elt_transform_ = R_NilValue)
     : Collector_Base(required_, col_location_, name_, field_args)
+  , elt_transform(elt_transform_)
   { }
 
   inline void add_value(SEXP value, Path& path) {
@@ -560,7 +626,7 @@ public:
       return;
     }
 
-    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
     SET_VECTOR_ELT(this->data, this->current_row++, value);
   }
 
@@ -568,6 +634,10 @@ public:
     LOG_DEBUG;
 
     check_colmajor_size(value, n_rows, path);
+    if (!Rf_isNull(this->elt_transform)) {
+      cpp11::stop("`elt_transform` not supported for `input_form = \"colmajor\"");
+    }
+
     if (Rf_isNull(this->transform)) {
       this->data = value;
     } else {
@@ -1234,8 +1304,12 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
 
     Field_Args field_args = Field_Args(elt["fill"], elt["transform"]);
 
-    if (type == "variant" || type == "unspecified") {
+    if (type == "unspecified") {
       col_vec.push_back(Collector_Ptr(new Collector_List(required, location, name, field_args)));
+      continue;
+    }
+    if (type == "variant") {
+      col_vec.push_back(Collector_Ptr(new Collector_List(required, location, name, field_args, elt["elt_transform"])));
       continue;
     }
 
@@ -1262,7 +1336,8 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
         vector_allows_empty_list,
         elt["names_to"],
         elt["values_to"],
-        elt["na"]
+        elt["na"],
+        elt["elt_transform"]
       );
 
       col_vec.push_back(Collector_Ptr(new Collector_Vector(required, location, name, field_args, vector_args))

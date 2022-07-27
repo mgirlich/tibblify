@@ -303,10 +303,10 @@ tib_native_ptype.Date <- function(ptype, class, fields) {
 #' @param required,.required Throw an error if the field does not exist?
 #' @param fill Optionally, a value to use if the field does not exist.
 #' @param ptype_inner A prototype of the field.
-#' @param transform A function to apply after casting to `ptype_inner`.
-#'   When exactly it is applied depends on the field type:
-#'   * `tib_scalar()` it is applied to the column.
-#'   * `tib_vector()`, `tib_variant()` it is applied to each element of the column.
+#' @param transform A function to apply to the whole vector after casting to
+#'  `ptype_inner`.
+#' @param elt_transform A function to apply to each element before casting
+#'   to `ptype_inner`.
 #' @param input_form A string that describes what structure the field has. Can
 #'   be one of:
 #'   * `"vector"`: The field is a vector, e.g. `c(1, 2, 3)`.
@@ -501,6 +501,7 @@ tib_vector_impl <- function(key,
                             fill = NULL,
                             ptype_inner = ptype,
                             transform = NULL,
+                            elt_transform = NULL,
                             input_form = c("vector", "scalar_list", "object"),
                             values_to = NULL,
                             names_to = NULL,
@@ -527,6 +528,7 @@ tib_vector_impl <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = prep_transform(transform, call),
+    elt_transform = prep_transform(elt_transform, call, arg = "elt_transform"),
     input_form = input_form,
     values_to = values_to,
     names_to = names_to,
@@ -575,6 +577,7 @@ tib_vector <- function(key,
                        fill = NULL,
                        ptype_inner = ptype,
                        transform = NULL,
+                       elt_transform = NULL,
                        input_form = c("vector", "scalar_list", "object"),
                        values_to = NULL,
                        names_to = NULL) {
@@ -587,6 +590,7 @@ tib_vector <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -601,6 +605,7 @@ tib_lgl_vec <- function(key,
                         fill = NULL,
                         ptype_inner = logical(),
                         transform = NULL,
+                        elt_transform = NULL,
                         input_form = c("vector", "scalar_list", "object"),
                         values_to = NULL,
                         names_to = NULL) {
@@ -613,6 +618,7 @@ tib_lgl_vec <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -627,6 +633,7 @@ tib_int_vec <- function(key,
                         fill = NULL,
                         ptype_inner = integer(),
                         transform = NULL,
+                        elt_transform = NULL,
                         input_form = c("vector", "scalar_list", "object"),
                         values_to = NULL,
                         names_to = NULL) {
@@ -639,6 +646,7 @@ tib_int_vec <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -653,6 +661,7 @@ tib_dbl_vec <- function(key,
                         fill = NULL,
                         ptype_inner = double(),
                         transform = NULL,
+                        elt_transform = NULL,
                         input_form = c("vector", "scalar_list", "object"),
                         values_to = NULL,
                         names_to = NULL) {
@@ -665,6 +674,7 @@ tib_dbl_vec <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -679,6 +689,7 @@ tib_chr_vec <- function(key,
                         fill = NULL,
                         ptype_inner = character(),
                         transform = NULL,
+                        elt_transform = NULL,
                         input_form = c("vector", "scalar_list", "object"),
                         values_to = NULL,
                         names_to = NULL) {
@@ -691,6 +702,7 @@ tib_chr_vec <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -705,6 +717,7 @@ tib_date_vec <- function(key,
                          fill = NULL,
                          ptype_inner = vctrs::new_date(),
                          transform = NULL,
+                         elt_transform = NULL,
                          input_form = c("vector", "scalar_list", "object"),
                          values_to = NULL,
                          names_to = NULL) {
@@ -717,6 +730,7 @@ tib_date_vec <- function(key,
     fill = fill,
     ptype_inner = ptype_inner,
     transform = transform,
+    elt_transform = elt_transform,
     input_form = input_form,
     values_to = values_to,
     names_to = names_to
@@ -759,14 +773,16 @@ tib_variant <- function(key,
                         ...,
                         required = TRUE,
                         fill = NULL,
-                        transform = NULL) {
+                        transform = NULL,
+                        elt_transform = NULL) {
   check_dots_empty()
   tib_collector(
     key = key,
     type = "variant",
     required = required,
     fill = fill,
-    transform = prep_transform(transform, call = current_env())
+    transform = prep_transform(transform, call = current_env()),
+    elt_transform = prep_transform(elt_transform, call = current_env(), arg = "elt_transform")
   )
 }
 
@@ -828,12 +844,12 @@ is_tib_df <- function(x) {
   inherits(x, "tib_df")
 }
 
-prep_transform <- function(f, call) {
+prep_transform <- function(f, call, arg = "transform") {
   if (is_null(f)) {
     return(f)
   }
 
-  as_function(f, arg = "transform", call = call)
+  as_function(f, arg = arg, call = call)
 }
 
 check_key <- function(key, call = caller_env()) {

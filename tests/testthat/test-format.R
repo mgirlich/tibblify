@@ -170,6 +170,7 @@ test_that("format for tib_row works", {
 test_that("format for tib_variant works", {
   expect_snapshot(tib_variant("a"))
   expect_snapshot(tib_variant("a", fill = tibble(a = 1:2)))
+  expect_snapshot(tib_variant("a", elt_transform = as.character))
 })
 
 test_that("format for tib_df works", {

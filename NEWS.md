@@ -1,5 +1,11 @@
 # tibblify (development version)
 
+* `tib_variant()` and `tib_vector()` give you more control for transforming:
+
+  * `transform` is now applied to the whole vector.
+  
+  * There is a new `elt_transform` argument that is applied to every element.
+
 # tibblify 0.2.0
 
 Major rewrite of the tibblify package with lots of benefits:
