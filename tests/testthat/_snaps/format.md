@@ -301,6 +301,13 @@
         fill = c("structure(list(a = 1:2), class = c(\"tbl_df\", \"tbl\", \"data.frame\"", "), row.names = c(NA, -2L))"),
       )
 
+---
+
+    Code
+      tib_variant("a", elt_transform = as.character)
+    Output
+      tib_variant("a", elt_transform = .Primitive("as.character"))
+
 # format for tib_df works
 
     Code

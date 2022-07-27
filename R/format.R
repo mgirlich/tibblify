@@ -184,7 +184,18 @@ format.tib_scalar <- function(x,
 }
 
 #' @export
-format.tib_variant <- format.tib_scalar
+format.tib_variant <- function(x, ...,
+                              multi_line = FALSE,
+                              nchar_indent = 0,
+                              width = NULL) {
+  format.tib_scalar(
+    x = x,
+    elt_transform = x$elt_transform,
+    multi_line = multi_line,
+    nchar_indent = nchar_indent,
+    width = width
+  )
+}
 #' @export
 format.tib_vector <- function(x, ...,
                               multi_line = FALSE,
@@ -192,6 +203,7 @@ format.tib_vector <- function(x, ...,
                               width = NULL) {
   format.tib_scalar(
     x = x,
+    elt_transform = x$elt_transform,
     input_form = if (!identical(x$input_form, "vector")) {
       double_tick(x$input_form)
     },
