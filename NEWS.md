@@ -1,5 +1,9 @@
 # tibblify (development version)
 
+* `tspec_*()`, `tib_df()`, and `tib_row()` now discard `NULL` in `...`. This
+  makes it easier to add a field conditionally with, for example
+  `tspec_df(if (x) tib_int("a"))`.
+
 * `tib_variant()` and `tib_vector()` give you more control for transforming:
 
   * `transform` is now applied to the whole vector.
