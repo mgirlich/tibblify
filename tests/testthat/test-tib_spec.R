@@ -31,6 +31,13 @@ test_that("can infer name from key", {
   })
 })
 
+test_that("drops NULL", {
+  expect_equal(
+    tspec_row(tib_int("a"), NULL, if (FALSE) tib_chr("b")),
+    tspec_row(tib_int("a"))
+  )
+})
+
 test_that("can nest specifications", {
   spec1 <- tspec_row(
     a = tib_int("a"),
@@ -219,6 +226,13 @@ test_that("tib_df() checks arguments", {
   expect_snapshot({
     (expect_error(tib_df("x", .names_to = 1)))
   })
+})
+
+test_that("tib_df() drops NULL", {
+  expect_equal(
+    tib_df("df", tib_int("a"), NULL, if (FALSE) tib_chr("b")),
+    tib_df("df", tib_int("a"))
+  )
 })
 
 test_that("special ptypes are not incorrectly recognized", {
