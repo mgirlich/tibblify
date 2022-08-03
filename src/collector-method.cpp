@@ -477,23 +477,42 @@ private:
 
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
+    R_xlen_t loc_first_null = -1;
     R_xlen_t n = Rf_length(value);
     const SEXP* ptr_row = VECTOR_PTR_RO(value);
-    cpp11::writable::list out_list(n);
+
     for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
       if (Rf_isNull(*ptr_row)) {
-        out_list[i] = this->na;
+        loc_first_null = i;
+        break;
+      }
+
+      if (vec_size(*ptr_row) != 1) {
+        stop_vector_wrong_size_element(path, this->input_form, value);
+      }
+    }
+
+    if (loc_first_null == -1) {
+      return(vec_flatten(value, this->ptype_inner));
+    }
+
+    // Theoretically a shallow duplicate should be more efficient but in
+    // benchmarks this didn't seem to be the case...
+    SEXP out_list = PROTECT(Rf_shallow_duplicate(value));
+    for (R_xlen_t i = loc_first_null; i < n; i++, ptr_row++) {
+      if (Rf_isNull(*ptr_row)) {
+        SET_VECTOR_ELT(out_list, i, this->na);
         continue;
       }
 
       if (vec_size(*ptr_row) != 1) {
         stop_vector_wrong_size_element(path, this->input_form, value);
       }
-
-      out_list[i] = *ptr_row;
     }
 
-    return(vec_flatten(out_list, this->ptype_inner));
+    SEXP out = vec_flatten(out_list, this->ptype_inner);
+    UNPROTECT(1);
+    return out;
   }
 
 public:
@@ -542,15 +561,11 @@ public:
         stop_vector_non_list_element(path, this->input_form, value);
       }
 
-      if (Rf_isNull(names) && this->input_form == vector_input_form::object) {
+      if (this->input_form == vector_input_form::object && Rf_isNull(names)) {
         stop_object_vector_names_is_null(path);
       }
 
       value = unchop_value(value, path);
-    }
-
-    if (Rf_isNull(names)) {
-      names = na_chr(vec_size(value));
     }
 
     if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
@@ -561,7 +576,11 @@ public:
       cpp11::writable::list df = init_out_df(size);
 
       if (this->uses_names_col) {
-        df[0] = names;
+        if (Rf_isNull(names)) {
+          df[0] = na_chr(vec_size(value));
+        } else {
+          df[0] = names;
+        }
         df[1] = value_casted;
       } else {
         df[0] = value_casted;
