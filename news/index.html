@@ -62,7 +62,8 @@
 
     <div class="section level2">
 <h2 class="page-header" data-toc-text="development version" id="tibblify-development-version">tibblify (development version)<a class="anchor" aria-label="anchor" href="#tibblify-development-version"></a></h2>
-<ul><li><p><code>tspec_*()</code>, <code><a href="../reference/tib_scalar.html">tib_df()</a></code>, and <code><a href="../reference/tib_scalar.html">tib_row()</a></code> now discard <code>NULL</code> in <code>...</code>. This makes it easier to add a field conditionally with, for example <code>tspec_df(if (x) tib_int("a"))</code>.</p></li>
+<ul><li><p><code><a href="../reference/tib_scalar.html">tib_vector()</a></code> is now uses less memory and is faster.</p></li>
+<li><p><code>tspec_*()</code>, <code><a href="../reference/tib_scalar.html">tib_df()</a></code>, and <code><a href="../reference/tib_scalar.html">tib_row()</a></code> now discard <code>NULL</code> in <code>...</code>. This makes it easier to add a field conditionally with, for example <code>tspec_df(if (x) tib_int("a"))</code>.</p></li>
 <li>
 <p><code><a href="../reference/tib_scalar.html">tib_variant()</a></code> and <code><a href="../reference/tib_scalar.html">tib_vector()</a></code> give you more control for transforming:</p>
 <ul><li><p><code>transform</code> is now applied to the whole vector.</p></li>
