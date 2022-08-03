@@ -1,5 +1,7 @@
 # tibblify (development version)
 
+* `tib_vector()` is now uses less memory and is faster.
+
 * `tspec_*()`, `tib_df()`, and `tib_row()` now discard `NULL` in `...`. This
   makes it easier to add a field conditionally with, for example
   `tspec_df(if (x) tib_int("a"))`.
