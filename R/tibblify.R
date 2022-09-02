@@ -12,6 +12,7 @@
 #'   * `"list"`: Parse an unspecified field into a list.
 #'
 #' @return Either a tibble or a list, depending on the specification
+#' @seealso Use [`untibblify()`] to undo the result of `tibblify()`.
 #' @export
 #'
 #' @examples

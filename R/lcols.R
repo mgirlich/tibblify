@@ -3,6 +3,7 @@
 #' @param ... Column specification objects created by `lcol_*()`.
 #' @param .default Deprecated.
 #'
+#' @keywords internal
 #' @export
 #' @examples
 #' lcols(
@@ -41,6 +42,7 @@ lcols <- function(..., .default = zap()) {
 #' @param .ptype The `.ptype` for `vctrs::list_of()`.
 #' @param ptype The prototype of the vector.
 #'
+#' @keywords internal
 #' @export
 lcol_lgl <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_lgl()", "tib_lgl()")
