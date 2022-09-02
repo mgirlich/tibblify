@@ -12,6 +12,7 @@ A tool to rectangle a nested list, that is to convert it into a tibble. This is 
 Useful links:
 \itemize{
   \item \url{https://github.com/mgirlich/tibblify}
+  \item \url{https://mgirlich.github.io/tibblify/}
   \item Report bugs at \url{https://github.com/mgirlich/tibblify/issues}
 }
 

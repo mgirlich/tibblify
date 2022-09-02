@@ -46,3 +46,6 @@ tibblify(x, spec)
 # Provide a specification for a single object
 tibblify(x[[1]], tspec_object(spec))
 }
+\seealso{
+Use \code{\link[=untibblify]{untibblify()}} to undo the result of \code{tibblify()}.
+}
