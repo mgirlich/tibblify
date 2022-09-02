@@ -58,3 +58,4 @@ lcol_df(path, ..., .default = zap())
 \description{
 \code{lcols()} includes all fields in the input data, skipping the column types as the default.
 }
+\keyword{internal}

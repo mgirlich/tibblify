@@ -31,3 +31,4 @@ lcols(
   !!!purrr::map(chr_cols, lcol_chr)
 )
 }
+\keyword{internal}
