@@ -1,8 +1,11 @@
-pandoc: 2.7.3
+pandoc: 2.14.2
 pkgdown: 2.0.6
 pkgdown_sha: ~
 articles:
   overview-supported-structures: overview-supported-structures.html
   tibblify: tibblify.html
-last_built: 2022-08-03T07:57Z
+last_built: 2022-09-02T09:50Z
+urls:
+  reference: https://mgirlich.github.io/tibblify/reference
+  article: https://mgirlich.github.io/tibblify/articles
 

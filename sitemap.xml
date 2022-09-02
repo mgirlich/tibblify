@@ -1,93 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>/404.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/404.html</loc>
   </url>
   <url>
-    <loc>/CODE_OF_CONDUCT.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/CODE_OF_CONDUCT.html</loc>
   </url>
   <url>
-    <loc>/CONTRIBUTING.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/CONTRIBUTING.html</loc>
   </url>
   <url>
-    <loc>/ISSUE_TEMPLATE.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/ISSUE_TEMPLATE.html</loc>
   </url>
   <url>
-    <loc>/LICENSE.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/LICENSE.html</loc>
   </url>
   <url>
-    <loc>/SUPPORT.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/SUPPORT.html</loc>
   </url>
   <url>
-    <loc>/articles/index.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/articles/index.html</loc>
   </url>
   <url>
-    <loc>/articles/overview-supported-structures.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/articles/overview-supported-structures.html</loc>
   </url>
   <url>
-    <loc>/articles/tibblify.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/articles/tibblify.html</loc>
   </url>
   <url>
-    <loc>/authors.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/authors.html</loc>
   </url>
   <url>
-    <loc>/index.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/index.html</loc>
   </url>
   <url>
-    <loc>/news/index.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/news/index.html</loc>
   </url>
   <url>
-    <loc>/reference/formatting.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/formatting.html</loc>
   </url>
   <url>
-    <loc>/reference/get_spec.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/get_spec.html</loc>
   </url>
   <url>
-    <loc>/reference/gh_repos.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/gh_repos.html</loc>
   </url>
   <url>
-    <loc>/reference/gh_users.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/gh_users.html</loc>
   </url>
   <url>
-    <loc>/reference/got_chars.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/got_chars.html</loc>
   </url>
   <url>
-    <loc>/reference/guess_tspec.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/guess_tspec.html</loc>
   </url>
   <url>
-    <loc>/reference/index.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/index.html</loc>
   </url>
   <url>
-    <loc>/reference/lcol_lgl.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/lcol_lgl.html</loc>
   </url>
   <url>
-    <loc>/reference/lcols.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/lcols.html</loc>
   </url>
   <url>
-    <loc>/reference/politicians.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/politicians.html</loc>
   </url>
   <url>
-    <loc>/reference/reexports.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/reexports.html</loc>
   </url>
   <url>
-    <loc>/reference/should_inform_unspecified.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/should_inform_unspecified.html</loc>
   </url>
   <url>
-    <loc>/reference/tib_scalar.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/tib_scalar.html</loc>
   </url>
   <url>
-    <loc>/reference/tibblify-package.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/tibblify-package.html</loc>
   </url>
   <url>
-    <loc>/reference/tibblify.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/tibblify.html</loc>
   </url>
   <url>
-    <loc>/reference/tspec_combine.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/tspec_combine.html</loc>
   </url>
   <url>
-    <loc>/reference/tspec_df.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/tspec_df.html</loc>
   </url>
   <url>
-    <loc>/reference/untibblify.html</loc>
+    <loc>https://mgirlich.github.io/tibblify/reference/untibblify.html</loc>
   </url>
 </urlset>
