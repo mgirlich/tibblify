@@ -1,1 +1,1 @@
-class Path;
+#include "Path.h"
