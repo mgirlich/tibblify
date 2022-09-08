@@ -20,14 +20,14 @@ extern "C" SEXP _tibblify_init_logging(SEXP log_level) {
     return R_NilValue;
   END_CPP11
 }
-// Path.h
+// Path.cpp
 SEXP init_tibblify_path();
 extern "C" SEXP _tibblify_init_tibblify_path() {
   BEGIN_CPP11
     return cpp11::as_sexp(init_tibblify_path());
   END_CPP11
 }
-// Path.h
+// Path.cpp
 SEXP get_path_data(cpp11::external_pointer<Path> path_ptr);
 extern "C" SEXP _tibblify_get_path_data(SEXP path_ptr) {
   BEGIN_CPP11
