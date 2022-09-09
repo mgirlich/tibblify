@@ -16,25 +16,25 @@ inline SEXP apply_transform(SEXP value, SEXP fn) {
   LOG_DEBUG;
 
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
-  SEXP call = PROTECT(Rf_lang2(syms_transform, syms_value));
+  SEXP call = KEEP(Rf_lang2(syms_transform, syms_value));
 
-  SEXP mask = PROTECT(r_new_environment(R_GlobalEnv));
+  SEXP mask = KEEP(r_new_environment(R_GlobalEnv));
   Rf_defineVar(syms_transform, fn, mask);
   Rf_defineVar(syms_value, value, mask);
-  SEXP out = PROTECT(Rf_eval(call, mask));
+  SEXP out = KEEP(Rf_eval(call, mask));
 
-  UNPROTECT(3);
+  FREE(3);
   return out;
 }
 
 inline SEXP vec_flatten(SEXP value, SEXP ptype) {
   LOG_DEBUG;
 
-  SEXP call = PROTECT(Rf_lang3(syms_vec_flatten,
+  SEXP call = KEEP(Rf_lang3(syms_vec_flatten,
                                value,
                                ptype));
   SEXP out = Rf_eval(call, tibblify_ns_env);
-  UNPROTECT(1);
+  FREE(1);
   return(out);
 }
 
@@ -57,12 +57,12 @@ inline bool is_list_of(SEXP value, SEXP ptype) {
 }
 
 inline SEXP vec_init_along(SEXP ptype, SEXP along) {
-  SEXP n_rows_sexp = PROTECT(Rf_ScalarInteger(short_vec_size(along)));
-  SEXP call = PROTECT(Rf_lang3(Rf_install("vec_init"),
+  SEXP n_rows_sexp = KEEP(Rf_ScalarInteger(short_vec_size(along)));
+  SEXP call = KEEP(Rf_lang3(Rf_install("vec_init"),
                                ptype,
                                n_rows_sexp));
   SEXP out = Rf_eval(call, tibblify_ns_env);
-  UNPROTECT(2);
+  FREE(2);
   return(out);
 }
 
@@ -177,11 +177,11 @@ public:
 
     SEXP data = this->data;
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
-    PROTECT(data);
+    KEEP(data);
 
     SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(1);
+    FREE(1);
   }
 };
 
@@ -217,14 +217,14 @@ public:
       return;
     }
 
-    SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
+    SEXP value_casted = KEEP(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path, size);
     }
 
     SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
-    UNPROTECT(1);
+    FREE(1);
   }
 
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
@@ -256,14 +256,14 @@ public:
     } else {
       value = vec_flatten(this->data, this->ptype_inner);
     }
-    PROTECT(value);
+    KEEP(value);
 
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
-    SEXP value_cast = PROTECT(vec_cast(PROTECT(value), this->ptype));
+    SEXP value_cast = KEEP(vec_cast(KEEP(value), this->ptype));
 
     SET_VECTOR_ELT(list, this->col_location, value_cast);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(3);
+    FREE(3);
   }
 };
 
@@ -372,7 +372,7 @@ public:
       return;
     }
 
-    SEXP value_casted = PROTECT(vec_cast(value, this->ptype_inner));
+    SEXP value_casted = KEEP(vec_cast(value, this->ptype_inner));
     R_len_t size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path, size);
@@ -380,7 +380,7 @@ public:
 
     *this->data_ptr = r_vector_cast<T, CPP11_TYPE>(value_casted);
     ++this->data_ptr;
-    UNPROTECT(1);
+    FREE(1);
   }
 
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
@@ -416,9 +416,9 @@ public:
     SEXP data = this->data;
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
 
-    SEXP data_cast = PROTECT(vec_cast(PROTECT(data), this->ptype));
+    SEXP data_cast = KEEP(vec_cast(KEEP(data), this->ptype));
     SET_VECTOR_ELT(list, this->col_location, data_cast);
-    UNPROTECT(2);
+    FREE(2);
     SET_STRING_ELT(names, this->col_location, this->name);
   }
 };
@@ -498,7 +498,7 @@ private:
 
     // Theoretically a shallow duplicate should be more efficient but in
     // benchmarks this didn't seem to be the case...
-    SEXP out_list = PROTECT(Rf_shallow_duplicate(value));
+    SEXP out_list = KEEP(Rf_shallow_duplicate(value));
     for (R_xlen_t i = loc_first_null; i < n; i++, ptr_row++) {
       if (Rf_isNull(*ptr_row)) {
         SET_VECTOR_ELT(out_list, i, this->na);
@@ -511,7 +511,7 @@ private:
     }
 
     SEXP out = vec_flatten(out_list, this->ptype_inner);
-    UNPROTECT(1);
+    FREE(1);
     return out;
   }
 
@@ -569,7 +569,7 @@ public:
     }
 
     if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
-    SEXP value_casted = PROTECT(vec_cast(PROTECT(value), this->ptype));
+    SEXP value_casted = KEEP(vec_cast(KEEP(value), this->ptype));
 
     if (this->uses_values_col) {
       R_len_t size = short_vec_size(value_casted);
@@ -590,7 +590,7 @@ public:
     } else {
       SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
     }
-    UNPROTECT(2);
+    FREE(2);
   }
 
   inline void assign_data(SEXP list, SEXP names) const {
@@ -598,7 +598,7 @@ public:
 
     SEXP data = this->data;
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
-    PROTECT(data);
+    KEEP(data);
 
     cpp11::writable::list out_ptype;
     if (this->uses_values_col) {
@@ -618,10 +618,10 @@ public:
       LOG_DEBUG << "cast";
       data = vec_cast(data, out_ptype);
     }
-    PROTECT(data);
+    KEEP(data);
     SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(2);
+    FREE(2);
   }
 };
 
@@ -675,15 +675,15 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
     n_cols += (*collector).size();
   }
 
-  SEXP df = PROTECT(r_alloc_list(n_cols));
-  SEXP names = PROTECT(r_alloc_character(n_cols));
+  SEXP df = KEEP(r_alloc_list(n_cols));
+  SEXP names = KEEP(r_alloc_character(n_cols));
 
   for (const Collector_Ptr& collector : collector_vec) {
     (*collector).assign_data(df, names);
   }
   set_df_attributes(df, names, n_rows);
 
-  UNPROTECT(2);
+  FREE(2);
   return df;
 }
 
@@ -1092,11 +1092,11 @@ public:
   inline void assign_data(SEXP list, SEXP names) const {
     LOG_DEBUG;
 
-    SEXP data = PROTECT(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
+    SEXP data = KEEP(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
 
     SET_VECTOR_ELT(list, this->col_location, data);
     SET_STRING_ELT(names, this->col_location, this->name);
-    UNPROTECT(1);
+    FREE(1);
   }
 };
 
@@ -1111,7 +1111,7 @@ private:
 
     int n_extra_cols = this->has_names_col ? 1 : 0;
 
-    SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
+    SEXP out = KEEP(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
     SEXP names = Rf_getAttrib(out, R_NamesSymbol);
 
     if (this->has_names_col) {
@@ -1119,7 +1119,7 @@ private:
       SET_STRING_ELT(names, 0, this->names_col);
     }
 
-    UNPROTECT(1);
+    FREE(1);
     return(out);
   }
 
@@ -1151,7 +1151,7 @@ public:
 
     int n_extra_cols = this->has_names_col ? 1 : 0;
 
-    SEXP out = PROTECT(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
+    SEXP out = KEEP(collector_vec_to_df(std::move(this->collector_vec), n_rows, n_extra_cols));
     SEXP names = Rf_getAttrib(out, R_NamesSymbol);
 
     if (this->has_names_col) {
@@ -1159,7 +1159,7 @@ public:
       SET_STRING_ELT(names, 0, this->names_col);
     }
 
-    UNPROTECT(1);
+    FREE(1);
 
     return(out);
   }
@@ -1201,16 +1201,16 @@ public:
           this->add_value(ptr_row[row_index], path);
         }
       } else {
-        SEXP slice_index_int = PROTECT(r_alloc_integer(1));
+        SEXP slice_index_int = KEEP(r_alloc_integer(1));
         int* slice_index_int_ptr = INTEGER(slice_index_int);
 
         for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
           path.replace(row_index);
           *slice_index_int_ptr = row_index + 1;
-          this->add_value(PROTECT(vec_slice_impl(object_list, slice_index_int)), path);
-          UNPROTECT(1);
+          this->add_value(KEEP(vec_slice_impl(object_list, slice_index_int)), path);
+          FREE(1);
         }
-        UNPROTECT(1);
+        FREE(1);
       }
       return this->get_data(object_list, n_rows);
     }
