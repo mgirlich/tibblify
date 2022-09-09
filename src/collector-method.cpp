@@ -158,7 +158,7 @@ public:
     LOG_DEBUG;
 
     if (check && required) stop_required(path);
-    SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+    r_list_poke(this->data, this->current_row++, this->default_value);
   }
 
   void add_default_colmajor(bool check, Path& path) {
@@ -168,7 +168,7 @@ public:
 
     const R_xlen_t n_rows = Rf_length(this->data);
     for (R_xlen_t row = 0; row < n_rows; row++) {
-      SET_VECTOR_ELT(this->data, this->current_row++, this->default_value);
+      r_list_poke(this->data, this->current_row++, this->default_value);
     }
   }
 
@@ -179,8 +179,8 @@ public:
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
     KEEP(data);
 
-    SET_VECTOR_ELT(list, this->col_location, data);
-    SET_STRING_ELT(names, this->col_location, this->name);
+    r_list_poke(list, this->col_location, data);
+    r_chr_poke(names, this->col_location, this->name);
     FREE(1);
   }
 };
@@ -213,7 +213,7 @@ public:
 
     if (Rf_isNull(value)) {
       LOG_DEBUG << "NULL";
-      SET_VECTOR_ELT(this->data, this->current_row++, this->na);
+      r_list_poke(this->data, this->current_row++, this->na);
       return;
     }
 
@@ -223,7 +223,7 @@ public:
       stop_scalar(path, size);
     }
 
-    SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+    r_list_poke(this->data, this->current_row++, value_casted);
     FREE(1);
   }
 
@@ -261,8 +261,8 @@ public:
     if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
     SEXP value_cast = KEEP(vec_cast(KEEP(value), this->ptype));
 
-    SET_VECTOR_ELT(list, this->col_location, value_cast);
-    SET_STRING_ELT(names, this->col_location, this->name);
+    r_list_poke(list, this->col_location, value_cast);
+    r_chr_poke(names, this->col_location, this->name);
     FREE(3);
   }
 };
@@ -417,9 +417,9 @@ public:
     if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
 
     SEXP data_cast = KEEP(vec_cast(KEEP(data), this->ptype));
-    SET_VECTOR_ELT(list, this->col_location, data_cast);
+    r_list_poke(list, this->col_location, data_cast);
     FREE(2);
-    SET_STRING_ELT(names, this->col_location, this->name);
+    r_chr_poke(names, this->col_location, this->name);
   }
 };
 
@@ -501,7 +501,7 @@ private:
     SEXP out_list = KEEP(Rf_shallow_duplicate(value));
     for (R_xlen_t i = loc_first_null; i < n; i++, ptr_row++) {
       if (Rf_isNull(*ptr_row)) {
-        SET_VECTOR_ELT(out_list, i, this->na);
+        r_list_poke(out_list, i, this->na);
         continue;
       }
 
@@ -543,13 +543,13 @@ public:
     if (Rf_isNull(value)) {
       LOG_DEBUG << "NULL";
 
-      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+      r_list_poke(this->data, this->current_row++, R_NilValue);
       return;
     }
 
     if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
       if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
-        SET_VECTOR_ELT(this->data, this->current_row++, this->empty_element);
+        r_list_poke(this->data, this->current_row++, this->empty_element);
         return;
       }
     }
@@ -586,9 +586,9 @@ public:
         df[0] = value_casted;
       }
 
-      SET_VECTOR_ELT(this->data, this->current_row++, df);
+      r_list_poke(this->data, this->current_row++, df);
     } else {
-      SET_VECTOR_ELT(this->data, this->current_row++, value_casted);
+      r_list_poke(this->data, this->current_row++, value_casted);
     }
     FREE(2);
   }
@@ -619,8 +619,8 @@ public:
       data = vec_cast(data, out_ptype);
     }
     KEEP(data);
-    SET_VECTOR_ELT(list, this->col_location, data);
-    SET_STRING_ELT(names, this->col_location, this->name);
+    r_list_poke(list, this->col_location, data);
+    r_chr_poke(names, this->col_location, this->name);
     FREE(2);
   }
 };
@@ -641,12 +641,12 @@ public:
     if (Rf_isNull(value)) {
       LOG_DEBUG << "NULL";
 
-      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+      r_list_poke(this->data, this->current_row++, R_NilValue);
       return;
     }
 
     if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
-    SET_VECTOR_ELT(this->data, this->current_row++, value);
+    r_list_poke(this->data, this->current_row++, value);
   }
 
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
@@ -858,7 +858,7 @@ public:
     this->keys = r_alloc_character(n_keys);
     for(int i = 0; i < n_keys; i++) {
       int key_index = this->ind[i];
-      SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
+      r_chr_poke(this->keys, i, STRING_ELT(keys_, key_index));
       this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
     }
 
@@ -1094,8 +1094,8 @@ public:
 
     SEXP data = KEEP(collector_vec_to_df(std::move(this->collector_vec), this->n_rows, 0));
 
-    SET_VECTOR_ELT(list, this->col_location, data);
-    SET_STRING_ELT(names, this->col_location, this->name);
+    r_list_poke(list, this->col_location, data);
+    r_chr_poke(names, this->col_location, this->name);
     FREE(1);
   }
 };
@@ -1115,8 +1115,8 @@ private:
     SEXP names = Rf_getAttrib(out, R_NamesSymbol);
 
     if (this->has_names_col) {
-      SET_VECTOR_ELT(out, 0, my_vec_names2(object_list));
-      SET_STRING_ELT(names, 0, this->names_col);
+      r_list_poke(out, 0, my_vec_names2(object_list));
+      r_chr_poke(names, 0, this->names_col);
     }
 
     FREE(1);
@@ -1155,8 +1155,8 @@ public:
     SEXP names = Rf_getAttrib(out, R_NamesSymbol);
 
     if (this->has_names_col) {
-      SET_VECTOR_ELT(out, 0, tibblify_shared_empty_chr);
-      SET_STRING_ELT(names, 0, this->names_col);
+      r_list_poke(out, 0, tibblify_shared_empty_chr);
+      r_chr_poke(names, 0, this->names_col);
     }
 
     FREE(1);
@@ -1266,10 +1266,10 @@ public:
     LOG_DEBUG;
 
     if (Rf_isNull(value)) {
-      SET_VECTOR_ELT(this->data, this->current_row++, R_NilValue);
+      r_list_poke(this->data, this->current_row++, R_NilValue);
     } else {
       path.down();
-      SET_VECTOR_ELT(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
+      r_list_poke(this->data, this->current_row++, (*this->parser_ptr).parse(value, path));
       path.up();
     }
   }
