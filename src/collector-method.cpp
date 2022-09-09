@@ -57,7 +57,7 @@ inline bool is_list_of(r_obj* value, r_obj* ptype) {
 }
 
 inline r_obj* vec_init_along(r_obj* ptype, r_obj* along) {
-  r_obj* n_rows_sexp = KEEP(Rf_ScalarInteger(short_vec_size(along)));
+  r_obj* n_rows_sexp = KEEP(r_int(short_vec_size(along)));
   r_obj* call = KEEP(r_call3(r_sym("vec_init"),
                                ptype,
                                n_rows_sexp));
