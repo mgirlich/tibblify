@@ -141,7 +141,7 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (TYPEOF(value) != VECSXP) {
+    if (r_typeof(value) != R_TYPE_list) {
       stop_colmajor_non_list_element(path, value);
     }
 
@@ -548,7 +548,7 @@ public:
     }
 
     if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
-      if (Rf_length(value) == 0 && TYPEOF(value) == VECSXP) {
+      if (Rf_length(value) == 0 && r_typeof(value) == R_TYPE_list) {
         r_list_poke(this->data, this->current_row++, this->empty_element);
         return;
       }
@@ -557,7 +557,7 @@ public:
     SEXP names = Rf_getAttrib(value, R_NamesSymbol);
     if (this->input_form == vector_input_form::scalar_list || this->input_form == vector_input_form::object) {
       // FIXME should check with `vec_is_list()`?
-      if (TYPEOF(value) != VECSXP) {
+      if (r_typeof(value) != R_TYPE_list) {
         stop_vector_non_list_element(path, this->input_form, value);
       }
 
@@ -1051,7 +1051,7 @@ public:
       return(false);
     }
 
-    if (TYPEOF(value) != VECSXP) {
+    if (r_typeof(value) != R_TYPE_list) {
       // TODO should pass along path?
       Path path;
       stop_colmajor_non_list_element(path, value);
