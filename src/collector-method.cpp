@@ -44,7 +44,7 @@ inline bool is_list_of(r_obj* value, r_obj* ptype) {
     return false;
   }
 
-  r_obj* value_ptype = Rf_getAttrib(value, Rf_install("ptype"));
+  r_obj* value_ptype = Rf_getAttrib(value, r_sym("ptype"));
 
   if (vec_is(value_ptype, ptype)) {
     LOG_DEBUG << "correct ptype";
@@ -58,7 +58,7 @@ inline bool is_list_of(r_obj* value, r_obj* ptype) {
 
 inline r_obj* vec_init_along(r_obj* ptype, r_obj* along) {
   r_obj* n_rows_sexp = KEEP(Rf_ScalarInteger(short_vec_size(along)));
-  r_obj* call = KEEP(r_call3(Rf_install("vec_init"),
+  r_obj* call = KEEP(r_call3(r_sym("vec_init"),
                                ptype,
                                n_rows_sexp));
   r_obj* out = r_eval(call, tibblify_ns_env);
