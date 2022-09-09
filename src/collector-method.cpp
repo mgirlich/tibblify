@@ -119,7 +119,7 @@ public:
   inline void init(R_xlen_t& length) {
     LOG_DEBUG;
 
-    this->data = Rf_allocVector(VECSXP, length);
+    this->data = r_alloc_list(length);
     this->current_row = 0;
   }
 
@@ -272,22 +272,22 @@ SEXP r_alloc_vector(R_xlen_t& length);
 
 template <>
 SEXP r_alloc_vector<cpp11::r_bool>(R_xlen_t& length) {
-  return(Rf_allocVector(LGLSXP, length));
+  return(r_alloc_logical(length));
 }
 
 template <>
 SEXP r_alloc_vector<int>(R_xlen_t& length) {
-  return(Rf_allocVector(INTSXP, length));
+  return(r_alloc_integer(length));
 }
 
 template <>
 SEXP r_alloc_vector<double>(R_xlen_t& length) {
-  return(Rf_allocVector(REALSXP, length));
+  return(r_alloc_double(length));
 }
 
 template <>
 SEXP r_alloc_vector<cpp11::r_string>(R_xlen_t& length) {
-  return(Rf_allocVector(STRSXP, length));
+  return(r_alloc_character(length));
 }
 
 template <typename T, typename CPP11_TYPE>
@@ -675,8 +675,8 @@ inline SEXP collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
     n_cols += (*collector).size();
   }
 
-  SEXP df = PROTECT(Rf_allocVector(VECSXP, n_cols));
-  SEXP names = PROTECT(Rf_allocVector(STRSXP, n_cols));
+  SEXP df = PROTECT(r_alloc_list(n_cols));
+  SEXP names = PROTECT(r_alloc_character(n_cols));
 
   for (const Collector_Ptr& collector : collector_vec) {
     (*collector).assign_data(df, names);
@@ -855,7 +855,7 @@ public:
     // TODO should use `order_chr()`?
     R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
 
-    this->keys = Rf_allocVector(STRSXP, n_keys);
+    this->keys = r_alloc_character(n_keys);
     for(int i = 0; i < n_keys; i++) {
       int key_index = this->ind[i];
       SET_STRING_ELT(this->keys, i, STRING_ELT(keys_, key_index));
@@ -1201,7 +1201,7 @@ public:
           this->add_value(ptr_row[row_index], path);
         }
       } else {
-        SEXP slice_index_int = PROTECT(Rf_allocVector(INTSXP, 1));
+        SEXP slice_index_int = PROTECT(r_alloc_integer(1));
         int* slice_index_int_ptr = INTEGER(slice_index_int);
 
         for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
