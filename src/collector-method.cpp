@@ -21,7 +21,7 @@ inline r_obj* apply_transform(r_obj* value, r_obj* fn) {
   r_obj* mask = KEEP(r_new_environment(R_GlobalEnv));
   Rf_defineVar(syms_transform, fn, mask);
   Rf_defineVar(syms_value, value, mask);
-  r_obj* out = KEEP(Rf_eval(call, mask));
+  r_obj* out = KEEP(r_eval(call, mask));
 
   FREE(3);
   return out;
@@ -33,7 +33,7 @@ inline r_obj* vec_flatten(r_obj* value, r_obj* ptype) {
   r_obj* call = KEEP(r_call3(syms_vec_flatten,
                                value,
                                ptype));
-  r_obj* out = Rf_eval(call, tibblify_ns_env);
+  r_obj* out = r_eval(call, tibblify_ns_env);
   FREE(1);
   return(out);
 }
@@ -61,7 +61,7 @@ inline r_obj* vec_init_along(r_obj* ptype, r_obj* along) {
   r_obj* call = KEEP(r_call3(Rf_install("vec_init"),
                                ptype,
                                n_rows_sexp));
-  r_obj* out = Rf_eval(call, tibblify_ns_env);
+  r_obj* out = r_eval(call, tibblify_ns_env);
   FREE(2);
   return(out);
 }
