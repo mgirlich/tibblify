@@ -130,7 +130,7 @@ public:
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       return(false);
     }
 
@@ -176,7 +176,7 @@ public:
     LOG_DEBUG;
 
     SEXP data = this->data;
-    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+    if (this->transform != r_null) data = apply_transform(data, this->transform);
     KEEP(data);
 
     r_list_poke(list, this->col_location, data);
@@ -200,7 +200,7 @@ public:
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       return(false);
     }
 
@@ -211,7 +211,7 @@ public:
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       LOG_DEBUG << "NULL";
       r_list_poke(this->data, this->current_row++, this->na);
       return;
@@ -231,7 +231,7 @@ public:
     LOG_DEBUG;
     this->colmajor = true;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       this->add_default_colmajor(false, path);
       return;
     }
@@ -258,7 +258,7 @@ public:
     }
     KEEP(value);
 
-    if (!Rf_isNull(this->transform)) value = apply_transform(value, this->transform);
+    if (this->transform != r_null) value = apply_transform(value, this->transform);
     SEXP value_cast = KEEP(vec_cast(KEEP(value), this->ptype));
 
     r_list_poke(list, this->col_location, value_cast);
@@ -364,7 +364,7 @@ public:
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       LOG_DEBUG << "NULL";
 
       *this->data_ptr = this->na;
@@ -386,7 +386,7 @@ public:
   inline void add_value_colmajor(SEXP value, R_xlen_t& n_rows, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       add_default_colmajor(false, path);
       return;
     }
@@ -414,7 +414,7 @@ public:
     LOG_DEBUG;
 
     SEXP data = this->data;
-    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+    if (this->transform != r_null) data = apply_transform(data, this->transform);
 
     SEXP data_cast = KEEP(vec_cast(KEEP(data), this->ptype));
     r_list_poke(list, this->col_location, data_cast);
@@ -454,11 +454,11 @@ private:
   SEXP get_output_col_names(SEXP names_to_, SEXP values_to_) {
     LOG_DEBUG;
 
-    if (Rf_isNull(values_to_)) {
+    if (values_to_ == r_null) {
       return(NULL);
     }
 
-    if (Rf_isNull(names_to_)) {
+    if (names_to_ == r_null) {
       return(values_to_);
     } else {
       cpp11::writable::strings col_names(2);
@@ -482,7 +482,7 @@ private:
     const SEXP* ptr_row = r_list_cbegin(value);
 
     for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
-      if (Rf_isNull(*ptr_row)) {
+      if (*ptr_row == r_null) {
         loc_first_null = i;
         break;
       }
@@ -500,7 +500,7 @@ private:
     // benchmarks this didn't seem to be the case...
     SEXP out_list = KEEP(Rf_shallow_duplicate(value));
     for (R_xlen_t i = loc_first_null; i < n; i++, ptr_row++) {
-      if (Rf_isNull(*ptr_row)) {
+      if (*ptr_row == r_null) {
         r_list_poke(out_list, i, this->na);
         continue;
       }
@@ -519,8 +519,8 @@ public:
   Collector_Vector(bool required_, int col_location_, SEXP name_, Field_Args& field_args, Vector_Args vector_args)
     : Collector_Base(required_, col_location_, name_, field_args)
   , input_form(vector_args.input_form)
-  , uses_names_col(!Rf_isNull(vector_args.names_to))
-  , uses_values_col(!Rf_isNull(vector_args.values_to))
+  , uses_names_col(vector_args.names_to != r_null)
+  , uses_values_col(vector_args.values_to != r_null)
   , output_col_names(get_output_col_names(vector_args.names_to, vector_args.values_to))
   , vector_allows_empty_list(vector_args.vector_allows_empty_list)
   , na(vector_args.na)
@@ -540,7 +540,7 @@ public:
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       LOG_DEBUG << "NULL";
 
       r_list_poke(this->data, this->current_row++, R_NilValue);
@@ -561,14 +561,14 @@ public:
         stop_vector_non_list_element(path, this->input_form, value);
       }
 
-      if (this->input_form == vector_input_form::object && Rf_isNull(names)) {
+      if (this->input_form == vector_input_form::object && names == r_null) {
         stop_object_vector_names_is_null(path);
       }
 
       value = unchop_value(value, path);
     }
 
-    if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
+    if (this->elt_transform != r_null) value = apply_transform(value, this->elt_transform);
     SEXP value_casted = KEEP(vec_cast(KEEP(value), this->ptype));
 
     if (this->uses_values_col) {
@@ -576,7 +576,7 @@ public:
       cpp11::writable::list df = init_out_df(size);
 
       if (this->uses_names_col) {
-        if (Rf_isNull(names)) {
+        if (names == r_null) {
           df[0] = na_chr(vec_size(value));
         } else {
           df[0] = names;
@@ -597,7 +597,7 @@ public:
     LOG_DEBUG;
 
     SEXP data = this->data;
-    if (!Rf_isNull(this->transform)) data = apply_transform(data, this->transform);
+    if (this->transform != r_null) data = apply_transform(data, this->transform);
     KEEP(data);
 
     cpp11::writable::list out_ptype;
@@ -638,14 +638,14 @@ public:
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       LOG_DEBUG << "NULL";
 
       r_list_poke(this->data, this->current_row++, R_NilValue);
       return;
     }
 
-    if (!Rf_isNull(this->elt_transform)) value = apply_transform(value, this->elt_transform);
+    if (this->elt_transform != r_null) value = apply_transform(value, this->elt_transform);
     r_list_poke(this->data, this->current_row++, value);
   }
 
@@ -653,11 +653,11 @@ public:
     LOG_DEBUG;
 
     check_colmajor_size(value, n_rows, path);
-    if (!Rf_isNull(this->elt_transform)) {
+    if (this->elt_transform != r_null) {
       cpp11::stop("`elt_transform` not supported for `input_form = \"colmajor\"");
     }
 
-    if (Rf_isNull(this->transform)) {
+    if (this->transform == r_null) {
       this->data = value;
     } else {
       Collector_Base::add_value_colmajor(value, n_rows, path);
@@ -876,7 +876,7 @@ public:
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       return(false);
     }
 
@@ -892,7 +892,7 @@ public:
   inline void add_value(SEXP object, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(object)) {
+    if (object == r_null) {
       LOG_DEBUG << "NULL";
 
       this->add_default(false, path);
@@ -1047,7 +1047,7 @@ public:
   inline bool colmajor_nrows(SEXP value, R_xlen_t& n_rows) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       return(false);
     }
 
@@ -1142,7 +1142,7 @@ public:
     : Multi_Collector(keys_, col_vec_)
   , input_form(input_form_)
   , names_col(names_col_)
-  , has_names_col(!Rf_isNull(names_col_))
+  , has_names_col(names_col_ != r_null)
   { }
 
   inline SEXP get_ptype() {
@@ -1265,7 +1265,7 @@ public:
   inline void add_value(SEXP value, Path& path) {
     LOG_DEBUG;
 
-    if (Rf_isNull(value)) {
+    if (value == r_null) {
       r_list_poke(this->data, this->current_row++, R_NilValue);
     } else {
       path.down();
@@ -1309,7 +1309,7 @@ std::pair<SEXP, std::vector<Collector_Ptr>> parse_fields_spec(cpp11::list spec_l
       auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);
 
       cpp11::sexp names_col = elt["names_col"];
-      if (!Rf_isNull(names_col)) {
+      if (names_col != r_null) {
         names_col = cpp11::strings(names_col)[0];
       }
 
@@ -1384,7 +1384,7 @@ SEXP tibblify_impl(SEXP object_list, SEXP spec, cpp11::external_pointer<Path> pa
 
   if (type == "df") {
     cpp11::sexp names_col = spec_list["names_col"];
-    if (!Rf_isNull(names_col)) {
+    if (names_col != r_null) {
       names_col = cpp11::strings(names_col)[0];
     }
     LOG_DEBUG << "============ create parser ============";
