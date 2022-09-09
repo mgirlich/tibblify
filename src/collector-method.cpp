@@ -146,11 +146,11 @@ public:
     }
 
     check_colmajor_size(value, n_rows, path);
-    const SEXP* ptr_field = r_list_cbegin(value);
+    r_obj* const * v_value = r_list_cbegin(value);
 
     for (R_xlen_t row = 0; row < n_rows; row++) {
-      this->add_value(*ptr_field, path);
-      ++ptr_field;
+      this->add_value(*v_value, path);
+      ++v_value;
     }
   }
 
@@ -479,15 +479,15 @@ private:
     // `vec_init()` + `vec_assign()`
     R_xlen_t loc_first_null = -1;
     R_xlen_t n = Rf_length(value);
-    const SEXP* ptr_row = r_list_cbegin(value);
+    r_obj* const * v_value = r_list_cbegin(value);
 
-    for (R_xlen_t i = 0; i < n; i++, ptr_row++) {
-      if (*ptr_row == r_null) {
+    for (R_xlen_t i = 0; i < n; i++, v_value++) {
+      if (*v_value == r_null) {
         loc_first_null = i;
         break;
       }
 
-      if (vec_size(*ptr_row) != 1) {
+      if (vec_size(*v_value) != 1) {
         stop_vector_wrong_size_element(path, this->input_form, value);
       }
     }
@@ -499,13 +499,13 @@ private:
     // Theoretically a shallow duplicate should be more efficient but in
     // benchmarks this didn't seem to be the case...
     SEXP out_list = KEEP(Rf_shallow_duplicate(value));
-    for (R_xlen_t i = loc_first_null; i < n; i++, ptr_row++) {
-      if (*ptr_row == r_null) {
+    for (R_xlen_t i = loc_first_null; i < n; i++, v_value++) {
+      if (*v_value == r_null) {
         r_list_poke(out_list, i, this->na);
         continue;
       }
 
-      if (vec_size(*ptr_row) != 1) {
+      if (vec_size(*v_value) != 1) {
         stop_vector_wrong_size_element(path, this->input_form, value);
       }
     }
@@ -695,13 +695,13 @@ inline void check_names(const SEXP field_names,
 
   if (n_fields == 0) return;
 
-  const SEXP* field_names_ptr = r_chr_cbegin(field_names);
-  SEXPREC* field_nm = field_names_ptr[ind[0]];
+  r_obj* const * v_field_names = r_chr_cbegin(field_names);
+  SEXPREC* field_nm = v_field_names[ind[0]];
   if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[0]);
 
   for (int field_index = 1; field_index < n_fields; field_index++) {
     SEXPREC* field_nm_prev = field_nm;
-    field_nm = field_names_ptr[ind[field_index]];
+    field_nm = v_field_names[ind[field_index]];
     if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
 
     if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[field_index]);
@@ -728,7 +728,7 @@ R_xlen_t get_collector_vec_rows(SEXP object_list,
 
   R_xlen_t n_rows;
   auto key_match_ind = match_chr(keys, field_names);
-  const SEXP* field_ptr = r_list_cbegin(object_list);
+  r_obj* const * v_object_list = r_list_cbegin(object_list);
 
   for (int key_index = 0; key_index < n_keys; key_index++) {
     int loc = key_match_ind[key_index];
@@ -738,7 +738,7 @@ R_xlen_t get_collector_vec_rows(SEXP object_list,
       continue;
     }
 
-    SEXP field = field_ptr[loc];
+    SEXP field = v_object_list[loc];
     if ((*collector_vec[key_index]).colmajor_nrows(field, n_rows)) {
       LOG_DEBUG << "found rows: " << n_rows;
       return(n_rows);
@@ -764,19 +764,19 @@ void parse_colmajor_impl(SEXP object_list,
   if (field_names == R_NilValue) stop_names_is_null(path);
 
   auto key_match_ind = match_chr(keys, field_names);
-  const SEXP* field_ptr = r_list_cbegin(object_list);
-  const SEXP* key_names_ptr = r_chr_cbegin(keys);
+  r_obj* const * v_object_list = r_list_cbegin(object_list);
+  r_obj* const * v_keys = r_chr_cbegin(keys);
 
   path.down();
-  for (int key_index = 0; key_index < n_keys; key_index++, key_names_ptr++) {
-    path.replace(*key_names_ptr);
+  for (int key_index = 0; key_index < n_keys; key_index++, v_keys++) {
+    path.replace(*v_keys);
     int loc = key_match_ind[key_index];
-    LOG_DEBUG << "key: " << CHAR(*key_names_ptr);
+    LOG_DEBUG << "key: " << CHAR(*v_keys);
 
     if (loc < 0) {
       (*collector_vec[key_index]).add_default_colmajor(true, path);
     } else {
-      SEXP field = field_ptr[loc];
+      SEXP field = v_object_list[loc];
       (*collector_vec[key_index]).add_value_colmajor(field, n_rows, path);
     }
   }
@@ -812,12 +812,12 @@ private:
     if (n_fields != this->n_fields_prev) return true;
 
     if (n_fields >= INDEX_SIZE) cpp11::stop("At most 256 fields are supported");
-    const SEXP* nms_ptr = r_chr_cbegin(field_names);
-    const SEXP* nms_ptr_prev = r_chr_cbegin(this->field_names_prev);
+    r_obj* const * v_field_names = r_chr_cbegin(field_names);
+    r_obj* const * v_field_names_prev = r_chr_cbegin(this->field_names_prev);
     const int n = std::max(n_fields, this->n_fields_prev);
-    for (int i = 0; i < n; i++, nms_ptr++, nms_ptr_prev++) {
-      LOG_DEBUG << i << " - " << CHAR(*nms_ptr) << " - " << CHAR(*nms_ptr_prev);
-      if (*nms_ptr != *nms_ptr_prev) {
+    for (int i = 0; i < n; i++, v_field_names++, v_field_names_prev++) {
+      LOG_DEBUG << i << " - " << CHAR(*v_field_names) << " - " << CHAR(*v_field_names_prev);
+      if (*v_field_names != *v_field_names_prev) {
         return true;
       }
     }
@@ -911,13 +911,13 @@ public:
     this->update_fields(field_names, n_fields, path);
 
     // TODO r_list_cbegin only works if object is a list
-    const SEXP* key_names_ptr = r_chr_cbegin(this->keys);
-    const SEXP* values_ptr = r_list_cbegin(object);
+    r_obj* const * v_keys = r_chr_cbegin(this->keys);
+    r_obj* const * v_object = r_list_cbegin(object);
 
     path.down();
     for (int key_index = 0; key_index < this->n_keys; key_index++) {
       int loc = this->key_match_ind[key_index];
-      SEXPREC* cur_key = key_names_ptr[key_index];
+      SEXPREC* cur_key = v_keys[key_index];
       LOG_DEBUG << "match loc: " << loc << " - " << CHAR(cur_key);
       path.replace(cur_key);
 
@@ -925,7 +925,7 @@ public:
         (*this->collector_vec[key_index]).add_default(true, path);
       } else {
         LOG_DEBUG << " - " << CHAR(STRING_ELT(field_names, loc));
-        auto cur_value = values_ptr[loc];
+        auto cur_value = v_object[loc];
         (*this->collector_vec[key_index]).add_value(cur_value, path);
       }
     }
@@ -947,9 +947,9 @@ public:
     LOG_DEBUG;
 
     path.down();
-    const SEXP* key_names_ptr = r_chr_cbegin(this->keys);
-    for (int key_index = 0; key_index < this->n_keys; key_index++, key_names_ptr++) {
-      path.replace(*key_names_ptr);
+    r_obj* const * v_keys = r_chr_cbegin(this->keys);
+    for (int key_index = 0; key_index < this->n_keys; key_index++, v_keys++) {
+      path.replace(*v_keys);
       (*this->collector_vec[key_index]).add_default(check, path);
     }
     path.up();
@@ -1195,10 +1195,10 @@ public:
         return this->get_data(object_list, n_rows);
       } else if (vec_is_list(object_list)) {
         LOG_DEBUG << "===== Start parsing rowmajor - list ======";
-        const SEXP* ptr_row = r_list_cbegin(object_list);
+        r_obj* const * v_object_list = r_list_cbegin(object_list);
         for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
           path.replace(row_index);
-          this->add_value(ptr_row[row_index], path);
+          this->add_value(v_object_list[row_index], path);
         }
       } else {
         SEXP slice_index_int = KEEP(r_alloc_integer(1));
