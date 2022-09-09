@@ -71,16 +71,16 @@ public:
   virtual ~ Collector() {};
 
   // reserve space
-  virtual void init(R_xlen_t& length) = 0;
+  virtual void init(r_ssize& length) = 0;
   // number of columns it expands in the end
   // only really relevant for `Collector_Same_Key`
   virtual int size() const = 0;
 
-  virtual bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) = 0;
+  virtual bool colmajor_nrows(r_obj* value, r_ssize& n_rows) = 0;
   // if key is found -> add `object` to internal memory
   virtual void add_value(r_obj* object, Path& path) = 0;
 
-  virtual inline void add_value_colmajor(r_obj* value, R_xlen_t& n_rows, Path& path) = 0;
+  virtual inline void add_value_colmajor(r_obj* value, r_ssize& n_rows, Path& path) = 0;
   // if key is absent -> check if field is required; if not add `default`
   virtual void add_default(bool check, Path& path) = 0;
 
@@ -116,7 +116,7 @@ public:
   , ptype_inner(field_args.ptype_inner)
   { }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     this->data = r_alloc_list(length);
@@ -127,7 +127,7 @@ public:
     return 1;
   }
 
-  inline bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) {
+  inline bool colmajor_nrows(r_obj* value, r_ssize& n_rows) {
     LOG_DEBUG;
 
     if (value == r_null) {
@@ -138,7 +138,7 @@ public:
     return(true);
   }
 
-  inline void add_value_colmajor(r_obj* value, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* value, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     if (r_typeof(value) != R_TYPE_list) {
@@ -148,7 +148,7 @@ public:
     check_colmajor_size(value, n_rows, path);
     r_obj* const * v_value = r_list_cbegin(value);
 
-    for (R_xlen_t row = 0; row < n_rows; row++) {
+    for (r_ssize row = 0; row < n_rows; row++) {
       this->add_value(*v_value, path);
       ++v_value;
     }
@@ -166,8 +166,8 @@ public:
 
     if (check && required) stop_required(path);
 
-    const R_xlen_t n_rows = Rf_length(this->data);
-    for (R_xlen_t row = 0; row < n_rows; row++) {
+    const r_ssize n_rows = Rf_length(this->data);
+    for (r_ssize row = 0; row < n_rows; row++) {
       r_list_poke(this->data, this->current_row++, this->default_value);
     }
   }
@@ -197,7 +197,7 @@ public:
   , na(na_)
   { }
 
-  inline bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) {
+  inline bool colmajor_nrows(r_obj* value, r_ssize& n_rows) {
     LOG_DEBUG;
 
     if (value == r_null) {
@@ -218,7 +218,7 @@ public:
     }
 
     r_obj* value_casted = KEEP(vec_cast(value, this->ptype_inner));
-    R_len_t size = short_vec_size(value_casted);
+    r_ssize size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path, size);
     }
@@ -227,7 +227,7 @@ public:
     FREE(1);
   }
 
-  inline void add_value_colmajor(r_obj* value, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* value, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
     this->colmajor = true;
 
@@ -268,25 +268,25 @@ public:
 };
 
 template <typename CPP11_TYPE>
-r_obj* r_alloc_vector(R_xlen_t& length);
+r_obj* r_alloc_vector(r_ssize& length);
 
 template <>
-r_obj* r_alloc_vector<cpp11::r_bool>(R_xlen_t& length) {
+r_obj* r_alloc_vector<cpp11::r_bool>(r_ssize& length) {
   return(r_alloc_logical(length));
 }
 
 template <>
-r_obj* r_alloc_vector<int>(R_xlen_t& length) {
+r_obj* r_alloc_vector<int>(r_ssize& length) {
   return(r_alloc_integer(length));
 }
 
 template <>
-r_obj* r_alloc_vector<double>(R_xlen_t& length) {
+r_obj* r_alloc_vector<double>(r_ssize& length) {
   return(r_alloc_double(length));
 }
 
 template <>
-r_obj* r_alloc_vector<cpp11::r_string>(R_xlen_t& length) {
+r_obj* r_alloc_vector<cpp11::r_string>(r_ssize& length) {
   return(r_alloc_character(length));
 }
 
@@ -354,7 +354,7 @@ public:
   , default_value(convert_default(field_args.default_sexp))
   { }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     this->data = r_alloc_vector<CPP11_TYPE>(length);
@@ -373,7 +373,7 @@ public:
     }
 
     r_obj* value_casted = KEEP(vec_cast(value, this->ptype_inner));
-    R_len_t size = short_vec_size(value_casted);
+    r_ssize size = short_vec_size(value_casted);
     if (size != 1) {
       stop_scalar(path, size);
     }
@@ -383,7 +383,7 @@ public:
     FREE(1);
   }
 
-  inline void add_value_colmajor(r_obj* value, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* value, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     if (value == r_null) {
@@ -468,7 +468,7 @@ private:
     }
   }
 
-  cpp11::writable::list init_out_df(R_xlen_t n_rows) const {
+  cpp11::writable::list init_out_df(r_ssize n_rows) const {
     return(init_df(n_rows, this->output_col_names));
   }
 
@@ -477,11 +477,11 @@ private:
 
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
-    R_xlen_t loc_first_null = -1;
-    R_xlen_t n = Rf_length(value);
+    r_ssize loc_first_null = -1;
+    r_ssize n = Rf_length(value);
     r_obj* const * v_value = r_list_cbegin(value);
 
-    for (R_xlen_t i = 0; i < n; i++, v_value++) {
+    for (r_ssize i = 0; i < n; i++, v_value++) {
       if (*v_value == r_null) {
         loc_first_null = i;
         break;
@@ -499,7 +499,7 @@ private:
     // Theoretically a shallow duplicate should be more efficient but in
     // benchmarks this didn't seem to be the case...
     r_obj* out_list = KEEP(Rf_shallow_duplicate(value));
-    for (R_xlen_t i = loc_first_null; i < n; i++, v_value++) {
+    for (r_ssize i = loc_first_null; i < n; i++, v_value++) {
       if (*v_value == r_null) {
         r_list_poke(out_list, i, this->na);
         continue;
@@ -528,7 +528,7 @@ public:
   , elt_transform(vector_args.elt_transform)
   { }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     Collector_Base::init(length);
@@ -572,7 +572,7 @@ public:
     r_obj* value_casted = KEEP(vec_cast(KEEP(value), this->ptype));
 
     if (this->uses_values_col) {
-      R_len_t size = short_vec_size(value_casted);
+      r_ssize size = short_vec_size(value_casted);
       cpp11::writable::list df = init_out_df(size);
 
       if (this->uses_names_col) {
@@ -649,7 +649,7 @@ public:
     r_list_poke(this->data, this->current_row++, value);
   }
 
-  inline void add_value_colmajor(r_obj* value, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* value, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     check_colmajor_size(value, n_rows, path);
@@ -666,7 +666,7 @@ public:
 };
 
 inline r_obj* collector_vec_to_df(const std::vector<Collector_Ptr>& collector_vec,
-                                R_xlen_t n_rows,
+                                r_ssize n_rows,
                                 int n_extra_cols) {
   LOG_DEBUG;
 
@@ -708,7 +708,7 @@ inline void check_names(r_obj* field_names,
   }
 }
 
-R_xlen_t get_collector_vec_rows(r_obj* object_list,
+r_ssize get_collector_vec_rows(r_obj* object_list,
                                 const std::vector<Collector_Ptr>& collector_vec,
                                 r_obj* keys,
                                 const int& n_keys) {
@@ -719,14 +719,14 @@ R_xlen_t get_collector_vec_rows(r_obj* object_list,
   // TODO check if list
 
   r_obj* field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-  const R_xlen_t n_fields = short_vec_size(object_list);
+  const r_ssize n_fields = short_vec_size(object_list);
 
   if (n_fields == 0) {
-    R_xlen_t n_rows (0);
+    r_ssize n_rows (0);
     return(n_rows);
   }
 
-  R_xlen_t n_rows;
+  r_ssize n_rows;
   auto key_match_ind = match_chr(keys, field_names);
   r_obj* const * v_object_list = r_list_cbegin(object_list);
 
@@ -752,7 +752,7 @@ R_xlen_t get_collector_vec_rows(r_obj* object_list,
 void parse_colmajor_impl(r_obj* object_list,
                          r_obj* keys,
                          const int& n_keys,
-                         R_xlen_t& n_rows,
+                         r_ssize& n_rows,
                          std::vector<Collector_Ptr>& collector_vec,
                          Path& path) {
   LOG_DEBUG;
@@ -838,7 +838,7 @@ protected:
   std::vector<Collector_Ptr> collector_vec;
   const int n_keys;
 
-  inline r_obj* get_data(r_obj* object_list, R_xlen_t n_rows) {
+  inline r_obj* get_data(r_obj* object_list, r_ssize n_rows) {
     LOG_DEBUG;
 
     r_obj* out = collector_vec_to_df(std::move(this->collector_vec), n_rows, 0);
@@ -865,7 +865,7 @@ public:
     this->update_order(keys_, n_keys);
   }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     for (const Collector_Ptr& collector : this->collector_vec) {
@@ -873,7 +873,7 @@ public:
     }
   }
 
-  inline bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) {
+  inline bool colmajor_nrows(r_obj* value, r_ssize& n_rows) {
     LOG_DEBUG;
 
     if (value == r_null) {
@@ -932,7 +932,7 @@ public:
     path.up();
   }
 
-  inline void add_value_colmajor(r_obj* object_list, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* object_list, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     parse_colmajor_impl(object_list,
@@ -977,13 +977,13 @@ public:
     return size;
   }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     Multi_Collector::init(length);
   }
 
-  inline bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) {
+  inline bool colmajor_nrows(r_obj* value, r_ssize& n_rows) {
     LOG_DEBUG;
 
     return(Multi_Collector::colmajor_nrows(value, n_rows));
@@ -995,7 +995,7 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_value_colmajor(r_obj* object, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* object, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     Multi_Collector::add_value_colmajor(object, n_rows, path);
@@ -1028,7 +1028,7 @@ public:
 
 class Collector_Tibble : public Collector_Base, Multi_Collector {
 private:
-  R_xlen_t n_rows;
+  r_ssize n_rows;
 
 public:
   Collector_Tibble(r_obj* keys_, std::vector<Collector_Ptr>& col_vec_,
@@ -1037,14 +1037,14 @@ public:
   , Multi_Collector(keys_, col_vec_)
   { }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG;
 
     this->n_rows = length;
     Multi_Collector::init(length);
   }
 
-  inline bool colmajor_nrows(r_obj* value, R_xlen_t& n_rows) {
+  inline bool colmajor_nrows(r_obj* value, r_ssize& n_rows) {
     LOG_DEBUG;
 
     if (value == r_null) {
@@ -1071,7 +1071,7 @@ public:
     Multi_Collector::add_value(object, path);
   }
 
-  inline void add_value_colmajor(r_obj* object, R_xlen_t& n_rows, Path& path) {
+  inline void add_value_colmajor(r_obj* object, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     Multi_Collector::add_value_colmajor(object, n_rows, path);
@@ -1106,7 +1106,7 @@ private:
   const SEXP names_col;
   const bool has_names_col;
 
-  inline r_obj* get_data(r_obj* object_list, R_xlen_t n_rows) {
+  inline r_obj* get_data(r_obj* object_list, r_ssize n_rows) {
     LOG_DEBUG;
 
     int n_extra_cols = this->has_names_col ? 1 : 0;
@@ -1123,7 +1123,7 @@ private:
     return(out);
   }
 
-  void parse_colmajor(r_obj* object_list, R_xlen_t& n_rows, Path& path) {
+  void parse_colmajor(r_obj* object_list, r_ssize& n_rows, Path& path) {
     LOG_DEBUG;
 
     parse_colmajor_impl(object_list,
@@ -1146,7 +1146,7 @@ public:
   { }
 
   inline r_obj* get_ptype() {
-    R_xlen_t n_rows = 0;
+    r_ssize n_rows = 0;
     this->init(n_rows);
 
     int n_extra_cols = this->has_names_col ? 1 : 0;
@@ -1171,13 +1171,13 @@ public:
       // FIXME path handling is quite confusing here...
       path.up();
       r_obj* field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-      const R_xlen_t n_fields = Rf_length(field_names);
+      const r_ssize n_fields = Rf_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
 
       auto ind = order_chr(field_names);
       check_names(field_names, ind.data(), n_fields, path);
 
-      R_xlen_t n_rows = get_collector_vec_rows(object_list, this->collector_vec, this->keys, this->n_keys);
+      r_ssize n_rows = get_collector_vec_rows(object_list, this->collector_vec, this->keys, this->n_keys);
       this->init(n_rows);
 
       this->parse_colmajor(object_list, n_rows, path);
@@ -1185,7 +1185,7 @@ public:
       path.down();
       return(out);
     } else if (input_form == "rowmajor") {
-      R_xlen_t n_rows = short_vec_size(object_list);
+      r_ssize n_rows = short_vec_size(object_list);
       LOG_DEBUG << "===== Start init ======";
       this->init(n_rows);
 
@@ -1196,7 +1196,7 @@ public:
       } else if (vec_is_list(object_list)) {
         LOG_DEBUG << "===== Start parsing rowmajor - list ======";
         r_obj* const * v_object_list = r_list_cbegin(object_list);
-        for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+        for (r_ssize row_index = 0; row_index < n_rows; row_index++) {
           path.replace(row_index);
           this->add_value(v_object_list[row_index], path);
         }
@@ -1204,7 +1204,7 @@ public:
         r_obj* slice_index_int = KEEP(r_alloc_integer(1));
         int* slice_index_int_ptr = INTEGER(slice_index_int);
 
-        for (R_xlen_t row_index = 0; row_index < n_rows; row_index++) {
+        for (r_ssize row_index = 0; row_index < n_rows; row_index++) {
           path.replace(row_index);
           *slice_index_int_ptr = row_index + 1;
           this->add_value(KEEP(vec_slice_impl(object_list, slice_index_int)), path);
@@ -1228,7 +1228,7 @@ public:
   inline r_obj* parse(r_obj* object, Path& path) {
     LOG_DEBUG;
 
-    R_xlen_t n_rows = 1;
+    r_ssize n_rows = 1;
     LOG_DEBUG << "====== Object -> init ======";
     this->init(n_rows);
 
@@ -1254,7 +1254,7 @@ public:
   , input_form(input_form_)
   { }
 
-  inline void init(R_xlen_t& length) {
+  inline void init(r_ssize& length) {
     LOG_DEBUG << length;
 
     Collector_Base::init(length);
