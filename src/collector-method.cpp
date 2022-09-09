@@ -732,7 +732,7 @@ R_xlen_t get_collector_vec_rows(r_obj* object_list,
 
   for (int key_index = 0; key_index < n_keys; key_index++) {
     int loc = key_match_ind[key_index];
-    LOG_DEBUG << "match loc: " << loc << " - " << CHAR(STRING_ELT(keys, key_index));
+    LOG_DEBUG << "match loc: " << loc << " - " << r_chr_get_c_string(keys, key_index);
 
     if (loc < 0) {
       continue;
@@ -858,7 +858,7 @@ public:
     this->keys = r_alloc_character(n_keys);
     for(int i = 0; i < n_keys; i++) {
       int key_index = this->ind[i];
-      r_chr_poke(this->keys, i, STRING_ELT(keys_, key_index));
+      r_chr_poke(this->keys, i, r_chr_get(keys_, key_index));
       this->collector_vec.emplace_back(std::move(collector_vec_[key_index]));
     }
 
