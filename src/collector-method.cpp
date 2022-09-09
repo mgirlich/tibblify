@@ -696,11 +696,11 @@ inline void check_names(r_obj* field_names,
   if (n_fields == 0) return;
 
   r_obj* const * v_field_names = r_chr_cbegin(field_names);
-  SEXPREC* field_nm = v_field_names[ind[0]];
+  r_obj* field_nm = v_field_names[ind[0]];
   if (field_nm == NA_STRING || field_nm == strings_empty) stop_empty_name(path, ind[0]);
 
   for (int field_index = 1; field_index < n_fields; field_index++) {
-    SEXPREC* field_nm_prev = field_nm;
+    r_obj* field_nm_prev = field_nm;
     field_nm = v_field_names[ind[field_index]];
     if (field_nm == field_nm_prev) stop_duplicate_name(path, field_nm);
 
@@ -917,14 +917,14 @@ public:
     path.down();
     for (int key_index = 0; key_index < this->n_keys; key_index++) {
       int loc = this->key_match_ind[key_index];
-      SEXPREC* cur_key = v_keys[key_index];
+      r_obj* cur_key = v_keys[key_index];
       LOG_DEBUG << "match loc: " << loc << " - " << CHAR(cur_key);
       path.replace(cur_key);
 
       if (loc < 0) {
         (*this->collector_vec[key_index]).add_default(true, path);
       } else {
-        LOG_DEBUG << " - " << CHAR(STRING_ELT(field_names, loc));
+        LOG_DEBUG << " - " << r_chr_get_c_string(field_names, loc);
         auto cur_value = v_object[loc];
         (*this->collector_vec[key_index]).add_value(cur_value, path);
       }
