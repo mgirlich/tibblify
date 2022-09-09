@@ -134,7 +134,7 @@ public:
       return(false);
     }
 
-    n_rows = Rf_length(value);
+    n_rows = r_length(value);
     return(true);
   }
 
@@ -166,7 +166,7 @@ public:
 
     if (check && required) stop_required(path);
 
-    const r_ssize n_rows = Rf_length(this->data);
+    const r_ssize n_rows = r_length(this->data);
     for (r_ssize row = 0; row < n_rows; row++) {
       r_list_poke(this->data, this->current_row++, this->default_value);
     }
@@ -478,7 +478,7 @@ private:
     // FIXME if `vec_assign()` gets exported this should use
     // `vec_init()` + `vec_assign()`
     r_ssize loc_first_null = -1;
-    r_ssize n = Rf_length(value);
+    r_ssize n = r_length(value);
     r_obj* const * v_value = r_list_cbegin(value);
 
     for (r_ssize i = 0; i < n; i++, v_value++) {
@@ -548,7 +548,7 @@ public:
     }
 
     if (this->input_form == vector_input_form::vector && this->vector_allows_empty_list) {
-      if (Rf_length(value) == 0 && r_typeof(value) == R_TYPE_list) {
+      if (r_length(value) == 0 && r_typeof(value) == R_TYPE_list) {
         r_list_poke(this->data, this->current_row++, this->empty_element);
         return;
       }
@@ -847,11 +847,11 @@ protected:
 
 public:
   Multi_Collector(r_obj* keys_, std::vector<Collector_Ptr>& collector_vec_)
-    : n_keys(Rf_length(keys_))
+    : n_keys(r_length(keys_))
   {
     LOG_DEBUG;
 
-    int n_keys = Rf_length(keys_);
+    int n_keys = r_length(keys_);
     // TODO should use `order_chr()`?
     R_orderVector1(this->ind, n_keys, keys_, FALSE, FALSE);
 
@@ -899,7 +899,7 @@ public:
       return;
     }
 
-    const int n_fields = Rf_length(object);
+    const int n_fields = r_length(object);
     if (n_fields == 0) {
       this->add_default(true, path);
       return;
@@ -963,7 +963,7 @@ protected:
 public:
   Collector_Same_Key(r_obj* keys_, std::vector<Collector_Ptr>& collector_vec_)
     : Multi_Collector(keys_, collector_vec_)
-  , n_keys(Rf_length(keys_))
+  , n_keys(r_length(keys_))
   { }
 
   inline int size() const {
@@ -1171,7 +1171,7 @@ public:
       // FIXME path handling is quite confusing here...
       path.up();
       r_obj* field_names = Rf_getAttrib(object_list, R_NamesSymbol);
-      const r_ssize n_fields = Rf_length(field_names);
+      const r_ssize n_fields = r_length(field_names);
       if (field_names == R_NilValue) stop_names_is_null(path);
 
       auto ind = order_chr(field_names);
