@@ -16,7 +16,7 @@ inline r_obj* apply_transform(r_obj* value, r_obj* fn) {
   LOG_DEBUG;
 
   // from https://github.com/r-lib/vctrs/blob/9b65e090da2a0f749c433c698a15d4e259422542/src/names.c#L83
-  r_obj* call = KEEP(Rf_lang2(syms_transform, syms_value));
+  r_obj* call = KEEP(r_call2(syms_transform, syms_value));
 
   r_obj* mask = KEEP(r_new_environment(R_GlobalEnv));
   Rf_defineVar(syms_transform, fn, mask);
@@ -30,7 +30,7 @@ inline r_obj* apply_transform(r_obj* value, r_obj* fn) {
 inline r_obj* vec_flatten(r_obj* value, r_obj* ptype) {
   LOG_DEBUG;
 
-  r_obj* call = KEEP(Rf_lang3(syms_vec_flatten,
+  r_obj* call = KEEP(r_call3(syms_vec_flatten,
                                value,
                                ptype));
   r_obj* out = Rf_eval(call, tibblify_ns_env);
@@ -58,7 +58,7 @@ inline bool is_list_of(r_obj* value, r_obj* ptype) {
 
 inline r_obj* vec_init_along(r_obj* ptype, r_obj* along) {
   r_obj* n_rows_sexp = KEEP(Rf_ScalarInteger(short_vec_size(along)));
-  r_obj* call = KEEP(Rf_lang3(Rf_install("vec_init"),
+  r_obj* call = KEEP(r_call3(Rf_install("vec_init"),
                                ptype,
                                n_rows_sexp));
   r_obj* out = Rf_eval(call, tibblify_ns_env);
