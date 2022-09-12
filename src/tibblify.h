@@ -2,6 +2,7 @@
 #define TIBBLIFY_H
 
 #define R_NO_REMAP
+#include <rlang.h>
 #include <R.h>
 #include <Rversion.h>
 #include <Rinternals.h>

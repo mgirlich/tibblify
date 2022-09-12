@@ -6,10 +6,10 @@
 #include <R_ext/Visibility.h>
 
 // collector-method.cpp
-SEXP tibblify_impl(SEXP object_list, SEXP spec, cpp11::external_pointer<Path> path_ptr);
+r_obj* tibblify_impl(r_obj* object_list, r_obj* spec, cpp11::external_pointer<Path> path_ptr);
 extern "C" SEXP _tibblify_tibblify_impl(SEXP object_list, SEXP spec, SEXP path_ptr) {
   BEGIN_CPP11
-    return cpp11::as_sexp(tibblify_impl(cpp11::as_cpp<cpp11::decay_t<SEXP>>(object_list), cpp11::as_cpp<cpp11::decay_t<SEXP>>(spec), cpp11::as_cpp<cpp11::decay_t<cpp11::external_pointer<Path>>>(path_ptr)));
+    return cpp11::as_sexp(tibblify_impl(cpp11::as_cpp<cpp11::decay_t<r_obj*>>(object_list), cpp11::as_cpp<cpp11::decay_t<r_obj*>>(spec), cpp11::as_cpp<cpp11::decay_t<cpp11::external_pointer<Path>>>(path_ptr)));
   END_CPP11
 }
 // collector-method.cpp
