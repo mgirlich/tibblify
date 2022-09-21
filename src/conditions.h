@@ -5,17 +5,17 @@
 // inline void stop_scalar(const Path& path, r_ssize size_act) {
 static inline
 void stop_scalar(r_ssize size_act) {
-  SEXP call = PROTECT(r_call3(Rf_install("stop_scalar"),
-                               // PROTECT(path.data()),
-                               r_null,
-                               r_int(size_act)));
+  r_obj* call = PROTECT(r_call3(Rf_install("stop_scalar"),
+                                // PROTECT(path.data()),
+                                r_null,
+                                r_int(size_act)));
   r_eval(call, tibblify_ns_env);
 }
 
 // inline void stop_required(const Path& path) {
 static inline
 void stop_required() {
-  SEXP call = PROTECT(r_call2(Rf_install("stop_required"),
+  r_obj* call = PROTECT(r_call2(Rf_install("stop_required"),
                                r_null));
                                // PROTECT(path.data())));
   r_eval(call, tibblify_ns_env);
@@ -34,12 +34,14 @@ void stop_required() {
 //                                r_int(index)));
 //   r_eval(call, tibblify_ns_env);
 // }
-//
+
 // inline void stop_names_is_null(const Path& path) {
-//   SEXP call = PROTECT(r_call2(Rf_install("stop_names_is_null"),
-//                                PROTECT(path.data())));
-//   r_eval(call, tibblify_ns_env);
-// }
+static inline
+void stop_names_is_null() {
+  r_obj* call = PROTECT(r_call(Rf_install("stop_names_is_null")));
+                               // PROTECT(path.data())));
+  r_eval(call, tibblify_ns_env);
+}
 //
 // inline void stop_object_vector_names_is_null(const Path& path) {
 //   SEXP call = PROTECT(r_call2(Rf_install("stop_object_vector_names_is_null"),

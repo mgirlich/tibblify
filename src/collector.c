@@ -18,24 +18,25 @@ r_obj* init_collector_data(r_ssize n_rows, struct collector* v_collector) {
   case COLLECTOR_TYPE_scalar_lgl:
     col = KEEP(r_alloc_vector(R_TYPE_logical, n_rows));
     v_collector->data = col;
-    v_collector->details.scalar_lgl_coll.v_data = r_lgl_begin(col);
-    // v_collector->v_data = r_lgl_begin(col);
+    v_collector->v_data = r_lgl_begin(col);
+    v_collector->add_value = &add_value_lgl;
+    v_collector->add_default = &add_default_lgl;
     break;
   case COLLECTOR_TYPE_scalar_int:
     col = KEEP(r_alloc_vector(R_TYPE_integer, n_rows));
     v_collector->data = col;
-    v_collector->details.scalar_int_coll.v_data = r_int_begin(col);
-    // v_collector->v_data = r_int_begin(col);
+    v_collector->v_data = r_int_begin(col);
     break;
   case COLLECTOR_TYPE_scalar_dbl:
     col = KEEP(r_alloc_vector(R_TYPE_double, n_rows));
     v_collector->data = col;
-    v_collector->details.scalar_dbl_coll.v_data = r_dbl_begin(col);
-    // v_collector->v_data = r_dbl_begin(col);
+    v_collector->v_data = r_dbl_begin(col);
     break;
   case COLLECTOR_TYPE_scalar_chr:
     col = KEEP(r_alloc_vector(R_TYPE_character, n_rows));
     v_collector->data = col;
+    v_collector->add_value = &add_value_chr;
+    v_collector->add_default = &add_default_chr;
     break;
   case COLLECTOR_TYPE_scalar:
   case COLLECTOR_TYPE_vector:
@@ -60,6 +61,8 @@ r_obj* init_collector_data(r_ssize n_rows, struct collector* v_collector) {
       // `col_inner` is now protected by `data` so can free again
       FREE(1);
     }
+    v_collector->add_value = &add_value_row;
+    v_collector->add_default = &add_default_row;
     break;
   }
   }
@@ -75,17 +78,24 @@ r_obj* init_collector_data(r_ssize n_rows, struct collector* v_collector) {
 struct collector parse_spect(r_obj* spec) {
   struct collector lgl_coll = {
     .coll_type = COLLECTOR_TYPE_scalar_lgl,
-    .required = true,
+    .required = false,
     .col_location = 1,
     .ptype_inner = r_globals.empty_lgl,
+    // .default_value = r_lgl_get(r_list_get(spec, 1), 0),
+    // .default_value = 0,
 
     .current_row = 0,
   };
 
+  // lgl_coll
+  lgl_coll.default_value = malloc(sizeof(int));
+  *((int*)lgl_coll.default_value) = 0;
+
   struct collector chr_coll = {
     .coll_type = COLLECTOR_TYPE_scalar_chr,
-    .required = true,
+    .required = false,
     .col_location = 2,
+    .default_value = r_chr_get(r_list_get(spec, 2), 0),
 
     .current_row = 0,
   };
@@ -118,25 +128,26 @@ struct collector parse_spect(r_obj* spec) {
 
   struct collector coll = {
     .coll_type = COLLECTOR_TYPE_row,
-    .required = true,
+    .required = false,
     .col_location = 1,
 
     .current_row = 0,
 
     .details.row_coll = {
+      .keys = r_list_get(spec, 0), // TODO fix this
       .collectors = collectors,
       .n_keys = n_keys,
+      .key_match_ind = malloc(n_keys * sizeof(int)),
     },
   };
 
   return coll;
 }
 
-r_obj* ffi_tibblify(r_obj* data) {
+r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
   r_ssize n_rows = short_vec_size(data);
 
-  struct collector coll = parse_spect(r_null);
-  const r_ssize n_keys = 2;
+  struct collector coll = parse_spect(spec);
 
   r_obj* out = KEEP(init_collector_data(n_rows, &coll));
   r_obj* const * v_data = r_list_cbegin(data);
@@ -144,17 +155,15 @@ r_obj* ffi_tibblify(r_obj* data) {
   for (r_ssize i = 0; i < n_rows; ++i) {
     r_obj* const row = v_data[i];
 
-    for (r_ssize j = 0; j < n_keys; ++j) {
-      r_obj* value = r_list_get(row, j);
-      r_obj* r_cur_coll = r_list_get(coll.details.row_coll.collectors, j);
-      struct collector* cur_coll = r_raw_begin(r_cur_coll);
+    coll.add_value(&coll, row);
 
-      if (j == 0) {
-        add_value_lgl(cur_coll, value);
-      } else {
-        add_value_chr(cur_coll, value);
-      }
-    }
+    // for (r_ssize j = 0; j < 2; ++j) {
+    //   r_obj* value = r_list_get(row, j);
+    //   r_obj* r_cur_coll = r_list_get(coll.details.row_coll.collectors, j);
+    //   struct collector* cur_coll = r_raw_begin(r_cur_coll);
+    //
+    //   cur_coll->add_value(cur_coll, value);
+    // }
   }
 
   FREE(2);

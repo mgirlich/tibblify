@@ -37,17 +37,14 @@ struct scalar_collector {
   r_obj* na;
 };
 
-struct scalar_lgl_collector {
-  int* v_data;
-};
-
-struct scalar_int_collector {
-  int* v_data;
-};
-
-struct scalar_dbl_collector {
-  double* v_data;
-};
+// struct scalar_lgl_collector {
+// };
+//
+// struct scalar_int_collector {
+// };
+//
+// struct scalar_dbl_collector {
+// };
 
 struct vector_collector {
   r_obj* na;
@@ -67,9 +64,12 @@ struct list_collector {
 
 struct row_collector {
   r_obj* keys; // strings
+
+  // struct collector* collector_vec;
   // std::vector<Collector_Ptr> collector_vec;
   r_obj* collectors;
   const int n_keys;
+  r_ssize* key_match_ind;
 };
 
 struct collector {
@@ -85,19 +85,22 @@ struct collector {
 
   r_obj* data;
   void* v_data;
-  int current_row;
+  r_ssize current_row;
 
-  void (*add_value)(r_obj* x, r_ssize i, r_obj* value);
+  void* default_value;
+
+  void (*add_value)(struct collector* v_collector, r_obj* value);
+  void (*add_default)(struct collector* v_collector, const bool check);
 
   union details {
-    struct scalar_lgl_collector scalar_lgl_coll;
-    struct scalar_int_collector scalar_int_coll;
-    struct scalar_dbl_collector scalar_dbl_coll;
+    // struct scalar_lgl_collector scalar_lgl_coll;
+    // struct scalar_int_collector scalar_int_coll;
+    // struct scalar_dbl_collector scalar_dbl_coll;
     struct scalar_collector scalar_coll;
     struct row_collector row_coll;
   } details;
 };
 
-r_obj* ffi_tibblify(r_obj* data);
+r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
 
 #endif
