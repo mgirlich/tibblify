@@ -6,13 +6,6 @@
 #include <R_ext/Visibility.h>
 
 // collector-method.cpp
-r_obj* tibblify_impl(r_obj* object_list, r_obj* spec, cpp11::external_pointer<Path> path_ptr);
-extern "C" SEXP _tibblify_tibblify_impl(SEXP object_list, SEXP spec, SEXP path_ptr) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(tibblify_impl(cpp11::as_cpp<cpp11::decay_t<r_obj*>>(object_list), cpp11::as_cpp<cpp11::decay_t<r_obj*>>(spec), cpp11::as_cpp<cpp11::decay_t<cpp11::external_pointer<Path>>>(path_ptr)));
-  END_CPP11
-}
-// collector-method.cpp
 void init_logging(const std::string& log_level);
 extern "C" SEXP _tibblify_init_logging(SEXP log_level) {
   BEGIN_CPP11
@@ -37,13 +30,14 @@ extern "C" SEXP _tibblify_get_path_data(SEXP path_ptr) {
 
 extern "C" {
 /* .Call calls */
+extern SEXP ffi_tibblify(SEXP, SEXP);
 extern SEXP tibblify_initialize(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"_tibblify_get_path_data",      (DL_FUNC) &_tibblify_get_path_data,      1},
     {"_tibblify_init_logging",       (DL_FUNC) &_tibblify_init_logging,       1},
     {"_tibblify_init_tibblify_path", (DL_FUNC) &_tibblify_init_tibblify_path, 0},
-    {"_tibblify_tibblify_impl",      (DL_FUNC) &_tibblify_tibblify_impl,      3},
+    {"ffi_tibblify",                 (DL_FUNC) &ffi_tibblify,                 2},
     {"tibblify_initialize",          (DL_FUNC) &tibblify_initialize,          1},
     {NULL, NULL, 0}
 };

@@ -67,19 +67,24 @@ struct row_collector {
 
   // struct collector* collector_vec;
   // std::vector<Collector_Ptr> collector_vec;
-  r_obj* collectors;
-  const int n_keys;
-  r_ssize* key_match_ind;
+  // r_obj* collectors;
+  r_obj* shelter;
+  struct collector* collectors;
+  int n_keys;
+  r_obj* key_match_ind;
+  r_ssize* p_key_match_ind;
 };
 
 struct collector {
-  const enum collector_type coll_type;
-  const bool required;
-  const int col_location;
+  r_obj* shelter;
+
+  enum collector_type coll_type;
+  bool required;
+  int col_location;
   // r_obj* name;
   // r_obj* transform;
   // r_obj* default_value;
-  // r_obj* ptype;
+  r_obj* ptype;
   r_obj* ptype_inner;
   // TODO store `na` in `collector`?
 
@@ -87,6 +92,7 @@ struct collector {
   void* v_data;
   r_ssize current_row;
 
+  r_obj* r_default_value;
   void* default_value;
 
   void (*add_value)(struct collector* v_collector, r_obj* value);
@@ -100,6 +106,23 @@ struct collector {
     struct row_collector row_coll;
   } details;
 };
+
+static inline
+void* collector_pointer(struct collector* p_coll, int i) {
+  int offset = i * sizeof(struct collector);
+  return p_coll + offset;
+}
+
+struct collector* new_row_collector(bool required,
+                                    int col_location,
+                                    r_obj* keys,
+                                    struct collector* collectors);
+
+struct collector* new_scalar_collector(bool required,
+                                       int col_location,
+                                       r_obj* ptype,
+                                       r_obj* ptype_inner,
+                                       r_obj* default_value);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
 

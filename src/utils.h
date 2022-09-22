@@ -5,6 +5,8 @@
 
 #include "tibblify.h"
 
+r_obj* r_list_get_by_name(r_obj* x, const char* nm);
+
 // enum vector_input_form {vector, scalar_list, object};
 
 // struct Vector_Args
@@ -123,18 +125,18 @@
 //   return Rf_asLogical(out) == 1;
 // }
 //
-// inline
-// bool vec_is(SEXP x, SEXP ptype) {
-//   SEXP call = PROTECT(Rf_lang3(syms_vec_is, syms_x, syms_ptype));
-//
-//   SEXP mask = PROTECT(r_new_environment(R_GlobalEnv));
-//   Rf_defineVar(syms_x, x, mask);
-//   Rf_defineVar(syms_ptype, ptype, mask);
-//   SEXP out = PROTECT(Rf_eval(call, mask));
-//
-//   UNPROTECT(3);
-//   return Rf_asLogical(out) == 1;
-// }
+static inline
+bool vec_is(SEXP x, SEXP ptype) {
+  SEXP call = KEEP(Rf_lang3(syms_vec_is, syms_x, syms_ptype));
+
+  r_obj* mask = KEEP(r_alloc_environment(2, r_envs.global));
+  r_env_poke(mask, syms_x, x);
+  r_env_poke(mask, syms_ptype, ptype);
+  r_obj* out = KEEP(r_eval(call, mask));
+
+  FREE(3);
+  return Rf_asLogical(out) == 1;
+}
 //
 // inline
 // SEXP my_vec_names2(SEXP x) {

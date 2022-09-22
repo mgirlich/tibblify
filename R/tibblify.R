@@ -230,3 +230,7 @@ set_spec <- function(x, spec) {
 get_spec <- function(x) {
   attr(x, "tib_spec")
 }
+
+tibblify2 <- function(x, spec) {
+  .Call(ffi_tibblify, x, spec)
+}
