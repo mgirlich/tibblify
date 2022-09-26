@@ -97,6 +97,7 @@ struct collector {
 
   void (*add_value)(struct collector* v_collector, r_obj* value);
   void (*add_default)(struct collector* v_collector, const bool check);
+  void (*finalize)(struct collector* v_collector);
 
   union details {
     // struct scalar_lgl_collector scalar_lgl_coll;

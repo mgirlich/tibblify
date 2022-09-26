@@ -31,25 +31,19 @@ struct collector* parse_spec_elt(r_obj* spec_elt, r_obj* keys, int i) {
 
   // struct collector coll;
 
-  // if (type == r_string_types.row) {
-  //   r_obj* fields = r_list_get_by_name(spec_elt, "fields");
-  //   coll.coll_type = COLLECTOR_TYPE_row;
-  //   const r_ssize n_sub_fields = r_length(fields);
-  //
-  //   struct key_collector_pair sub_spec = parse_fields_spec(fields);
-  //   coll.details.row_coll = (struct row_collector) {
-  //     .keys = sub_spec.keys,
-  //     .collectors = sub_spec.collectors,
-  //     .n_keys = n_sub_fields,
-  //     .key_match_ind = malloc(n_sub_fields * sizeof(int)),
-  //   };
-  //
-  //   *v_collectors = coll;
-  //   ++v_collectors;
-  //
-  //   // auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);
-  //   // col_vec.push_back(Collector_Ptr(new Collector_Tibble(spec_pair.first, spec_pair.second, required, location, name)));
-  //   continue;
+  if (type == r_string_types.row) {
+    r_obj* sub_spec = r_list_get_by_name(spec_elt, "fields");
+
+    r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
+    struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
+    *v_key_coll_pair = *parse_fields_spec(sub_spec);
+    FREE(1);
+
+    return new_row_collector(required,
+                             col_location,
+                             v_key_coll_pair->keys,
+                             v_key_coll_pair->v_collectors);
+  }
   // // } else if (type == "df") {
   // //   cpp11::list fields = spec_elt["fields"];
   // //   auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);

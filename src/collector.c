@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "parse-spec.h"
 #include "add-value.h"
+#include "finalize.h"
 
 /* 1. get number of rows so that we can init data
  * rowmajor -> trivial
@@ -21,8 +22,6 @@ void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
     col = KEEP(r_alloc_vector(R_TYPE_logical, n_rows));
     v_collector->data = col;
     v_collector->v_data = r_lgl_begin(col);
-    v_collector->add_value = &add_value_lgl;
-    v_collector->add_default = &add_default_lgl;
     break;
   case COLLECTOR_TYPE_scalar_int:
     col = KEEP(r_alloc_vector(R_TYPE_integer, n_rows));
@@ -37,8 +36,6 @@ void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
   case COLLECTOR_TYPE_scalar_chr:
     col = KEEP(r_alloc_vector(R_TYPE_character, n_rows));
     v_collector->data = col;
-    v_collector->add_value = &add_value_chr;
-    v_collector->add_default = &add_default_chr;
     break;
   case COLLECTOR_TYPE_scalar:
   case COLLECTOR_TYPE_vector:
@@ -50,24 +47,14 @@ void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
   case COLLECTOR_TYPE_row: {
     r_ssize n_col = v_collector->details.row_coll.n_keys;
     col = KEEP(r_alloc_vector(R_TYPE_list, n_col));
+    r_init_tibble(col, n_rows);
     struct collector* v_collectors = v_collector->details.row_coll.collectors;
 
     for (r_ssize j = 0; j < n_col; ++j) {
       init_collector_data(n_rows, &v_collectors[j]);
       r_list_poke(col, j, v_collectors[j].data);
-      //
-      // struct collector* p_collector_j = &v_collectors[j];
-      //
-      // // TODO maybe use `KEEP_HERE` instead?
-      // r_obj* col_inner = KEEP(init_collector_data(n_rows, p_collector_j));
-      // p_collector_j->data = col_inner;
-      // r_list_poke(col, j, col_inner);
-      // // `col_inner` is now protected by `data` so can free again
-      // FREE(1);
     }
     v_collector->data = col;
-    v_collector->add_value = &add_value_row;
-    v_collector->add_default = &add_default_row;
     break;
   }
   }
@@ -106,6 +93,8 @@ struct collector* new_scalar_collector(bool required,
   if (vec_is(ptype_inner, r_globals.empty_lgl)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_lgl;
     p_coll->default_value = r_lgl_begin(default_value);
+    p_coll->add_value = &add_value_lgl;
+    p_coll->add_default = &add_default_lgl;
   } else if (vec_is(ptype_inner, r_globals.empty_int)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_int;
   } else if (vec_is(ptype_inner, r_globals.empty_dbl)) {
@@ -113,10 +102,14 @@ struct collector* new_scalar_collector(bool required,
   } else if (vec_is(ptype_inner, r_globals.empty_chr)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_chr;
     p_coll->default_value = r_chr_get(default_value, 0);
+    p_coll->add_value = &add_value_chr;
+    p_coll->add_default = &add_default_chr;
   // } else {
   //   cpp11::sexp na = elt["na"];
   //   col_vec.push_back(Collector_Ptr(new Collector_Scalar(required, location, name, field_args, na)));
   }
+
+  p_coll->finalize = &finalize_scalar;
 
   FREE(1);
   return p_coll;
@@ -140,6 +133,9 @@ struct collector* new_row_collector(bool required,
   p_coll->ptype_inner = r_null;
   p_coll->r_default_value = r_null;
   p_coll->current_row = 0;
+  p_coll->add_value = &add_value_row;
+  p_coll->add_default = &add_default_row;
+  p_coll->finalize = &finalize_row;
 
   r_obj* key_match_ind = KEEP(r_alloc_raw(n_keys * sizeof(r_ssize)));
   r_list_poke(shelter, 2, key_match_ind);
@@ -161,6 +157,7 @@ struct collector* new_row_collector(bool required,
     p_key_match_ind[i] = (r_ssize) i;
   }
 
+
   FREE(4);
   return p_coll;
 }
@@ -171,17 +168,6 @@ struct collector* new_row_collector(bool required,
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
   r_ssize n_rows = short_vec_size(data);
-
-  // struct collector coll = new_scalar_collector(false,
-  //                                              0,
-  //                                              r_globals.empty_lgl,
-  //                                              r_globals.empty_lgl,
-  //                                              r_list_get(spec, 0));
-  // struct collector coll = new_scalar_collector(false,
-  //                                              0,
-  //                                              r_globals.empty_chr,
-  //                                              r_globals.empty_chr,
-  //                                              r_list_get(spec, 0));
 
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
@@ -205,6 +191,8 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
 
     p_coll->add_value(p_coll, row);
   }
+
+  p_coll->finalize(p_coll);
 
   FREE(3);
   return p_coll->data;
