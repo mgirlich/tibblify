@@ -79,7 +79,6 @@ struct collector* new_scalar_collector(bool required,
 
   r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
   r_list_poke(shelter, 1, coll_raw);
-  FREE(1);
   struct collector* p_coll = r_raw_begin(coll_raw);
 
   p_coll->shelter = shelter;
@@ -97,8 +96,12 @@ struct collector* new_scalar_collector(bool required,
     p_coll->add_default = &add_default_lgl;
   } else if (vec_is(ptype_inner, r_globals.empty_int)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_int;
+    p_coll->add_value = &add_value_int;
+    p_coll->add_default = &add_default_int;
   } else if (vec_is(ptype_inner, r_globals.empty_dbl)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_dbl;
+    p_coll->add_value = &add_value_dbl;
+    p_coll->add_default = &add_default_dbl;
   } else if (vec_is(ptype_inner, r_globals.empty_chr)) {
     p_coll->coll_type = COLLECTOR_TYPE_scalar_chr;
     p_coll->default_value = r_chr_get(default_value, 0);
@@ -111,7 +114,7 @@ struct collector* new_scalar_collector(bool required,
 
   p_coll->finalize = &finalize_scalar;
 
-  FREE(1);
+  FREE(2);
   return p_coll;
 }
 
@@ -184,11 +187,7 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
 
   r_obj* const * v_data = r_list_cbegin(data);
   for (r_ssize i = 0; i < n_rows; ++i) {
-    // r_obj* blub = KEEP(r_alloc_integer(1000));
-    // r_int_poke(blub, 1, 1);
     r_obj* const row = v_data[i];
-    // FREE(1);
-
     p_coll->add_value(p_coll, row);
   }
 

@@ -52,6 +52,23 @@ void add_default_row(struct collector* v_collector, const bool check) {
   children_add_default(v_collector, false);
 }
 
+#define ADD_VALUE(CTYPE, NA, EMPTY, CAST)                                     \
+  if (value == r_null) {                                       \
+    ((CTYPE*) v_collector->v_data)[v_collector->current_row] = NA; \
+    ++v_collector->current_row;                                \
+    return;                                                    \
+  }                                                            \
+                                                               \
+  r_obj* value_casted = KEEP(vec_cast(value, EMPTY));          \
+  r_ssize size = short_vec_size(value_casted);                 \
+  if (size != 1) {                                             \
+    stop_scalar(size);                                         \
+  }                                                            \
+                                                               \
+  ((CTYPE*) v_collector->v_data)[v_collector->current_row] = CAST(value_casted);\
+  ++v_collector->current_row;                                  \
+  FREE(1);
+
 void add_value_scalar(struct collector* v_collector, r_obj* value) {
   if (value == r_null) {
     r_list_poke(v_collector->data, v_collector->current_row, r_null);
@@ -68,31 +85,19 @@ void add_value_scalar(struct collector* v_collector, r_obj* value) {
   r_list_poke(v_collector->data, v_collector->current_row, r_null);
   ++v_collector->current_row;
   FREE(1);
-
-  return;
 }
 
 void add_value_lgl(struct collector* v_collector, r_obj* value) {
-  // r_printf("add_value_lgl()\n");
-  if (value == r_null) {
-    ((int*) v_collector->v_data)[v_collector->current_row] = r_globals.na_lgl;
-    ++v_collector->current_row;
-    return;
-  }
-
-  r_obj* value_casted = KEEP(vec_cast(value, r_globals.empty_lgl));
-  r_ssize size = short_vec_size(value_casted);
-  if (size != 1) {
-    stop_scalar(size);
-  }
-
   // TODO could use `r_lgl_get(value_casted, 0)`?
-  ((int*) v_collector->v_data)[v_collector->current_row] = Rf_asLogical(value_casted);
-  ++v_collector->current_row;
+  ADD_VALUE(int, r_globals.na_lgl, r_globals.empty_lgl, Rf_asLogical);
+}
 
-  FREE(1);
+void add_value_int(struct collector* v_collector, r_obj* value) {
+  ADD_VALUE(int, r_globals.na_int, r_globals.empty_int, Rf_asInteger);
+}
 
-  return;
+void add_value_dbl(struct collector* v_collector, r_obj* value) {
+  ADD_VALUE(double, r_globals.na_dbl, r_globals.empty_dbl, Rf_asReal);
 }
 
 void add_value_chr(struct collector* v_collector, r_obj* value) {
