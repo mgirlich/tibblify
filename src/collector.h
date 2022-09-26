@@ -30,7 +30,7 @@ enum collector_type {
   COLLECTOR_TYPE_vector        = 7,
   COLLECTOR_TYPE_variant       = 8,
   COLLECTOR_TYPE_row           = 9,
-  // COLLECTOR_TYPE_tibble        = 10,
+  COLLECTOR_TYPE_df            = 10,
 };
 
 struct scalar_collector {
@@ -65,9 +65,16 @@ struct list_collector {
 struct row_collector {
   r_obj* keys; // strings
 
-  // struct collector* collector_vec;
-  // std::vector<Collector_Ptr> collector_vec;
-  // r_obj* collectors;
+  r_obj* shelter;
+  struct collector* collectors;
+  int n_keys;
+  r_obj* key_match_ind;
+  r_ssize* p_key_match_ind;
+};
+
+struct df_collector {
+  r_obj* keys; // strings
+
   r_obj* shelter;
   struct collector* collectors;
   int n_keys;
@@ -100,19 +107,11 @@ struct collector {
   void (*finalize)(struct collector* v_collector);
 
   union details {
-    // struct scalar_lgl_collector scalar_lgl_coll;
-    // struct scalar_int_collector scalar_int_coll;
-    // struct scalar_dbl_collector scalar_dbl_coll;
     struct scalar_collector scalar_coll;
     struct row_collector row_coll;
+    struct df_collector df_coll;
   } details;
 };
-
-static inline
-void* collector_pointer(struct collector* p_coll, int i) {
-  int offset = i * sizeof(struct collector);
-  return p_coll + offset;
-}
 
 struct collector* new_row_collector(bool required,
                                     int col_location,
@@ -124,6 +123,9 @@ struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype,
                                        r_obj* ptype_inner,
                                        r_obj* default_value);
+
+r_obj* init_parser(struct collector* v_collector, r_ssize n_rows);
+void init_collector_data(r_ssize n_rows, struct collector* v_collector);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
 

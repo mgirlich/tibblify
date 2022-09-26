@@ -27,3 +27,6 @@ void finalize_row(struct collector* v_collector) {
     r_list_poke(v_collector->data, i, v_collectors[i].data);
   }
 }
+
+void finalize_df(struct collector* v_collector) {
+}

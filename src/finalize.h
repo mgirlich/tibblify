@@ -3,7 +3,8 @@
 
 #include "tibblify.h"
 
-void finalize_row(struct collector* v_collector);
 void finalize_scalar(struct collector* v_collector);
+void finalize_row(struct collector* v_collector);
+void finalize_df(struct collector* v_collector);
 
 #endif

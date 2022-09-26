@@ -52,6 +52,13 @@ void add_default_row(struct collector* v_collector, const bool check) {
   children_add_default(v_collector, false);
 }
 
+void add_default_df(struct collector* v_collector, const bool check) {
+  if (check && v_collector->required) stop_required();
+
+  r_list_poke(v_collector->data, v_collector->current_row, r_null);
+  ++v_collector->current_row;
+}
+
 #define ADD_VALUE(CTYPE, NA, EMPTY, CAST)                                     \
   if (value == r_null) {                                       \
     ((CTYPE*) v_collector->v_data)[v_collector->current_row] = NA; \
@@ -221,4 +228,34 @@ void add_value_row(struct collector* v_collector, r_obj* value) {
     }
   }
   // path.up();
+}
+
+r_obj* parse(struct collector* v_collector, r_obj* value) {
+  r_ssize n_rows = short_vec_size(value);
+  r_obj* out = KEEP(init_parser(v_collector, n_rows));
+
+  r_obj* const * v_value = r_list_cbegin(value);
+  for (r_ssize i = 0; i < n_rows; ++i) {
+    r_obj* const row = v_value[i];
+    add_value_row(v_collector, row);
+  }
+
+  v_collector->finalize(v_collector);
+  FREE(1);
+
+  return out;
+}
+
+void add_value_df(struct collector* v_collector, r_obj* value) {
+  if (value == r_null) {
+    r_list_poke(v_collector->data, v_collector->current_row, r_null);
+    ++v_collector->current_row;
+  } else {
+    // path.down();
+    r_obj* parsed_value = KEEP(parse(v_collector, value));
+    r_list_poke(v_collector->data, v_collector->current_row, parsed_value);
+    FREE(1);
+    // path.up();
+  }
+  ++v_collector->current_row;
 }

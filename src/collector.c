@@ -12,6 +12,22 @@
  * 2. allocate memory for data
  */
 
+r_obj* init_parser(struct collector* v_collector, r_ssize n_rows) {
+  r_ssize n_col = v_collector->details.row_coll.n_keys;
+  r_obj* out = KEEP(r_alloc_vector(R_TYPE_list, n_col));
+
+  r_init_tibble(out, n_rows);
+  struct collector* v_collectors = v_collector->details.row_coll.collectors;
+
+  for (r_ssize j = 0; j < n_col; ++j) {
+    init_collector_data(n_rows, &v_collectors[j]);
+    r_list_poke(out, j, v_collectors[j].data);
+  }
+
+  FREE(1);
+  return out;
+}
+
 void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
   enum collector_type coll_type = v_collector->coll_type;
 
@@ -45,18 +61,14 @@ void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
     break;
 
   case COLLECTOR_TYPE_row: {
-    r_ssize n_col = v_collector->details.row_coll.n_keys;
-    col = KEEP(r_alloc_vector(R_TYPE_list, n_col));
-    r_init_tibble(col, n_rows);
-    struct collector* v_collectors = v_collector->details.row_coll.collectors;
-
-    for (r_ssize j = 0; j < n_col; ++j) {
-      init_collector_data(n_rows, &v_collectors[j]);
-      r_list_poke(col, j, v_collectors[j].data);
-    }
+    col = KEEP(init_parser(v_collector, n_rows));
     v_collector->data = col;
     break;
   }
+  case COLLECTOR_TYPE_df:
+    col = KEEP(r_alloc_vector(R_TYPE_list, n_rows));
+    v_collector->data = col;
+    break;
   }
 
   r_list_poke(v_collector->shelter, 0, col);
@@ -123,7 +135,7 @@ struct collector* new_row_collector(bool required,
                                     r_obj* keys,
                                     struct collector* collectors) {
   int n_keys = r_length(keys);
-  r_obj* shelter = KEEP(r_alloc_list(7 + n_keys));
+  r_obj* shelter = KEEP(r_alloc_list(4 + n_keys));
 
   r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
   r_list_poke(shelter, 1, coll_raw);
@@ -165,13 +177,29 @@ struct collector* new_row_collector(bool required,
   return p_coll;
 }
 
+struct collector* new_df_collector(bool required,
+                                   int col_location,
+                                   r_obj* keys,
+                                   struct collector* collectors) {
+  // TODO integrate into `new_row_collector()`?
+  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  struct collector* p_coll = r_raw_begin(coll_raw);
+
+  *p_coll = *new_row_collector(required,
+                               col_location,
+                               keys,
+                               collectors);
+  p_coll->coll_type = COLLECTOR_TYPE_df;
+
+  FREE(1);
+  return p_coll;
+}
+
 // r_obj* init_parser_data(r_ssize n_rows, struct collector* collectors, r_ssize n_col) {
 //   // TODO can simply use `init_collector_data()` as well?
 // }
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
-  r_ssize n_rows = short_vec_size(data);
-
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
   *v_key_coll_pair = *parse_fields_spec(spec);
@@ -183,6 +211,8 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
                                v_key_coll_pair->keys,
                                v_key_coll_pair->v_collectors);
   KEEP(p_coll->shelter);
+
+  r_ssize n_rows = short_vec_size(data);
   init_collector_data(n_rows, p_coll);
 
   r_obj* const * v_data = r_list_cbegin(data);
