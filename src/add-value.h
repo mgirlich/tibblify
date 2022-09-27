@@ -19,4 +19,6 @@ void add_value_chr(struct collector* v_collector, r_obj* value);
 void add_value_row(struct collector* v_collector, r_obj* value);
 void add_value_df(struct collector* v_collector, r_obj* value);
 
+r_obj* parse(struct collector* v_collector, r_obj* value);
+
 #endif

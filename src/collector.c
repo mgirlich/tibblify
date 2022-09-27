@@ -15,6 +15,7 @@
 r_obj* init_parser(struct collector* v_collector, r_ssize n_rows) {
   r_ssize n_col = v_collector->details.row_coll.n_keys;
   r_obj* out = KEEP(r_alloc_vector(R_TYPE_list, n_col));
+  r_attrib_poke_names(out, v_collector->details.row_coll.keys);
 
   r_init_tibble(out, n_rows);
   struct collector* v_collectors = v_collector->details.row_coll.collectors;
@@ -62,6 +63,7 @@ void init_collector_data(r_ssize n_rows, struct collector* v_collector) {
 
   case COLLECTOR_TYPE_row: {
     col = KEEP(init_parser(v_collector, n_rows));
+    r_attrib_poke_names(col, v_collector->details.row_coll.keys);
     v_collector->data = col;
     break;
   }
@@ -190,6 +192,9 @@ struct collector* new_df_collector(bool required,
                                keys,
                                collectors);
   p_coll->coll_type = COLLECTOR_TYPE_df;
+  p_coll->add_value = &add_value_df;
+  p_coll->add_default = &add_default_df;
+  p_coll->finalize = &finalize_df;
 
   FREE(1);
   return p_coll;
@@ -204,25 +209,38 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
   *v_key_coll_pair = *parse_fields_spec(spec);
 
-  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
-  struct collector* p_coll = r_raw_begin(coll_raw);
-  *p_coll = *new_row_collector(false,
-                               0,
-                               v_key_coll_pair->keys,
-                               v_key_coll_pair->v_collectors);
-  KEEP(p_coll->shelter);
+  // r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  // struct collector* p_coll = r_raw_begin(coll_raw);
+  // *p_coll = *new_df_collector(false,
+  //                             0,
+  //                             v_key_coll_pair->keys,
+  //                             v_key_coll_pair->v_collectors);
+  // KEEP(p_coll->shelter);
 
-  r_ssize n_rows = short_vec_size(data);
-  init_collector_data(n_rows, p_coll);
+  // r_ssize n_rows = short_vec_size(data);
+  // init_collector_data(n_rows, p_coll);
 
-  r_obj* const * v_data = r_list_cbegin(data);
-  for (r_ssize i = 0; i < n_rows; ++i) {
-    r_obj* const row = v_data[i];
-    p_coll->add_value(p_coll, row);
-  }
+  // TODO make this a bit clearer
+  // `tspec_df()` basically is a row collector without a key
+  // would make more sense if it would not have `required` and `col_location`
+  r_obj* out = KEEP(parse(new_row_collector(false,
+                                            0,
+                                            v_key_coll_pair->keys,
+                                            v_key_coll_pair->v_collectors), data));
+  // r_obj* out = KEEP(parse(p_coll, data));
+  FREE(2);
 
-  p_coll->finalize(p_coll);
+  return out;
 
-  FREE(3);
-  return p_coll->data;
+
+  // r_obj* const * v_data = r_list_cbegin(data);
+  // for (r_ssize i = 0; i < n_rows; ++i) {
+  //   r_obj* const row = v_data[i];
+  //   p_coll->add_value(p_coll, row);
+  // }
+  //
+  // p_coll->finalize(p_coll);
+  //
+  // FREE(3);
+  // return p_coll->data;
 }

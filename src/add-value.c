@@ -108,7 +108,6 @@ void add_value_dbl(struct collector* v_collector, r_obj* value) {
 }
 
 void add_value_chr(struct collector* v_collector, r_obj* value) {
-  // r_printf("add_value_chr()\n");
   if (value == r_null) {
     r_chr_poke(v_collector->data, v_collector->current_row, r_globals.na_str);
     ++v_collector->current_row;
@@ -232,15 +231,19 @@ void add_value_row(struct collector* v_collector, r_obj* value) {
 
 r_obj* parse(struct collector* v_collector, r_obj* value) {
   r_ssize n_rows = short_vec_size(value);
+
+  // r_printf("# rows: %d\n", n_rows);
   r_obj* out = KEEP(init_parser(v_collector, n_rows));
 
+  // r_printf("# parse: %d\n", n_rows);
   r_obj* const * v_value = r_list_cbegin(value);
   for (r_ssize i = 0; i < n_rows; ++i) {
+    // r_printf("row: %d\n", i);
     r_obj* const row = v_value[i];
     add_value_row(v_collector, row);
   }
 
-  v_collector->finalize(v_collector);
+  // v_collector->finalize(v_collector);
   FREE(1);
 
   return out;
