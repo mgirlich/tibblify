@@ -96,6 +96,7 @@ void add_value_scalar(struct collector* v_collector, r_obj* value) {
 
 void add_value_lgl(struct collector* v_collector, r_obj* value) {
   // TODO could use `r_lgl_get(value_casted, 0)`?
+  // r_printf("lgl: current row: %d\n", v_collector->current_row);
   ADD_VALUE(int, r_globals.na_lgl, r_globals.empty_lgl, Rf_asLogical);
 }
 
@@ -250,13 +251,15 @@ r_obj* parse(struct collector* v_collector, r_obj* value) {
 }
 
 void add_value_df(struct collector* v_collector, r_obj* value) {
+  r_printf("add_value_df() - current row: %d\n", v_collector->current_row);
   if (value == r_null) {
     r_list_poke(v_collector->data, v_collector->current_row, r_null);
-    ++v_collector->current_row;
   } else {
     // path.down();
     r_obj* parsed_value = KEEP(parse(v_collector, value));
+    r_printf("set value\n");
     r_list_poke(v_collector->data, v_collector->current_row, parsed_value);
+    r_printf("done\n");
     FREE(1);
     // path.up();
   }

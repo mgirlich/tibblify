@@ -13,8 +13,6 @@ r_obj* r_list_get_by_name(r_obj* x, const char* nm) {
     }
   }
 
-  r_printf("KEY NOT FOUND\n");
-  // TODO nicer error message
-  // r_stop_internal("Field not found");
+  r_stop_internal("Field `%s` not found", nm);
   return r_null;
 }

@@ -44,4 +44,14 @@ extern SEXP syms_vec_names2;
 extern SEXP syms_vec_flatten;
 extern SEXP syms_vec_init;
 
+struct r_string_types_struct {
+  r_obj* sub;
+  r_obj* row;
+  r_obj* df;
+  r_obj* scalar;
+  r_obj* vector;
+};
+
+extern struct r_string_types_struct r_string_types;
+
 #endif

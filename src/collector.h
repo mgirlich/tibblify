@@ -15,10 +15,6 @@ enum parser_type {
   PARSER_TYPE_object = 2,
 };
 
-// struct parser {
-//
-// };
-
 enum collector_type {
   COLLECTOR_TYPE_scalar        = 0,
   COLLECTOR_TYPE_scalar_lgl    = 1,
@@ -37,15 +33,6 @@ struct scalar_collector {
   r_obj* na;
 };
 
-// struct scalar_lgl_collector {
-// };
-//
-// struct scalar_int_collector {
-// };
-//
-// struct scalar_dbl_collector {
-// };
-
 struct vector_collector {
   r_obj* na;
 
@@ -63,16 +50,6 @@ struct list_collector {
 };
 
 struct row_collector {
-  r_obj* keys; // strings
-
-  r_obj* shelter;
-  struct collector* collectors;
-  int n_keys;
-  r_obj* key_match_ind;
-  r_ssize* p_key_match_ind;
-};
-
-struct df_collector {
   r_obj* keys; // strings
 
   r_obj* shelter;
@@ -109,7 +86,6 @@ struct collector {
   union details {
     struct scalar_collector scalar_coll;
     struct row_collector row_coll;
-    struct df_collector df_coll;
   } details;
 };
 
@@ -117,6 +93,11 @@ struct collector* new_row_collector(bool required,
                                     int col_location,
                                     r_obj* keys,
                                     struct collector* collectors);
+
+struct collector* new_df_collector(bool required,
+                                   int col_location,
+                                   r_obj* keys,
+                                   struct collector* collectors);
 
 struct collector* new_scalar_collector(bool required,
                                        int col_location,

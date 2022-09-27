@@ -3,18 +3,7 @@
 #include "utils.h"
 #include "parse-spec.h"
 
-struct r_string_types {
-  r_obj* sub;
-  r_obj* row;
-  r_obj* df;
-  r_obj* scalar;
-  r_obj* vector;
-} r_string_types;
-
-struct collector* parse_spec_elt(r_obj* spec_elt, r_obj* keys, int i) {
-  r_obj* key = r_chr_get(r_list_get_by_name(spec_elt, "key"), 0);
-  r_chr_poke(keys, i, key);
-
+struct collector* parse_spec_elt(r_obj* spec_elt) {
   r_obj* type = r_chr_get(r_list_get_by_name(spec_elt, "type"), 0);
 
   // if (type == "sub") {
@@ -27,11 +16,8 @@ struct collector* parse_spec_elt(r_obj* spec_elt, r_obj* keys, int i) {
   // r_obj* name = r_list_get_by_name(spec_elt, "name");
   const int col_location = r_int_get(r_list_get_by_name(spec_elt, "location"), 0);
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
-  r_obj* default_value = r_list_get_by_name(spec_elt, "fill");
 
-  // struct collector coll;
-
-  if (type == r_string_types.row) {
+  if (type == r_string_types.row || type == r_string_types.df) {
     r_obj* sub_spec = r_list_get_by_name(spec_elt, "fields");
 
     r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
@@ -39,28 +25,24 @@ struct collector* parse_spec_elt(r_obj* spec_elt, r_obj* keys, int i) {
     *v_key_coll_pair = *parse_fields_spec(sub_spec);
     FREE(1);
 
-    return new_row_collector(required,
-                             col_location,
-                             v_key_coll_pair->keys,
-                             v_key_coll_pair->v_collectors);
+    if (type == r_string_types.row) {
+      return new_row_collector(required,
+                               col_location,
+                               v_key_coll_pair->keys,
+                               v_key_coll_pair->v_collectors);
+    } else {
+      // cpp11::sexp names_col = spec_elt["names_col"];
+      // if (names_col != r_null) {
+      //   names_col = cpp11::strings(names_col)[0];
+      // }
+      return new_df_collector(required,
+                              col_location,
+                              v_key_coll_pair->keys,
+                              v_key_coll_pair->v_collectors);
+    }
   }
-  // // } else if (type == "df") {
-  // //   cpp11::list fields = spec_elt["fields"];
-  // //   auto spec_pair = parse_fields_spec(fields, vector_allows_empty_list, input_form);
-  // //
-  // //   cpp11::sexp names_col = spec_elt["names_col"];
-  // //   if (names_col != r_null) {
-  // //     names_col = cpp11::strings(names_col)[0];
-  // //   }
-  // //
-  // //   col_vec.push_back(
-  // //     Collector_Ptr(
-  // //       new Collector_List_Of_Tibble(spec_pair.first, spec_pair.second, names_col, required, location, name, input_form)
-  // //     )
-  // //   );
-  // //   continue;
-  // }
 
+  r_obj* default_value = r_list_get_by_name(spec_elt, "fill");
   // Field_Args field_args = Field_Args(elt["fill"], elt["transform"]);
   //
   // if (type == "unspecified") {
@@ -101,8 +83,6 @@ struct collector* parse_spec_elt(r_obj* spec_elt, r_obj* keys, int i) {
 }
 
 struct key_collector_pair* parse_fields_spec(r_obj* spec) {
-  // bool vector_allows_empty_list,
-  // std::string input_form) {
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
 
@@ -110,11 +90,7 @@ struct key_collector_pair* parse_fields_spec(r_obj* spec) {
   const r_ssize n_fields = r_length(spec);
 
   r_obj* shelter = KEEP(r_alloc_list(2));
-
   r_obj* keys = KEEP(r_alloc_character(n_fields));
-  r_list_poke(shelter, 0, keys);
-
-  // TODO should be global const
   size_t coll_size = sizeof(struct collector);
   r_obj* collectors = KEEP(r_alloc_raw(coll_size * n_fields));
   r_list_poke(shelter, 1, collectors);
@@ -124,21 +100,32 @@ struct key_collector_pair* parse_fields_spec(r_obj* spec) {
   v_key_coll_pair->shelter = shelter;
   v_key_coll_pair->keys = keys;
   v_key_coll_pair->v_collectors = v_collectors;
-  // std::vector<Collector_Ptr> col_vec;
 
   r_obj* const * v_spec = r_list_cbegin(spec);
 
-  r_preserve_global(r_string_types.sub = r_str("sub"));
-  r_preserve_global(r_string_types.row = r_str("row"));
-  r_preserve_global(r_string_types.df = r_str("df"));
-  r_preserve_global(r_string_types.scalar = r_str("scalar"));
-  r_preserve_global(r_string_types.vector = r_str("vector"));
 
-  for (r_ssize i = 0; i < n_fields; ++i) {
-    *v_collectors = *parse_spec_elt(v_spec[i], keys, i);
-    ++v_collectors;
+  for (r_ssize i = 0; i < n_fields; ++i, ++v_collectors) {
+    *v_collectors = *parse_spec_elt(v_spec[i]);
+
+    r_obj* key = r_chr_get(r_list_get_by_name(v_spec[i], "key"), 0);
+    r_chr_poke(keys, i, key);
   }
 
   FREE(4);
   return v_key_coll_pair;
+}
+
+struct collector* create_parser(r_obj* spec) {
+  r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
+  struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
+  *v_key_coll_pair = *parse_fields_spec(spec);
+  FREE(1);
+
+  // TODO make this a bit clearer
+  // `tspec_df()` basically is a row collector without a key
+  // would make more sense if it would not have `required` and `col_location`
+  return new_row_collector(false,
+                           0,
+                           v_key_coll_pair->keys,
+                           v_key_coll_pair->v_collectors);
 }

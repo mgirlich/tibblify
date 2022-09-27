@@ -17,8 +17,6 @@ void finalize_scalar(struct collector* v_collector) {
 }
 
 void finalize_row(struct collector* v_collector) {
-  r_attrib_poke_names(v_collector->data, v_collector->details.row_coll.keys);
-
   r_ssize n_col = v_collector->details.row_coll.n_keys;
   struct collector* v_collectors = v_collector->details.row_coll.collectors;
 
