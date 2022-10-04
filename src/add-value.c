@@ -1,39 +1,39 @@
 #include "tibblify.h"
 #include "add-value.h"
+#include "finalize.h"
 #include "conditions.h"
 
+void add_stop_required(struct collector* v_collector) {
+  stop_required();
+}
+
 #define ADD_DEFAULT(CTYPE)                                     \
-  if (check && v_collector->required) stop_required();         \
-                                                               \
   ((CTYPE*) v_collector->v_data)[v_collector->current_row] = *((CTYPE*) v_collector->default_value); \
   ++v_collector->current_row;
 
 #define ADD_DEFAULT_BARRIER(SET)                               \
-  if (check && v_collector->required) stop_required();         \
-                                                               \
   r_obj* r_default_value = (r_obj*) v_collector->default_value;\
   SET(v_collector->data, v_collector->current_row, r_default_value);\
   ++v_collector->current_row;
 
-
-void add_default_lgl(struct collector* v_collector, const bool check) {
+void add_default_lgl(struct collector* v_collector) {
   ADD_DEFAULT(int);
 }
 
-void add_default_int(struct collector* v_collector, const bool check) {
+void add_default_int(struct collector* v_collector) {
   ADD_DEFAULT(int);
 }
 
-void add_default_dbl(struct collector* v_collector, const bool check) {
+void add_default_dbl(struct collector* v_collector) {
   ADD_DEFAULT(int);
 }
 
-void add_default_chr(struct collector* v_collector, const bool check) {
+void add_default_chr(struct collector* v_collector) {
   ADD_DEFAULT_BARRIER(r_chr_poke);
 }
 
-void children_add_default(struct collector* v_collector, const bool check) {
-  struct row_collector* coll = &v_collector->details.row_coll;
+void children_add_default(struct collector* v_collector) {
+  struct multi_collector* coll = &v_collector->details.multi_coll;
   r_obj* const * v_keys = r_chr_cbegin(coll->keys);
 
   //     path.down();
@@ -41,20 +41,30 @@ void children_add_default(struct collector* v_collector, const bool check) {
   for (int key_index = 0; key_index < coll->n_keys; key_index++, v_keys++) {
   //   // path.replace(*v_keys);
     struct collector* cur_coll = &v_collectors[key_index];
-    cur_coll->add_default(cur_coll, check);
+    cur_coll->add_default(cur_coll);
   }
   //     path.up();
 }
 
-void add_default_row(struct collector* v_collector, const bool check) {
-  if (check && v_collector->required) stop_required();
+void children_add_default_absent(struct collector* v_collector) {
+  struct multi_collector* coll = &v_collector->details.multi_coll;
+  r_obj* const * v_keys = r_chr_cbegin(coll->keys);
 
-  children_add_default(v_collector, false);
+  //     path.down();
+  struct collector* v_collectors = coll->collectors;
+  for (int key_index = 0; key_index < coll->n_keys; key_index++, v_keys++) {
+  //   // path.replace(*v_keys);
+    struct collector* cur_coll = &v_collectors[key_index];
+    cur_coll->add_default_absent(cur_coll);
+  }
+  //     path.up();
 }
 
-void add_default_df(struct collector* v_collector, const bool check) {
-  if (check && v_collector->required) stop_required();
+void add_default_row(struct collector* v_collector) {
+  children_add_default(v_collector);
+}
 
+void add_default_df(struct collector* v_collector) {
   r_list_poke(v_collector->data, v_collector->current_row, r_null);
   ++v_collector->current_row;
 }
@@ -186,16 +196,19 @@ void match_chr(r_obj* needles_sorted,
 }
 
 void add_value_row(struct collector* v_collector, r_obj* value) {
-  struct row_collector* coll = &v_collector->details.row_coll;
+  // r_printf("add_value_row()\n");
+  struct multi_collector* coll = &v_collector->details.multi_coll;
 
   if (value == r_null) {
-    children_add_default(v_collector, false);
+    // r_printf("-> value is null\n");
+    children_add_default(v_collector);
     return;
   }
 
   const r_ssize n_fields = r_length(value);
   if (n_fields == 0) {
-    children_add_default(v_collector, true);
+    // r_printf("-> no fields\n");
+    children_add_default_absent(v_collector);
     return;
   }
 
@@ -220,21 +233,40 @@ void add_value_row(struct collector* v_collector, r_obj* value) {
 
     struct collector* cur_coll = &v_collectors[key_index];
     if (loc < 0) {
-      cur_coll->add_default(cur_coll, true);
+      // r_printf("* add_default_absent()\n");
+      cur_coll->add_default_absent(cur_coll);
     } else {
       r_obj* cur_value = v_value[loc];
 
+      // r_printf("* add_value()\n");
       cur_coll->add_value(cur_coll, cur_value);
     }
   }
   // path.up();
 }
 
+void add_value_df(struct collector* v_collector, r_obj* value) {
+  // r_printf("add_value_df() - current row: %d\n", v_collector->current_row);
+  if (value == r_null) {
+    r_list_poke(v_collector->data, v_collector->current_row, r_null);
+  } else {
+    // path.down();
+    r_obj* parsed_value = KEEP(parse(v_collector, value));
+    r_list_poke(v_collector->data, v_collector->current_row, parsed_value);
+    FREE(1);
+    // path.up();
+  }
+  ++v_collector->current_row;
+}
+
 r_obj* parse(struct collector* v_collector, r_obj* value) {
   r_ssize n_rows = short_vec_size(value);
 
-  // r_printf("# rows: %d\n", n_rows);
-  r_obj* out = KEEP(init_parser(v_collector, n_rows));
+  init_row_collector(v_collector, n_rows);
+
+  // struct collector* v_collectors = v_collector->details.multi_coll.collectors;
+  // r_printf("# out-cols: %d\n", v_collector->details.multi_coll.n_keys);
+  // r_printf("# out-rows: %d\n", r_length(v_collectors[0].data));
 
   // r_printf("# parse: %d\n", n_rows);
   r_obj* const * v_value = r_list_cbegin(value);
@@ -244,24 +276,5 @@ r_obj* parse(struct collector* v_collector, r_obj* value) {
     add_value_row(v_collector, row);
   }
 
-  // v_collector->finalize(v_collector);
-  FREE(1);
-
-  return out;
-}
-
-void add_value_df(struct collector* v_collector, r_obj* value) {
-  r_printf("add_value_df() - current row: %d\n", v_collector->current_row);
-  if (value == r_null) {
-    r_list_poke(v_collector->data, v_collector->current_row, r_null);
-  } else {
-    // path.down();
-    r_obj* parsed_value = KEEP(parse(v_collector, value));
-    r_printf("set value\n");
-    r_list_poke(v_collector->data, v_collector->current_row, parsed_value);
-    r_printf("done\n");
-    FREE(1);
-    // path.up();
-  }
-  ++v_collector->current_row;
+  return finalize_row(v_collector);
 }

@@ -49,22 +49,25 @@ struct list_collector {
   r_obj* elt_transform;
 };
 
-struct row_collector {
+struct multi_collector {
   r_obj* keys; // strings
-
-  r_obj* shelter;
-  struct collector* collectors;
   int n_keys;
+
+  r_obj* shelter; // TODO should be able to remove this?!
+  struct collector* collectors;
   r_obj* key_match_ind;
   r_ssize* p_key_match_ind;
+
+  r_ssize n_rows;
+  int n_cols;
+  r_obj* col_names; // strings
+  r_obj* coll_locations; // list - needed to unpack `same_key_collector` columns
 };
 
 struct collector {
   r_obj* shelter;
 
   enum collector_type coll_type;
-  bool required;
-  int col_location;
   // r_obj* name;
   // r_obj* transform;
   // r_obj* default_value;
@@ -79,34 +82,43 @@ struct collector {
   r_obj* r_default_value;
   void* default_value;
 
+  void (*init)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value);
-  void (*add_default)(struct collector* v_collector, const bool check);
-  void (*finalize)(struct collector* v_collector);
+   // add default value
+  void (*add_default)(struct collector* v_collector);
+  // error if required, otherwise add default value
+  void (*add_default_absent)(struct collector* v_collector);
+  r_obj* (*finalize)(struct collector* v_collector);
 
   union details {
     struct scalar_collector scalar_coll;
-    struct row_collector row_coll;
+    struct multi_collector multi_coll;
   } details;
 };
 
 struct collector* new_row_collector(bool required,
-                                    int col_location,
                                     r_obj* keys,
+                                    r_obj* coll_locations,
+                                    r_obj* col_names,
                                     struct collector* collectors);
 
 struct collector* new_df_collector(bool required,
-                                   int col_location,
                                    r_obj* keys,
+                                   r_obj* coll_locations,
+                                   r_obj* col_names,
                                    struct collector* collectors);
 
 struct collector* new_scalar_collector(bool required,
-                                       int col_location,
                                        r_obj* ptype,
                                        r_obj* ptype_inner,
                                        r_obj* default_value);
 
-r_obj* init_parser(struct collector* v_collector, r_ssize n_rows);
-void init_collector_data(r_ssize n_rows, struct collector* v_collector);
+void init_lgl_collector(struct collector* v_collector, r_ssize n_rows);
+void init_int_collector(struct collector* v_collector, r_ssize n_rows);
+void init_dbl_collector(struct collector* v_collector, r_ssize n_rows);
+void init_chr_collector(struct collector* v_collector, r_ssize n_rows);
+void init_row_collector(struct collector* v_collector, r_ssize n_rows);
+void init_df_collector(struct collector* v_collector, r_ssize n_rows);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
 
