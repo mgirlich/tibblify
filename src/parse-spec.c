@@ -3,7 +3,8 @@
 #include "utils.h"
 #include "parse-spec.h"
 
-struct collector* parse_spec_elt(r_obj* spec_elt) {
+struct collector* parse_spec_elt(r_obj* spec_elt,
+                                 bool vector_allows_empty_list) {
   r_obj* type = r_chr_get(r_list_get_by_name(spec_elt, "type"), 0);
 
   // if (type == "sub") {
@@ -13,7 +14,6 @@ struct collector* parse_spec_elt(r_obj* spec_elt) {
   //   continue;
   // }
 
-  // r_obj* name = r_list_get_by_name(spec_elt, "name");
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
 
   if (type == r_string_types.row || type == r_string_types.df) {
@@ -23,63 +23,73 @@ struct collector* parse_spec_elt(r_obj* spec_elt) {
 
     r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
     struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
-    *v_key_coll_pair = *parse_fields_spec(sub_spec);
-    FREE(1);
+    *v_key_coll_pair = *parse_fields_spec(sub_spec, vector_allows_empty_list);
+    KEEP(v_key_coll_pair->shelter);
+    struct collector* p_collector;
 
     if (type == r_string_types.row) {
-      // r_printf("spec -> row\n");
-      return new_row_collector(required,
-                               v_key_coll_pair->keys,
-                               coll_locations,
-                               col_names,
-                               v_key_coll_pair->v_collectors);
+      p_collector = new_row_collector(required,
+                                      v_key_coll_pair->keys,
+                                      coll_locations,
+                                      col_names,
+                                      v_key_coll_pair->v_collectors);
+
+
     } else {
-      // cpp11::sexp names_col = spec_elt["names_col"];
+      // TODO add `names_col`
       // if (names_col != r_null) {
       //   names_col = cpp11::strings(names_col)[0];
       // }
-      // r_printf("spec -> df\n");
-      return new_df_collector(required,
-                              v_key_coll_pair->keys,
-                              coll_locations,
-                              col_names,
-                              v_key_coll_pair->v_collectors);
+      p_collector = new_df_collector(required,
+                                     v_key_coll_pair->keys,
+                                     coll_locations,
+                                     col_names,
+                                     v_key_coll_pair->v_collectors);
     }
+
+    FREE(2);
+    return p_collector;
   }
 
   r_obj* default_value = r_list_get_by_name(spec_elt, "fill");
-  // Field_Args field_args = Field_Args(elt["fill"], elt["transform"]);
-  //
-  // if (type == "unspecified") {
-  //   col_vec.push_back(Collector_Ptr(new Collector_List(required, location, name, field_args)));
-  //   continue;
-  // }
-  // if (type == "variant") {
-  //   col_vec.push_back(Collector_Ptr(new Collector_List(required, location, name, field_args, elt["elt_transform"])));
-  //   continue;
-  // }
+  r_obj* transform = r_list_get_by_name(spec_elt, "transform");
+
+  if (type == r_string_types.unspecified) {
+    return new_variant_collector(required,
+                                 default_value,
+                                 transform,
+                                 r_null);
+  }
+  if (type == r_string_types.variant) {
+    r_obj* elt_transform = r_list_get_by_name(spec_elt, "transform");
+    return new_variant_collector(required,
+                                 default_value,
+                                 transform,
+                                 elt_transform);
+  }
 
   r_obj* ptype = r_list_get_by_name(spec_elt, "ptype");
   r_obj* ptype_inner = r_list_get_by_name(spec_elt, "ptype_inner");
   if (type == r_string_types.scalar) {
-    // r_printf("spec -> scalar\n");
     return new_scalar_collector(required,
                                 ptype,
                                 ptype_inner,
-                                default_value);
-    // } else if (type == "vector") {
-    //   cpp11::r_string input_form = cpp11::strings(elt["input_form"])[0];
-    //   Vector_Args vector_args = Vector_Args(
-    //     string_to_form_enum(input_form),
-    //     vector_allows_empty_list,
-    //     elt["names_to"],
-    //     elt["values_to"],
-    //     elt["na"],
-    //     elt["elt_transform"]
-    //   );
-    //
-    //   col_vec.push_back(Collector_Ptr(new Collector_Vector(required, location, name, field_args, vector_args))
-    //   );
+                                default_value,
+                                transform);
+  } else if (type == r_string_types.vector) {
+    r_obj* input_form = r_chr_get(r_list_get_by_name(spec_elt, "input_form"), 0);
+
+    return new_vector_collector(required,
+                                ptype,
+                                ptype_inner,
+                                default_value,
+                                transform,
+                                input_form,
+                                vector_allows_empty_list,
+                                r_list_get_by_name(spec_elt, "names_to"),
+                                r_list_get_by_name(spec_elt, "values_to"),
+                                r_list_get_by_name(spec_elt, "na"),
+                                r_list_get_by_name(spec_elt, "elt_transform"));
   } else {
     r_printf(CHAR(type));
     r_printf(CHAR(r_string_types.scalar));
@@ -87,7 +97,8 @@ struct collector* parse_spec_elt(r_obj* spec_elt) {
   }
 }
 
-struct key_collector_pair* parse_fields_spec(r_obj* spec) {
+struct key_collector_pair* parse_fields_spec(r_obj* spec,
+                                             bool vector_allows_empty_list) {
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
 
@@ -110,7 +121,7 @@ struct key_collector_pair* parse_fields_spec(r_obj* spec) {
 
 
   for (r_ssize i = 0; i < n_fields; ++i, ++v_collectors) {
-    *v_collectors = *parse_spec_elt(v_spec[i]);
+    *v_collectors = *parse_spec_elt(v_spec[i], vector_allows_empty_list);
 
     r_obj* key = r_chr_get(r_list_get_by_name(v_spec[i], "key"), 0);
     r_chr_poke(keys, i, key);
@@ -125,8 +136,10 @@ struct collector* create_parser(r_obj* spec) {
   // r_printf("------------- parse fields -------------\n");
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
-  *v_key_coll_pair = *parse_fields_spec(r_list_get_by_name(spec, "fields"));
-  FREE(1);
+  r_obj* fields = r_list_get_by_name(spec, "fields");
+  bool vector_allows_empty_list = r_lgl_begin(r_list_get_by_name(spec, "vector_allows_empty_list"));
+  *v_key_coll_pair = *parse_fields_spec(fields, vector_allows_empty_list);
+  KEEP(v_key_coll_pair->shelter);
 
 
   // r_printf("============= add locations and names =============\n");
@@ -136,9 +149,12 @@ struct collector* create_parser(r_obj* spec) {
   // TODO make this a bit clearer
   // `tspec_df()` basically is a row collector without a key
   // would make more sense if it would not have `required`
-  return new_row_collector(false,
-                           v_key_coll_pair->keys,
-                           coll_locations,
-                           col_names,
-                           v_key_coll_pair->v_collectors);
+  struct collector* p_collector = new_row_collector(false,
+                                                    v_key_coll_pair->keys,
+                                                    coll_locations,
+                                                    col_names,
+                                                    v_key_coll_pair->v_collectors);
+
+  FREE(2);
+  return p_collector;
 }

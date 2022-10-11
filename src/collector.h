@@ -29,23 +29,23 @@ enum collector_type {
   COLLECTOR_TYPE_df            = 10,
 };
 
-struct scalar_collector {
-  r_obj* na;
-};
-
 struct vector_collector {
-  r_obj* na;
+  r_obj* list_of_ptype;
+  r_obj* col_names;
 
   enum vector_form input_form;
-  bool uses_names_col;
-  bool uses_values_col;
-  r_obj* output_col_names;
+  // bool uses_names_col;
+  r_obj* values_to;
+  // bool uses_values_col;
+  r_obj* names_to;
   bool vector_allows_empty_list;
   r_obj* empty_element;
   r_obj* elt_transform;
+
+  r_obj* (*prep_data)(r_obj* value_casted, r_obj* names);
 };
 
-struct list_collector {
+struct variant_collector {
   r_obj* elt_transform;
 };
 
@@ -69,8 +69,7 @@ struct collector {
 
   enum collector_type coll_type;
   // r_obj* name;
-  // r_obj* transform;
-  // r_obj* default_value;
+  r_obj* transform;
   r_obj* ptype;
   r_obj* ptype_inner;
   // TODO store `na` in `collector`?
@@ -79,6 +78,7 @@ struct collector {
   void* v_data;
   r_ssize current_row;
 
+  r_obj* na;
   r_obj* r_default_value;
   void* default_value;
 
@@ -91,7 +91,8 @@ struct collector {
   r_obj* (*finalize)(struct collector* v_collector);
 
   union details {
-    struct scalar_collector scalar_coll;
+    struct vector_collector vector_coll;
+    struct variant_collector variant_coll;
     struct multi_collector multi_coll;
   } details;
 };
@@ -108,17 +109,30 @@ struct collector* new_df_collector(bool required,
                                    r_obj* col_names,
                                    struct collector* collectors);
 
+struct collector* new_vector_collector(bool required,
+                                       r_obj* ptype,
+                                       r_obj* ptype_inner,
+                                       r_obj* default_value,
+                                       r_obj* transform,
+                                       r_obj* input_form,
+                                       bool vector_allows_empty_list,
+                                       r_obj* names_to,
+                                       r_obj* values_to,
+                                       r_obj* na,
+                                       r_obj* elt_transform);
+
 struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype,
                                        r_obj* ptype_inner,
-                                       r_obj* default_value);
+                                       r_obj* default_value,
+                                       r_obj* transform);
 
-void init_lgl_collector(struct collector* v_collector, r_ssize n_rows);
-void init_int_collector(struct collector* v_collector, r_ssize n_rows);
-void init_dbl_collector(struct collector* v_collector, r_ssize n_rows);
-void init_chr_collector(struct collector* v_collector, r_ssize n_rows);
+struct collector* new_variant_collector(bool required,
+                                        r_obj* default_value,
+                                        r_obj* transform,
+                                        r_obj* elt_transform);
+
 void init_row_collector(struct collector* v_collector, r_ssize n_rows);
-void init_df_collector(struct collector* v_collector, r_ssize n_rows);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
 

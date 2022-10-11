@@ -11,6 +11,7 @@ void add_stop_required(struct collector* v_collector) {
   ((CTYPE*) v_collector->v_data)[v_collector->current_row] = *((CTYPE*) v_collector->default_value); \
   ++v_collector->current_row;
 
+// TODO use `v_collector->r_default_value`?
 #define ADD_DEFAULT_BARRIER(SET)                               \
   r_obj* r_default_value = (r_obj*) v_collector->default_value;\
   SET(v_collector->data, v_collector->current_row, r_default_value);\
@@ -32,14 +33,19 @@ void add_default_chr(struct collector* v_collector) {
   ADD_DEFAULT_BARRIER(r_chr_poke);
 }
 
+void add_default_scalar(struct collector* v_collector) {
+  r_list_poke(v_collector->data, v_collector->current_row, v_collector->r_default_value);
+  ++v_collector->current_row;
+}
+
 void children_add_default(struct collector* v_collector) {
   struct multi_collector* coll = &v_collector->details.multi_coll;
   r_obj* const * v_keys = r_chr_cbegin(coll->keys);
 
   //     path.down();
   struct collector* v_collectors = coll->collectors;
-  for (int key_index = 0; key_index < coll->n_keys; key_index++, v_keys++) {
-  //   // path.replace(*v_keys);
+  for (int key_index = 0; key_index < coll->n_keys; ++key_index, ++v_keys) {
+    // path.replace(*v_keys);
     struct collector* cur_coll = &v_collectors[key_index];
     cur_coll->add_default(cur_coll);
   }
@@ -62,6 +68,11 @@ void children_add_default_absent(struct collector* v_collector) {
 
 void add_default_row(struct collector* v_collector) {
   children_add_default(v_collector);
+}
+
+void add_default_coll(struct collector* v_collector) {
+  r_list_poke(v_collector->data, v_collector->current_row, v_collector->r_default_value);
+  ++v_collector->current_row;
 }
 
 void add_default_df(struct collector* v_collector) {
@@ -88,7 +99,7 @@ void add_default_df(struct collector* v_collector) {
 
 void add_value_scalar(struct collector* v_collector, r_obj* value) {
   if (value == r_null) {
-    r_list_poke(v_collector->data, v_collector->current_row, r_null);
+    r_list_poke(v_collector->data, v_collector->current_row, v_collector->na);
     ++v_collector->current_row;
     return;
   }
@@ -99,7 +110,7 @@ void add_value_scalar(struct collector* v_collector, r_obj* value) {
     stop_scalar(size);
   }
 
-  r_list_poke(v_collector->data, v_collector->current_row, r_null);
+  r_list_poke(v_collector->data, v_collector->current_row, value_casted);
   ++v_collector->current_row;
   FREE(1);
 }
@@ -136,6 +147,94 @@ void add_value_chr(struct collector* v_collector, r_obj* value) {
   FREE(1);
 
   return;
+}
+
+r_obj* vec_unchop_value(r_obj* value,
+                        enum vector_form input_form,
+                        r_obj* ptype,
+                        r_obj* na) {
+  // FIXME if `vec_assign()` gets exported this should use
+  // `vec_init()` + `vec_assign()`
+  r_ssize loc_first_null = -1;
+  r_ssize n = r_length(value);
+  r_obj* const * v_value = r_list_cbegin(value);
+
+  for (r_ssize i = 0; i < n; ++i, ++v_value) {
+    if (*v_value == r_null) {
+      loc_first_null = i;
+      break;
+    }
+
+    if (vec_size(*v_value) != 1) {
+      // stop_vector_wrong_size_element(path, input_form, value);
+    }
+  }
+
+  if (loc_first_null == -1) {
+    return(vec_flatten(value, ptype));
+  }
+
+  // Theoretically a shallow duplicate should be more efficient but in
+  // benchmarks this didn't seem to be the case...
+  r_obj* out_list = KEEP(Rf_shallow_duplicate(value));
+  for (r_ssize i = loc_first_null; i < n; ++i, ++v_value) {
+    if (*v_value == r_null) {
+      r_list_poke(out_list, i, na);
+      continue;
+    }
+
+    if (vec_size(*v_value) != 1) {
+      // stop_vector_wrong_size_element(path, input_form, value);
+    }
+  }
+
+  r_obj* out = vec_flatten(out_list, ptype);
+  FREE(1);
+  return out;
+}
+
+void add_value_vec(struct collector* v_collector, r_obj* value) {
+  if (value == r_null) {
+    r_list_poke(v_collector->data, v_collector->current_row, r_null);
+    ++v_collector->current_row;
+    return;
+  }
+
+  struct vector_collector vec_coll = v_collector->details.vector_coll;
+  if (vec_coll.input_form == VECTOR_FORM_vector && vec_coll.vector_allows_empty_list) {
+    if (r_length(value) == 0 && r_typeof(value) == R_TYPE_list) {
+      r_list_poke(v_collector->data, v_collector->current_row, vec_coll.empty_element);
+      ++v_collector->current_row;
+      return;
+    }
+  }
+
+  r_obj* names = r_names(value);
+  if (vec_coll.input_form == VECTOR_FORM_scalar_list || vec_coll.input_form == VECTOR_FORM_object) {
+    // FIXME should check with `vec_is_list()`?
+    if (r_typeof(value) != R_TYPE_list) {
+      // stop_vector_non_list_element(path, vec_coll.input_form, value);
+      stop_vector_non_list_element(vec_coll.input_form, value);
+    }
+
+    if (vec_coll.input_form == VECTOR_FORM_object && names == r_null) {
+      // stop_object_vector_names_is_null(path);
+    }
+
+    value = vec_unchop_value(value, vec_coll.input_form, v_collector->ptype_inner, v_collector->na);
+  }
+  KEEP(value);
+
+  if (vec_coll.elt_transform != r_null) value = apply_transform(value, vec_coll.elt_transform);
+  KEEP(value);
+
+  r_obj* value_prepped = KEEP(v_collector->details.vector_coll.prep_data(value, names));
+  r_obj* value_casted = KEEP(vec_cast(value_prepped, v_collector->ptype));
+
+  r_list_poke(v_collector->data, v_collector->current_row, value_casted);
+  ++v_collector->current_row;
+
+  FREE(4);
 }
 
 //   inline void update_order(r_obj* field_names, const int& n_fields) {
@@ -200,14 +299,12 @@ void add_value_row(struct collector* v_collector, r_obj* value) {
   struct multi_collector* coll = &v_collector->details.multi_coll;
 
   if (value == r_null) {
-    // r_printf("-> value is null\n");
     children_add_default(v_collector);
     return;
   }
 
   const r_ssize n_fields = r_length(value);
   if (n_fields == 0) {
-    // r_printf("-> no fields\n");
     children_add_default_absent(v_collector);
     return;
   }
@@ -257,6 +354,21 @@ void add_value_df(struct collector* v_collector, r_obj* value) {
     // path.up();
   }
   ++v_collector->current_row;
+}
+
+void add_value_variant(struct collector* v_collector, r_obj* value) {
+  if (value == r_null) {
+    r_list_poke(v_collector->data, v_collector->current_row, r_null);
+    ++v_collector->current_row;
+    return;
+  }
+
+  struct variant_collector variant_coll = v_collector->details.variant_coll;
+  if (variant_coll.elt_transform != r_null) value = apply_transform(value, variant_coll.elt_transform);
+  KEEP(value);
+  r_list_poke(v_collector->data, v_collector->current_row, value);
+  ++v_collector->current_row;
+  FREE(1);
 }
 
 r_obj* parse(struct collector* v_collector, r_obj* value) {

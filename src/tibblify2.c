@@ -6,15 +6,12 @@
 #include "add-value.h"
 
 struct r_string_types_struct r_string_types;
+struct r_vector_form_struct r_vector_form;
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec) {
-  r_preserve_global(r_string_types.sub = r_str("sub"));
-  r_preserve_global(r_string_types.row = r_str("row"));
-  r_preserve_global(r_string_types.df = r_str("df"));
-  r_preserve_global(r_string_types.scalar = r_str("scalar"));
-  r_preserve_global(r_string_types.vector = r_str("vector"));
-
-  r_obj* out = KEEP(parse(create_parser(spec), data));
+  struct collector* coll_parser = create_parser(spec);
+  KEEP(coll_parser->shelter);
+  r_obj* out = parse(coll_parser, data);
   FREE(1);
 
   return out;

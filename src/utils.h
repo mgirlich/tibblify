@@ -3,9 +3,22 @@
 
 // #include <vector>
 
+#include "collector.h"
 #include "tibblify.h"
 
 r_obj* r_list_get_by_name(r_obj* x, const char* nm);
+
+r_obj* apply_transform(r_obj* value, r_obj* fn);
+
+static inline
+r_obj* vec_flatten(r_obj* value, r_obj* ptype) {
+  r_obj* call = KEEP(r_call3(syms_vec_flatten,
+                             value,
+                             ptype));
+  r_obj* out = r_eval(call, tibblify_ns_env);
+  FREE(1);
+  return(out);
+}
 
 // enum vector_input_form {vector, scalar_list, object};
 
@@ -61,16 +74,14 @@ r_obj* r_list_get_by_name(r_obj* x, const char* nm);
 //   }
 // }
 //
-// inline cpp11::sexp vector_input_form_to_sexp(vector_input_form input_form) {
-//   cpp11::r_string input_form_string;
-//   switch (input_form) {
-//   case scalar_list: {input_form_string = "scalar_list";} break;
-//   case vector: {input_form_string = "vector";} break;
-//   case object: {input_form_string = "object";} break;
-//   }
-//
-//   return(cpp11::as_sexp(input_form_string));
-// }
+static inline
+r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
+  switch (input_form) {
+  case VECTOR_FORM_vector: return r_chr("scalar_list");
+  case VECTOR_FORM_scalar_list: return r_chr("vector");
+  case VECTOR_FORM_object: return r_chr("object");
+  }
+}
 //
 // inline
 // SEXP set_df_attributes(SEXP list, SEXP col_names, R_xlen_t n_rows) {

@@ -17,21 +17,8 @@ struct Parse_Spec;
 
 extern SEXP tibblify_ns_env;
 
-extern SEXP strings_empty;
-
 extern SEXP classes_tibble;
 extern SEXP classes_list_of;
-
-extern SEXP tibblify_shared_empty_lgl;
-extern SEXP tibblify_shared_empty_int;
-extern SEXP tibblify_shared_empty_dbl;
-// extern SEXP tibblify_shared_empty_cpl;
-extern SEXP tibblify_shared_empty_chr;
-// extern SEXP tibblify_shared_empty_raw;
-extern SEXP tibblify_shared_empty_list;
-extern SEXP tibblify_shared_empty_named_list;
-// extern SEXP tibblify_shared_empty_date;
-// extern SEXP tibblify_shared_empty_uns;
 
 extern SEXP syms_transform;
 extern SEXP syms_value;
@@ -50,8 +37,17 @@ struct r_string_types_struct {
   r_obj* df;
   r_obj* scalar;
   r_obj* vector;
+  r_obj* unspecified;
+  r_obj* variant;
 };
 
 extern struct r_string_types_struct r_string_types;
+
+struct r_vector_form_struct {
+  r_obj* vector;
+  r_obj* scalar_list;
+  r_obj* object_list;
+};
+extern struct r_vector_form_struct r_vector_form;
 
 #endif

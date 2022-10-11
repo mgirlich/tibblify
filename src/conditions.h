@@ -50,13 +50,15 @@ void stop_names_is_null() {
 // }
 //
 // inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form, SEXP x) {
-//   cpp11::sexp input_form_string = vector_input_form_to_sexp(input_form);
-//   SEXP call = PROTECT(r_call4(Rf_install("stop_vector_non_list_element"),
-//                                PROTECT(path.data()),
-//                                input_form_string,
-//                                x));
-//   r_eval(call, tibblify_ns_env);
-// }
+static inline
+void stop_vector_non_list_element(enum vector_form input_form, r_obj* x) {
+  r_obj* input_form_string = KEEP(vector_input_form_to_sexp(input_form));
+  r_obj* call = KEEP(r_call3(Rf_install("stop_vector_non_list_element"),
+                             // KEEP(path.data()),
+                             input_form_string,
+                             x));
+  r_eval(call, tibblify_ns_env);
+}
 //
 // inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form, SEXP x) {
 //   SEXP call = PROTECT(r_call4(Rf_install("stop_vector_wrong_size_element"),
