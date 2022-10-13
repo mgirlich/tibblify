@@ -61,7 +61,7 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                  r_null);
   }
   if (type == r_string_types.variant) {
-    r_obj* elt_transform = r_list_get_by_name(spec_elt, "transform");
+    r_obj* elt_transform = r_list_get_by_name(spec_elt, "elt_transform");
     return new_variant_collector(required,
                                  default_value,
                                  transform,
@@ -137,7 +137,7 @@ struct collector* create_parser(r_obj* spec) {
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
   r_obj* fields = r_list_get_by_name(spec, "fields");
-  bool vector_allows_empty_list = r_lgl_begin(r_list_get_by_name(spec, "vector_allows_empty_list"));
+  bool vector_allows_empty_list = r_lgl_get(r_list_get_by_name(spec, "vector_allows_empty_list"), 0);
   *v_key_coll_pair = *parse_fields_spec(fields, vector_allows_empty_list);
   KEEP(v_key_coll_pair->shelter);
 

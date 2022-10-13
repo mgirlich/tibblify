@@ -13,7 +13,7 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* ffi_path) {
   KEEP(coll_parser->shelter);
 
   r_obj* depth = KEEP(r_alloc_integer(1));
-  r_int_poke(depth, 0, 0);
+  r_int_poke(depth, 0, -1);
   r_list_poke(ffi_path, 0, depth);
   r_obj* path_elts = KEEP(r_alloc_list(30));
   r_list_poke(ffi_path, 1, path_elts);

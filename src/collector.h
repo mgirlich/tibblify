@@ -43,7 +43,7 @@ struct vector_collector {
   r_obj* empty_element;
   r_obj* elt_transform;
 
-  r_obj* (*prep_data)(r_obj* value_casted, r_obj* names);
+  r_obj* (*prep_data)(r_obj* value_casted, r_obj* names, r_obj* col_names);
 };
 
 struct variant_collector {

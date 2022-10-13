@@ -44,10 +44,12 @@ void tibblify_init_utils(SEXP ns) {
   r_preserve_global(r_string_types.df = r_str("df"));
   r_preserve_global(r_string_types.scalar = r_str("scalar"));
   r_preserve_global(r_string_types.vector = r_str("vector"));
+  r_preserve_global(r_string_types.variant = r_str("variant"));
+  // TODO need unspecified?
 
   r_preserve_global(r_vector_form.vector = r_str("vector"));
   r_preserve_global(r_vector_form.scalar_list = r_str("scalar_list"));
-  r_preserve_global(r_vector_form.object_list = r_str("object_list"));
+  r_preserve_global(r_vector_form.object_list = r_str("object"));
 
   classes_list_of = r_new_shared_vector(STRSXP, 3);
   strings_list_of = Rf_mkChar("vctrs_list_of");

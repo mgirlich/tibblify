@@ -233,10 +233,10 @@ void add_value_vec(struct collector* v_collector, r_obj* value, struct Path* pat
   if (vec_coll.elt_transform != r_null) value = apply_transform(value, vec_coll.elt_transform);
   KEEP(value);
 
-  r_obj* value_prepped = KEEP(v_collector->details.vector_coll.prep_data(value, names));
-  r_obj* value_casted = KEEP(vec_cast(value_prepped, v_collector->ptype));
+  r_obj* value_casted = KEEP(vec_cast(value, v_collector->ptype));
+  r_obj* value_prepped = KEEP(vec_coll.prep_data(value_casted, names, vec_coll.col_names));
 
-  r_list_poke(v_collector->data, v_collector->current_row, value_casted);
+  r_list_poke(v_collector->data, v_collector->current_row, value_prepped);
   ++v_collector->current_row;
 
   FREE(4);
@@ -384,7 +384,7 @@ r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path) {
   // r_printf("# out-rows: %d\n", r_length(v_collectors[0].data));
 
   // r_printf("# parse: %d\n", n_rows);
-  // path_down(path);
+  path_down(path);
   r_obj* const * v_value = r_list_cbegin(value);
   for (r_ssize i = 0; i < n_rows; ++i) {
     // r_printf("row: %d\n", i);
@@ -392,7 +392,7 @@ r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path) {
     r_obj* const row = v_value[i];
     add_value_row(v_collector, row, path);
   }
-  // path_up(path);
+  path_up(path);
 
   return finalize_row(v_collector);
 }

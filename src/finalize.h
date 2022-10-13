@@ -6,9 +6,8 @@
 r_obj* finalize_atomic_scalar(struct collector* v_collector);
 r_obj* finalize_scalar(struct collector* v_collector);
 r_obj* finalize_vec(struct collector* v_collector);
+r_obj* finalize_variant(struct collector* v_collector);
 r_obj* finalize_row(struct collector* v_collector);
 r_obj* finalize_df(struct collector* v_collector);
-
-r_obj* finalize_coll(struct collector* v_collector);
 
 #endif

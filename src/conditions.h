@@ -31,7 +31,6 @@ void stop_required(r_obj* path) {
 //   r_eval(call, tibblify_ns_env);
 // }
 
-// inline void stop_names_is_null(const Path& path) {
 static inline
 void stop_names_is_null(r_obj* path) {
   r_obj* call = KEEP(r_call2(Rf_install("stop_names_is_null"),

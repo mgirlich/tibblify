@@ -161,7 +161,7 @@ struct collector* new_vector_collector(bool required,
                                        r_obj* na,
                                        r_obj* elt_transform) {
   // TODO check size and ptype of `default_value`?
-  r_obj* shelter = KEEP(r_alloc_list(4));
+  r_obj* shelter = KEEP(r_alloc_list(5));
 
   r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
   r_list_poke(shelter, 1, coll_raw);
@@ -211,8 +211,8 @@ struct collector* new_vector_collector(bool required,
   if (names_to != r_null) {
     p_vec_coll->prep_data = &vec_prep_values_names;
     r_obj* col_names = KEEP(r_alloc_character(2));
-    r_chr_poke(col_names, 0, names_to);
-    r_chr_poke(col_names, 1, values_to);
+    r_chr_poke(col_names, 0, r_chr_get(names_to, 0));
+    r_chr_poke(col_names, 1, r_chr_get(values_to, 0));
     r_list_poke(shelter, 3, col_names);
     p_vec_coll->col_names = col_names;
     FREE(1);
@@ -229,7 +229,7 @@ struct collector* new_vector_collector(bool required,
   } else if (values_to != r_null) {
     p_vec_coll->prep_data = &vec_prep_values;
     r_obj* col_names = KEEP(r_alloc_character(1));
-    r_chr_poke(col_names, 0, values_to);
+    r_chr_poke(col_names, 0, r_chr_get(values_to, 0));
     r_list_poke(shelter, 3, col_names);
     p_vec_coll->col_names = col_names;
     FREE(1);
@@ -273,10 +273,12 @@ struct collector* new_variant_collector(bool required,
   struct variant_collector* p_variant_coll = r_raw_begin(variant_coll_raw);
   p_variant_coll->elt_transform = elt_transform;
 
+  p_coll->details.variant_coll = *p_variant_coll;
+
   p_coll->init = &init_coll;
   p_coll->add_value = &add_value_variant;
   p_coll->add_default = &add_default_coll;
-  p_coll->finalize = &finalize_coll;
+  p_coll->finalize = &finalize_variant;
 
   if (required) {
     p_coll->add_default_absent = &add_stop_required;
@@ -317,7 +319,8 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->init = &init_coll;
     p_coll->add_value = &add_value_df;
     p_coll->add_default = &add_default_df;
-    p_coll->finalize = &finalize_coll;
+    p_coll->finalize = &finalize_df;
+    // TODO should calculate ptype here?
     break;
   default:
     r_stop_internal("Unexpected collector type.");

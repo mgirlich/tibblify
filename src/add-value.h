@@ -27,13 +27,14 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
 void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path);
 
 static inline
-r_obj* vec_prep_simple(r_obj* value_casted, r_obj* names) {
+r_obj* vec_prep_simple(r_obj* value_casted, r_obj* names, r_obj* col_names) {
   return value_casted;
 }
 
 static inline
-r_obj* vec_prep_values(r_obj* value_casted, r_obj* names) {
+r_obj* vec_prep_values(r_obj* value_casted, r_obj* names, r_obj* col_names) {
   r_obj* df = KEEP(r_alloc_vector(R_TYPE_list, 1));
+  r_attrib_poke_names(df, col_names);
   r_init_tibble(df, short_vec_size(value_casted));
 
   r_list_poke(df, 0, value_casted);
@@ -42,9 +43,10 @@ r_obj* vec_prep_values(r_obj* value_casted, r_obj* names) {
 }
 
 static inline
-r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names) {
+r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names) {
   r_obj* df = KEEP(r_alloc_vector(R_TYPE_list, 2));
   r_init_tibble(df, short_vec_size(value_casted));
+  r_attrib_poke_names(df, col_names);
 
   if (names == r_null) {
     // TODO

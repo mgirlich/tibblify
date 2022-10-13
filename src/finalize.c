@@ -61,6 +61,18 @@ r_obj* finalize_row(struct collector* v_collector) {
   return df;
 }
 
-r_obj* finalize_coll(struct collector* v_collector) {
-  return v_collector->data;
+r_obj* finalize_variant(struct collector* v_collector) {
+  r_obj* data = v_collector->data;
+  if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
+
+  return data;
+}
+
+r_obj* finalize_df(struct collector* v_collector) {
+  r_obj* data = v_collector->data;
+
+  r_attrib_poke_class(data, classes_list_of);
+  // r_attrib_poke(data, syms_ptype, v_collector->details.vector_coll.list_of_ptype);
+
+  return data;
 }
