@@ -53,20 +53,22 @@ tibblify <- function(x,
   }
 
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
-  spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
-  path_ptr <- init_tibblify_path()
+  # spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
+  spec <- spec_prep2(spec)
+  # path_ptr <- init_tibblify_path()
+  path <- vctrs::vec_init(list(), 2L)
   call <- current_call()
   try_fetch(
-    out <- tibblify_impl(x, spec, path_ptr),
+    out <- .Call(ffi_tibblify, x, spec, path),
     error = function(cnd) {
       if (inherits(cnd, "tibblify_error")) {
         cnd$call <- call
         cnd_signal(cnd)
       }
 
-      path <- format_path(path_ptr)
+      path_str <- path_to_string(path)
       tibblify_abort(
-        "Problem while tibblifying {.arg {path}}",
+        "Problem while tibblifying {.arg {path_str}}",
         parent = cnd,
         call = call
       )
@@ -184,6 +186,81 @@ prep_nested_keys <- function(spec, shift = FALSE) {
   )
 }
 
+spec_prep2 <- function(spec) {
+  # TODO need to shift if it has names col
+  spec$col_names <- names(spec$fields)
+  # TODO fix for sub collector
+  spec$coll_locations <- as.list(seq_along(spec$fields))
+
+  spec$fields <- prep_nested_keys2(spec$fields)
+  spec
+}
+
+prep_nested_keys2 <- function(spec) {
+  remove_first_key <- function(x) {
+    x$key <- x$key[-1]
+    x
+  }
+
+  is_sub <- purrr::map_lgl(spec, ~ length(.x$key) > 1)
+  spec_simple <- spec[!is_sub]
+  spec_simple_prepped <- purrr::map(
+    spec_simple,
+    function(x) {
+      x$key <- unlist(x$key)
+
+      if (x$type == "row" || x$type == "df") {
+        # x$fields <- spec_prep2(x$fields, shift = !is.null(x$names_col))
+        x <- spec_prep2(x)
+      }
+
+      if (x$type == "scalar") {
+        x$na <- vec_init(x$ptype_inner)
+      } else if (x$type == "vector") {
+        x$na <- vec_init(x$ptype)
+      }
+
+      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
+        if (is_null(x$names_to)) {
+          fill_list <- set_names(
+            list(unname(x$fill)),
+            x$values_to
+          )
+        } else {
+          fill_list <- set_names(
+            list(names(x$fill), unname(x$fill)),
+            c(x$names_to, x$values_to)
+          )
+        }
+        x$fill <- tibble::as_tibble(fill_list)
+      }
+
+      x
+    }
+  )
+
+  spec_complex <- spec[is_sub]
+
+  first_keys <- purrr::map_chr(spec_complex, list("key", 1))
+  spec_complex <- purrr::map(spec_complex, remove_first_key)
+  spec_split <- vec_split(spec_complex, first_keys)
+  spec_complex_prepped <- purrr::map2(
+    spec_split$key, spec_split$val,
+    function(key, sub_spec) {
+      list(
+        key = key,
+        type = "sub",
+        spec = prep_nested_keys(sub_spec)
+      )
+    }
+  )
+
+  c(
+    spec_simple_prepped,
+    spec_complex_prepped
+  )
+}
+
 tibblify_prepare_unspecified <- function(spec, unspecified, call) {
   unspecified <- unspecified %||% "error"
   unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
@@ -229,8 +306,4 @@ set_spec <- function(x, spec) {
 #' @export
 get_spec <- function(x) {
   attr(x, "tib_spec")
-}
-
-tibblify2 <- function(x, spec) {
-  .Call(ffi_tibblify, x, spec)
 }

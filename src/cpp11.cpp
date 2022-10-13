@@ -13,32 +13,16 @@ extern "C" SEXP _tibblify_init_logging(SEXP log_level) {
     return R_NilValue;
   END_CPP11
 }
-// Path.cpp
-SEXP init_tibblify_path();
-extern "C" SEXP _tibblify_init_tibblify_path() {
-  BEGIN_CPP11
-    return cpp11::as_sexp(init_tibblify_path());
-  END_CPP11
-}
-// Path.cpp
-SEXP get_path_data(cpp11::external_pointer<Path> path_ptr);
-extern "C" SEXP _tibblify_get_path_data(SEXP path_ptr) {
-  BEGIN_CPP11
-    return cpp11::as_sexp(get_path_data(cpp11::as_cpp<cpp11::decay_t<cpp11::external_pointer<Path>>>(path_ptr)));
-  END_CPP11
-}
 
 extern "C" {
 /* .Call calls */
-extern SEXP ffi_tibblify(SEXP, SEXP);
+extern SEXP ffi_tibblify(SEXP, SEXP, SEXP);
 extern SEXP tibblify_initialize(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_tibblify_get_path_data",      (DL_FUNC) &_tibblify_get_path_data,      1},
-    {"_tibblify_init_logging",       (DL_FUNC) &_tibblify_init_logging,       1},
-    {"_tibblify_init_tibblify_path", (DL_FUNC) &_tibblify_init_tibblify_path, 0},
-    {"ffi_tibblify",                 (DL_FUNC) &ffi_tibblify,                 2},
-    {"tibblify_initialize",          (DL_FUNC) &tibblify_initialize,          1},
+    {"_tibblify_init_logging", (DL_FUNC) &_tibblify_init_logging, 1},
+    {"ffi_tibblify",           (DL_FUNC) &ffi_tibblify,           3},
+    {"tibblify_initialize",    (DL_FUNC) &tibblify_initialize,    1},
     {NULL, NULL, 0}
 };
 }

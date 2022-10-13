@@ -3,11 +3,3 @@
 init_logging <- function(log_level) {
   invisible(.Call(`_tibblify_init_logging`, log_level))
 }
-
-init_tibblify_path <- function() {
-  .Call(`_tibblify_init_tibblify_path`)
-}
-
-get_path_data <- function(path_ptr) {
-  .Call(`_tibblify_get_path_data`, path_ptr)
-}

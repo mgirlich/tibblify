@@ -11,12 +11,15 @@ format_path <- function(path_ptr) {
 }
 
 path_to_string <- function(path) {
-  if (length(path) == 0) {
+  depth <- path[[1]]
+  path_elts <- path[[2]]
+
+  if (depth == 0) {
     return("x")
   }
 
   path_elements <- purrr::map_chr(
-    path,
+    path_elts[1:depth],
     function(elt) {
       if (is.character(elt)) {
         paste0("$", elt)
@@ -34,10 +37,12 @@ tibblify_abort <- function(..., .envir = caller_env()) {
 }
 
 stop_required <- function(path) {
-  n <- length(path)
-  path_str <- path_to_string(path[-n])
+  n <- path[[1]] + 1L
+  path_elts <- path[[2]]
+  path[[2]] <- path_elts[-n]
+  path_str <- path_to_string(path)
   msg <- c(
-    "Field {.field {path[[n]]}} is required but does not exist in {.arg {path_str}}.",
+    "Field {.field {path_elts[[n]]}} is required but does not exist in {.arg {path_str}}.",
     i = "Use {.code required = FALSE} if the field is optional."
   )
   tibblify_abort(msg)
@@ -46,7 +51,7 @@ stop_required <- function(path) {
 stop_scalar <- function(path, size_act) {
   path_str <- path_to_string(path)
   msg <- c(
-    "{.arg {path_str}} must have size {.val 1}, not size {.val {size_act}}.",
+    "{.arg {path_str}} must have size {.val {1}}, not size {.val {size_act}}.",
     i = "You specified that the field is a scalar.",
     i = "Use {.fn tib_vector} if the field is a vector instead."
   )
@@ -89,6 +94,7 @@ stop_object_vector_names_is_null <- function(path) {
   tibblify_abort(msg)
 }
 
+# stop_vector_non_list_element <- function(path, input_form, x) {
 stop_vector_non_list_element <- function(path, input_form, x) {
   # FIXME {.code} cannot be interpolated correctly
   path_str <- path_to_string(path)

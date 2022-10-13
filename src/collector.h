@@ -2,6 +2,7 @@
 #define TIBBLIFY_COLLECTOR_H
 
 #include "tibblify.h"
+#include "Path.h"
 
 enum vector_form {
   VECTOR_FORM_vector      = 0,
@@ -83,11 +84,11 @@ struct collector {
   void* default_value;
 
   void (*init)(struct collector* v_collector, r_ssize n_rows);
-  void (*add_value)(struct collector* v_collector, r_obj* value);
+  void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
    // add default value
-  void (*add_default)(struct collector* v_collector);
+  void (*add_default)(struct collector* v_collector, struct Path* path);
   // error if required, otherwise add default value
-  void (*add_default_absent)(struct collector* v_collector);
+  void (*add_default_absent)(struct collector* v_collector, struct Path* path);
   r_obj* (*finalize)(struct collector* v_collector);
 
   union details {
@@ -134,6 +135,6 @@ struct collector* new_variant_collector(bool required,
 
 void init_row_collector(struct collector* v_collector, r_ssize n_rows);
 
-r_obj* ffi_tibblify(r_obj* data, r_obj* spec);
+r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* path_xptr);
 
 #endif

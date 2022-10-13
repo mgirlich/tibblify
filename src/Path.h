@@ -1,55 +1,39 @@
 #ifndef TIBBLIFY_PATH_H
 #define TIBBLIFY_PATH_H
 
-#include <cpp11.hpp>
-#include <plogr.h>
+#define R_NO_REMAP
+#define STRICT_R_HEADERS
 #include "tibblify.h"
 
-class Path {
-private:
-  cpp11::writable::list path;
-  int depth = 0;
-  Path(const Path&);
-  Path& operator=(const Path&);
-
-public:
-  Path() {
-    path = Rf_allocVector(VECSXP, 20);
-  }
-
-  ~ Path() {}
-
-  inline void down() {
-    LOG_DEBUG;
-    // FIXME: fail if diving too deep
-    this->depth++;
-  }
-
-  inline void up() {
-    LOG_DEBUG;
-    this->depth--;
-  }
-
-  inline void replace(int index) {
-    SET_VECTOR_ELT(this->path, this->depth, Rf_ScalarInteger(index));
-  }
-
-  inline void replace(const SEXP key) {
-    SET_VECTOR_ELT(this->path, this->depth, key);
-  }
-
-  inline SEXP data() const {
-    cpp11::list path_cpp(path);
-    cpp11::writable::list out(this->depth + 1);
-    for (int i = 0; i < this->depth + 1; i++) {
-      if (TYPEOF(path_cpp[i]) == CHARSXP) {
-        out[i] = cpp11::writable::strings({path_cpp[i]});
-      } else {
-        out[i] = path_cpp[i];
-      }
-    }
-    return out;
-  }
+struct Path {
+  r_obj* data;
+  int* depth;
+  r_obj* path_elts;
 };
+
+static inline
+void path_down(struct Path* path) {
+  ++(*path->depth);
+}
+
+static inline
+void path_up(struct Path* path) {
+  --(*path->depth);
+}
+
+static inline
+void path_replace_int(struct Path* path, int index) {
+  r_obj* ffi_index = KEEP(r_int(index));
+  r_list_poke(path->path_elts, *path->depth, ffi_index);
+  FREE(1);
+}
+
+static inline
+void path_replace_key(struct Path* path, r_obj* key) {
+  r_obj* ffi_key = KEEP(r_alloc_character(1));
+  r_chr_poke(ffi_key, 0, key);
+  r_list_poke(path->path_elts, *path->depth, ffi_key);
+  FREE(1);
+}
 
 #endif
