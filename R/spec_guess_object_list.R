@@ -173,7 +173,7 @@ is_field_scalar <- function(value) {
     return(FALSE)
   }
 
-  size_0_is_null <- vec_equal_na(value[sizes == 0])
+  size_0_is_null <- vec_detect_missing(value[sizes == 0])
   if (all(size_0_is_null)) {
     return(TRUE)
   }

@@ -11,7 +11,7 @@ format_path <- function(path_ptr) {
 }
 
 path_to_string <- function(path) {
-  depth <- path[[1]]
+  depth <- path[[1]] + 1L
   path_elts <- path[[2]]
 
   if (depth == 0) {
@@ -39,7 +39,7 @@ tibblify_abort <- function(..., .envir = caller_env()) {
 stop_required <- function(path) {
   n <- path[[1]] + 1L
   path_elts <- path[[2]]
-  path[[2]] <- path_elts[-n]
+  path[[1]] <- path[[1]] - 1L
   path_str <- path_to_string(path)
   msg <- c(
     "Field {.field {path_elts[[n]]}} is required but does not exist in {.arg {path_str}}.",
@@ -142,11 +142,11 @@ stop_colmajor_non_list_element <- function(path, x) {
 }
 
 vec_flatten <- function(x, ptype, name_spec = zap()) {
-  vctrs::vec_unchop(x, ptype = ptype, name_spec = name_spec)
+  vctrs::list_unchop(x, ptype = ptype, name_spec = name_spec)
 }
 
 list_drop_null <- function(x) {
-  null_flag <- vec_equal_na(x)
+  null_flag <- vec_detect_missing(x)
   if (any(null_flag)) {
     x <- x[!null_flag]
   }

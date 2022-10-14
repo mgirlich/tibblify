@@ -187,10 +187,15 @@ prep_nested_keys <- function(spec, shift = FALSE) {
 }
 
 spec_prep2 <- function(spec) {
-  # TODO need to shift if it has names col
-  spec$col_names <- names(spec$fields)
-  # TODO fix for sub collector
-  spec$coll_locations <- as.list(seq_along(spec$fields))
+  if (is_null(spec$names_col)) {
+    spec$col_names <- names2(spec$fields)
+    # TODO fix for sub collector
+    spec$coll_locations <- as.list(seq_along(spec$fields) - 1L)
+  } else {
+    spec$col_names <- c(spec$names_col, names(spec$fields))
+    # TODO fix for sub collector
+    spec$coll_locations <- as.list(seq_along(spec$fields))
+  }
 
   spec$fields <- prep_nested_keys2(spec$fields)
   spec

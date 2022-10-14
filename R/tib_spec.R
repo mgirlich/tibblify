@@ -871,7 +871,7 @@ check_key <- function(key, call = caller_env()) {
     }
   }
 
-  na_idx <- purrr::detect_index(vec_equal_na(key), ~ .x)
+  na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
   if (na_idx != 0) {
     msg <- "`key[{.field {na_idx}}] must not be NA."
     cli::cli_abort(msg, call = call)
