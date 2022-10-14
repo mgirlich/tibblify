@@ -10,12 +10,6 @@ enum vector_form {
   VECTOR_FORM_object      = 2,
 };
 
-enum parser_type {
-  PARSER_TYPE_df     = 0,
-  PARSER_TYPE_row    = 1,
-  PARSER_TYPE_object = 2,
-};
-
 enum collector_type {
   COLLECTOR_TYPE_scalar        = 0,
   COLLECTOR_TYPE_scalar_lgl    = 1,
@@ -30,15 +24,41 @@ enum collector_type {
   COLLECTOR_TYPE_df            = 10,
 };
 
+struct lgl_collector {
+  int* v_data;
+  int default_value;
+};
+
+struct int_collector {
+  int* v_data;
+  int default_value;
+};
+
+struct dbl_collector {
+  double* v_data;
+  double default_value;
+};
+
+struct chr_collector {
+  r_obj* default_value;
+};
+
+struct scalar_collector {
+  r_obj* ptype_inner;
+  r_obj* default_value;
+  r_obj* na;
+};
+
 struct vector_collector {
+  r_obj* ptype_inner;
+  r_obj* default_value;
+
   r_obj* list_of_ptype;
   r_obj* col_names;
 
+  r_obj* na;
+
   enum vector_form input_form;
-  // bool uses_names_col;
-  r_obj* values_to;
-  // bool uses_values_col;
-  r_obj* names_to;
   bool vector_allows_empty_list;
   r_obj* empty_element;
   r_obj* elt_transform;
@@ -47,6 +67,7 @@ struct vector_collector {
 };
 
 struct variant_collector {
+  r_obj* default_value;
   r_obj* elt_transform;
 };
 
@@ -56,9 +77,9 @@ struct multi_collector {
 
   r_obj* shelter; // TODO should be able to remove this?!
   struct collector* collectors;
+  int field_order_ind[256];
   r_obj* key_match_ind;
-  r_ssize* p_key_match_ind;
-  int n_fields_prev;
+  int* p_key_match_ind;
   r_obj* field_names_prev;
 
   r_ssize n_rows;
@@ -72,21 +93,6 @@ struct multi_collector {
 struct collector {
   r_obj* shelter;
 
-  enum collector_type coll_type;
-  // r_obj* name;
-  r_obj* transform;
-  r_obj* ptype;
-  r_obj* ptype_inner;
-  // TODO store `na` in `collector`?
-
-  r_obj* data;
-  void* v_data;
-  r_ssize current_row;
-
-  r_obj* na;
-  r_obj* r_default_value;
-  void* default_value;
-
   void (*init)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
    // add default value
@@ -95,18 +101,46 @@ struct collector {
   void (*add_default_absent)(struct collector* v_collector, struct Path* path);
   r_obj* (*finalize)(struct collector* v_collector);
 
+  r_obj* transform;
+  r_obj* ptype;
+
+  r_obj* data;
+  r_ssize current_row;
+
   union details {
-    struct vector_collector vector_coll;
+    struct lgl_collector lgl_coll;
+    struct int_collector int_coll;
+    struct dbl_collector dbl_coll;
+    struct chr_collector chr_coll;
+    struct scalar_collector scalar_coll;
+    struct vector_collector vec_coll;
     struct variant_collector variant_coll;
     struct multi_collector multi_coll;
   } details;
 };
 
-struct collector* new_parser(r_obj* keys,
-                             r_obj* coll_locations,
-                             r_obj* col_names,
-                             struct collector* collectors,
-                             r_obj* names_col);
+struct collector* new_scalar_collector(bool required,
+                                       r_obj* ptype,
+                                       r_obj* ptype_inner,
+                                       r_obj* default_value,
+                                       r_obj* transform);
+
+struct collector* new_vector_collector(bool required,
+                                       r_obj* ptype,
+                                       r_obj* ptype_inner,
+                                       r_obj* default_value,
+                                       r_obj* transform,
+                                       r_obj* input_form,
+                                       bool vector_allows_empty_list,
+                                       r_obj* names_to,
+                                       r_obj* values_to,
+                                       r_obj* na,
+                                       r_obj* elt_transform);
+
+struct collector* new_variant_collector(bool required,
+                                        r_obj* default_value,
+                                        r_obj* transform,
+                                        r_obj* elt_transform);
 
 struct collector* new_row_collector(bool required,
                                     r_obj* keys,
@@ -121,28 +155,11 @@ struct collector* new_df_collector(bool required,
                                    struct collector* collectors,
                                    r_obj* names_col);
 
-struct collector* new_vector_collector(bool required,
-                                       r_obj* ptype,
-                                       r_obj* ptype_inner,
-                                       r_obj* default_value,
-                                       r_obj* transform,
-                                       r_obj* input_form,
-                                       bool vector_allows_empty_list,
-                                       r_obj* names_to,
-                                       r_obj* values_to,
-                                       r_obj* na,
-                                       r_obj* elt_transform);
-
-struct collector* new_scalar_collector(bool required,
-                                       r_obj* ptype,
-                                       r_obj* ptype_inner,
-                                       r_obj* default_value,
-                                       r_obj* transform);
-
-struct collector* new_variant_collector(bool required,
-                                        r_obj* default_value,
-                                        r_obj* transform,
-                                        r_obj* elt_transform);
+struct collector* new_parser(r_obj* keys,
+                             r_obj* coll_locations,
+                             r_obj* col_names,
+                             struct collector* collectors,
+                             r_obj* names_col);
 
 void init_row_collector(struct collector* v_collector, r_ssize n_rows);
 

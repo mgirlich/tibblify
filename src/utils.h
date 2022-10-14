@@ -36,7 +36,10 @@ r_obj* names2(r_obj* x) {
   return nms;
 }
 
-// enum vector_input_form {vector, scalar_list, object};
+void match_chr(r_obj* needles_sorted,
+               r_obj* haystack,
+               int* indices,
+               const r_ssize n_haystack);
 
 // struct Vector_Args
 // {

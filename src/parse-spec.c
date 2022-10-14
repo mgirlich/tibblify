@@ -154,9 +154,6 @@ struct collector* create_parser(r_obj* spec) {
     names_col = r_null;
   }
 
-  // TODO make this a bit clearer
-  // `tspec_df()` basically is a row collector without a key
-  // would make more sense if it would not have `required`
   struct collector* p_collector = new_parser(v_key_coll_pair->keys,
                                              coll_locations,
                                              col_names,

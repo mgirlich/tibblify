@@ -127,7 +127,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` must have size "1", not size 2.
+      ! `x[[1]]$x` must have size 1, not size 2.
       i You specified that the field is a scalar.
       i Use `tib_vector()` if the field is a vector instead.
     Code
@@ -135,7 +135,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` must have size "1", not size 0.
+      ! `x[[1]]$x` must have size 1, not size 0.
       i You specified that the field is a scalar.
       i Use `tib_vector()` if the field is a vector instead.
     Code
@@ -143,7 +143,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` must have size "1", not size 2.
+      ! `x[[1]]$x` must have size 1, not size 2.
       i You specified that the field is a scalar.
       i Use `tib_vector()` if the field is a vector instead.
 

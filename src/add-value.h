@@ -7,21 +7,31 @@
 
 void add_stop_required(struct collector* v_collector, struct Path* path);
 
+static inline
+void assign_f_absent(struct collector* v_collector, bool required) {
+  if (required) {
+    v_collector->add_default_absent = &add_stop_required;
+  } else {
+    v_collector->add_default_absent = v_collector->add_default;
+  }
+}
+
 void add_default_lgl(struct collector* v_collector, struct Path* path);
 void add_default_int(struct collector* v_collector, struct Path* path);
 void add_default_dbl(struct collector* v_collector, struct Path* path);
 void add_default_chr(struct collector* v_collector, struct Path* path);
 void add_default_scalar(struct collector* v_collector, struct Path* path);
+void add_default_vector(struct collector* v_collector, struct Path* path);
+void add_default_variant(struct collector* v_collector, struct Path* path);
 void add_default_row(struct collector* v_collector, struct Path* path);
 void add_default_df(struct collector* v_collector, struct Path* path);
-void add_default_coll(struct collector* v_collector, struct Path* path);
 
-void add_value_scalar(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_lgl(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_int(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_dbl(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* path);
-void add_value_vec(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_scalar(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_vector(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_variant(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_row(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path);
@@ -51,6 +61,8 @@ r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names
   if (names == r_null) {
     // TODO
     // names = na_chr(n)
+    // nms = KEEP(r_alloc_character(n));
+    // r_chr_fill(nms, r_strs.empty, n);
   }
   KEEP(names);
 
@@ -59,6 +71,7 @@ r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names
   FREE(2);
   return df;
 }
+
 r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path);
 
 #endif
