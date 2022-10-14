@@ -20,6 +20,11 @@ extern SEXP tibblify_ns_env;
 extern SEXP classes_tibble;
 extern SEXP classes_list_of;
 
+extern SEXP strings_empty;
+extern SEXP strings_object;
+extern SEXP strings_df;
+extern SEXP strings_row;
+
 extern SEXP syms_transform;
 extern SEXP syms_value;
 extern SEXP syms_x;

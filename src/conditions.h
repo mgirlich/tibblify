@@ -17,19 +17,25 @@ void stop_required(r_obj* path) {
   r_eval(call, tibblify_ns_env);
 }
 
-// inline void stop_duplicate_name(const Path& path, SEXPREC* field_nm) {
-//   SEXP call = PROTECT(r_call3(Rf_install("stop_duplicate_name"),
-//                                PROTECT(path.data()),
-//                                cpp11::as_sexp(cpp11::r_string(field_nm))));
-//   r_eval(call, tibblify_ns_env);
-// }
-//
-// inline void stop_empty_name(const Path& path, const int& index) {
-//   SEXP call = PROTECT(r_call3(Rf_install("stop_empty_name"),
-//                                PROTECT(path.data()),
-//                                r_int(index)));
-//   r_eval(call, tibblify_ns_env);
-// }
+static inline
+void stop_duplicate_name(r_obj* path, r_obj* field_nm_str) {
+  r_obj* field_nm_chr = KEEP(r_alloc_character(1));
+  r_chr_poke(field_nm_chr, 0, field_nm_str);
+
+  r_obj* call = KEEP(r_call3(Rf_install("stop_duplicate_name"),
+                             path,
+                             field_nm_chr));
+  FREE(1);
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void stop_empty_name(r_obj* path, const int index) {
+  r_obj* call = KEEP(r_call3(Rf_install("stop_empty_name"),
+                             path,
+                             r_int(index)));
+  r_eval(call, tibblify_ns_env);
+}
 
 static inline
 void stop_names_is_null(r_obj* path) {

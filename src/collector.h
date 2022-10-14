@@ -58,11 +58,15 @@ struct multi_collector {
   struct collector* collectors;
   r_obj* key_match_ind;
   r_ssize* p_key_match_ind;
+  int n_fields_prev;
+  r_obj* field_names_prev;
 
   r_ssize n_rows;
   int n_cols;
   r_obj* col_names; // strings
   r_obj* coll_locations; // list - needed to unpack `same_key_collector` columns
+
+  r_obj* names_col;
 };
 
 struct collector {
@@ -98,6 +102,12 @@ struct collector {
   } details;
 };
 
+struct collector* new_parser(r_obj* keys,
+                             r_obj* coll_locations,
+                             r_obj* col_names,
+                             struct collector* collectors,
+                             r_obj* names_col);
+
 struct collector* new_row_collector(bool required,
                                     r_obj* keys,
                                     r_obj* coll_locations,
@@ -108,7 +118,8 @@ struct collector* new_df_collector(bool required,
                                    r_obj* keys,
                                    r_obj* coll_locations,
                                    r_obj* col_names,
-                                   struct collector* collectors);
+                                   struct collector* collectors,
+                                   r_obj* names_col);
 
 struct collector* new_vector_collector(bool required,
                                        r_obj* ptype,

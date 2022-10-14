@@ -36,15 +36,16 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
 
 
     } else {
-      // TODO add `names_col`
-      // if (names_col != r_null) {
-      //   names_col = cpp11::strings(names_col)[0];
-      // }
+      r_obj* names_col = r_list_get_by_name(spec_elt, "names_col");
+      if (names_col != r_null) {
+        names_col = r_chr_get(names_col, 0);
+      }
       p_collector = new_df_collector(required,
                                      v_key_coll_pair->keys,
                                      coll_locations,
                                      col_names,
-                                     v_key_coll_pair->v_collectors);
+                                     v_key_coll_pair->v_collectors,
+                                     names_col);
     }
 
     FREE(2);
@@ -132,7 +133,6 @@ struct key_collector_pair* parse_fields_spec(r_obj* spec,
 }
 
 struct collector* create_parser(r_obj* spec) {
-  // r_printf("============= CREATE PARSER =============\n");
   // r_printf("------------- parse fields -------------\n");
   r_obj* key_coll_pair = KEEP(r_alloc_raw(sizeof(struct key_collector_pair)));
   struct key_collector_pair* v_key_coll_pair = r_raw_begin(key_coll_pair);
@@ -146,14 +146,22 @@ struct collector* create_parser(r_obj* spec) {
   r_obj* coll_locations = r_list_get_by_name(spec, "coll_locations");
   r_obj* col_names = r_list_get_by_name(spec, "col_names");
 
+  r_obj* type = r_chr_get(r_list_get_by_name(spec, "type"), 0);
+  r_obj* names_col;
+  if (type == strings_df) {
+    names_col = r_list_get_by_name(spec, "names_col");
+  } else {
+    names_col = r_null;
+  }
+
   // TODO make this a bit clearer
   // `tspec_df()` basically is a row collector without a key
   // would make more sense if it would not have `required`
-  struct collector* p_collector = new_row_collector(false,
-                                                    v_key_coll_pair->keys,
-                                                    coll_locations,
-                                                    col_names,
-                                                    v_key_coll_pair->v_collectors);
+  struct collector* p_collector = new_parser(v_key_coll_pair->keys,
+                                             coll_locations,
+                                             col_names,
+                                             v_key_coll_pair->v_collectors,
+                                             names_col);
 
   FREE(2);
   return p_collector;

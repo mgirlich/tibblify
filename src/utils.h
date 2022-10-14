@@ -20,6 +20,22 @@ r_obj* vec_flatten(r_obj* value, r_obj* ptype) {
   return(out);
 }
 
+static inline
+r_obj* names2(r_obj* x) {
+  r_obj* nms = r_names(x);
+
+  if (nms == r_null) {
+    r_ssize n = r_length(x);
+    nms = KEEP(r_alloc_character(n));
+    r_chr_fill(nms, r_strs.empty, n);
+  } else {
+    KEEP(nms);
+  }
+
+  FREE(1);
+  return nms;
+}
+
 // enum vector_input_form {vector, scalar_list, object};
 
 // struct Vector_Args

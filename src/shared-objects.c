@@ -12,6 +12,11 @@ SEXP strings_list = NULL;
 SEXP classes_tibble = NULL;
 SEXP classes_list_of = NULL;
 
+SEXP strings_object = NULL;
+SEXP strings_df = NULL;
+SEXP strings_row = NULL;
+SEXP strings_empty = NULL;
+
 SEXP syms_ptype = NULL;
 SEXP syms_transform = NULL;
 SEXP syms_value = NULL;
@@ -58,6 +63,11 @@ void tibblify_init_utils(SEXP ns) {
   SET_STRING_ELT(classes_list_of, 1, strings_vctr);
   strings_list = Rf_mkChar("list");
   SET_STRING_ELT(classes_list_of, 2, strings_list);
+
+  r_preserve_global(strings_empty = r_str(""));
+  r_preserve_global(strings_object = r_str("object"));
+  r_preserve_global(strings_df = r_str("df"));
+  r_preserve_global(strings_row = r_str("row"));
 
   syms_ptype = Rf_install("ptype");
   syms_transform = Rf_install("transform");

@@ -150,7 +150,7 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
   return;
 }
 
-r_obj* vec_unchop_value(r_obj* value,
+r_obj* list_unchop_value(r_obj* value,
                         enum vector_form input_form,
                         r_obj* ptype,
                         r_obj* na,
@@ -222,7 +222,7 @@ void add_value_vec(struct collector* v_collector, r_obj* value, struct Path* pat
       stop_object_vector_names_is_null(path->data);
     }
 
-    value = vec_unchop_value(value,
+    value = list_unchop_value(value,
                              vec_coll.input_form,
                              v_collector->ptype_inner,
                              v_collector->na,
@@ -299,6 +299,80 @@ void match_chr(r_obj* needles_sorted,
   return;
 }
 
+bool have_fields_changed(r_obj* field_names,
+                         r_obj* field_names_prev,
+                         const int n_fields,
+                         const int n_fields_prev) {
+  if (n_fields != n_fields_prev) return true;
+
+  const int INDEX_SIZE = 256;
+  if (n_fields >= INDEX_SIZE) r_stop_internal("At most 256 fields are supported");
+  r_obj* const * v_field_names = r_chr_cbegin(field_names);
+  r_obj* const * v_field_names_prev = r_chr_cbegin(field_names_prev);
+  const int n = n_fields > n_fields_prev ? n_fields : n_fields_prev;
+  for (int i = 0; i < n; i++, v_field_names++, v_field_names_prev++) {
+    // LOG_DEBUG << i << " - " << CHAR(*v_field_names) << " - " << CHAR(*v_field_names_prev);
+    if (*v_field_names != *v_field_names_prev) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+void update_order(struct collector* v_collector,
+                         r_obj* field_names,
+                         const int n_fields) {
+  struct multi_collector multi_coll = v_collector->details.multi_coll;
+  multi_coll.n_fields_prev = n_fields;
+  multi_coll.field_names_prev = field_names;
+  // multi_coll.key_match_ind = match_chr(multi_coll.keys,
+  match_chr(multi_coll.keys,
+                                       field_names,
+                                       multi_coll.p_key_match_ind,
+                                       r_length(field_names));
+}
+
+void check_names(r_obj* field_names,
+                 const int ind[],
+                 const int n_fields,
+                 const struct Path* path) {
+  if (n_fields == 0) return;
+
+  r_obj* const * v_field_names = r_chr_cbegin(field_names);
+  r_obj* field_nm = v_field_names[ind[0]];
+  if (field_nm == r_globals.na_str || field_nm == strings_empty) stop_empty_name(path->data, ind[0]);
+
+  for (int field_index = 1; field_index < n_fields; field_index++) {
+    r_obj* field_nm_prev = field_nm;
+    field_nm = v_field_names[ind[field_index]];
+    if (field_nm == field_nm_prev) stop_duplicate_name(path->data, field_nm);
+
+    if (field_nm == r_globals.na_str || field_nm == strings_empty) stop_empty_name(path->data, ind[field_index]);
+  }
+}
+
+void update_fields(struct collector* v_collector,
+                   r_obj* field_names,
+                   const int n_fields,
+                   struct Path* path) {
+  struct multi_collector multi_coll = v_collector->details.multi_coll;
+  const bool fields_have_changed = have_fields_changed(field_names,
+                                                       multi_coll.field_names_prev,
+                                                       n_fields,
+                                                       multi_coll.n_fields_prev);
+  // only update `ind` if necessary as `R_orderVector1()` is pretty slow
+  if (!fields_have_changed) {
+    return;
+  }
+
+  update_order(v_collector, field_names, n_fields);
+
+  // TODO use `order_chr()`?
+  R_orderVector1((int*) multi_coll.p_key_match_ind, n_fields, field_names, FALSE, FALSE);
+  check_names(field_names, (int*) multi_coll.p_key_match_ind, n_fields, path);
+}
+
 void add_value_row(struct collector* v_collector, r_obj* value, struct Path* path) {
   // r_printf("add_value_row()\n");
   struct multi_collector* coll = &v_collector->details.multi_coll;
@@ -319,7 +393,10 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
     stop_names_is_null(path->data);
   }
 
-  // TODO this->update_fields(field_names, n_fields, path);
+  update_fields(v_collector,
+                field_names,
+                n_fields,
+                path);
   match_chr(coll->keys, field_names, coll->p_key_match_ind, n_fields);
 
   // TODO r_list_cbegin only works if object is a list
@@ -335,7 +412,9 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
 
     struct collector* cur_coll = &v_collectors[key_index];
     if (loc < 0) {
+      path_up(path);
       cur_coll->add_default_absent(cur_coll, path);
+      path_down(path);
     } else {
       r_obj* cur_value = v_value[loc];
 
@@ -374,7 +453,9 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
   FREE(1);
 }
 
-r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path) {
+r_obj* parse(struct collector* v_collector,
+             r_obj* value,
+             struct Path* path) {
   r_ssize n_rows = short_vec_size(value);
 
   init_row_collector(v_collector, n_rows);
@@ -394,5 +475,11 @@ r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path) {
   }
   path_up(path);
 
-  return finalize_row(v_collector);
+  r_obj* out = finalize_row(v_collector);
+
+  if (v_collector->details.multi_coll.names_col != r_null) {
+    r_list_poke(out, 0, names2(value));
+  }
+
+  return out;
 }
