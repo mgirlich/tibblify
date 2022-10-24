@@ -69,18 +69,18 @@ void tibblify_init_utils(SEXP ns) {
   r_preserve_global(strings_df = r_str("df"));
   r_preserve_global(strings_row = r_str("row"));
 
-  syms_ptype = Rf_install("ptype");
-  syms_transform = Rf_install("transform");
-  syms_value = Rf_install("value");
-  syms_x = Rf_install("x");
+  syms_ptype = r_sym("ptype");
+  syms_transform = r_sym("transform");
+  syms_value = r_sym("value");
+  syms_x = r_sym("x");
 
-  SEXP vctrs_package = Rf_findVarInFrame(R_NamespaceRegistry, Rf_install("vctrs"));
-  syms_vec_is_list = Rf_findFun(Rf_install("vec_is_list"), vctrs_package);
-  syms_vec_is = Rf_findFun(Rf_install("vec_is"), vctrs_package);
-  syms_vec_names2 = Rf_findFun(Rf_install("vec_names2"), vctrs_package);
-  syms_vec_init = Rf_findFun(Rf_install("vec_init"), vctrs_package);
+  SEXP vctrs_package = Rf_findVarInFrame(R_NamespaceRegistry, r_sym("vctrs"));
+  syms_vec_is_list = Rf_findFun(r_sym("vec_is_list"), vctrs_package);
+  syms_vec_is = Rf_findFun(r_sym("vec_is"), vctrs_package);
+  syms_vec_names2 = Rf_findFun(r_sym("vec_names2"), vctrs_package);
+  syms_vec_init = Rf_findFun(r_sym("vec_init"), vctrs_package);
 
-  SEXP tibblify_symbol = Rf_install("tibblify");
+  SEXP tibblify_symbol = r_sym("tibblify");
   SEXP tibblify_package = Rf_findVarInFrame(R_NamespaceRegistry, tibblify_symbol);
-  syms_vec_flatten = Rf_findFun(Rf_install("vec_flatten"), tibblify_package);
+  syms_vec_flatten = Rf_findFun(r_sym("vec_flatten"), tibblify_package);
 }
