@@ -20,7 +20,7 @@ r_obj* vec_init(r_obj* x, int n) {
   return out;
 }
 
-#define INIT_SCALAR_COLLECTOR(RTYPE, BEGIN, COLL)              \
+#define ALLOC_SCALAR_COLLECTOR(RTYPE, BEGIN, COLL)              \
   r_obj* col = KEEP(r_alloc_vector(RTYPE, n_rows));            \
   v_collector->data = col;                                     \
   v_collector->details.COLL.v_data = BEGIN(col);               \
@@ -29,16 +29,16 @@ r_obj* vec_init(r_obj* x, int n) {
                                                                \
   FREE(1);
 
-void init_lgl_collector(struct collector* v_collector, r_ssize n_rows) {
-  INIT_SCALAR_COLLECTOR(R_TYPE_logical, r_lgl_begin, lgl_coll);
+void alloc_lgl_collector(struct collector* v_collector, r_ssize n_rows) {
+  ALLOC_SCALAR_COLLECTOR(R_TYPE_logical, r_lgl_begin, lgl_coll);
 }
-void init_int_collector(struct collector* v_collector, r_ssize n_rows) {
-  INIT_SCALAR_COLLECTOR(R_TYPE_integer, r_int_begin, int_coll);
+void alloc_int_collector(struct collector* v_collector, r_ssize n_rows) {
+  ALLOC_SCALAR_COLLECTOR(R_TYPE_integer, r_int_begin, int_coll);
 }
-void init_dbl_collector(struct collector* v_collector, r_ssize n_rows) {
-  INIT_SCALAR_COLLECTOR(R_TYPE_double, r_dbl_begin, dbl_coll);
+void alloc_dbl_collector(struct collector* v_collector, r_ssize n_rows) {
+  ALLOC_SCALAR_COLLECTOR(R_TYPE_double, r_dbl_begin, dbl_coll);
 }
-void init_chr_collector(struct collector* v_collector, r_ssize n_rows) {
+void alloc_chr_collector(struct collector* v_collector, r_ssize n_rows) {
   r_obj* col = KEEP(r_alloc_vector(R_TYPE_character, n_rows));
   v_collector->data = col;
 
@@ -48,31 +48,31 @@ void init_chr_collector(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-void init_coll(struct collector* v_collector, r_ssize n_rows) {
+void alloc_coll(struct collector* v_collector, r_ssize n_rows) {
   r_obj* col = KEEP(r_alloc_list(n_rows));
 
   v_collector->data = col;
   v_collector->current_row = 0;
-  r_list_poke(v_collector->shelter, 0, col);
+  r_list_poke(v_collector->shelter, 0, v_collector->data);
 
   FREE(1);
 }
 
-void init_row_collector_impl(struct collector* v_collector, r_ssize n_rows) {
+void alloc_row_collector_impl(struct collector* v_collector, r_ssize n_rows) {
   v_collector->details.multi_coll.n_rows = n_rows;
   r_ssize n_col = v_collector->details.multi_coll.n_keys;
 
   struct collector* v_collectors = v_collector->details.multi_coll.collectors;
   for (r_ssize j = 0; j < n_col; ++j) {
-    // r_printf("* ");
+    r_alloc_integer(10000);
     v_collectors[j].init(&v_collectors[j], n_rows);
     // TODO this is not really needed, right?
     // r_list_poke(df, j, v_collectors[j].data);
   }
 }
 
-void init_row_collector(struct collector* v_collector, r_ssize n_rows) {
-  init_row_collector_impl(v_collector, n_rows);
+void alloc_row_collector(struct collector* v_collector, r_ssize n_rows) {
+  alloc_row_collector_impl(v_collector, n_rows);
 }
 
 struct collector* new_scalar_collector(bool required,
@@ -81,40 +81,39 @@ struct collector* new_scalar_collector(bool required,
                                        r_obj* default_value,
                                        r_obj* transform) {
   // TODO check size and ptype of `default_value`?
-  const r_ssize shelter_size = 2;
-  r_obj* shelter = KEEP(r_alloc_list(shelter_size));
+  r_obj* shelter = KEEP(r_alloc_list(2));
 
-  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
   r_list_poke(shelter, 1, coll_raw);
   struct collector* p_coll = r_raw_begin(coll_raw);
 
   p_coll->shelter = shelter;
   if (vec_is(ptype_inner, r_globals.empty_lgl)) {
-    p_coll->init = &init_lgl_collector;
+    p_coll->init = &alloc_lgl_collector;
     p_coll->add_value = &add_value_lgl;
     p_coll->add_default = &add_default_lgl;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.lgl_coll.default_value = *r_lgl_begin(default_value);
   } else if (vec_is(ptype_inner, r_globals.empty_int)) {
-    p_coll->init = &init_int_collector;
+    p_coll->init = &alloc_int_collector;
     p_coll->add_value = &add_value_int;
     p_coll->add_default = &add_default_int;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.int_coll.default_value = *r_int_begin(default_value);
   } else if (vec_is(ptype_inner, r_globals.empty_dbl)) {
-    p_coll->init = &init_dbl_collector;
+    p_coll->init = &alloc_dbl_collector;
     p_coll->add_value = &add_value_dbl;
     p_coll->add_default = &add_default_dbl;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.dbl_coll.default_value = *r_dbl_begin(default_value);
   } else if (vec_is(ptype_inner, r_globals.empty_chr)) {
-    p_coll->init = &init_chr_collector;
+    p_coll->init = &alloc_chr_collector;
     p_coll->add_value = &add_value_chr;
     p_coll->add_default = &add_default_chr;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.chr_coll.default_value = r_chr_get(default_value, 0);
   } else {
-    p_coll->init = &init_coll;
+    p_coll->init = &alloc_coll;
     p_coll->add_value = &add_value_scalar;
     p_coll->add_default = &add_default_scalar;
     p_coll->finalize = &finalize_scalar;
@@ -127,7 +126,7 @@ struct collector* new_scalar_collector(bool required,
   p_coll->ptype = ptype;
   p_coll->transform = transform;
 
-  FREE(2);
+  FREE(1);
   return p_coll;
 }
 
@@ -154,16 +153,14 @@ struct collector* new_vector_collector(bool required,
                                        r_obj* values_to,
                                        r_obj* na,
                                        r_obj* elt_transform) {
-  const r_ssize shelter_size = 6;
-  r_obj* shelter = KEEP(r_alloc_list(shelter_size));
+  r_obj* shelter = KEEP(r_alloc_list(6));
 
-  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
   r_list_poke(shelter, 1, coll_raw);
   struct collector* p_coll = r_raw_begin(coll_raw);
 
   p_coll->shelter = shelter;
-
-  p_coll->init = &init_coll;
+  p_coll->init = &alloc_coll;
   p_coll->add_value = &add_value_vector;
   p_coll->add_default = &add_default_vector;
   p_coll->finalize = &finalize_vec;
@@ -172,7 +169,7 @@ struct collector* new_vector_collector(bool required,
   p_coll->ptype = ptype;
   p_coll->transform = transform;
 
-  r_obj* vec_coll_raw = KEEP(r_alloc_raw(sizeof(struct vector_collector)));
+  r_obj* vec_coll_raw = r_alloc_raw(sizeof(struct vector_collector));
   r_list_poke(shelter, 2, vec_coll_raw);
   struct vector_collector* p_vec_coll = r_raw_begin(vec_coll_raw);
 
@@ -182,18 +179,20 @@ struct collector* new_vector_collector(bool required,
   p_vec_coll->elt_transform = elt_transform;
   p_vec_coll->vector_allows_empty_list = vector_allows_empty_list;
   p_vec_coll->empty_element = KEEP(vec_init(ptype, 0));
-  r_list_poke(shelter, 5, p_vec_coll->empty_element);
+  r_list_poke(p_coll->shelter, 3, p_vec_coll->empty_element);
   FREE(1);
   p_vec_coll->input_form = r_to_vector_form(input_form);
 
   if (names_to != r_null) {
     p_vec_coll->prep_data = &vec_prep_values_names;
     r_obj* col_names = KEEP(r_alloc_character(2));
-    r_chr_poke(col_names, 0, r_chr_get(names_to, 0));
-    r_chr_poke(col_names, 1, r_chr_get(values_to, 0));
-    r_list_poke(shelter, 3, col_names);
+    r_obj* names_to_str = KEEP(r_chr_get(names_to, 0));
+    r_chr_poke(col_names, 0, names_to_str);
+    r_obj* values_to_str = KEEP(r_chr_get(values_to, 0));
+    r_chr_poke(col_names, 1, values_to_str);
+    r_list_poke(p_coll->shelter, 4, col_names);
     p_vec_coll->col_names = col_names;
-    FREE(1);
+    FREE(3);
 
     r_obj* out_ptype = KEEP(r_alloc_list(2));
     r_attrib_poke_names(out_ptype, col_names);
@@ -202,15 +201,16 @@ struct collector* new_vector_collector(bool required,
     r_init_tibble(out_ptype, 0);
 
     p_vec_coll->list_of_ptype = out_ptype;
-    r_list_poke(shelter, 4, out_ptype);
+    r_list_poke(p_coll->shelter, 5, out_ptype);
     FREE(1);
   } else if (values_to != r_null) {
     p_vec_coll->prep_data = &vec_prep_values;
     r_obj* col_names = KEEP(r_alloc_character(1));
-    r_chr_poke(col_names, 0, r_chr_get(values_to, 0));
-    r_list_poke(shelter, 3, col_names);
+    r_obj* values_to_str = KEEP(r_chr_get(values_to, 0));
+    r_chr_poke(col_names, 0, values_to_str);
+    r_list_poke(p_coll->shelter, 4, col_names);
     p_vec_coll->col_names = col_names;
-    FREE(1);
+    FREE(2);
 
     r_obj* out_ptype = KEEP(r_alloc_list(1));
     r_attrib_poke_names(out_ptype, col_names);
@@ -218,7 +218,7 @@ struct collector* new_vector_collector(bool required,
     r_init_tibble(out_ptype, 0);
 
     p_vec_coll->list_of_ptype = out_ptype;
-    r_list_poke(shelter, 4, out_ptype);
+    r_list_poke(p_coll->shelter, 5, out_ptype);
     FREE(1);
   } else {
     p_vec_coll->prep_data = &vec_prep_simple;
@@ -226,7 +226,7 @@ struct collector* new_vector_collector(bool required,
   }
   p_coll->details.vec_coll = *p_vec_coll;
 
-  FREE(3);
+  FREE(1);
   return p_coll;
 }
 
@@ -234,16 +234,14 @@ struct collector* new_variant_collector(bool required,
                                         r_obj* default_value,
                                         r_obj* transform,
                                         r_obj* elt_transform) {
-  const r_ssize shelter_size = 3;
-  r_obj* shelter = KEEP(r_alloc_list(shelter_size));
+  r_obj* shelter = KEEP(r_alloc_list(3));
 
-  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
   r_list_poke(shelter, 1, coll_raw);
   struct collector* p_coll = r_raw_begin(coll_raw);
 
   p_coll->shelter = shelter;
-
-  p_coll->init = &init_coll;
+  p_coll->init = &alloc_coll;
   p_coll->add_value = &add_value_variant;
   p_coll->add_default = &add_default_variant;
   p_coll->finalize = &finalize_variant;
@@ -259,23 +257,19 @@ struct collector* new_variant_collector(bool required,
 
   p_coll->details.variant_coll = *p_variant_coll;
 
-  FREE(3);
+  FREE(2);
   return p_coll;
 }
 
 struct collector* new_multi_collector(enum collector_type coll_type,
                                       bool required,
-                                      r_obj* keys,
+                                      int n_keys,
                                       r_obj* coll_locations,
                                       r_obj* col_names,
-                                      struct collector* collectors,
                                       r_obj* names_col) {
-  int n_keys = r_length(keys);
+  r_obj* shelter = KEEP(r_alloc_list(7 + n_keys));
 
-  const r_ssize shelter_size = 6 + n_keys;
-  r_obj* shelter = KEEP(r_alloc_list(shelter_size));
-
-  r_obj* coll_raw = KEEP(r_alloc_raw(sizeof(struct collector)));
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
   r_list_poke(shelter, 1, coll_raw);
   struct collector* p_coll = r_raw_begin(coll_raw);
 
@@ -283,13 +277,13 @@ struct collector* new_multi_collector(enum collector_type coll_type,
 
   switch(coll_type) {
   case COLLECTOR_TYPE_row:
-    p_coll->init = &init_row_collector;
+    p_coll->init = &alloc_row_collector;
     p_coll->add_value = &add_value_row;
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
     break;
   case COLLECTOR_TYPE_df:
-    p_coll->init = &init_coll;
+    p_coll->init = &alloc_coll;
     p_coll->add_value = &add_value_df;
     p_coll->add_default = &add_default_df;
     p_coll->finalize = &finalize_df;
@@ -300,17 +294,14 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   assign_f_absent(p_coll, required);
 
   r_obj* multi_coll_raw = KEEP(r_alloc_raw(sizeof(struct multi_collector)));
-  r_list_poke(p_coll->shelter, 2, multi_coll_raw);
+  r_list_poke(shelter, 2, multi_coll_raw);
   struct multi_collector* p_multi_coll = r_raw_begin(multi_coll_raw);
-  p_multi_coll->keys = keys;
-  p_multi_coll->collectors = collectors;
-  for (int i = 0; i < n_keys; ++i) {
-    r_list_poke(p_coll->shelter, 5 + i, collectors[i].shelter);
-  }
   p_multi_coll->n_keys = n_keys;
+  p_multi_coll->keys = KEEP(r_alloc_character(n_keys));
+  r_list_poke(p_coll->shelter, 3, p_multi_coll->keys);
 
   r_obj* key_match_ind = KEEP(r_alloc_raw(n_keys * sizeof(r_ssize)));
-  r_list_poke(p_coll->shelter, 3, key_match_ind);
+  r_list_poke(p_coll->shelter, 4, key_match_ind);
   p_multi_coll->key_match_ind = key_match_ind;
   int* p_key_match_ind = r_raw_begin(key_match_ind);
   for (int i = 0; i < n_keys; ++i) {
@@ -330,74 +321,88 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   p_multi_coll->col_names = col_names;
   p_multi_coll->coll_locations = coll_locations;
   p_multi_coll->names_col = names_col;
-
   p_multi_coll->field_names_prev = r_null;
 
   r_obj* ptype = KEEP(r_alloc_list(n_cols));
-  for (int i = 0; i < n_keys; ++i) {
-    collectors[i].init(&collectors[i], 0);
-    r_obj* col = KEEP(collectors[i].finalize(&collectors[i]));
-    // TODO support sub collector
-    r_obj* ffi_locs = r_list_get(coll_locations, i);
-    r_list_poke(ptype, r_int_get(ffi_locs, 0), col);
-    FREE(1);
-  }
-
-  if (names_col != r_null) {
-    r_list_poke(ptype, 0, r_globals.empty_chr);
-  }
-
-  r_attrib_poke_names(ptype, col_names);
-  r_init_tibble(ptype, 0);
-  r_list_poke(p_coll->shelter, 4, ptype);
+  r_list_poke(p_coll->shelter, 5, ptype);
   p_coll->ptype = ptype;
-  FREE(1);
+
+  r_obj* collectors_raw = KEEP(r_alloc_raw(sizeof(struct collector) * n_keys));
+  r_list_poke(shelter, 6, collectors_raw);
+  p_multi_coll->collectors = r_raw_begin(collectors_raw);
 
   p_coll->details.multi_coll = *p_multi_coll;
 
-  FREE(4);
+  FREE(6);
   return p_coll;
 }
 
-struct collector* new_parser(r_obj* keys,
+void add_collectors_to_multi_coll(struct collector* coll,
+                                  r_obj* keys,
+                                  struct collector* collectors) {
+  coll->details.multi_coll.keys = keys;
+  int n_keys = r_length(keys);
+  r_list_poke(coll->shelter, 3, keys);
+
+  coll->details.multi_coll.collectors = collectors;
+  for (int i = 0; i < n_keys; ++i) {
+    r_list_poke(coll->shelter, 6 + i, collectors[i].shelter);
+  }
+
+  // r_obj* ptype = KEEP(r_alloc_list(n_cols));
+  // for (int i = 0; i < n_keys; ++i) {
+  //   collectors[i].init(&collectors[i], 0);
+  //   r_obj* col = KEEP(collectors[i].finalize(&collectors[i]));
+  //   // TODO support sub collector
+  //   r_obj* ffi_locs = r_list_get(coll_locations, i);
+  //   r_list_poke(ptype, r_int_get(ffi_locs, 0), col);
+  //   FREE(1);
+  // }
+  //
+  // if (names_col != r_null) {
+  //   r_list_poke(ptype, 0, r_globals.empty_chr);
+  // }
+  //
+  // r_attrib_poke_names(ptype, col_names);
+  // r_init_tibble(ptype, 0);
+  // r_list_poke(out.shelter, 5, ptype);
+  // out.ptype = ptype;
+  // FREE(1);
+}
+
+struct collector* new_parser(int n_keys,
                              r_obj* coll_locations,
                              r_obj* col_names,
-                             struct collector* collectors,
                              r_obj* names_col) {
   return new_multi_collector(COLLECTOR_TYPE_row,
                              false,
-                             keys,
+                             n_keys,
                              coll_locations,
                              col_names,
-                             collectors,
                              names_col);
 }
 
 struct collector* new_row_collector(bool required,
-                                    r_obj* keys,
+                                    int n_keys,
                                     r_obj* coll_locations,
-                                    r_obj* col_names,
-                                    struct collector* collectors) {
+                                    r_obj* col_names) {
   return new_multi_collector(COLLECTOR_TYPE_row,
                              required,
-                             keys,
+                             n_keys,
                              coll_locations,
                              col_names,
-                             collectors,
                              r_null);
 }
 
 struct collector* new_df_collector(bool required,
-                                   r_obj* keys,
+                                   int n_keys,
                                    r_obj* coll_locations,
                                    r_obj* col_names,
-                                   struct collector* collectors,
                                    r_obj* names_col) {
   return new_multi_collector(COLLECTOR_TYPE_df,
                              required,
-                             keys,
+                             n_keys,
                              coll_locations,
                              col_names,
-                             collectors,
                              names_col);
 }

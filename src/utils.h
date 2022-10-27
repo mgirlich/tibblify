@@ -131,7 +131,7 @@ r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
 // inline
 // SEXP set_list_of_attributes(SEXP x, SEXP ptype) {
 //   Rf_setAttrib(x, R_ClassSymbol, classes_list_of);
-//   Rf_setAttrib(x, Rf_install("ptype"), ptype);
+//   Rf_setAttrib(x, r_sym("ptype"), ptype);
 //
 //   return x;
 // }

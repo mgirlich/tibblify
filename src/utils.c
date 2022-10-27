@@ -5,11 +5,9 @@ r_obj* r_list_get_by_name(r_obj* x, const char* nm) {
   const r_ssize n = r_length(names);
   // TODO add checks;
 
-  r_obj* const * v_x = r_list_cbegin(x);
-
   for (r_ssize i = 0; i < n; ++i) {
     if (strcmp(r_chr_get_c_string(names, i), nm) == 0) {
-      return v_x[i];
+      return r_list_get(x, i);
     }
   }
 
@@ -59,7 +57,6 @@ void match_chr(r_obj* needles_sorted,
     // needle is too small, so go to next needle
     if (strcmp(needle_char, hay_char) < 0) {
       // needle not found in haystack
-      // r_printf("needle not found\n");
       indices[i] = -1;
       ++v_needles; ++i;
     } else {
@@ -69,7 +66,6 @@ void match_chr(r_obj* needles_sorted,
 
   // mark remaining needles as not found
   for (; i < n_needles; i++) {
-    // r_printf("needle not found\n");
     indices[i] = -1;
   }
 

@@ -194,7 +194,6 @@ r_obj* list_unchop_value(r_obj* value,
 }
 
 void add_value_vector(struct collector* v_collector, r_obj* value, struct Path* path) {
-  // r_printf("add_value_vector()\n");
   if (value == r_null) {
     r_list_poke(v_collector->data, v_collector->current_row, r_null);
     ++v_collector->current_row;
@@ -302,7 +301,6 @@ void update_fields(struct collector* v_collector,
   bool fields_unchanged = chr_equal(field_names, multi_coll->field_names_prev);
   // only update `ind` if necessary as `R_orderVector1()` is pretty slow
   if (fields_unchanged) {
-    // r_printf("fields_unchanged\n");
     return;
   }
 
@@ -311,11 +309,9 @@ void update_fields(struct collector* v_collector,
   // TODO use `order_chr()`?
   R_orderVector1(multi_coll->field_order_ind, n_fields, field_names, FALSE, FALSE);
   check_names(field_names, multi_coll->field_order_ind, n_fields, path);
-  // r_printf("* loc: %d\n", v_collector->details.multi_coll.p_key_match_ind[0]);
 }
 
 void add_value_row(struct collector* v_collector, r_obj* value, struct Path* path) {
-  // r_printf("add_value_row()\n");
   struct multi_collector* coll = &v_collector->details.multi_coll;
 
   if (value == r_null) {
@@ -348,7 +344,6 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
     path_replace_key(path, cur_key);
 
     struct collector* cur_coll = &v_collectors[key_index];
-    // r_printf("loc: %d\n", loc);
     if (loc < 0) {
       path_up(path);
       cur_coll->add_default_absent(cur_coll, path);
@@ -391,22 +386,23 @@ r_obj* parse(struct collector* v_collector,
              r_obj* value,
              struct Path* path) {
   r_ssize n_rows = short_vec_size(value);
-  init_row_collector(v_collector, n_rows);
+  alloc_row_collector(v_collector, n_rows);
 
   path_down(path);
-  r_obj* const * v_value = r_list_cbegin(value);
+  // r_obj* const * v_value = r_list_cbegin(value);
   for (r_ssize i = 0; i < n_rows; ++i) {
     path_replace_int(path, i);
-    r_obj* const row = v_value[i];
+    // r_obj* const row = v_value[i];
+    r_obj* row = VECTOR_ELT(value, i);
     add_value_row(v_collector, row, path);
   }
   path_up(path);
 
   r_obj* out = finalize_row(v_collector);
 
-  // if (v_collector->details.multi_coll.names_col != r_null) {
-  //   r_list_poke(out, 0, names2(value));
-  // }
+  if (v_collector->details.multi_coll.names_col != r_null) {
+    r_list_poke(out, 0, names2(value));
+  }
 
   return out;
 }

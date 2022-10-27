@@ -3,13 +3,7 @@
 
 #include "tibblify.h"
 
-struct key_collector_pair {
-  r_obj* shelter;
-  r_obj* keys;
-  struct collector* v_collectors;
-};
-
-struct key_collector_pair* parse_fields_spec(r_obj* spec, bool vector_allows_empty_list);
+void collector_add_fields(struct collector* p_coll, r_obj* fields, bool vector_allows_empty_list);
 
 struct collector* create_parser(r_obj* spec);
 

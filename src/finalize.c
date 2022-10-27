@@ -5,7 +5,6 @@
 #include "finalize.h"
 
 r_obj* finalize_atomic_scalar(struct collector* v_collector) {
-  // r_printf("finalize_scalar()\n");
   r_obj* data = v_collector->data;
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
   KEEP(data);
@@ -28,7 +27,6 @@ r_obj* finalize_scalar(struct collector* v_collector) {
 }
 
 r_obj* finalize_vec(struct collector* v_collector) {
-  // r_printf("finalize_df()\n");
   r_obj* data = v_collector->data;
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
 
@@ -46,7 +44,6 @@ r_obj* finalize_variant(struct collector* v_collector) {
 }
 
 r_obj* finalize_row(struct collector* v_collector) {
-  // r_printf("finalize_row()\n");
   struct multi_collector* multi_coll = &v_collector->details.multi_coll;
   r_ssize n_cols = multi_coll->n_cols;
   r_obj* df = KEEP(r_alloc_list(n_cols));
@@ -55,9 +52,7 @@ r_obj* finalize_row(struct collector* v_collector) {
   struct collector* v_collectors = multi_coll->collectors;
 
   for (r_ssize i = 0; i < multi_coll->n_keys; ++i) {
-    // r_printf("finalize_row() -> finalize\n");
     r_obj* col = KEEP(v_collectors[i].finalize(&v_collectors[i]));
-    // r_printf("finalize_row() -> assign data\n");
     // TODO must use `coll_locations`
     r_obj* ffi_locs = r_list_get(multi_coll->coll_locations, i);
     r_list_poke(df, r_int_get(ffi_locs, 0), col);

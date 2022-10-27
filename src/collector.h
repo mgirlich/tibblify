@@ -60,7 +60,7 @@ struct vector_collector {
 
   enum vector_form input_form;
   bool vector_allows_empty_list;
-  r_obj* empty_element;
+  r_obj* empty_element; // TODO simply use `ptype` instead?
   r_obj* elt_transform;
 
   r_obj* (*prep_data)(r_obj* value_casted, r_obj* names, r_obj* col_names);
@@ -75,7 +75,6 @@ struct multi_collector {
   r_obj* keys; // strings
   int n_keys;
 
-  r_obj* shelter; // TODO should be able to remove this?!
   struct collector* collectors;
   int field_order_ind[256];
   r_obj* key_match_ind;
@@ -143,25 +142,22 @@ struct collector* new_variant_collector(bool required,
                                         r_obj* elt_transform);
 
 struct collector* new_row_collector(bool required,
-                                    r_obj* keys,
+                                    int n_keys,
                                     r_obj* coll_locations,
-                                    r_obj* col_names,
-                                    struct collector* collectors);
+                                    r_obj* col_names);
 
 struct collector* new_df_collector(bool required,
-                                   r_obj* keys,
+                                   int n_keys,
                                    r_obj* coll_locations,
                                    r_obj* col_names,
-                                   struct collector* collectors,
                                    r_obj* names_col);
 
-struct collector* new_parser(r_obj* keys,
-                             r_obj* coll_locations,
-                             r_obj* col_names,
-                             struct collector* collectors,
-                             r_obj* names_col);
+struct collector* new_parser(int n_keys,
+                            r_obj* coll_locations,
+                            r_obj* col_names,
+                            r_obj* names_col);
 
-void init_row_collector(struct collector* v_collector, r_ssize n_rows);
+void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* path_xptr);
 
