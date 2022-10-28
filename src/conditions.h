@@ -70,25 +70,27 @@ void stop_vector_wrong_size_element(r_obj* path, enum vector_form input_form, r_
   r_eval(call, tibblify_ns_env);
 }
 
-// inline void stop_colmajor_wrong_size_element(const Path& path, R_xlen_t size_exp, R_xlen_t size_act) {
-//   SEXP call = PROTECT(r_call4(r_sym("stop_colmajor_wrong_size_element"),
-//                                PROTECT(path.data()),
-//                                cpp11::as_sexp(size_exp),
-//                                // cpp11::integers{size_exp},
-//                                cpp11::as_sexp(size_act)));
-//   r_eval(call, tibblify_ns_env);
-// }
-//
-// inline void check_colmajor_size(SEXP value, R_xlen_t n_rows, const Path& path) {
-//   R_len_t size = short_vec_size(value);
-//   if (n_rows != size) {
-//     stop_colmajor_wrong_size_element(path, n_rows, size);
-//   }
-// }
-//
-// inline void stop_colmajor_non_list_element(const Path& path, SEXP x) {
-//   SEXP call = PROTECT(r_call3(r_sym("stop_colmajor_non_list_element"),
-//                                PROTECT(path.data()),
-//                                x));
-//   r_eval(call, tibblify_ns_env);
-// }
+static inline
+void stop_colmajor_wrong_size_element(r_obj* path, r_ssize size_exp, r_ssize size_act) {
+  r_obj* call = KEEP(r_call4(r_sym("stop_colmajor_wrong_size_element"),
+                             path,
+                             r_int(size_exp),
+                             r_int(size_act)));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void check_colmajor_size(r_obj* value, r_ssize n_rows, struct Path* path) {
+  r_ssize size = short_vec_size(value);
+  if (n_rows != size) {
+    stop_colmajor_wrong_size_element(path->data, n_rows, size);
+  }
+}
+
+static inline
+void stop_colmajor_non_list_element(r_obj* path, r_obj* x) {
+  r_obj* call = KEEP(r_call3(r_sym("stop_colmajor_non_list_element"),
+                             path,
+                             x));
+  r_eval(call, tibblify_ns_env);
+}

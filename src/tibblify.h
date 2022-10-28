@@ -36,6 +36,12 @@ extern SEXP syms_vec_names2;
 extern SEXP syms_vec_flatten;
 extern SEXP syms_vec_init;
 
+struct r_string_input_form_struct {
+  r_obj* rowmajor;
+  r_obj* colmajor;
+};
+extern struct r_string_input_form_struct r_string_input_form;
+
 struct r_string_types_struct {
   r_obj* sub;
   r_obj* row;
@@ -45,7 +51,6 @@ struct r_string_types_struct {
   r_obj* unspecified;
   r_obj* variant;
 };
-
 extern struct r_string_types_struct r_string_types;
 
 struct r_vector_form_struct {

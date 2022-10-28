@@ -44,6 +44,9 @@ void tibblify_init_utils(SEXP ns) {
 
   classes_tibble = r_new_shared_vector(STRSXP, 3);
 
+  r_preserve_global(r_string_input_form.rowmajor = r_str("rowmajor"));
+  r_preserve_global(r_string_input_form.colmajor = r_str("colmajor"));
+
   r_preserve_global(r_string_types.sub = r_str("sub"));
   r_preserve_global(r_string_types.row = r_str("row"));
   r_preserve_global(r_string_types.df = r_str("df"));

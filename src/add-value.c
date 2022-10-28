@@ -127,6 +127,37 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
   ADD_VALUE_BARRIER(r_chr_poke, r_globals.na_str, r_globals.empty_chr, r_chr_get);
 }
 
+#define ADD_VALUE_COLMAJOR(PTYPE)                              \
+  if (value == r_null) {                                       \
+    return;                                                    \
+  }                                                            \
+                                                               \
+  check_colmajor_size(value, n_rows, path);                    \
+  v_collector->data = vec_cast(value, PTYPE);
+
+void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  // TODO does this really need the cast here?
+  // if so -> need to be protected!
+  ADD_VALUE_COLMAJOR(r_globals.empty_lgl);
+
+  // if (value == r_null) {
+  //   // TODO
+  //   return;
+  // }
+}
+
+void add_value_int_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  ADD_VALUE_COLMAJOR(r_globals.empty_int);
+}
+
+void add_value_dbl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  ADD_VALUE_COLMAJOR(r_globals.empty_dbl);
+}
+
+void add_value_chr_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  ADD_VALUE_COLMAJOR(r_globals.empty_chr);
+}
+
 void add_value_scalar(struct collector* v_collector, r_obj* value, struct Path* path) {
   if (value == r_null) {
     r_obj* na = v_collector->details.scalar_coll.na;
@@ -144,6 +175,10 @@ void add_value_scalar(struct collector* v_collector, r_obj* value, struct Path* 
   r_list_poke(v_collector->data, v_collector->current_row, value_casted);
   ++v_collector->current_row;
   FREE(1);
+}
+
+void add_value_scalar_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  ADD_VALUE_COLMAJOR(v_collector->details.scalar_coll.ptype_inner);
 }
 
 r_obj* list_unchop_value(r_obj* value,
@@ -231,6 +266,7 @@ void add_value_vector(struct collector* v_collector, r_obj* value, struct Path* 
   if (v_vec_coll->elt_transform != r_null) value = apply_transform(value, v_vec_coll->elt_transform);
   KEEP(value);
 
+  r_printf("add value vector()\n");
   r_obj* value_casted = KEEP(vec_cast(value, v_collector->ptype));
   r_obj* value_prepped = KEEP(v_vec_coll->prep_data(value_casted, names, v_vec_coll->col_names));
 
@@ -238,6 +274,19 @@ void add_value_vector(struct collector* v_collector, r_obj* value, struct Path* 
   ++v_collector->current_row;
 
   FREE(4);
+}
+
+void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  if (r_typeof(value) != R_TYPE_list) {
+    stop_colmajor_non_list_element(path->data, value);
+  }
+
+  check_colmajor_size(value, n_rows, path);
+  r_obj* const * v_value = r_list_cbegin(value);
+
+  for (r_ssize row = 0; row < n_rows; row++) {
+    add_value_vector(v_collector, v_value[row], path);
+  }
 }
 
 void add_value_variant(struct collector* v_collector, r_obj* value, struct Path* path) {
@@ -253,6 +302,31 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
   r_list_poke(v_collector->data, v_collector->current_row, value);
   ++v_collector->current_row;
   FREE(1);
+}
+
+void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  // check_colmajor_size(value, n_rows, path);
+  // if (this->elt_transform != r_null) {
+  //   cpp11::stop("`elt_transform` not supported for `input_form = \"colmajor\"");
+  // }
+
+  // TODO
+  // if (this->transform == r_null) {
+  //   this->data = value;
+  //   return;
+  // }
+
+  if (r_typeof(value) != R_TYPE_list) {
+    stop_colmajor_non_list_element(path->data, value);
+  }
+
+  check_colmajor_size(value, n_rows, path);
+  r_obj* const * v_value = r_list_cbegin(value);
+
+  for (r_ssize row = 0; row < n_rows; row++) {
+    // add_value_vector(v_collector, v_value[row], path);
+    add_value_variant(v_collector, v_value[row], path);
+  }
 }
 
 void update_fields(struct collector* v_collector,
@@ -319,6 +393,39 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
   path_up(path);
 }
 
+void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+  //  TODO what if 0 fields?
+  r_ssize n_fields = r_length(value);
+  r_obj* field_names = r_names(value);
+  if (field_names == r_null) {
+    stop_names_is_null(path->data);
+  }
+  // update_fields(v_collector, field_names, n_fields, path);
+
+  struct multi_collector* v_multi_coll = &v_collector->details.multi_coll;
+  r_obj* const * v_keys = r_chr_cbegin(v_multi_coll->keys);
+  r_obj* const * v_value = r_list_cbegin(value);
+
+  path_down(path);
+  struct collector* v_collectors = v_multi_coll->collectors;
+  for (int key_index = 0; key_index < v_multi_coll->n_keys; ++key_index) {
+    int loc = v_multi_coll->p_key_match_ind[key_index];
+    r_obj* cur_key = v_keys[key_index];
+    path_replace_key(path, cur_key);
+
+    struct collector* v_cur_coll = &v_collectors[key_index];
+    if (loc < 0) {
+      // v_cur_coll->add_default_colmajor(v_cur_coll, path);
+      // (*collector_vec[key_index]).add_default_colmajor(true, path);
+    } else {
+      r_obj* cur_value = v_value[loc];
+      v_cur_coll->add_value_colmajor(v_cur_coll, cur_value, n_rows, path);
+    }
+  }
+  path_up(path);
+
+}
+
 void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path) {
   if (value == r_null) {
     r_list_poke(v_collector->data, v_collector->current_row, r_null);
@@ -350,6 +457,21 @@ r_obj* parse(struct collector* v_collector,
   if (v_collector->details.multi_coll.names_col != r_null) {
     r_list_poke(out, 0, names2(value));
   }
+
+  return out;
+}
+
+r_obj* parse_colmajor(struct collector* v_collector,
+                      r_obj* value,
+                      struct Path* path) {
+  // TODO calculate `n_rows` correctly
+  r_ssize n_rows = short_vec_size(r_list_get(value, 0));
+  // r_printf("# rows: %d\n", n_rows);
+  alloc_row_collector(v_collector, n_rows);
+
+  add_value_row_colmajor(v_collector, value, n_rows, path);
+
+  r_obj* out = finalize_row(v_collector);
 
   return out;
 }

@@ -15,6 +15,7 @@ r_obj* finalize_atomic_scalar(struct collector* v_collector) {
 }
 
 r_obj* finalize_scalar(struct collector* v_collector) {
+  // TODO if colmajor -> don't flatten
   r_obj* data = vec_flatten(v_collector->data, v_collector->details.vec_coll.ptype_inner);
   KEEP(data);
 

@@ -6,6 +6,7 @@
 #include "add-value.h"
 #include "finalize.h"
 
+struct r_string_input_form_struct r_string_input_form;
 struct r_string_types_struct r_string_types;
 struct r_vector_form_struct r_vector_form;
 
@@ -28,17 +29,19 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* ffi_path) {
   r_obj* type = r_chr_get(r_list_get_by_name(spec, "type"), 0);
   r_obj* out;
 
-  alloc_row_collector(coll_parser, 10);
+  if (coll_parser->details.multi_coll.rowmajor) {
+    if (type == strings_df) {
+      // r_obj* names_col = r_list_get_by_name(spec, "names_col");
+      out = parse(coll_parser, data, &path);
+      // } else (type == strings_object) {
+    } else {
+      alloc_row_collector(coll_parser, 1);
+      add_value_row(coll_parser, data, &path);
 
-  if (type == strings_df) {
-    // r_obj* names_col = r_list_get_by_name(spec, "names_col");
-    out = parse(coll_parser, data, &path);
-  // } else (type == strings_object) {
+      out = finalize_row(coll_parser);
+    }
   } else {
-    alloc_row_collector(coll_parser, 1);
-    add_value_row(coll_parser, data, &path);
-
-    out = finalize_row(coll_parser);
+    out = parse_colmajor(coll_parser, data, &path);
   }
 
   FREE(3);

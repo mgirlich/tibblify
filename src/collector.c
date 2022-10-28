@@ -72,6 +72,7 @@ struct collector* new_scalar_collector(bool required,
   if (vec_is(ptype_inner, r_globals.empty_lgl)) {
     p_coll->alloc = &alloc_lgl_collector;
     p_coll->add_value = &add_value_lgl;
+    p_coll->add_value_colmajor = &add_value_lgl_colmajor;
     p_coll->add_default = &add_default_lgl;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.lgl_coll.default_value = *r_lgl_begin(default_value);
@@ -79,24 +80,28 @@ struct collector* new_scalar_collector(bool required,
   } else if (vec_is(ptype_inner, r_globals.empty_int)) {
     p_coll->alloc = &alloc_int_collector;
     p_coll->add_value = &add_value_int;
+    p_coll->add_value_colmajor = &add_value_int_colmajor;
     p_coll->add_default = &add_default_int;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.int_coll.default_value = *r_int_begin(default_value);
   } else if (vec_is(ptype_inner, r_globals.empty_dbl)) {
     p_coll->alloc = &alloc_dbl_collector;
     p_coll->add_value = &add_value_dbl;
+    p_coll->add_value_colmajor = &add_value_dbl_colmajor;
     p_coll->add_default = &add_default_dbl;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.dbl_coll.default_value = *r_dbl_begin(default_value);
   } else if (vec_is(ptype_inner, r_globals.empty_chr)) {
     p_coll->alloc = &alloc_chr_collector;
     p_coll->add_value = &add_value_chr;
+    p_coll->add_value_colmajor = &add_value_chr_colmajor;
     p_coll->add_default = &add_default_chr;
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.chr_coll.default_value = r_chr_get(default_value, 0);
   } else {
     p_coll->alloc = &alloc_coll;
     p_coll->add_value = &add_value_scalar;
+    p_coll->add_value_colmajor = &add_value_scalar_colmajor;
     p_coll->add_default = &add_default_scalar;
     p_coll->finalize = &finalize_scalar;
     p_coll->details.scalar_coll.default_value = default_value;
@@ -134,6 +139,7 @@ struct collector* new_vector_collector(bool required,
   p_coll->shelter = shelter;
   p_coll->alloc = &alloc_coll;
   p_coll->add_value = &add_value_vector;
+  p_coll->add_value_colmajor = &add_value_vector_colmajor;
   p_coll->add_default = &add_default_vector;
   p_coll->finalize = &finalize_vec;
   assign_f_absent(p_coll, required);
@@ -180,6 +186,7 @@ struct collector* new_variant_collector(bool required,
   p_coll->shelter = shelter;
   p_coll->alloc = &alloc_coll;
   p_coll->add_value = &add_value_variant;
+  p_coll->add_value_colmajor = &add_value_variant_colmajor;
   p_coll->add_default = &add_default_variant;
   p_coll->finalize = &finalize_variant;
   assign_f_absent(p_coll, required);
@@ -219,6 +226,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   case COLLECTOR_TYPE_row:
     p_coll->alloc = &alloc_row_collector;
     p_coll->add_value = &add_value_row;
+    p_coll->add_value_colmajor = &add_value_row_colmajor;
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
     break;

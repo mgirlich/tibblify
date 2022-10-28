@@ -108,6 +108,7 @@ struct multi_collector {
   r_obj* coll_locations; // list - needed to unpack `same_key_collector` columns
 
   r_obj* names_col;
+  bool rowmajor;
 };
 
 struct collector {
@@ -115,6 +116,7 @@ struct collector {
 
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
+  void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
   // add default value
   void (*add_default)(struct collector* v_collector, struct Path* path);
   // error if required, otherwise add default value
