@@ -44,8 +44,8 @@ struct chr_collector {
 };
 
 struct scalar_collector {
-  r_obj* ptype_inner;
   r_obj* default_value;
+  r_obj* ptype_inner;
   r_obj* na;
 };
 

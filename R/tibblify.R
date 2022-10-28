@@ -198,6 +198,11 @@ spec_prep2 <- function(spec) {
   }
 
   spec$fields <- prep_nested_keys2(spec$fields)
+  keys <- purrr::map_chr(spec$fields, list("key", 1))
+  key_order <- order(keys)
+  spec$fields <- spec$fields[key_order]
+  spec$coll_locations <- spec$coll_locations[key_order]
+
   spec
 }
 

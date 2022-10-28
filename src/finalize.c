@@ -8,19 +8,19 @@ r_obj* finalize_atomic_scalar(struct collector* v_collector) {
   r_obj* data = v_collector->data;
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
   KEEP(data);
-  data = vec_cast(data, v_collector->ptype);
 
+  data = vec_cast(data, v_collector->ptype);
   FREE(1);
   return data;
 }
 
 r_obj* finalize_scalar(struct collector* v_collector) {
-  r_obj* value = vec_flatten(v_collector->data, v_collector->details.vec_coll.ptype_inner);
-  KEEP(value);
+  r_obj* data = vec_flatten(v_collector->data, v_collector->details.vec_coll.ptype_inner);
+  KEEP(data);
 
-  if (v_collector->transform != r_null) value = apply_transform(value, v_collector->transform);
-  KEEP(value);
-  r_obj* value_cast = KEEP(vec_cast(value, v_collector->ptype));
+  if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
+  KEEP(data);
+  r_obj* value_cast = KEEP(vec_cast(data, v_collector->ptype));
 
   FREE(3);
   return value_cast;
@@ -29,10 +29,11 @@ r_obj* finalize_scalar(struct collector* v_collector) {
 r_obj* finalize_vec(struct collector* v_collector) {
   r_obj* data = v_collector->data;
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
+  KEEP(data);
 
   r_attrib_poke_class(data, classes_list_of);
   r_attrib_poke(data, syms_ptype, v_collector->details.vec_coll.list_of_ptype);
-
+  FREE(1);
   return data;
 }
 
