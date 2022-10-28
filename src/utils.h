@@ -41,46 +41,13 @@ void match_chr(r_obj* needles_sorted,
                int* indices,
                const r_ssize n_haystack);
 
-// struct Vector_Args
-// {
-//   vector_input_form input_form;
-//   bool vector_allows_empty_list;
-//   r_obj* names_to;
-//   r_obj* values_to;
-//   r_obj* na;
-//   r_obj* elt_transform;
-//
-//   Vector_Args(vector_input_form input_form_,
-//               bool vector_allows_empty_list_,
-//               SEXP names_to_,
-//               SEXP values_to_,
-//               SEXP na_,
-//               SEXP elt_transform_)
-//     : input_form(input_form_)
-//     , vector_allows_empty_list(vector_allows_empty_list_)
-//     , names_to(names_to_)
-//     , values_to(values_to_)
-//     , na(na_)
-//     , elt_transform(elt_transform_) { }
-// };
-//
-// struct Field_Args
-// {
-//   r_obj* default_sexp;
-//   r_obj* transform;
-//   r_obj* ptype;
-//   r_obj* ptype_inner;
-//
-//   Field_Args(cpp11::sexp default_sexp_ = R_NilValue,
-//              cpp11::sexp transform_ = R_NilValue,
-//              cpp11::sexp ptype_ = R_NilValue,
-//              cpp11::sexp ptype_inner_ = R_NilValue)
-//     : default_sexp(default_sexp_)
-//     , transform(transform_)
-//     , ptype(ptype_)
-//     , ptype_inner(ptype_inner_) { }
-// };
-//
+bool chr_equal(r_obj* x, r_obj* y);
+
+void check_names_unique(r_obj* field_names,
+                        const int ind[],
+                        const int n_fields,
+                        const struct Path* path);
+
 // inline vector_input_form string_to_form_enum(cpp11::r_string input_form_) {
 //   if (input_form_ == "vector") {
 //     return(vector);
@@ -92,15 +59,6 @@ void match_chr(r_obj* needles_sorted,
 //     cpp11::stop("Internal error.");
 //   }
 // }
-//
-static inline
-r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
-  switch (input_form) {
-  case VECTOR_FORM_vector: return r_chr("scalar_list");
-  case VECTOR_FORM_scalar_list: return r_chr("vector");
-  case VECTOR_FORM_object: return r_chr("object");
-  }
-}
 //
 // inline
 // SEXP set_df_attributes(SEXP list, SEXP col_names, R_xlen_t n_rows) {
@@ -194,65 +152,6 @@ bool vec_is(SEXP x, SEXP ptype) {
 //
 //   UNPROTECT(1);
 //   return(row);
-// }
-//
-// inline
-// std::vector<int> order_chr(SEXP x) {
-//   const int n = Rf_length(x);
-//   std::vector<int> out;
-//   out.reserve(n);
-//   R_orderVector1(out.data(), n, x, FALSE, FALSE);
-//   return(out);
-// }
-//
-// inline
-// std::vector<int> match_chr(SEXP needles_sorted, SEXP haystack) {
-//   LOG_DEBUG;
-//
-//   // CAREFUL: this assumes needles to be sorted!
-//   const SEXP* needles_ptr = STRING_PTR_RO(needles_sorted);
-//   const SEXP* haystack_ptr = STRING_PTR_RO(haystack);
-//
-//   auto haystack_ind = order_chr(haystack);
-//   const R_xlen_t n_needles = Rf_length(needles_sorted);
-//   const R_xlen_t n_haystack = Rf_length(haystack);
-//
-//   std::vector<int> indices;
-//   indices.reserve(n_needles);
-//
-//   int i = 0;
-//   int j = 0;
-//   for (i = 0; (i < n_needles) && (j < n_haystack); ) {
-//     SEXPREC* hay = haystack_ptr[haystack_ind[j]];
-//     LOG_DEBUG << "needle: " << CHAR(*needles_ptr) << " - hay: " << CHAR(hay);
-//
-//     if (*needles_ptr == hay) {
-//       indices[i] = haystack_ind[j];
-//       needles_ptr++;
-//       i++; j++;
-//       continue;
-//     }
-//
-//     const char* needle_char = CHAR(*needles_ptr);
-//     const char* hay_char = CHAR(hay);
-//     // needle is too small, so go to next needle
-//     if (strcmp(needle_char, hay_char) < 0) {
-//       LOG_DEBUG << "needle too small";
-//       // needle not found in haystack
-//       indices[i] = -1;
-//       needles_ptr++; i++;
-//     } else {
-//       LOG_DEBUG << "hay too small";
-//       j++;
-//     }
-//   }
-//
-//   // mark remaining needles as not found
-//   for (; i < n_needles; i++) {
-//     indices[i] = -1;
-//   }
-//
-//   return(indices);
 // }
 //
 // inline

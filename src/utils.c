@@ -1,9 +1,9 @@
 #include "utils.h"
+#include "conditions.h"
 
 r_obj* r_list_get_by_name(r_obj* x, const char* nm) {
   r_obj* names = r_names(x);
   const r_ssize n = r_length(names);
-  // TODO add checks;
 
   for (r_ssize i = 0; i < n; ++i) {
     if (strcmp(r_chr_get_c_string(names, i), nm) == 0) {
@@ -41,14 +41,14 @@ void match_chr(r_obj* needles_sorted,
   int haystack_ind[n_haystack];
   R_orderVector1(haystack_ind, n_haystack, haystack, FALSE, FALSE);
 
-  r_ssize i = 0;
-  r_ssize j = 0;
-  for (i = 0; (i < n_needles) && (j < n_haystack); ) {
-    r_obj* hay = v_haystack[haystack_ind[j]];
+  r_ssize i_needle = 0;
+  r_ssize i_hay = 0;
+  for (i_needle = 0; (i_needle < n_needles) && (i_hay < n_haystack); ) {
+    r_obj* hay = v_haystack[haystack_ind[i_hay]];
     if (*v_needles == hay) {
-      indices[i] = haystack_ind[j];
+      indices[i_needle] = haystack_ind[i_hay];
       ++v_needles;
-      ++i; ++j;
+      ++i_needle; ++i_hay;
       continue;
     }
 
@@ -57,17 +57,59 @@ void match_chr(r_obj* needles_sorted,
     // needle is too small, so go to next needle
     if (strcmp(needle_char, hay_char) < 0) {
       // needle not found in haystack
-      indices[i] = -1;
-      ++v_needles; ++i;
+      indices[i_needle] = -1;
+      ++v_needles; ++i_needle;
     } else {
-      ++j;
+      ++i_hay;
     }
   }
 
   // mark remaining needles as not found
-  for (; i < n_needles; i++) {
-    indices[i] = -1;
+  for (; i_needle < n_needles; ++i_needle) {
+    indices[i_needle] = -1;
   }
 
   return;
+}
+
+bool chr_equal(r_obj* x, r_obj* y) {
+  int n_x = r_length(x);
+  int n_y = r_length(y);
+  if (n_x != n_y) {
+    return false;
+  }
+
+  r_obj* const * v_x = r_chr_cbegin(x);
+  r_obj* const * v_y = r_chr_cbegin(y);
+
+  for (int i = 0; i < n_x; ++i, ++v_x, ++v_y) {
+    if (*v_x != *v_y) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
+void check_names_unique(r_obj* field_names,
+                        const int ind[],
+                        const int n_fields,
+                        const struct Path* path) {
+  if (n_fields == 0) return;
+
+  r_obj* const * v_field_names = r_chr_cbegin(field_names);
+  r_obj* field_nm = v_field_names[ind[0]];
+  if (field_nm == r_globals.na_str || field_nm == strings_empty) {
+    stop_empty_name(path->data, ind[0]);
+  }
+
+  for (int field_index = 1; field_index < n_fields; ++field_index) {
+    r_obj* field_nm_prev = field_nm;
+    field_nm = v_field_names[ind[field_index]];
+    if (field_nm == field_nm_prev) stop_duplicate_name(path->data, field_nm);
+
+    if (field_nm == r_globals.na_str || field_nm == strings_empty) {
+      stop_empty_name(path->data, ind[field_index]);
+    }
+  }
 }

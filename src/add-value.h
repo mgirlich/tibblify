@@ -55,16 +55,16 @@ r_obj* vec_prep_values(r_obj* value_casted, r_obj* names, r_obj* col_names) {
 static inline
 r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names) {
   r_obj* df = KEEP(r_alloc_vector(R_TYPE_list, 2));
-  r_init_tibble(df, short_vec_size(value_casted));
+  r_ssize n = short_vec_size(value_casted);
+  r_init_tibble(df, n);
   r_attrib_poke_names(df, col_names);
 
   if (names == r_null) {
-    // TODO
-    // names = na_chr(n)
-    // nms = KEEP(r_alloc_character(n));
-    // r_chr_fill(nms, r_strs.empty, n);
+    names = KEEP(r_alloc_character(n));
+    r_chr_fill(names, r_strs.empty, n);
+  } else {
+    KEEP(names);
   }
-  KEEP(names);
 
   r_list_poke(df, 0, names);
   r_list_poke(df, 1, value_casted);

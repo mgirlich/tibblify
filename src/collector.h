@@ -10,6 +10,28 @@ enum vector_form {
   VECTOR_FORM_object      = 2,
 };
 
+static inline
+enum vector_form r_to_vector_form(r_obj* input_form) {
+  if (input_form == r_vector_form.vector) {
+    return VECTOR_FORM_vector;
+  } else if (input_form == r_vector_form.scalar_list) {
+    return VECTOR_FORM_scalar_list;
+  } else if (input_form == r_vector_form.object_list) {
+    return VECTOR_FORM_object;
+  } else {
+    r_stop_internal("unexpected vector input form");
+  }
+}
+
+static inline
+r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
+  switch (input_form) {
+  case VECTOR_FORM_vector: return r_chr("scalar_list");
+  case VECTOR_FORM_scalar_list: return r_chr("vector");
+  case VECTOR_FORM_object: return r_chr("object");
+  }
+}
+
 enum collector_type {
   COLLECTOR_TYPE_scalar        = 0,
   COLLECTOR_TYPE_scalar_lgl    = 1,
@@ -60,7 +82,6 @@ struct vector_collector {
 
   enum vector_form input_form;
   bool vector_allows_empty_list;
-  r_obj* empty_element; // TODO simply use `ptype` instead?
   r_obj* elt_transform;
 
   r_obj* (*prep_data)(r_obj* value_casted, r_obj* names, r_obj* col_names);
@@ -92,7 +113,7 @@ struct multi_collector {
 struct collector {
   r_obj* shelter;
 
-  void (*init)(struct collector* v_collector, r_ssize n_rows);
+  void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
   // add default value
   void (*add_default)(struct collector* v_collector, struct Path* path);
