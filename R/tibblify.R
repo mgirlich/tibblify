@@ -56,7 +56,7 @@ tibblify <- function(x,
   # spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
   spec <- spec_prep2(spec)
   # path_ptr <- init_tibblify_path()
-  path <- vctrs::vec_init(list(), 2L)
+  path <- list(depth = 0, path_elts = list())
   call <- current_call()
   try_fetch(
     out <- .Call(ffi_tibblify, x, spec, path),
@@ -187,14 +187,17 @@ prep_nested_keys <- function(spec, shift = FALSE) {
 }
 
 spec_prep2 <- function(spec) {
+  n_cols <- length(spec$fields)
   if (is_null(spec$names_col)) {
-    coll_locations <- seq_along(spec$fields) - 1L
+    coll_locations <- seq2(1, n_cols) - 1L
     spec$col_names <- names2(spec$fields)
   } else {
-    coll_locations <- seq_along(spec$fields)
+    coll_locations <- seq2(1, n_cols)
+    n_cols <- n_cols + 1L
     spec$col_names <- c(spec$names_col, names(spec$fields))
   }
   spec$coll_locations <- as.list(coll_locations)
+  spec$n_cols <- n_cols
 
   # TODO
   # spec$fields <- purrr::map2(
@@ -205,6 +208,7 @@ spec_prep2 <- function(spec) {
   #   }
   # )
 
+  spec$ptype_dummy <- vctrs::vec_init(list(), n_cols)
   spec$fields <- prep_nested_keys2(spec$fields)
   keys <- purrr::map_chr(spec$fields, list("key", 1))
   key_order <- order(keys)
@@ -212,7 +216,6 @@ spec_prep2 <- function(spec) {
   spec$coll_locations <- spec$coll_locations[key_order]
   spec$keys <- keys[key_order]
   # TODO maybe add `key_match_ind`?
-  # TODO add dummy ptype?
 
   spec
 }
@@ -239,27 +242,6 @@ prep_nested_keys2 <- function(spec) {
         x <- prep_tib_vector(x)
       }
 
-      # if (x$type == "scalar") {
-      #   x$na <- vec_init(x$ptype_inner)
-      # } else if (x$type == "vector") {
-      #   x$na <- vec_init(x$ptype)
-      # }
-      #
-      # if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
-      #   if (is_null(x$names_to)) {
-      #     fill_list <- set_names(
-      #       list(unname(x$fill)),
-      #       x$values_to
-      #     )
-      #   } else {
-      #     fill_list <- set_names(
-      #       list(names(x$fill), unname(x$fill)),
-      #       c(x$names_to, x$values_to)
-      #     )
-      #   }
-      #   x$fill <- tibble::as_tibble(fill_list)
-      # }
-      # x
       x
     }
   )
@@ -316,13 +298,13 @@ prep_tib_vector <- function(x) {
       x$fill <- tibble::as_tibble(set_names(fill_list, col_names))
     }
     list_of_ptype <- set_names(list_of_ptype, col_names)
-    list_of_ptype <- vctrs::new_data_frame(list_of_ptype, n = 0L)
+    list_of_ptype <- tibble::as_tibble(list_of_ptype)
   } else {
     col_names <- NULL
     list_of_ptype <- x$ptype
   }
 
-  x$col_names <- col_names
+  x["col_names"] <- list(col_names)
   x$list_of_ptype <- list_of_ptype
   x$na <- vec_init(x$ptype)
 

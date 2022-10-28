@@ -94,7 +94,7 @@ struct collector {
 
   void (*init)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
-   // add default value
+  // add default value
   void (*add_default)(struct collector* v_collector, struct Path* path);
   // error if required, otherwise add default value
   void (*add_default_absent)(struct collector* v_collector, struct Path* path);
@@ -122,7 +122,8 @@ struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype,
                                        r_obj* ptype_inner,
                                        r_obj* default_value,
-                                       r_obj* transform);
+                                       r_obj* transform,
+                                       r_obj* na);
 
 struct collector* new_vector_collector(bool required,
                                        r_obj* ptype,
@@ -134,7 +135,9 @@ struct collector* new_vector_collector(bool required,
                                        r_obj* names_to,
                                        r_obj* values_to,
                                        r_obj* na,
-                                       r_obj* elt_transform);
+                                       r_obj* elt_transform,
+                                       r_obj* col_names,
+                                       r_obj* list_of_ptype);
 
 struct collector* new_variant_collector(bool required,
                                         r_obj* default_value,
@@ -144,18 +147,27 @@ struct collector* new_variant_collector(bool required,
 struct collector* new_row_collector(bool required,
                                     int n_keys,
                                     r_obj* coll_locations,
-                                    r_obj* col_names);
+                                    r_obj* col_names,
+                                    r_obj* keys,
+                                    r_obj* ptype_dummy,
+                                    int n_cols);
 
 struct collector* new_df_collector(bool required,
                                    int n_keys,
                                    r_obj* coll_locations,
                                    r_obj* col_names,
-                                   r_obj* names_col);
+                                   r_obj* names_col,
+                                   r_obj* keys,
+                                   r_obj* ptype_dummy,
+                                   int n_cols);
 
 struct collector* new_parser(int n_keys,
-                            r_obj* coll_locations,
-                            r_obj* col_names,
-                            r_obj* names_col);
+                             r_obj* coll_locations,
+                             r_obj* col_names,
+                             r_obj* names_col,
+                             r_obj* keys,
+                             r_obj* ptype_dummy,
+                             int n_cols);
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 

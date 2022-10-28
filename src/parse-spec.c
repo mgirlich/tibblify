@@ -20,6 +20,9 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
     r_obj* ffi_fields_spec = r_list_get_by_name(spec_elt, "fields");
     r_obj* coll_locations = r_list_get_by_name(spec_elt, "coll_locations");
     r_obj* col_names = r_list_get_by_name(spec_elt, "col_names");
+    r_obj* keys = r_list_get_by_name(spec_elt, "keys");
+    r_obj* ptype_dummy = r_list_get_by_name(spec_elt, "ptype_dummy");
+    int n_cols = r_int_get(r_list_get_by_name(spec_elt, "n_cols"), 0);
 
     int n_fields = r_length(ffi_fields_spec);
     struct collector* p_collector;
@@ -27,7 +30,10 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
       p_collector = new_row_collector(required,
                                       n_fields,
                                       coll_locations,
-                                      col_names);
+                                      col_names,
+                                      keys,
+                                      ptype_dummy,
+                                      n_cols);
 
 
     } else {
@@ -39,7 +45,10 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                      n_fields,
                                      coll_locations,
                                      col_names,
-                                     names_col);
+                                     names_col,
+                                     keys,
+                                     ptype_dummy,
+                                     n_cols);
     }
 
     KEEP(p_collector->shelter);
@@ -69,11 +78,13 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
   r_obj* ptype = r_list_get_by_name(spec_elt, "ptype");
   r_obj* ptype_inner = r_list_get_by_name(spec_elt, "ptype_inner");
   if (type == r_string_types.scalar) {
+    r_obj* na = r_list_get_by_name(spec_elt, "na");
     return new_scalar_collector(required,
                                 ptype,
                                 ptype_inner,
                                 default_value,
-                                transform);
+                                transform,
+                                na);
   } else if (type == r_string_types.vector) {
     r_obj* input_form = r_chr_get(r_list_get_by_name(spec_elt, "input_form"), 0);
 
@@ -87,7 +98,9 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                 r_list_get_by_name(spec_elt, "names_to"),
                                 r_list_get_by_name(spec_elt, "values_to"),
                                 r_list_get_by_name(spec_elt, "na"),
-                                r_list_get_by_name(spec_elt, "elt_transform"));
+                                r_list_get_by_name(spec_elt, "elt_transform"),
+                                r_list_get_by_name(spec_elt, "col_names"),
+                                r_list_get_by_name(spec_elt, "list_of_ptype"));
   } else {
     r_printf(CHAR(type));
     r_printf(CHAR(r_string_types.scalar));
@@ -114,10 +127,6 @@ void collector_add_fields(struct collector* p_coll,
     r_obj* ffi_locs = r_list_get(p_multi_coll->coll_locations, i);
     r_list_poke(p_coll->ptype, r_int_get(ffi_locs, 0), col);
     FREE(1);
-
-    // add key
-    r_obj* key = r_chr_get(r_list_get_by_name(v_spec[i], "key"), 0);
-    r_chr_poke(p_multi_coll->keys, i, key);
   }
 
   if (p_multi_coll->names_col != r_null) {
@@ -134,6 +143,9 @@ struct collector* create_parser(r_obj* spec) {
 
   r_obj* coll_locations = r_list_get_by_name(spec, "coll_locations");
   r_obj* col_names = r_list_get_by_name(spec, "col_names");
+  r_obj* keys = r_list_get_by_name(spec, "keys");
+  r_obj* ptype_dummy = r_list_get_by_name(spec, "ptype_dummy");
+  int n_cols = r_int_get(r_list_get_by_name(spec, "n_cols"), 0);
 
   r_obj* type = r_chr_get(r_list_get_by_name(spec, "type"), 0);
   r_obj* names_col;
@@ -146,7 +158,10 @@ struct collector* create_parser(r_obj* spec) {
   struct collector* p_parser = new_parser(n_fields,
                                           coll_locations,
                                           col_names,
-                                          names_col);
+                                          names_col,
+                                          keys,
+                                          ptype_dummy,
+                                          n_cols);
   KEEP(p_parser->shelter);
 
   bool vector_allows_empty_list = r_lgl_get(r_list_get_by_name(spec, "vector_allows_empty_list"), 0);
