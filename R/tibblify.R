@@ -188,20 +188,31 @@ prep_nested_keys <- function(spec, shift = FALSE) {
 
 spec_prep2 <- function(spec) {
   if (is_null(spec$names_col)) {
+    coll_locations <- seq_along(spec$fields) - 1L
     spec$col_names <- names2(spec$fields)
-    # TODO fix for sub collector
-    spec$coll_locations <- as.list(seq_along(spec$fields) - 1L)
   } else {
+    coll_locations <- seq_along(spec$fields)
     spec$col_names <- c(spec$names_col, names(spec$fields))
-    # TODO fix for sub collector
-    spec$coll_locations <- as.list(seq_along(spec$fields))
   }
+  spec$coll_locations <- as.list(coll_locations)
+
+  # TODO
+  # spec$fields <- purrr::map2(
+  #   spec$fields, coll_locations,
+  #   function(field, loc) {
+  #     field$loc <- loc
+  #     field
+  #   }
+  # )
 
   spec$fields <- prep_nested_keys2(spec$fields)
   keys <- purrr::map_chr(spec$fields, list("key", 1))
   key_order <- order(keys)
   spec$fields <- spec$fields[key_order]
   spec$coll_locations <- spec$coll_locations[key_order]
+  spec$keys <- keys[key_order]
+  # TODO maybe add `key_match_ind`?
+  # TODO add dummy ptype?
 
   spec
 }
@@ -222,29 +233,33 @@ prep_nested_keys2 <- function(spec) {
       if (x$type == "row" || x$type == "df") {
         # x$fields <- spec_prep2(x$fields, shift = !is.null(x$names_col))
         x <- spec_prep2(x)
-      }
-
-      if (x$type == "scalar") {
-        x$na <- vec_init(x$ptype_inner)
+      } else if (x$type == "scalar") {
+        x <- prep_tib_scalar(x)
       } else if (x$type == "vector") {
-        x$na <- vec_init(x$ptype)
+        x <- prep_tib_vector(x)
       }
 
-      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
-        if (is_null(x$names_to)) {
-          fill_list <- set_names(
-            list(unname(x$fill)),
-            x$values_to
-          )
-        } else {
-          fill_list <- set_names(
-            list(names(x$fill), unname(x$fill)),
-            c(x$names_to, x$values_to)
-          )
-        }
-        x$fill <- tibble::as_tibble(fill_list)
-      }
-
+      # if (x$type == "scalar") {
+      #   x$na <- vec_init(x$ptype_inner)
+      # } else if (x$type == "vector") {
+      #   x$na <- vec_init(x$ptype)
+      # }
+      #
+      # if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
+      #   if (is_null(x$names_to)) {
+      #     fill_list <- set_names(
+      #       list(unname(x$fill)),
+      #       x$values_to
+      #     )
+      #   } else {
+      #     fill_list <- set_names(
+      #       list(names(x$fill), unname(x$fill)),
+      #       c(x$names_to, x$values_to)
+      #     )
+      #   }
+      #   x$fill <- tibble::as_tibble(fill_list)
+      # }
+      # x
       x
     }
   )
@@ -269,6 +284,49 @@ prep_nested_keys2 <- function(spec) {
     spec_simple_prepped,
     spec_complex_prepped
   )
+}
+
+prep_tib <- function(x) {
+  if (x$type == "scalar") {
+    prep_tib_scalar(x)
+  } else if (x$type == "vector") {
+    prep_tib_vector(x)
+  } else if (x$type %in% c("row", "df")) {
+
+  }
+}
+
+prep_tib_scalar <- function(x) {
+  x$na <- vctrs::vec_init(x$ptype_inner, 1L)
+  x
+}
+
+prep_tib_vector <- function(x) {
+  if (!is.null(x$names_to) || !is.null(x$values_to)) {
+    if (!is.null(x$names_to)) {
+      col_names <- c(x$names_to, x$values_to)
+      list_of_ptype <- list(character(), x$ptype)
+      fill_list <- list(names(x$fill), unname(x$fill))
+    } else {
+      col_names <- x$values_to
+      list_of_ptype <- list(x$ptype)
+      fill_list <- list(unname(x$fill))
+    }
+    if (!is.null(x$fill)) {
+      x$fill <- tibble::as_tibble(set_names(fill_list, col_names))
+    }
+    list_of_ptype <- set_names(list_of_ptype, col_names)
+    list_of_ptype <- vctrs::new_data_frame(list_of_ptype, n = 0L)
+  } else {
+    col_names <- NULL
+    list_of_ptype <- x$ptype
+  }
+
+  x$col_names <- col_names
+  x$list_of_ptype <- list_of_ptype
+  x$na <- vec_init(x$ptype)
+
+  x
 }
 
 tibblify_prepare_unspecified <- function(spec, unspecified, call) {
