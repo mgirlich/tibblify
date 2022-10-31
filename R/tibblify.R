@@ -201,28 +201,17 @@ spec_prep2 <- function(spec) {
   spec$coll_locations <- as.list(coll_locations)
   spec$n_cols <- n_cols
 
-  # TODO
-  # spec$fields <- purrr::map2(
-  #   spec$fields, coll_locations,
-  #   function(field, loc) {
-  #     field$loc <- loc
-  #     field
-  #   }
-  # )
-
   spec$ptype_dummy <- vctrs::vec_init(list(), n_cols)
-  spec$fields <- prep_nested_keys2(spec$fields)
-  keys <- purrr::map_chr(spec$fields, list("key", 1))
-  key_order <- order(keys)
-  spec$fields <- spec$fields[key_order]
-  spec$coll_locations <- spec$coll_locations[key_order]
-  spec$keys <- keys[key_order]
+  result <- prep_nested_keys2(spec$fields, coll_locations)
+  spec$fields <- result$fields
+  spec$keys <- result$keys
+  spec$coll_locations <- result$coll_locations
   # TODO maybe add `key_match_ind`?
 
   spec
 }
 
-prep_nested_keys2 <- function(spec) {
+prep_nested_keys2 <- function(spec, coll_locations) {
   remove_first_key <- function(x) {
     x$key <- x$key[-1]
     x
@@ -236,7 +225,6 @@ prep_nested_keys2 <- function(spec) {
       x$key <- unlist(x$key)
 
       if (x$type == "row" || x$type == "df") {
-        # x$fields <- spec_prep2(x$fields, shift = !is.null(x$names_col))
         x <- spec_prep2(x)
       } else if (x$type == "scalar") {
         x <- prep_tib_scalar(x)
@@ -256,17 +244,35 @@ prep_nested_keys2 <- function(spec) {
   spec_complex_prepped <- purrr::map2(
     spec_split$key, spec_split$val,
     function(key, sub_spec) {
-      list(
+      out <- list(
         key = key,
         type = "sub",
-        spec = prep_nested_keys(sub_spec)
+        # fields = prep_nested_keys(sub_spec)
+        fields = sub_spec
       )
+
+      # browser()
+      spec_prep2(out)
     }
   )
 
-  c(
+  spec_out <- c(
     spec_simple_prepped,
     spec_complex_prepped
+  )
+
+  coll_locations <- c(
+    vec_chop(coll_locations[!is_sub]),
+    vec_split(coll_locations[is_sub], first_keys)$val
+  )
+
+  keys <- purrr::map_chr(spec_out, list("key", 1))
+  key_order <- order(keys)
+
+  list(
+    fields = spec_out[key_order],
+    coll_locations = coll_locations[key_order],
+    keys = keys[key_order]
   )
 }
 

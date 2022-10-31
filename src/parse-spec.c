@@ -8,12 +8,29 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                  bool rowmajor) {
   r_obj* type = r_chr_get(r_list_get_by_name(spec_elt, "type"), 0);
 
-  // if (type == "sub") {
-  //   cpp11::list sub_spec = elt["spec"];
-  //   auto spec_pair = parse_fields_spec(sub_spec, vector_allows_empty_list, input_form);
-  //   col_vec.push_back(Collector_Ptr(new Collector_Same_Key(spec_pair.first, spec_pair.second)));
-  //   continue;
-  // }
+  if (type == r_string_types.sub) {
+    r_obj* ffi_fields_spec = r_list_get_by_name(spec_elt, "fields");
+    r_obj* coll_locations = r_list_get_by_name(spec_elt, "coll_locations");
+    r_obj* col_names = r_list_get_by_name(spec_elt, "col_names");
+    r_obj* keys = r_list_get_by_name(spec_elt, "keys");
+    r_obj* ptype_dummy = r_list_get_by_name(spec_elt, "ptype_dummy");
+    int n_cols = r_int_get(r_list_get_by_name(spec_elt, "n_cols"), 0);
+    int n_fields = r_length(ffi_fields_spec);
+
+    struct collector*p_collector = new_sub_collector(n_fields,
+                                                     coll_locations,
+                                                     col_names,
+                                                     keys,
+                                                     ptype_dummy,
+                                                     n_cols,
+                                                     rowmajor);
+
+    KEEP(p_collector->shelter);
+    collector_add_fields(p_collector, ffi_fields_spec, vector_allows_empty_list, rowmajor);
+
+    FREE(1);
+    return p_collector;
+  }
 
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
 

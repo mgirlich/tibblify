@@ -58,10 +58,20 @@ r_obj* finalize_row(struct collector* v_collector) {
   struct collector* v_collectors = multi_coll->collectors;
 
   for (r_ssize i = 0; i < multi_coll->n_keys; ++i) {
-    r_obj* col = KEEP(v_collectors[i].finalize(&v_collectors[i]));
-    // TODO must use `coll_locations`
+    struct collector* v_coll_i = &v_collectors[i];
+    r_obj* col = KEEP(v_coll_i->finalize(v_coll_i));
+
     r_obj* ffi_locs = r_list_get(multi_coll->coll_locations, i);
-    r_list_poke(df, r_int_get(ffi_locs, 0), col);
+    if (v_coll_i->unpack) {
+      r_ssize n_locs = short_vec_size(ffi_locs);
+      for (r_ssize j = 0; j < n_locs; ++j) {
+        int loc = r_int_get(ffi_locs, j);
+        r_obj* val = r_list_get(col, j);
+        r_list_poke(df, loc, val);
+      }
+    } else {
+      r_list_poke(df, r_int_get(ffi_locs, 0), col);
+    }
     FREE(1);
   }
 

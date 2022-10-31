@@ -204,10 +204,20 @@ r_obj* get_ptype_row(struct collector* v_collector) {
 
   struct collector* v_collectors = p_multi_coll->collectors;
   for (r_ssize i = 0; i < p_multi_coll->n_keys; ++i) {
-    r_obj* col = KEEP(v_collectors[i].get_ptype(&v_collectors[i]));
-    // TODO must use `coll_locations`
+    struct collector* v_coll_i = &v_collectors[i];
+    r_obj* col = KEEP(v_coll_i->get_ptype(v_coll_i));
+
     r_obj* ffi_locs = r_list_get(p_multi_coll->coll_locations, i);
-    r_list_poke(df, r_int_get(ffi_locs, 0), col);
+    if (v_coll_i->unpack) {
+      r_ssize n_locs = short_vec_size(ffi_locs);
+      for (r_ssize j = 0; j < n_locs; ++j) {
+        int loc = r_int_get(ffi_locs, j);
+        r_obj* val = r_list_get(col, j);
+        r_list_poke(df, loc, val);
+      }
+    } else {
+      r_list_poke(df, r_int_get(ffi_locs, 0), col);
+    }
     FREE(1);
   }
 
@@ -288,6 +298,7 @@ struct collector* new_scalar_collector(bool required,
   p_coll->colmajor_nrows = &colmajor_nrows_scalar;
   p_coll->get_ptype = &get_ptype_scalar;
   p_coll->rowmajor = rowmajor;
+  p_coll->unpack = false;
   assign_f_absent(p_coll, required);
 
   p_coll->ptype = ptype;
@@ -326,6 +337,7 @@ struct collector* new_vector_collector(bool required,
   p_coll->finalize = &finalize_vec;
   p_coll->colmajor_nrows = &colmajor_nrows_coll;
   p_coll->rowmajor = rowmajor;
+  p_coll->unpack = false;
   assign_f_absent(p_coll, required);
 
   p_coll->ptype = ptype;
@@ -377,6 +389,7 @@ struct collector* new_variant_collector(bool required,
   p_coll->finalize = &finalize_variant;
   p_coll->colmajor_nrows = &colmajor_nrows_coll;
   p_coll->rowmajor = rowmajor;
+  p_coll->unpack = false;
   assign_f_absent(p_coll, required);
 
   p_coll->transform = transform;
@@ -412,6 +425,16 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   p_coll->shelter = shelter;
 
   switch(coll_type) {
+  case COLLECTOR_TYPE_sub:
+    p_coll->get_ptype = &get_ptype_row;
+    p_coll->alloc = &alloc_row_collector;
+    p_coll->add_value = &add_value_row;
+    p_coll->add_value_colmajor = &add_value_row_colmajor;
+    p_coll->add_default = &add_default_row;
+    p_coll->finalize = &finalize_row;
+    p_coll->colmajor_nrows = &colmajor_nrows_row;
+    p_coll->unpack = true;
+    break;
   case COLLECTOR_TYPE_row:
     p_coll->get_ptype = &get_ptype_row;
     p_coll->alloc = &alloc_row_collector;
@@ -420,6 +443,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
     p_coll->colmajor_nrows = &colmajor_nrows_row;
+    p_coll->unpack = false;
     break;
   case COLLECTOR_TYPE_df:
     p_coll->get_ptype = &get_ptype_df;
@@ -429,6 +453,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_default = &add_default_df;
     p_coll->finalize = &finalize_df;
     p_coll->colmajor_nrows = &colmajor_nrows_multi;
+    p_coll->unpack = false;
     break;
   default:
     r_stop_internal("Unexpected collector type.");
@@ -502,6 +527,25 @@ struct collector* new_row_collector(bool required,
                                     bool rowmajor) {
   return new_multi_collector(COLLECTOR_TYPE_row,
                              required,
+                             n_keys,
+                             coll_locations,
+                             col_names,
+                             r_null,
+                             keys,
+                             ptype_dummy,
+                             n_cols,
+                             rowmajor);
+}
+
+struct collector* new_sub_collector(int n_keys,
+                                    r_obj* coll_locations,
+                                    r_obj* col_names,
+                                    r_obj* keys,
+                                    r_obj* ptype_dummy,
+                                    int n_cols,
+                                    bool rowmajor) {
+  return new_multi_collector(COLLECTOR_TYPE_sub,
+                             false,
                              n_keys,
                              coll_locations,
                              col_names,

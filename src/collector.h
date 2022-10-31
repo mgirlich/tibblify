@@ -44,6 +44,7 @@ enum collector_type {
   COLLECTOR_TYPE_variant       = 8,
   COLLECTOR_TYPE_row           = 9,
   COLLECTOR_TYPE_df            = 10,
+  COLLECTOR_TYPE_sub           = 11,
 };
 
 struct lgl_collector {
@@ -124,6 +125,7 @@ struct collector {
   void (*add_default_absent)(struct collector* v_collector, struct Path* path);
   r_obj* (*finalize)(struct collector* v_collector);
   bool rowmajor;
+  bool unpack;
 
   r_obj* transform;
   r_obj* ptype;
@@ -174,6 +176,14 @@ struct collector* new_variant_collector(bool required,
 
 struct collector* new_row_collector(bool required,
                                     int n_keys,
+                                    r_obj* coll_locations,
+                                    r_obj* col_names,
+                                    r_obj* keys,
+                                    r_obj* ptype_dummy,
+                                    int n_cols,
+                                    bool rowmajor);
+
+struct collector* new_sub_collector(int n_keys,
                                     r_obj* coll_locations,
                                     r_obj* col_names,
                                     r_obj* keys,
