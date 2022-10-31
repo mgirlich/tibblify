@@ -692,6 +692,30 @@ test_that("nested keys work", {
     ),
     tibble(xyz = 1)
   )
+
+  spec <- tspec_df(
+    afk = tib_chr(c("a", "f", "k")),
+    ael = tib_int(c("a", "e", "l")),
+    aek = tib_dbl(c("a", "e", "k"))
+  )
+
+  out <- tibblify(
+    list(
+      list(a = list(
+        e = list(k = -0.1, l = 1L),
+        f = list(k = "a")
+      )),
+      list(a = list(
+        e = list(k = +0.2, l = 2L),
+        f = list(k = "b")
+      ))
+    ),
+    spec
+  )
+  expect_equal(
+    out,
+    tibble(afk = c("a", "b"), ael = 1:2, aek = c(-0.1, +0.2))
+  )
 })
 
 test_that("empty spec works", {
@@ -995,25 +1019,26 @@ test_that("guesses spec by default", {
 
 # colmajor ----------------------------------------------------------------
 
-test_that("colmajor: names are checked", {
-  spec <- tspec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
-
-  expect_snapshot({
-    # no names
-    (expect_error(tibblify(list(1, 2), spec)))
-
-    # partial names
-    (expect_error(tibblify(list(x = 1, 2), spec)))
-    (expect_error(tibblify(list(1, x = 2), spec)))
-    (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
-
-    # `NA` name
-    (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
-
-    # duplicate name
-    (expect_error(tibblify(list(x = 1, x = 2), spec)))
-  })
-})
+# TODO
+# test_that("colmajor: names are checked", {
+#   spec <- tspec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
+#
+#   expect_snapshot({
+#     # no names
+#     (expect_error(tibblify(list(1, 2), spec)))
+#
+#     # partial names
+#     (expect_error(tibblify(list(x = 1, 2), spec)))
+#     (expect_error(tibblify(list(1, x = 2), spec)))
+#     (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+#
+#     # `NA` name
+#     (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+#
+#     # duplicate name
+#     (expect_error(tibblify(list(x = 1, x = 2), spec)))
+#   })
+# })
 
 test_that("colmajor: scalar column works", {
   dtt <- vctrs::new_datetime(1)
@@ -1023,7 +1048,10 @@ test_that("colmajor: scalar column works", {
   expect_equal(tib_cm(x = dtt, tib_scalar("x", dtt)), tibble(x = dtt))
 
   # errors if required but absent
+  # TODO
   # expect_snapshot((expect_error(tib2(x = 1:3, tib_lgl("y")))))
+  # TODO need to catch this when determining nrows
+  # tib_cm(x = TRUE, tib_lgl("y"))
 
   # errors if bad type
   expect_snapshot({
@@ -1115,6 +1143,7 @@ test_that("colmajor: vector column works", {
   expect_equal(tib_cm(tib_lgl_vec("x"), x = list(c(TRUE, FALSE))), tibble(x = list_of(c(TRUE, FALSE))))
   expect_equal(tib_cm(tib_vector("x", dtt), x = list(c(dtt, dtt + 1))), tibble(x = list_of(c(dtt, dtt + 1))))
 
+  # TODO probably does not make sense
   # errors if required but absent
   # expect_snapshot((expect_error(tib_cm(tib_lgl_vec("x"), list()))))
   # expect_snapshot((expect_error(tib_cm(tib_vector("x", dtt), list()))))
@@ -1140,7 +1169,8 @@ test_that("colmajor: vector column works", {
       tib_vector("x", dtt, transform = ~ vctrs::new_list_of(purrr::map(.x, ~ .x + 1), vctrs::vec_ptype(dtt))),
       x = list(c(dtt - 1, dtt))
     ),
-    tibble(x = list_of(c(dtt, dtt + 1)))
+    tibble(x = list_of(c(dtt, dtt + 1))),
+    ignore_attr = "tzone"
   )
 
   # elt_transform works
@@ -1377,24 +1407,66 @@ test_that("errors if n_rows cannot be calculated", {
 })
 
 test_that("colmajor can calculate size", {
+  # atomic scalar
   expect_equal(
     tibblify(
-      list(
-        x = NULL,
-        y = 1:2
-      ),
+      list(x = NULL, y = 1:2),
       tspec_df(tib_int("x"), tib_int("y"), .input_form = "colmajor")
     ),
     tibble(x = NA_integer_, y = 1:2)
   )
 
+  # record objects
+  x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
+  expect_equal(
+    tibblify(
+      list(x = NULL, y = c(x_rcrd, x_rcrd + 1)),
+      tspec_df(tib_int("x"), tib_scalar("y", x_rcrd), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = c(x_rcrd, x_rcrd + 1))
+  )
+
+  # vector
+  expect_equal(
+    tibblify(
+      list(x = NULL, y = list(1:4, 1:3)),
+      tspec_df(tib_int("x"), tib_int_vec("y"), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = list_of(1:4, 1:3))
+  )
+
+  # row
+  expect_equal(
+    tibblify(
+      list(x = NULL, y = list(a = 1:2)),
+      tspec_df(tib_int("x"), tib_row("y", tib_int("a")), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = tibble(a = 1:2))
+  )
+
+  # df
+  expect_equal(
+    tibblify(
+      list(
+        x = NULL,
+        y = list(
+          list(a = 1:2),
+          list(a = 1)
+        )
+      ),
+      tspec_df(tib_int("x"), tib_df("y", tib_int("a")), .input_form = "colmajor")
+    ),
+    tibble(x = NA_integer_, y = list_of(tibble(a = 1:2), tibble(a = 1)))
+  )
+
+  # TODO should mention path
   expect_snapshot(
-    expect_error(
+    (expect_error(
       tibblify(
         list(row = "a"),
         tspec_df(tib_row("row", tib_int("x")), .input_form = "colmajor")
       )
-    )
+    ))
   )
 
   skip("undecided whether this should work")

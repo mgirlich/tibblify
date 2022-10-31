@@ -1,6 +1,7 @@
 // #include <plogr.h>
 #include "tibblify.h"
 #include "collector.h"
+#include "conditions.h"
 #include "utils.h"
 #include "parse-spec.h"
 #include "add-value.h"
@@ -94,36 +95,8 @@ bool colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n
     return false;
   }
 
-  *n_rows = r_length(value);
-  return true;
-}
-
-bool colmajor_nrows_scalar(struct collector* v_collector, r_obj* value, r_ssize* n_rows) {
-  if (value == r_null) {
-    return false;
-  }
-
   *n_rows = short_vec_size(value);
   return true;
-}
-
-bool colmajor_nrows_multi(struct collector* v_collector, r_obj* value, r_ssize* n_rows) {
-  // r_printf("colmajor_nrows_multi()\n");
-  if (value == r_null) {
-    return false;
-  }
-
-  struct multi_collector* v_multi_coll = &v_collector->details.multi_coll;
-  struct collector* v_collectors = v_multi_coll->collectors;
-  // TODO this must iterate over values?
-  for (int key_index = 0; key_index < v_multi_coll->n_keys; ++key_index) {
-    struct collector* cur_coll = &v_collectors[key_index];
-    if (cur_coll->colmajor_nrows(cur_coll, value, n_rows)) {
-      return true;
-    }
-  }
-
-  return false;
 }
 
 bool colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows) {
@@ -131,21 +104,28 @@ bool colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_
     return false;
   }
 
-  // if (r_typeof(value) != R_TYPE_list) {
-  //   // TODO should pass along path?
-  //   Path path;
-  //   stop_colmajor_non_list_element(path, value);
-  // }
-
   *n_rows = get_collector_vec_rows(value, v_collector);
   return true;
 }
 
 r_ssize get_collector_vec_rows(r_obj* object_list,
                                struct collector* v_collector) {
-  // CAREFUL this relies on the keys being sorted
+  if (r_typeof(object_list) != R_TYPE_list) {
+    // TODO should mention path
+    r_obj* ffi_path = KEEP(r_alloc_list(2));
+    r_obj* depth = KEEP(r_alloc_integer(1));
+    r_int_poke(depth, 0, -1);
+    r_list_poke(ffi_path, 0, depth);
+    r_obj* path_elts = KEEP(r_alloc_list(30));
+    r_list_poke(ffi_path, 1, path_elts);
 
-  // TODO check if list
+    struct Path path = (struct Path) {
+      .data = ffi_path,
+      .depth = r_int_begin(depth),
+      .path_elts = path_elts
+    };
+    stop_colmajor_non_list_element(path.data, object_list);
+  }
 
   r_obj* field_names = r_names(object_list);
   const r_ssize n_fields = short_vec_size(object_list);
@@ -168,14 +148,11 @@ r_ssize get_collector_vec_rows(r_obj* object_list,
     int loc = v_multi_coll->p_key_match_ind[key_index];
 
     if (loc < 0) {
-      r_printf("* not found\n");
       continue;
     }
 
     r_obj* field = v_object_list[loc];
-    // r_printf("* found -> get n rows\n");
     if (v_collectors[key_index].colmajor_nrows(&v_collectors[key_index], field, &n_rows)) {
-      // LOG_DEBUG << "found rows: " << n_rows;
       return(n_rows);
     }
   }
@@ -286,7 +263,7 @@ struct collector* new_scalar_collector(bool required,
     p_coll->details.scalar_coll.ptype_inner = ptype_inner;
     p_coll->details.scalar_coll.na = na;
   }
-  p_coll->colmajor_nrows = &colmajor_nrows_scalar;
+  p_coll->colmajor_nrows = &colmajor_nrows_coll;
   p_coll->get_ptype = &get_ptype_scalar;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
@@ -434,7 +411,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_value_colmajor = &add_value_df_colmajor;
     p_coll->add_default = &add_default_df;
     p_coll->finalize = &finalize_df;
-    p_coll->colmajor_nrows = &colmajor_nrows_multi;
+    p_coll->colmajor_nrows = &colmajor_nrows_coll;
     p_coll->unpack = false;
     break;
   default:

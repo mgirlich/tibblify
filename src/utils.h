@@ -6,6 +6,11 @@
 #include "collector.h"
 #include "tibblify.h"
 
+static inline
+bool is_data_frame(r_obj* x) {
+  return r_inherits(x, "data.frame");
+}
+
 r_obj* r_list_get_by_name(r_obj* x, const char* nm);
 
 r_obj* apply_transform(r_obj* value, r_obj* fn);

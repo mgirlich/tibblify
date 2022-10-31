@@ -23,9 +23,7 @@ r_obj* finalize_scalar(struct collector* v_collector) {
 
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
   KEEP(data);
-  // r_printf("try cast\n");
   r_obj* value_cast = KEEP(vec_cast(data, v_collector->ptype));
-  // r_printf("done cast\n");
 
   FREE(3);
   return value_cast;

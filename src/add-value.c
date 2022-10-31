@@ -141,14 +141,7 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
   FREE(1);
 
 void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
-  // TODO does this really need the cast here?
-  // if so -> need to be protected!
   ADD_VALUE_COLMAJOR(r_globals.empty_lgl);
-
-  // if (value == r_null) {
-  //   // TODO
-  //   return;
-  // }
 }
 
 void add_value_int_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
@@ -398,15 +391,17 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
 }
 
 void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
-  // r_printf("add_value_row_colmajor()\n");
+  r_ssize n_fields = r_length(value);
+  if (n_fields == 0) {
+    //  TODO what if 0 fields?
+    return;
+  }
 
-  //  TODO what if 0 fields?
-  // r_ssize n_fields = r_length(value);
   r_obj* field_names = r_names(value);
   if (field_names == r_null) {
     stop_names_is_null(path->data);
   }
-  // update_fields(v_collector, field_names, n_fields, path);
+  update_fields(v_collector, field_names, n_fields, path);
 
   struct multi_collector* v_multi_coll = &v_collector->details.multi_coll;
   r_obj* const * v_keys = r_chr_cbegin(v_multi_coll->keys);
@@ -444,7 +439,6 @@ void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path
 }
 
 void add_value_df_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
-  // r_printf("add_value_df_colmajor()\n");
   if (r_typeof(value) != R_TYPE_list) {
     stop_colmajor_non_list_element(path->data, value);
   }
@@ -474,14 +468,18 @@ r_obj* parse(struct collector* v_collector,
   r_ssize n_rows = short_vec_size(value);
   alloc_row_collector(v_collector, n_rows);
 
-  path_down(path);
-  r_obj* const * v_value = r_list_cbegin(value);
-  for (r_ssize i = 0; i < n_rows; ++i) {
-    path_replace_int(path, i);
-    r_obj* const row = v_value[i];
-    add_value_row(v_collector, row, path);
+  if (is_data_frame(value)) {
+    add_value_row_colmajor(v_collector, value, n_rows, path);
+  } else {
+    path_down(path);
+    r_obj* const * v_value = r_list_cbegin(value);
+    for (r_ssize i = 0; i < n_rows; ++i) {
+      path_replace_int(path, i);
+      r_obj* const row = v_value[i];
+      add_value_row(v_collector, row, path);
+    }
+    path_up(path);
   }
-  path_up(path);
 
   r_obj* out = finalize_row(v_collector);
 
@@ -495,13 +493,7 @@ r_obj* parse(struct collector* v_collector,
 r_obj* parse_colmajor(struct collector* v_collector,
                       r_obj* value,
                       struct Path* path) {
-  // TODO calculate `n_rows` correctly
-  // r_ssize n_rows;
-  // colmajor_nrows_multi(v_collector, value, &n_rows);
   r_ssize n_rows = get_collector_vec_rows(value, v_collector);
-  // r_ssize n_rows = short_vec_size(r_list_get(value, 0));
-  // r_printf("# rows: %d\n", n_rows);
-  // TODO allocating only makes sense for `row` and `df` where lists are required
   alloc_row_collector(v_collector, n_rows);
 
   add_value_row_colmajor(v_collector, value, n_rows, path);
