@@ -29,7 +29,7 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* ffi_path) {
   r_obj* type = r_chr_get(r_list_get_by_name(spec, "type"), 0);
   r_obj* out;
 
-  if (coll_parser->details.multi_coll.rowmajor) {
+  if (coll_parser->rowmajor) {
     if (type == strings_df) {
       // r_obj* names_col = r_list_get_by_name(spec, "names_col");
       out = parse(coll_parser, data, &path);

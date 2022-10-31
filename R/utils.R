@@ -123,11 +123,13 @@ stop_vector_wrong_size_element <- function(path, input_form, x) {
 }
 
 stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
-  n <- length(path)
-  path_str <- path_to_string(path[-n])
+  n <- path$depth
+  field <- path$path_elts[[n + 1]]
+  path$depth <- n - 1
+  path_str <- path_to_string(path)
   msg <- c(
     "Not all fields of {.arg {path_str}} have the same size.",
-    x = "Field {.field {path[[n]]}} has size {.val {size_act}}.",
+    x = "Field {.field {field}} has size {.val {size_act}}.",
     x = "Other fields have size {.val {size_exp}}."
   )
   tibblify_abort(msg)

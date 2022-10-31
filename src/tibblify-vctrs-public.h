@@ -8,4 +8,8 @@ static inline R_len_t vec_size(SEXP x) {
   return short_vec_size(x);
 }
 
+static inline r_obj* vec_recycle(SEXP x, R_len_t n) {
+  return short_vec_recycle(x, n);
+}
+
 #endif

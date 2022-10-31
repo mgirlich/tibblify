@@ -11,26 +11,26 @@ enum vector_form {
 };
 
 static inline
-enum vector_form r_to_vector_form(r_obj* input_form) {
-  if (input_form == r_vector_form.vector) {
-    return VECTOR_FORM_vector;
-  } else if (input_form == r_vector_form.scalar_list) {
-    return VECTOR_FORM_scalar_list;
-  } else if (input_form == r_vector_form.object_list) {
-    return VECTOR_FORM_object;
-  } else {
-    r_stop_internal("unexpected vector input form");
+  enum vector_form r_to_vector_form(r_obj* input_form) {
+    if (input_form == r_vector_form.vector) {
+      return VECTOR_FORM_vector;
+    } else if (input_form == r_vector_form.scalar_list) {
+      return VECTOR_FORM_scalar_list;
+    } else if (input_form == r_vector_form.object_list) {
+      return VECTOR_FORM_object;
+    } else {
+      r_stop_internal("unexpected vector input form");
+    }
   }
-}
 
 static inline
-r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
-  switch (input_form) {
-  case VECTOR_FORM_vector: return r_chr("scalar_list");
-  case VECTOR_FORM_scalar_list: return r_chr("vector");
-  case VECTOR_FORM_object: return r_chr("object");
+  r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
+    switch (input_form) {
+    case VECTOR_FORM_vector: return r_chr("scalar_list");
+    case VECTOR_FORM_scalar_list: return r_chr("vector");
+    case VECTOR_FORM_object: return r_chr("object");
+    }
   }
-}
 
 enum collector_type {
   COLLECTOR_TYPE_scalar        = 0,
@@ -108,12 +108,12 @@ struct multi_collector {
   r_obj* coll_locations; // list - needed to unpack `same_key_collector` columns
 
   r_obj* names_col;
-  bool rowmajor;
 };
 
 struct collector {
   r_obj* shelter;
 
+  bool (*colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
   void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
@@ -122,6 +122,7 @@ struct collector {
   // error if required, otherwise add default value
   void (*add_default_absent)(struct collector* v_collector, struct Path* path);
   r_obj* (*finalize)(struct collector* v_collector);
+  bool rowmajor;
 
   r_obj* transform;
   r_obj* ptype;
@@ -146,7 +147,8 @@ struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype_inner,
                                        r_obj* default_value,
                                        r_obj* transform,
-                                       r_obj* na);
+                                       r_obj* na,
+                                       bool rowmajor);
 
 struct collector* new_vector_collector(bool required,
                                        r_obj* ptype,
@@ -160,12 +162,14 @@ struct collector* new_vector_collector(bool required,
                                        r_obj* na,
                                        r_obj* elt_transform,
                                        r_obj* col_names,
-                                       r_obj* list_of_ptype);
+                                       r_obj* list_of_ptype,
+                                       bool rowmajor);
 
 struct collector* new_variant_collector(bool required,
                                         r_obj* default_value,
                                         r_obj* transform,
-                                        r_obj* elt_transform);
+                                        r_obj* elt_transform,
+                                        bool rowmajor);
 
 struct collector* new_row_collector(bool required,
                                     int n_keys,
@@ -173,7 +177,8 @@ struct collector* new_row_collector(bool required,
                                     r_obj* col_names,
                                     r_obj* keys,
                                     r_obj* ptype_dummy,
-                                    int n_cols);
+                                    int n_cols,
+                                    bool rowmajor);
 
 struct collector* new_df_collector(bool required,
                                    int n_keys,
@@ -182,7 +187,8 @@ struct collector* new_df_collector(bool required,
                                    r_obj* names_col,
                                    r_obj* keys,
                                    r_obj* ptype_dummy,
-                                   int n_cols);
+                                   int n_cols,
+                                   bool rowmajor);
 
 struct collector* new_parser(int n_keys,
                              r_obj* coll_locations,
@@ -190,9 +196,22 @@ struct collector* new_parser(int n_keys,
                              r_obj* names_col,
                              r_obj* keys,
                              r_obj* ptype_dummy,
-                             int n_cols);
+                             int n_cols,
+                             bool rowmajor);
+
+static inline
+r_obj* vec_init_along(r_obj* ptype, r_ssize n) {
+  r_obj* ffi_n = KEEP(r_int(n));
+  r_obj* call = KEEP(r_call3(r_sym("vec_init"),
+                             ptype,
+                             ffi_n));
+  r_obj* out = r_eval(call, tibblify_ns_env);
+  FREE(2);
+  return(out);
+}
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
+r_ssize get_collector_vec_rows(r_obj* object_list, struct collector* v_collector);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* path_xptr);
 

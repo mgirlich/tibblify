@@ -55,6 +55,8 @@ tibblify <- function(x,
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
   # spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
   spec <- spec_prep2(spec)
+  spec$rowmajor <- spec$input_form == "rowmajor"
+
   # path_ptr <- init_tibblify_path()
   path <- list(depth = 0, path_elts = list())
   call <- current_call()
