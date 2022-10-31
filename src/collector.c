@@ -208,16 +208,7 @@ r_obj* get_ptype_row(struct collector* v_collector) {
     r_obj* col = KEEP(v_coll_i->get_ptype(v_coll_i));
 
     r_obj* ffi_locs = r_list_get(p_multi_coll->coll_locations, i);
-    if (v_coll_i->unpack) {
-      r_ssize n_locs = short_vec_size(ffi_locs);
-      for (r_ssize j = 0; j < n_locs; ++j) {
-        int loc = r_int_get(ffi_locs, j);
-        r_obj* val = r_list_get(col, j);
-        r_list_poke(df, loc, val);
-      }
-    } else {
-      r_list_poke(df, r_int_get(ffi_locs, 0), col);
-    }
+    assign_in_multi_collector(df, col, v_coll_i->unpack, ffi_locs);
     FREE(1);
   }
 
@@ -426,15 +417,6 @@ struct collector* new_multi_collector(enum collector_type coll_type,
 
   switch(coll_type) {
   case COLLECTOR_TYPE_sub:
-    p_coll->get_ptype = &get_ptype_row;
-    p_coll->alloc = &alloc_row_collector;
-    p_coll->add_value = &add_value_row;
-    p_coll->add_value_colmajor = &add_value_row_colmajor;
-    p_coll->add_default = &add_default_row;
-    p_coll->finalize = &finalize_row;
-    p_coll->colmajor_nrows = &colmajor_nrows_row;
-    p_coll->unpack = true;
-    break;
   case COLLECTOR_TYPE_row:
     p_coll->get_ptype = &get_ptype_row;
     p_coll->alloc = &alloc_row_collector;
@@ -443,7 +425,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
     p_coll->colmajor_nrows = &colmajor_nrows_row;
-    p_coll->unpack = false;
+    p_coll->unpack = coll_type == COLLECTOR_TYPE_sub;
     break;
   case COLLECTOR_TYPE_df:
     p_coll->get_ptype = &get_ptype_df;
@@ -458,6 +440,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   default:
     r_stop_internal("Unexpected collector type.");
   }
+
   assign_f_absent(p_coll, required);
   p_coll->ptype = ptype_dummy;
   p_coll->rowmajor = rowmajor;
@@ -575,4 +558,19 @@ struct collector* new_df_collector(bool required,
                              ptype_dummy,
                              n_cols,
                              rowmajor);
+}
+
+void assign_in_multi_collector(r_obj* x, r_obj* xi, bool unpack, r_obj* ffi_locs) {
+  // The sub collector is basically the same as the row collector but the fields
+  // should not become columns. Rather they are into the parent structure.
+  if (unpack) {
+    r_ssize n_locs = short_vec_size(ffi_locs);
+    for (r_ssize j = 0; j < n_locs; ++j) {
+      int loc = r_int_get(ffi_locs, j);
+      r_obj* val = r_list_get(xi, j);
+      r_list_poke(x, loc, val);
+    }
+  } else {
+    r_list_poke(x, r_int_get(ffi_locs, 0), xi);
+  }
 }

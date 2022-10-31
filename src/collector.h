@@ -225,6 +225,8 @@ void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(r_obj* object_list, struct collector* v_collector);
 r_obj* get_ptype_row(struct collector* v_collector);
 
+void assign_in_multi_collector(r_obj* x, r_obj* xi, bool unpack, r_obj* ffi_locs);
+
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* path_xptr);
 
 #endif
