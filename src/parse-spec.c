@@ -128,21 +128,7 @@ void collector_add_fields(struct collector* p_coll,
     struct collector* coll_i = parse_spec_elt(v_spec[i], vector_allows_empty_list, rowmajor);
     r_list_poke(p_coll->shelter, 5 + i, coll_i->shelter);
     p_multi_coll->collectors[i] = *coll_i;
-
-    // add column to ptype
-    coll_i->alloc(coll_i, 0);
-    r_obj* col = KEEP(coll_i->finalize(coll_i));
-    r_obj* ffi_locs = r_list_get(p_multi_coll->coll_locations, i);
-    r_list_poke(p_coll->ptype, r_int_get(ffi_locs, 0), col);
-    FREE(1);
   }
-
-  if (p_multi_coll->names_col != r_null) {
-    r_list_poke(p_coll->ptype, 0, r_globals.empty_chr);
-  }
-
-  r_attrib_poke_names(p_coll->ptype, p_multi_coll->col_names);
-  r_init_tibble(p_coll->ptype, 0);
 }
 
 struct collector* create_parser(r_obj* spec) {

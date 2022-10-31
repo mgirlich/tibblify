@@ -75,7 +75,9 @@ r_obj* finalize_df(struct collector* v_collector) {
   r_obj* data = v_collector->data;
 
   r_attrib_poke_class(data, classes_list_of);
-  r_attrib_poke(data, syms_ptype, v_collector->ptype);
+  r_obj* ptype = KEEP(get_ptype_row(v_collector));
+  r_attrib_poke(data, syms_ptype, ptype);
 
+  FREE(1);
   return data;
 }

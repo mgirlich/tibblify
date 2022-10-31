@@ -114,6 +114,7 @@ struct collector {
   r_obj* shelter;
 
   bool (*colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows);
+  r_obj* (*get_ptype)(struct collector* v_collector);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
   void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
@@ -212,6 +213,7 @@ r_obj* vec_init_along(r_obj* ptype, r_ssize n) {
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(r_obj* object_list, struct collector* v_collector);
+r_obj* get_ptype_row(struct collector* v_collector);
 
 r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* path_xptr);
 
