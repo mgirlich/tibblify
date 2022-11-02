@@ -88,11 +88,17 @@
 <div class="section level2">
 <h2 id="supported-input-for-tibblify">Supported input for <code>tibblify()</code><a class="anchor" aria-label="anchor" href="#supported-input-for-tibblify"></a>
 </h2>
-<p>The idea of <code><a href="../reference/tibblify.html">tibblify()</a></code> is to make it easier and more robust to convert lists of lists into tibbles. This is a typical task after receiving API responses in JSON format. The following provides an overview which kind of R objects are supported and the JSON they correspond to.</p>
+<p>The idea of <code><a href="../reference/tibblify.html">tibblify()</a></code> is to make it easier and more
+robust to convert lists of lists into tibbles. This is a typical task
+after receiving API responses in JSON format. The following provides an
+overview which kind of R objects are supported and the JSON they
+correspond to.</p>
 <div class="section level3">
 <h3 id="scalars">Scalars<a class="anchor" aria-label="anchor" href="#scalars"></a>
 </h3>
-<p>There are 4 basic types of scalars coming from JSON: boolean, integer, float, string. In R there are not really scalars but only vectors of length 1.</p>
+<p>There are 4 basic types of scalars coming from JSON: boolean,
+integer, float, string. In R there are not really scalars but only
+vectors of length 1.</p>
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;">
 <div>
 <div class="sourceCode" id="cb2"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="er">true</span></span>
@@ -108,13 +114,15 @@
 <span><span class="st">"a"</span></span></code></pre></div>
 </div>
 </div>
-<p>Other R vectors without JSON equivalent are also supported as long as they:</p>
+<p>Other R vectors without JSON equivalent are also supported as long as
+they:</p>
 <ul>
 <li>are a vector in the vctrs definition and</li>
 <li>have size one, i.e. <code>vctrs::vec_size(x)</code> is 1.</li>
 </ul>
 <p>Examples are <code>Date</code> or <code>POSIXct</code>.</p>
-<p>In general a scalar can be parsed with <code><a href="../reference/tib_scalar.html">tib_scalar()</a></code>. There are some special functions for common types:</p>
+<p>In general a scalar can be parsed with <code><a href="../reference/tib_scalar.html">tib_scalar()</a></code>.
+There are some special functions for common types:</p>
 <ul>
 <li><code><a href="../reference/tib_scalar.html">tib_lgl()</a></code></li>
 <li><code><a href="../reference/tib_scalar.html">tib_int()</a></code></li>
@@ -128,7 +136,10 @@
 <div class="section level3">
 <h3 id="vectors">Vectors<a class="anchor" aria-label="anchor" href="#vectors"></a>
 </h3>
-<p>A homogeneous JSON array is an array of scalar where each scalar has the same type. In R they correspond to a <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code>, <code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>, <code><a href="https://rdrr.io/r/base/double.html" class="external-link">double()</a></code> or <code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code> vector:</p>
+<p>A homogeneous JSON array is an array of scalar where each scalar has
+the same type. In R they correspond to a <code><a href="https://rdrr.io/r/base/logical.html" class="external-link">logical()</a></code>,
+<code><a href="https://rdrr.io/r/base/integer.html" class="external-link">integer()</a></code>, <code><a href="https://rdrr.io/r/base/double.html" class="external-link">double()</a></code> or
+<code><a href="https://rdrr.io/r/base/character.html" class="external-link">character()</a></code> vector:</p>
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;">
 <div>
 <div class="sourceCode" id="cb4"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span><span class="kw">true</span><span class="ot">,</span> <span class="kw">null</span><span class="ot">,</span> <span class="kw">false</span><span class="ot">]</span></span>
@@ -144,12 +155,16 @@
 <span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"a"</span>, <span class="cn">NA</span>, <span class="st">"c"</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<p>As for scalars other types are also supported as long as they are a vector in the vctrs definition.</p>
-<p>They can be parsed with <code><a href="../reference/tib_scalar.html">tib_vector()</a></code>. As for scalars there are shortcuts for some common types, e.g. <code><a href="../reference/tib_scalar.html">tib_lgl_vec()</a></code>.</p>
+<p>As for scalars other types are also supported as long as they are a
+vector in the vctrs definition.</p>
+<p>They can be parsed with <code><a href="../reference/tib_scalar.html">tib_vector()</a></code>. As for scalars
+there are shortcuts for some common types,
+e.g. <code><a href="../reference/tib_scalar.html">tib_lgl_vec()</a></code>.</p>
 <div class="section level4">
 <h4 id="empty-lists">Empty lists<a class="anchor" aria-label="anchor" href="#empty-lists"></a>
 </h4>
-<p>A special case are empty lists <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>. They might appear when parsing an empty JSON array:</p>
+<p>A special case are empty lists <code><a href="https://rdrr.io/r/base/list.html" class="external-link">list()</a></code>. They might appear
+when parsing an empty JSON array:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x_json</span> <span class="op">&lt;-</span> <span class="st">'[</span></span>
 <span><span class="st">  {"a": [1, 2]},</span></span>
@@ -170,7 +185,9 @@
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Problem while tibblifying `x[[2]]$a`</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Caused by error:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Can't convert &lt;list&gt; to &lt;integer&gt;.</span></span></code></pre></div>
-<p>Use <code>vector_allows_empty_list = TRUE</code> in <code>tspec_*()</code> so that they are converted to an empty vector instead:</p>
+<p>Use <code>vector_allows_empty_list = TRUE</code> in
+<code>tspec_*()</code> so that they are converted to an empty vector
+instead:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span><span class="fu"><a href="../reference/tib_scalar.html">tib_int_vec</a></span><span class="op">(</span><span class="st">"a"</span><span class="op">)</span>, vector_allows_empty_list <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">a</span></span>
 <span><span class="co">#&gt; &lt;list_of&lt;integer&gt;[2]&gt;</span></span>
@@ -183,7 +200,9 @@
 <div class="section level4">
 <h4 id="homogeneous-r-lists-of-scalars">Homogeneous R lists of scalars<a class="anchor" aria-label="anchor" href="#homogeneous-r-lists-of-scalars"></a>
 </h4>
-<p>When using <code>jsonlite::fromJSON(simplifyVector = FALSE)</code> to parse JSON to an R object one does not get R vectors but homogeneous lists of scalars:</p>
+<p>When using <code>jsonlite::fromJSON(simplifyVector = FALSE)</code> to
+parse JSON to an R object one does not get R vectors but homogeneous
+lists of scalars:</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x_json</span> <span class="op">&lt;-</span> <span class="st">'[</span></span>
 <span><span class="st">  {"a": [1, 2]},</span></span>
@@ -209,7 +228,8 @@
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Problem while tibblifying `x[[1]]$a`</span></span>
 <span><span class="co">#&gt; <span style="font-weight: bold;">Caused by error:</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BBBB00;">!</span> Can't convert &lt;list&gt; to &lt;integer&gt;.</span></span></code></pre></div>
-<p>Use <code>input_form = "scalar_list"</code> in <code><a href="../reference/tib_scalar.html">tib_vector()</a></code> to parse them:</p>
+<p>Use <code>input_form = "scalar_list"</code> in
+<code><a href="../reference/tib_scalar.html">tib_vector()</a></code> to parse them:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span><span class="fu"><a href="../reference/tib_scalar.html">tib_int_vec</a></span><span class="op">(</span><span class="st">"a"</span>, input_form <span class="op">=</span> <span class="st">"scalar_list"</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">$</span><span class="va">a</span></span>
 <span><span class="co">#&gt; &lt;list_of&lt;integer&gt;[2]&gt;</span></span>
@@ -242,7 +262,9 @@
 <span><span class="co">#&gt;   .. ..$ a: int 1</span></span>
 <span><span class="co">#&gt;   .. ..$ b: int 2</span></span>
 <span><span class="co">#&gt;   .. ..$ b: int 3</span></span></code></pre></div>
-<p>Use <code>input_form = "object"</code> in <code><a href="../reference/tib_scalar.html">tib_vector()</a></code> to parse them. To actually store the names use the <code>names_to</code> and <code>values_to</code> argument:</p>
+<p>Use <code>input_form = "object"</code> in <code><a href="../reference/tib_scalar.html">tib_vector()</a></code>
+to parse them. To actually store the names use the <code>names_to</code>
+and <code>values_to</code> argument:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/tib_scalar.html">tib_int_vec</a></span><span class="op">(</span></span>
@@ -278,7 +300,8 @@
 <div class="section level3">
 <h3 id="varying">Varying<a class="anchor" aria-label="anchor" href="#varying"></a>
 </h3>
-<p>Lists where elements do not have a common type but vary. For example:</p>
+<p>Lists where elements do not have a common type but vary. For
+example:</p>
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;">
 <div>
 <div class="sourceCode" id="cb14"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="ot">[</span><span class="dv">1</span><span class="ot">,</span> <span class="st">"a"</span><span class="ot">,</span> <span class="kw">true</span><span class="ot">]</span></span></code></pre></div>
@@ -293,7 +316,9 @@
 <div class="section level3">
 <h3 id="object">Object<a class="anchor" aria-label="anchor" href="#object"></a>
 </h3>
-<p>The R equivalent to a JSON object is a named list where the names fulfill the requirements of <code>vctrs::vec_as_names(repair = "check_unique")</code>.</p>
+<p>The R equivalent to a JSON object is a named list where the names
+fulfill the requirements of
+<code>vctrs::vec_as_names(repair = "check_unique")</code>.</p>
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;">
 <div>
 <div class="sourceCode" id="cb16"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
@@ -354,7 +379,8 @@
 <div class="section level4">
 <h4 id="object-of-objects">Object of objects<a class="anchor" aria-label="anchor" href="#object-of-objects"></a>
 </h4>
-<p>A special form are named lists of object. In JSON they are represented as objects where each element is an object.</p>
+<p>A special form are named lists of object. In JSON they are
+represented as objects where each element is an object.</p>
 <div style="display: grid; grid-template-columns: 1fr 1fr; grid-column-gap: 10px; width: 100%;">
 <div>
 <div class="sourceCode" id="cb21"><pre class="sourceCode json"><code class="sourceCode json"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
@@ -370,7 +396,8 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<p>They are also parsed with <code><a href="../reference/tib_scalar.html">tib_df()</a></code> but you can parse the names into an extra column via the <code>.names_to</code> argument:</p>
+<p>They are also parsed with <code><a href="../reference/tib_scalar.html">tib_df()</a></code> but you can parse the
+names into an extra column via the <code>.names_to</code> argument:</p>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">x_json</span> <span class="op">&lt;-</span> <span class="st">'[</span></span>
 <span><span class="st">{</span></span>
@@ -425,7 +452,8 @@
 <span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
-<p>via <code>.input_form = "colmajor"</code> in <code>tspec_*()</code>:</p>
+<p>via <code>.input_form = "colmajor"</code> in
+<code>tspec_*()</code>:</p>
 <div class="sourceCode" id="cb26"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df_spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
 <span>  <span class="fu"><a href="../reference/tib_scalar.html">tib_int</a></span><span class="op">(</span><span class="st">"a"</span><span class="op">)</span>,</span>

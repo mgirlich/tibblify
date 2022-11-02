@@ -55,7 +55,9 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="development version" id="tibblify-development-version">tibblify (development version)<a class="anchor" aria-label="anchor" href="#tibblify-development-version"></a></h2>
-<ul><li><p><code><a href="../reference/tib_scalar.html">tib_vector()</a></code> is now uses less memory and is faster.</p></li>
+<ul><li><p>In column major format all fields are required.</p></li>
+<li><p>Fixed a memory leak.</p></li>
+<li><p><code><a href="../reference/tib_scalar.html">tib_vector()</a></code> is now uses less memory and is faster.</p></li>
 <li><p><code>tspec_*()</code>, <code><a href="../reference/tib_scalar.html">tib_df()</a></code>, and <code><a href="../reference/tib_scalar.html">tib_row()</a></code> now discard <code>NULL</code> in <code>...</code>. This makes it easier to add a field conditionally with, for example <code>tspec_df(if (x) tib_int("a"))</code>.</p></li>
 <li>
 <p><code><a href="../reference/tib_scalar.html">tib_variant()</a></code> and <code><a href="../reference/tib_scalar.html">tib_vector()</a></code> give you more control for transforming:</p>
@@ -87,7 +89,8 @@
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.0" id="tibblify-010">tibblify 0.1.0<a class="anchor" aria-label="anchor" href="#tibblify-010"></a></h2><p class="text-muted">CRAN release: 2020-09-23</p>
-<ul><li>First CRAN release.</li></ul></div>
+<ul><li>First CRAN release.</li>
+</ul></div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside></div>
 
