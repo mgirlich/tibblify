@@ -1,7 +1,7 @@
-#include "tibblify.h"
+#include "parse-spec.h"
 #include "collector.h"
 #include "utils.h"
-#include "parse-spec.h"
+#include "tibblify.h"
 
 struct collector* parse_spec_elt(r_obj* spec_elt,
                                  bool vector_allows_empty_list,
@@ -141,7 +141,6 @@ void collector_add_fields(struct collector* p_coll,
   int n_fields = r_length(fields);
 
   for (r_ssize i = 0; i < n_fields; ++i) {
-    // add collector
     struct collector* coll_i = parse_spec_elt(v_spec[i], vector_allows_empty_list, rowmajor);
     r_list_poke(p_coll->shelter, 5 + i, coll_i->shelter);
     p_multi_coll->collectors[i] = *coll_i;
@@ -176,14 +175,6 @@ struct collector* create_parser(r_obj* spec) {
                                           n_cols,
                                           rowmajor);
   KEEP(p_parser->shelter);
-  // r_obj* input_form = r_chr_get(r_list_get_by_name(spec, "input_form"), 0);
-  // if (input_form == r_string_input_form.rowmajor) {
-  //   p_parser->details.multi_coll.rowmajor = TRUE;
-  // } else if (input_form == r_string_input_form.colmajor) {
-  //   p_parser->details.multi_coll.rowmajor = FALSE;
-  // } else {
-  //   r_stop_internal("Unexpected input form.");
-  // }
 
   bool vector_allows_empty_list = r_lgl_get(r_list_get_by_name(spec, "vector_allows_empty_list"), 0);
   collector_add_fields(p_parser, fields, vector_allows_empty_list, rowmajor);

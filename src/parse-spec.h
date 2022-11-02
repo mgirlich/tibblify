@@ -1,6 +1,7 @@
 #ifndef TIBBLIFY_PARSE_SPEC_H
 #define TIBBLIFY_PARSE_SPEC_H
 
+#include "collector.h"
 #include "tibblify.h"
 
 void collector_add_fields(struct collector* p_coll,

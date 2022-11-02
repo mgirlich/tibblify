@@ -1,6 +1,25 @@
 #include "utils.h"
 #include "conditions.h"
 
+SEXP tibblify_ns_env = NULL;
+
+SEXP classes_list_of = NULL;
+
+SEXP strings_object = NULL;
+SEXP strings_df = NULL;
+SEXP strings_row = NULL;
+SEXP strings_empty = NULL;
+
+SEXP syms_ptype = NULL;
+SEXP syms_transform = NULL;
+SEXP syms_value = NULL;
+SEXP syms_x = NULL;
+
+SEXP syms_vec_is = NULL;
+SEXP syms_vec_flatten = NULL;
+
+// -----------------------------------------------------------------------------
+
 r_obj* r_list_get_by_name(r_obj* x, const char* nm) {
   r_obj* names = r_names(x);
   const r_ssize n = r_length(names);
@@ -112,4 +131,57 @@ void check_names_unique(r_obj* field_names,
       stop_empty_name(path->data, ind[field_index]);
     }
   }
+}
+
+// -----------------------------------------------------------------------------
+
+r_obj* r_new_shared_vector(SEXPTYPE type, R_len_t n) {
+  r_obj* out = Rf_allocVector(type, n);
+  R_PreserveObject(out);
+  MARK_NOT_MUTABLE(out);
+  return out;
+}
+
+// [[register()]]
+void tibblify_init_utils(SEXP ns) {
+  tibblify_ns_env = ns;
+
+  r_preserve_global(r_string_input_form.rowmajor = r_str("rowmajor"));
+  r_preserve_global(r_string_input_form.colmajor = r_str("colmajor"));
+
+  r_preserve_global(r_string_types.sub = r_str("sub"));
+  r_preserve_global(r_string_types.row = r_str("row"));
+  r_preserve_global(r_string_types.df = r_str("df"));
+  r_preserve_global(r_string_types.scalar = r_str("scalar"));
+  r_preserve_global(r_string_types.vector = r_str("vector"));
+  r_preserve_global(r_string_types.variant = r_str("variant"));
+
+  r_preserve_global(r_vector_form.vector = r_str("vector"));
+  r_preserve_global(r_vector_form.scalar_list = r_str("scalar_list"));
+  r_preserve_global(r_vector_form.object_list = r_str("object"));
+
+  classes_list_of = r_new_shared_vector(STRSXP, 3);
+  r_obj* strings_list_of = r_str("vctrs_list_of");
+  r_chr_poke(classes_list_of, 0, strings_list_of);
+  r_obj* strings_vctr = r_str("vctrs_vctr");
+  r_chr_poke(classes_list_of, 1, strings_vctr);
+  r_obj* strings_list = r_str("list");
+  r_chr_poke(classes_list_of, 2, strings_list);
+
+  r_preserve_global(strings_empty = r_str(""));
+  r_preserve_global(strings_object = r_str("object"));
+  r_preserve_global(strings_df = r_str("df"));
+  r_preserve_global(strings_row = r_str("row"));
+
+  syms_ptype = r_sym("ptype");
+  syms_transform = r_sym("transform");
+  syms_value = r_sym("value");
+  syms_x = r_sym("x");
+
+  r_obj* vctrs_package = r_env_find(R_NamespaceRegistry, r_sym("vctrs"));
+  syms_vec_is = Rf_findFun(r_sym("vec_is"), vctrs_package);
+
+  r_obj* tibblify_symbol = r_sym("tibblify");
+  r_obj* tibblify_package = r_env_find(R_NamespaceRegistry, tibblify_symbol);
+  syms_vec_flatten = Rf_findFun(r_sym("vec_flatten"), tibblify_package);
 }

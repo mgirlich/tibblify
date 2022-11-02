@@ -1,9 +1,9 @@
 #ifndef TIBBLIFY_ADD_VALUE_H
 #define TIBBLIFY_ADD_VALUE_H
 
-#include "tibblify.h"
-#include "Path.h"
 #include "collector.h"
+#include "Path.h"
+#include "tibblify.h"
 
 void add_stop_required(struct collector* v_collector, struct Path* path);
 

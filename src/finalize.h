@@ -1,6 +1,7 @@
 #ifndef TIBBLIFY_FINALIZE_H
 #define TIBBLIFY_FINALIZE_H
 
+#include "collector.h"
 #include "tibblify.h"
 
 r_obj* finalize_atomic_scalar(struct collector* v_collector);

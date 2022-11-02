@@ -1,8 +1,8 @@
 #ifndef TIBBLIFY_COLLECTOR_H
 #define TIBBLIFY_COLLECTOR_H
 
-#include "tibblify.h"
 #include "Path.h"
+#include "tibblify.h"
 
 enum vector_form {
   VECTOR_FORM_vector      = 0,
@@ -11,26 +11,26 @@ enum vector_form {
 };
 
 static inline
-  enum vector_form r_to_vector_form(r_obj* input_form) {
-    if (input_form == r_vector_form.vector) {
-      return VECTOR_FORM_vector;
-    } else if (input_form == r_vector_form.scalar_list) {
-      return VECTOR_FORM_scalar_list;
-    } else if (input_form == r_vector_form.object_list) {
-      return VECTOR_FORM_object;
-    } else {
-      r_stop_internal("unexpected vector input form");
-    }
+enum vector_form r_to_vector_form(r_obj* input_form) {
+  if (input_form == r_vector_form.vector) {
+    return VECTOR_FORM_vector;
+  } else if (input_form == r_vector_form.scalar_list) {
+    return VECTOR_FORM_scalar_list;
+  } else if (input_form == r_vector_form.object_list) {
+    return VECTOR_FORM_object;
+  } else {
+    r_stop_internal("unexpected vector input form");
   }
+}
 
 static inline
-  r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
-    switch (input_form) {
-    case VECTOR_FORM_vector: return r_chr("scalar_list");
-    case VECTOR_FORM_scalar_list: return r_chr("vector");
-    case VECTOR_FORM_object: return r_chr("object");
-    }
+r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
+  switch (input_form) {
+  case VECTOR_FORM_vector: return r_chr("scalar_list");
+  case VECTOR_FORM_scalar_list: return r_chr("vector");
+  case VECTOR_FORM_object: return r_chr("object");
   }
+}
 
 enum collector_type {
   COLLECTOR_TYPE_scalar        = 0,

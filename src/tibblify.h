@@ -10,11 +10,8 @@
 #include <stdbool.h>
 #include "tibblify-vctrs.h"
 
-#define VECTOR_PTR_RO(x) ((const SEXP*) DATAPTR_RO(x))
-
 extern SEXP tibblify_ns_env;
 
-extern SEXP classes_tibble;
 extern SEXP classes_list_of;
 
 extern SEXP strings_empty;
@@ -27,11 +24,8 @@ extern SEXP syms_value;
 extern SEXP syms_x;
 extern SEXP syms_ptype;
 
-extern SEXP syms_vec_is_list;
 extern SEXP syms_vec_is;
-extern SEXP syms_vec_names2;
 extern SEXP syms_vec_flatten;
-extern SEXP syms_vec_init;
 
 struct r_string_input_form_struct {
   r_obj* rowmajor;

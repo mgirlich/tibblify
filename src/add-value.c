@@ -1,9 +1,9 @@
-#include "tibblify.h"
-#include "Path.h"
 #include "add-value.h"
-#include "finalize.h"
 #include "conditions.h"
+#include "finalize.h"
+#include "Path.h"
 #include "utils.h"
+#include "tibblify.h"
 
 void add_stop_required(struct collector* v_collector, struct Path* v_path) {
   stop_required(v_path->data);

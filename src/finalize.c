@@ -1,7 +1,7 @@
+#include "finalize.h"
 #include "tibblify.h"
 #include "collector.h"
 #include "utils.h"
-#include "finalize.h"
 
 r_obj* finalize_atomic_scalar(struct collector* v_collector) {
   r_obj* data = v_collector->data;

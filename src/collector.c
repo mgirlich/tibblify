@@ -1,5 +1,5 @@
-#include "tibblify.h"
 #include "collector.h"
+#include "tibblify.h"
 #include "conditions.h"
 #include "utils.h"
 #include "parse-spec.h"
