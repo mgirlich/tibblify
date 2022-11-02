@@ -215,7 +215,7 @@
     Code
       (expect_error(tib_int("x", fill = "a")))
     Output
-      <error/vctrs_error_incompatible_type>
+      <error/vctrs_error_cast>
       Error in `tib_int()`:
       ! Can't convert `fill` <character> to match type of `ptype_inner` <integer>.
 
@@ -224,7 +224,7 @@
     Code
       (expect_error(tib_chr("x", fill = 0L, ptype_inner = character())))
     Output
-      <error/vctrs_error_incompatible_type>
+      <error/vctrs_error_cast>
       Error in `tib_chr()`:
       ! Can't convert `fill` <integer> to match type of `ptype_inner` <character>.
 

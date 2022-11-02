@@ -4,6 +4,10 @@
 #' Use `tspec_row()` resp. `tspec_object()` to specify how to convert an object
 #' to a one row tibble resp. a list.
 #'
+#' @details
+#' In column major format all fields are required, regardless of the `required`
+#' argument.
+#'
 #' @param ... Column specification created by `tib_*()` or `tspec_*()`.
 #' @param .input_form The input form of data frame like lists. Can be one of:
 #'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.

@@ -6,10 +6,6 @@ check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
   }
 }
 
-format_path <- function(path_ptr) {
-  path_to_string(get_path_data(path_ptr))
-}
-
 path_to_string <- function(path) {
   depth <- path[[1]] + 1L
   path_elts <- path[[2]]
