@@ -33,8 +33,6 @@ Suggests:
     spelling (>= 2.2),
     testthat (>= 3.1.4)
 LinkingTo: 
-    cpp11 (>= 0.4.2),
-    plogr (>= 0.2.0),
     vctrs (>= 0.5.0)
 VignetteBuilder: 
     knitr

@@ -10,9 +10,6 @@
 #include <stdbool.h>
 #include "tibblify-vctrs.h"
 
-struct Col_Spec;
-struct Parse_Spec;
-
 #define VECTOR_PTR_RO(x) ((const SEXP*) DATAPTR_RO(x))
 
 extern SEXP tibblify_ns_env;
