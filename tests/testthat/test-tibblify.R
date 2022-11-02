@@ -48,7 +48,7 @@ test_that("names are checked", {
   })
 })
 
-test_that("scalar column works", {
+test_that("tib_scalar works", {
   dtt <- vctrs::new_datetime(1)
 
   # can parse
@@ -104,7 +104,7 @@ test_that("scalar column works", {
   )
 })
 
-test_that("record objects work", {
+test_that("tib_scalar with record objects work", {
   x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
 
   expect_equal(
@@ -138,7 +138,7 @@ test_that("record objects work", {
   )
 })
 
-test_that("scalar columns respect ptype_inner", {
+test_that("tib_scalar respect ptype_inner", {
   withr::local_timezone("UTC")
   f <- function(x) {
     stopifnot(is.character(x))
@@ -182,7 +182,7 @@ test_that("scalar columns respect ptype_inner", {
   )
 })
 
-test_that("vector column works", {
+test_that("tib_vector works", {
   dtt <- vctrs::new_datetime(1)
 
   # can parse
@@ -229,7 +229,7 @@ test_that("vector column works", {
   )
 })
 
-test_that("vector columns respect ptype_inner", {
+test_that("tib_vector respect ptype_inner", {
   spec <- tspec_df(
     tib_vector(
       "x", Sys.Date(),
@@ -268,7 +268,7 @@ test_that("explicit NULL work", {
   )
 })
 
-test_that("vector column respects vector_allows_empty_list", {
+test_that("tib_vector respects vector_allows_empty_list", {
   x <- list(
     list(x = 1),
     list(x = list()),
@@ -285,7 +285,7 @@ test_that("vector column respects vector_allows_empty_list", {
   )
 })
 
-test_that("vector column creates tibble with values_to", {
+test_that("tib_vector creates tibble with values_to", {
   spec <- tib_int_vec("x", values_to = "val")
   expect_equal(
     tib(list(x = 1:2), spec),
@@ -312,7 +312,7 @@ test_that("vector column creates tibble with values_to", {
   )
 })
 
-test_that("vector column can parse scalar list", {
+test_that("tib_vector can parse scalar list", {
   spec <- tib_int_vec("x", input_form = "scalar_list")
   expect_equal(
     tib(list(x = list(1, NULL, 3)), spec),
@@ -354,7 +354,7 @@ test_that("vector column can parse scalar list", {
   })
 })
 
-test_that("vector column can parse object", {
+test_that("tib_vector can parse object", {
   spec <- tib_int_vec("x", input_form = "object")
   expect_equal(
     tib(list(x = list(a = 1, b = NULL, c = 3)), spec),
@@ -377,7 +377,7 @@ test_that("vector column can parse object", {
   )
 })
 
-test_that("vector column creates tibble with names_to", {
+test_that("tib_vector creates tibble with names_to", {
   spec <- tib_int_vec("x", input_form = "object", values_to = "val", names_to = "name")
   expect_equal(
     tib(list(x = list(a = 1, b = NULL)), spec),
@@ -405,7 +405,7 @@ test_that("vector column creates tibble with names_to", {
   )
 })
 
-test_that("list column works", {
+test_that("tib_variant works", {
   # can parse
   expect_equal(
     tibblify(
@@ -477,7 +477,7 @@ test_that("list column works", {
   )
 })
 
-test_that("df column works", {
+test_that("tib_row works", {
   # can parse
   expect_equal(
     tibblify(
@@ -515,7 +515,7 @@ test_that("df column works", {
   )
 })
 
-test_that("list of df column works", {
+test_that("tib_df works", {
   # can parse
   expect_equal(
     tibblify(
@@ -583,7 +583,7 @@ test_that("list of df column works", {
   )
 })
 
-test_that("list of df column can use names_to", {
+test_that("tib_df can use names_to", {
   spec <- tspec_df(x = tib_df("x", a = tib_lgl("a"), .names_to = "name"))
   expect_equal(
     tibblify(
@@ -1040,7 +1040,7 @@ test_that("guesses spec by default", {
 #   })
 # })
 
-test_that("colmajor: scalar column works", {
+test_that("colmajor: tib_scalar works", {
   dtt <- vctrs::new_datetime(1)
 
   # can parse
@@ -1064,7 +1064,7 @@ test_that("colmajor: scalar column works", {
   )
 })
 
-test_that("colmajor: record objects work", {
+test_that("colmajor: tib_scalar with record objects work", {
   x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
 
   expect_equal(
@@ -1080,7 +1080,7 @@ test_that("colmajor: record objects work", {
   )
 })
 
-test_that("colmajor: scalar columns respect ptype_inner", {
+test_that("colmajor: tib_scalar respect ptype_inner", {
   f <- function(x) {
     stopifnot(is.character(x))
     as.Date(x)
@@ -1105,7 +1105,7 @@ test_that("colmajor: scalar columns respect ptype_inner", {
   )
 })
 
-test_that("colmajor: vector column works", {
+test_that("colmajor: tib_vector works", {
   dtt <- vctrs::new_datetime(1)
 
   # can parse
@@ -1144,7 +1144,7 @@ test_that("colmajor: vector column works", {
   )
 })
 
-test_that("colmajor: list column works", {
+test_that("colmajor: tib_variant works", {
   # can parse
   expect_equal(
     tib_cm(tib_variant("x"), x = list(TRUE, 1)),
@@ -1170,7 +1170,7 @@ test_that("colmajor: list column works", {
   )
 })
 
-test_that("colmajor: row works", {
+test_that("colmajor: tib_row works", {
   # can parse
   expect_equal(
     tib_cm(
@@ -1190,7 +1190,7 @@ test_that("colmajor: row works", {
   )
 })
 
-test_that("colmajor: list of df column works", {
+test_that("colmajor: tib_row works", {
   # can parse
   expect_equal(
     tib_cm(

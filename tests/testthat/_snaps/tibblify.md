@@ -103,7 +103,7 @@
       ! The names of an object must be unique.
       x `x$row` has the duplicated name "x".
 
-# scalar column works
+# tib_scalar works
 
     Code
       (expect_error(tib(list(), tib_lgl("x"))))
@@ -166,7 +166,7 @@
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
-# vector column works
+# tib_vector works
 
     Code
       (expect_error(tib(list(), tib_lgl_vec("x"))))
@@ -194,7 +194,7 @@
       Caused by error:
       ! Can't convert <character> to <logical>.
 
-# vector column respects vector_allows_empty_list
+# tib_vector respects vector_allows_empty_list
 
     Code
       (expect_error(tibblify(x, tspec_df(tib_int_vec("x")))))
@@ -205,7 +205,7 @@
       Caused by error:
       ! Can't convert <list> to <integer>.
 
-# vector column can parse scalar list
+# tib_vector can parse scalar list
 
     Code
       (expect_error(tib(list(x = 1), spec)))
@@ -252,7 +252,7 @@
       Caused by error in `vctrs::list_unchop()`:
       ! Can't convert `x[[2]]` <character> to <integer>.
 
-# vector column can parse object
+# tib_vector can parse object
 
     Code
       (expect_error(tib(list(x = list(1, 2)), spec)))
@@ -262,7 +262,7 @@
       ! A vector must be a named list for `input_form = "object."`
       x `x[[1]]$x` is not named.
 
-# list column works
+# tib_variant works
 
     Code
       (expect_error(tibblify(list(list(x = TRUE), list(zzz = 1)), tspec_df(x = tib_variant(
@@ -273,7 +273,7 @@
       ! Field 1 is required but does not exist in `x`.
       i Use `required = FALSE` if the field is optional.
 
-# df column works
+# tib_row works
 
     Code
       (expect_error(tibblify(list(list(x = list(a = TRUE)), list()), tspec_df(x = tib_row(
@@ -284,7 +284,7 @@
       ! Field x is required but does not exist in `x[[2]]`.
       i Use `required = FALSE` if the field is optional.
 
-# list of df column works
+# tib_df works
 
     Code
       (expect_error(tibblify(list(list(x = list(list(a = TRUE), list(a = FALSE))),
@@ -303,7 +303,7 @@
       ! Field a is required but does not exist in `x[[1]]$x[[2]]`.
       i Use `required = FALSE` if the field is optional.
 
-# colmajor: scalar column works
+# colmajor: tib_scalar works
 
     Code
       (expect_error(tib_cm(x = "a", tib_lgl("x"))))
@@ -322,7 +322,7 @@
       Caused by error:
       ! Can't convert <double> to <datetime<local>>.
 
-# colmajor: vector column works
+# colmajor: tib_vector works
 
     Code
       (expect_error(tib_cm(tib_lgl_vec("x"), x = "a")))
