@@ -1,6 +1,6 @@
 #include "tibblify.h"
 #include "utils.h"
-// #include "Path.h"
+#include "Path.h"
 
 static inline
 void stop_scalar(r_ssize size_act, r_obj* path) {
