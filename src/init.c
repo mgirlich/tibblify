@@ -4,6 +4,9 @@
 #include <stdlib.h> // for NULL
 #include <R_ext/Rdynload.h>
 
+#include <R_ext/Visibility.h>
+#define export attribute_visible extern
+
 /* .Call calls */
 extern SEXP ffi_tibblify(SEXP, SEXP, SEXP);
 
@@ -16,10 +19,10 @@ static const R_CallMethodDef CallEntries[] = {
     {NULL, NULL, 0}
 };
 
-void R_init_tibblify(DllInfo* dll){
+export void R_init_tibblify(DllInfo* dll){
   R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
   R_useDynamicSymbols(dll, FALSE);
-  R_forceSymbols(dll, TRUE);
+  // R_forceSymbols(dll, TRUE);
 }
 
 // tibblify-vctrs-private.c
