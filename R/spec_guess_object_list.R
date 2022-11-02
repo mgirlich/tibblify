@@ -92,7 +92,8 @@ guess_object_list_field_spec <- function(value,
 
   if (ptype_type == "df") {
     # TODO should this actually be supported?
-    cli::cli_abort("a list of dataframes is not yet supported", call = call)
+    # TODO fix error call?
+    cli::cli_abort("a list of dataframes is not yet supported")
   }
 
   if (ptype_type != "list") {

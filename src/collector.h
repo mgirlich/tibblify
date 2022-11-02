@@ -118,7 +118,7 @@ struct collector {
   r_obj* (*get_ptype)(struct collector* v_collector);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
-  void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
+  void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, struct Path* path);
   // add default value
   void (*add_default)(struct collector* v_collector, struct Path* path);
   // error if required, otherwise add default value

@@ -132,19 +132,19 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
   r_list_poke(v_collector->shelter, 0, v_collector->data);     \
   FREE(1);
 
-void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   ADD_VALUE_COLMAJOR(r_globals.empty_lgl);
 }
 
-void add_value_int_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_int_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   ADD_VALUE_COLMAJOR(r_globals.empty_int);
 }
 
-void add_value_dbl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_dbl_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   ADD_VALUE_COLMAJOR(r_globals.empty_dbl);
 }
 
-void add_value_chr_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_chr_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   ADD_VALUE_COLMAJOR(r_globals.empty_chr);
 }
 
@@ -167,7 +167,7 @@ void add_value_scalar(struct collector* v_collector, r_obj* value, struct Path* 
   FREE(1);
 }
 
-void add_value_scalar_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_scalar_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   ADD_VALUE_COLMAJOR(v_collector->details.scalar_coll.ptype_inner);
 }
 
@@ -265,13 +265,14 @@ void add_value_vector(struct collector* v_collector, r_obj* value, struct Path* 
   FREE(4);
 }
 
-void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   if (r_typeof(value) != R_TYPE_list) {
     stop_colmajor_non_list_element(path->data, value);
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-  for (r_ssize row = 0; row < n_rows; row++) {
+  r_ssize n_value = short_vec_size(value);
+  for (r_ssize row = 0; row < n_value; ++row) {
     add_value_vector(v_collector, v_value[row], path);
   }
 }
@@ -291,13 +292,14 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
   FREE(1);
 }
 
-void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   if (r_typeof(value) != R_TYPE_list) {
     stop_colmajor_non_list_element(path->data, value);
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-  for (r_ssize row = 0; row < n_rows; row++) {
+  r_ssize n_value = short_vec_size(value);
+  for (r_ssize row = 0; row < n_value; ++row) {
     add_value_variant(v_collector, v_value[row], path);
   }
 }
@@ -366,13 +368,8 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
   path_up(path);
 }
 
-void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_row_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   r_ssize n_fields = r_length(value);
-  // if (n_fields == 0) {
-  //   //  TODO what if 0 fields?
-  //   return;
-  // }
-
   r_obj* field_names = r_names(value);
   if (field_names == r_null) {
     stop_names_is_null(path->data);
@@ -395,7 +392,7 @@ void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize
       r_stop_internal("Field is absent in colmajor.");
     } else {
       r_obj* cur_value = v_value[loc];
-      v_cur_coll->add_value_colmajor(v_cur_coll, cur_value, n_rows, path);
+      v_cur_coll->add_value_colmajor(v_cur_coll, cur_value, path);
     }
   }
   path_up(path);
@@ -413,13 +410,14 @@ void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path
   ++v_collector->current_row;
 }
 
-void add_value_df_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
+void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct Path* path) {
   if (r_typeof(value) != R_TYPE_list) {
     stop_colmajor_non_list_element(path->data, value);
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-  for (r_ssize row = 0; row < n_rows; ++row) {
+  r_ssize n_value = short_vec_size(value);
+  for (r_ssize row = 0; row < n_value; ++row) {
     r_obj* row_value = v_value[row];
 
     r_obj* parsed_row;
@@ -442,7 +440,7 @@ r_obj* parse(struct collector* v_collector,
   alloc_row_collector(v_collector, n_rows);
 
   if (is_data_frame(value)) {
-    add_value_row_colmajor(v_collector, value, n_rows, path);
+    add_value_row_colmajor(v_collector, value, path);
   } else {
     path_down(path);
     r_obj* const * v_value = r_list_cbegin(value);
@@ -479,12 +477,13 @@ r_obj* parse_colmajor(struct collector* v_collector,
                          &nrow_path);
 
   if (n_rows == -1) {
+    // TODO this should probably be an internal error
     r_abort("Could not determine number of rows.");
   }
 
   alloc_row_collector(v_collector, n_rows);
 
-  add_value_row_colmajor(v_collector, value, n_rows, path);
+  add_value_row_colmajor(v_collector, value, path);
 
   r_obj* out = finalize_row(v_collector);
 

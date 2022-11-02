@@ -1144,7 +1144,7 @@ test_that("colmajor: vector column works", {
   )
 })
 
-test_that("list column works", {
+test_that("colmajor: list column works", {
   # can parse
   expect_equal(
     tib_cm(tib_variant("x"), x = list(TRUE, 1)),
@@ -1170,7 +1170,7 @@ test_that("list column works", {
   )
 })
 
-test_that("row works", {
+test_that("colmajor: row works", {
   # can parse
   expect_equal(
     tib_cm(
@@ -1190,7 +1190,7 @@ test_that("row works", {
   )
 })
 
-test_that("list of df column works", {
+test_that("colmajor: list of df column works", {
   # can parse
   expect_equal(
     tib_cm(
@@ -1224,7 +1224,7 @@ test_that("list of df column works", {
   )
 })
 
-test_that("tibble with list columns work - #43", {
+test_that("colmajor: tibble with list columns work - #43", {
   x <- tibble::tibble(x = list(1:3, NULL, 1:2))
   expect_equal(
     tibblify(x, tspec_df(x = tib_int_vec("x"), .input_form = "colmajor")),
@@ -1239,7 +1239,7 @@ test_that("tibble with list columns work - #43", {
   )
 })
 
-test_that("nested keys work", {
+test_that("colmajor: nested keys work", {
   spec <- tspec_df(
     xyz = tib_int(c("x", "y", "z")),
     .input_form = "colmajor"
@@ -1250,7 +1250,7 @@ test_that("nested keys work", {
   )
 })
 
-test_that("empty spec works", {
+test_that("colmajor: empty spec works", {
   expect_equal(
     tibblify(
       set_names(list()),
@@ -1268,7 +1268,7 @@ test_that("empty spec works", {
   )
 })
 
-test_that("errors if field is absent", {
+test_that("colmajor: errors if field is absent", {
   expect_snapshot({
     (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
     # errors even if `required = FALSE`
@@ -1276,7 +1276,7 @@ test_that("errors if field is absent", {
   })
 })
 
-test_that("colmajor can calculate size", {
+test_that("colmajor: can calculate size", {
   # atomic scalar
   expect_equal(
     tibblify(
@@ -1338,13 +1338,13 @@ test_that("colmajor can calculate size", {
   )
 })
 
-test_that("colmajor errors on NULL value", {
+test_that("colmajor: errors on NULL value", {
   expect_snapshot({
     (expect_error(tib_cm(tib_int("x"), x = NULL)))
   })
 })
 
-test_that("colmajor checks size", {
+test_that("colmajor: checks size", {
   expect_snapshot({
     (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))
     (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(x = 1:3))))

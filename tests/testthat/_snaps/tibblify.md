@@ -339,7 +339,7 @@
       Caused by error:
       ! Can't convert <character> to <logical>.
 
-# errors if field is absent
+# colmajor: errors if field is absent
 
     Code
       (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
@@ -357,7 +357,7 @@
       ! Field y is required but does not exist in `x`.
       i For `.input_form = "colmajor"` every field is required.
 
-# colmajor can calculate size
+# colmajor: can calculate size
 
     Code
       (expect_error(tibblify(list(row = "a"), tspec_df(tib_row("row", tib_int("x")),
@@ -367,18 +367,16 @@
       Error in `tibblify()`:
       ! `x$row` must be a list, not a string.
 
-# colmajor errors on NULL value
+# colmajor: errors on NULL value
 
     Code
       (expect_error(tib_cm(tib_int("x"), x = NULL)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying `x$x`
-      Caused by error in `withCallingHandlers()`:
-      ! Must not be NULL.
+      ! Field x$x must not be "NULL".
 
-# colmajor checks size
+# colmajor: checks size
 
     Code
       (expect_error(tib_cm(tib_int("x"), tib_int("y"), x = 1:2, y = 1:3)))

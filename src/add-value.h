@@ -36,15 +36,15 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
 void add_value_row(struct collector* v_collector, r_obj* value, struct Path* path);
 void add_value_df(struct collector* v_collector, r_obj* value, struct Path* path);
 
-void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_int_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_dbl_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_chr_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_scalar_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
-void add_value_df_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path);
+void add_value_lgl_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_int_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_dbl_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_chr_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_scalar_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_row_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
 
 static inline
 r_obj* vec_prep_simple(r_obj* value_casted, r_obj* names, r_obj* col_names) {

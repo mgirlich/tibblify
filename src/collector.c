@@ -92,8 +92,7 @@ void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
 
 void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
   if (value == r_null) {
-    // TODO better error message
-    r_abort("Must not be NULL.");
+    stop_colmajor_null(path->data);
   }
 
   r_ssize n_value = short_vec_size(value);
