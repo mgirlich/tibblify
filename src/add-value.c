@@ -128,13 +128,6 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
 }
 
 #define ADD_VALUE_COLMAJOR(PTYPE)                              \
-  if (value == r_null) {                                       \
-    v_collector->data = KEEP(vec_init_along(PTYPE, n_rows));   \
-    r_list_poke(v_collector->shelter, 0, v_collector->data);   \
-    FREE(1);                                                   \
-    return;                                                    \
-  }                                                            \
-                                                               \
   v_collector->data = KEEP(vec_cast(value, PTYPE));            \
   r_list_poke(v_collector->shelter, 0, v_collector->data);     \
   FREE(1);
@@ -278,7 +271,6 @@ void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, r_ss
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-
   for (r_ssize row = 0; row < n_rows; row++) {
     add_value_vector(v_collector, v_value[row], path);
   }
@@ -300,24 +292,12 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
 }
 
 void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
-  // if (this->elt_transform != r_null) {
-  //   cpp11::stop("`elt_transform` not supported for `input_form = \"colmajor\"");
-  // }
-
-  // TODO
-  // if (this->transform == r_null) {
-  //   this->data = value;
-  //   return;
-  // }
-
   if (r_typeof(value) != R_TYPE_list) {
     stop_colmajor_non_list_element(path->data, value);
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-
   for (r_ssize row = 0; row < n_rows; row++) {
-    // add_value_vector(v_collector, v_value[row], path);
     add_value_variant(v_collector, v_value[row], path);
   }
 }
@@ -388,10 +368,10 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* pat
 
 void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
   r_ssize n_fields = r_length(value);
-  if (n_fields == 0) {
-    //  TODO what if 0 fields?
-    return;
-  }
+  // if (n_fields == 0) {
+  //   //  TODO what if 0 fields?
+  //   return;
+  // }
 
   r_obj* field_names = r_names(value);
   if (field_names == r_null) {
@@ -412,8 +392,7 @@ void add_value_row_colmajor(struct collector* v_collector, r_obj* value, r_ssize
 
     struct collector* v_cur_coll = &v_collectors[key_index];
     if (loc < 0) {
-      // v_cur_coll->add_default_colmajor(v_cur_coll, path);
-      // (*collector_vec[key_index]).add_default_colmajor(true, path);
+      r_stop_internal("Field is absent in colmajor.");
     } else {
       r_obj* cur_value = v_value[loc];
       v_cur_coll->add_value_colmajor(v_cur_coll, cur_value, n_rows, path);
@@ -440,7 +419,6 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, r_ssize 
   }
 
   r_obj* const * v_value = r_list_cbegin(value);
-
   for (r_ssize row = 0; row < n_rows; ++row) {
     r_obj* row_value = v_value[row];
 
@@ -510,5 +488,6 @@ r_obj* parse_colmajor(struct collector* v_collector,
 
   r_obj* out = finalize_row(v_collector);
 
+  FREE(1);
   return out;
 }

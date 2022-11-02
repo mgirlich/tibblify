@@ -90,10 +90,9 @@ void stop_colmajor_wrong_size_element2(r_obj* path, r_ssize size_act, r_obj* nro
 }
 
 static inline
-void check_colmajor_size2(r_ssize n_value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
+void check_colmajor_size(r_ssize n_value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
   if (*n_rows == -1) {
     *n_rows = n_value;
-    // *nrow_path = *path;
 
     r_obj* depth = KEEP(r_int(*path->depth));
     r_list_poke(nrow_path->data, 0, depth);
@@ -108,9 +107,14 @@ void check_colmajor_size2(r_ssize n_value, r_ssize* n_rows, struct Path* path, s
 
   if (*n_rows != n_value) {
     stop_colmajor_wrong_size_element2(path->data, n_value, nrow_path->data, *n_rows);
-    // TODO proper error message
-    // r_abort("All fields must have the same size\nprev: %i - cur: %i.", *n_rows, n_value);
   }
+}
+
+static inline
+void stop_required_colmajor(r_obj* path) {
+  r_obj* call = KEEP(r_call2(r_sym("stop_required_colmajor"),
+                             path));
+  r_eval(call, tibblify_ns_env);
 }
 
 static inline

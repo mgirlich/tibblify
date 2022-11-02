@@ -339,24 +339,23 @@
       Caused by error:
       ! Can't convert <character> to <logical>.
 
-# errors if n_rows cannot be calculated
+# errors if field is absent
 
     Code
       (expect_error(tib_cm(tib_int("y"), x = list(b = 1:3))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying `x`
-      Caused by error in `withCallingHandlers()`:
-      ! Could not determine number of rows.
+      ! Field y is required but does not exist in `x`.
+      i For `.input_form = "colmajor"` every field is required.
     Code
-      (expect_error(tib_cm(tib_int("a"), x = list(b = 1:3))))
+      (expect_error(tib_cm(tib_int("x"), tib_int("y", required = FALSE), x = list(b = 1:
+        3))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Problem while tibblifying `x`
-      Caused by error in `withCallingHandlers()`:
-      ! Could not determine number of rows.
+      ! Field y is required but does not exist in `x`.
+      i For `.input_form = "colmajor"` every field is required.
 
 # colmajor can calculate size
 
@@ -367,6 +366,17 @@
       <error/tibblify_error>
       Error in `tibblify()`:
       ! `x$row` must be a list, not a string.
+
+# colmajor errors on NULL value
+
+    Code
+      (expect_error(tib_cm(tib_int("x"), x = NULL)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Problem while tibblifying `x$x`
+      Caused by error in `withCallingHandlers()`:
+      ! Must not be NULL.
 
 # colmajor checks size
 

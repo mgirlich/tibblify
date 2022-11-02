@@ -145,6 +145,18 @@ stop_colmajor_wrong_size_element2 <- function(path, size_act, path_exp, size_exp
   tibblify_abort(msg)
 }
 
+stop_required_colmajor <- function(path) {
+  n <- path[[1]] + 1L
+  path_elts <- path[[2]]
+  path[[1]] <- path[[1]] - 1L
+  path_str <- path_to_string(path)
+  msg <- c(
+    "Field {.field {path_elts[[n]]}} is required but does not exist in {.arg {path_str}}.",
+    i = 'For {.code .input_form = "colmajor"} every field is required.'
+  )
+  tibblify_abort(msg)
+}
+
 stop_colmajor_non_list_element <- function(path, x) {
   path_str <- path_to_string(path)
   msg <- c(

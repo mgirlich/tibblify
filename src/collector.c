@@ -92,20 +92,17 @@ void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
 
 void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
   if (value == r_null) {
-    return;
+    // TODO better error message
+    r_abort("Must not be NULL.");
   }
 
   r_ssize n_value = short_vec_size(value);
-  check_colmajor_size2(n_value, n_rows, path, nrow_path);
+  check_colmajor_size(n_value, n_rows, path, nrow_path);
 }
 
 void colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
-  if (value == r_null) {
-    return;
-  }
-
   r_ssize n_value = get_collector_vec_rows(v_collector, value, n_rows, path, nrow_path);
-  check_colmajor_size2(n_value, n_rows, path, nrow_path);
+  check_colmajor_size(n_value, n_rows, path, nrow_path);
 }
 
 r_ssize get_collector_vec_rows(struct collector* v_collector,
@@ -144,7 +141,7 @@ r_ssize get_collector_vec_rows(struct collector* v_collector,
     path_replace_key(path, cur_key);
 
     if (loc < 0) {
-      continue;
+      stop_required_colmajor(path->data);
     }
 
     r_obj* field = v_object_list[loc];
@@ -440,7 +437,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   p_multi_coll->col_names = col_names;
   p_multi_coll->coll_locations = coll_locations;
   p_multi_coll->names_col = names_col;
-  p_multi_coll->field_names_prev = r_null;
+  p_multi_coll->field_names_prev = r_globals.empty_chr;
 
   r_obj* collectors_raw = KEEP(r_alloc_raw(sizeof(struct collector) * n_keys));
   r_list_poke(shelter, 4, collectors_raw);
