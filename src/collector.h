@@ -30,6 +30,8 @@ r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
   case VECTOR_FORM_scalar_list: return r_chr("vector");
   case VECTOR_FORM_object: return r_chr("object");
   }
+
+  r_stop_unreachable();
 }
 
 enum collector_type {
