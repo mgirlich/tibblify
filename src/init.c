@@ -1,3 +1,4 @@
+#include "rlang.h"
 #include <R.h>
 #include <Rinternals.h>
 #include <stdlib.h> // for NULL
@@ -7,7 +8,7 @@
 extern SEXP ffi_tibblify(SEXP, SEXP, SEXP);
 
 // Defined below
-SEXP tibblify_initialize(SEXP);
+extern SEXP tibblify_initialize(SEXP);
 
 static const R_CallMethodDef CallEntries[] = {
     {"ffi_tibblify",           (DL_FUNC) &ffi_tibblify,           3},
