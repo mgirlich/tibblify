@@ -135,7 +135,6 @@ void add_value_chr(struct collector* v_collector, r_obj* value, struct Path* pat
     return;                                                    \
   }                                                            \
                                                                \
-  check_colmajor_size(value, n_rows, path);                    \
   v_collector->data = KEEP(vec_cast(value, PTYPE));            \
   r_list_poke(v_collector->shelter, 0, v_collector->data);     \
   FREE(1);
@@ -278,7 +277,6 @@ void add_value_vector_colmajor(struct collector* v_collector, r_obj* value, r_ss
     stop_colmajor_non_list_element(path->data, value);
   }
 
-  check_colmajor_size(value, n_rows, path);
   r_obj* const * v_value = r_list_cbegin(value);
 
   for (r_ssize row = 0; row < n_rows; row++) {
@@ -302,7 +300,6 @@ void add_value_variant(struct collector* v_collector, r_obj* value, struct Path*
 }
 
 void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_ssize n_rows, struct Path* path) {
-  // check_colmajor_size(value, n_rows, path);
   // if (this->elt_transform != r_null) {
   //   cpp11::stop("`elt_transform` not supported for `input_form = \"colmajor\"");
   // }
@@ -317,7 +314,6 @@ void add_value_variant_colmajor(struct collector* v_collector, r_obj* value, r_s
     stop_colmajor_non_list_element(path->data, value);
   }
 
-  check_colmajor_size(value, n_rows, path);
   r_obj* const * v_value = r_list_cbegin(value);
 
   for (r_ssize row = 0; row < n_rows; row++) {
@@ -443,7 +439,6 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, r_ssize 
     stop_colmajor_non_list_element(path->data, value);
   }
 
-  check_colmajor_size(value, n_rows, path);
   r_obj* const * v_value = r_list_cbegin(value);
 
   for (r_ssize row = 0; row < n_rows; ++row) {
@@ -493,7 +488,22 @@ r_obj* parse(struct collector* v_collector,
 r_obj* parse_colmajor(struct collector* v_collector,
                       r_obj* value,
                       struct Path* path) {
-  r_ssize n_rows = get_collector_vec_rows(value, v_collector);
+  r_obj* ffi_nrow_path = KEEP(r_alloc_list(2));
+  struct Path nrow_path = (struct Path) {
+    .data = ffi_nrow_path,
+  };
+  r_ssize n_rows = -1;
+
+  get_collector_vec_rows(v_collector,
+                         value,
+                         &n_rows,
+                         path,
+                         &nrow_path);
+
+  if (n_rows == -1) {
+    r_abort("Could not determine number of rows.");
+  }
+
   alloc_row_collector(v_collector, n_rows);
 
   add_value_row_colmajor(v_collector, value, n_rows, path);

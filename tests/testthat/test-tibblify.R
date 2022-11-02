@@ -1459,7 +1459,6 @@ test_that("colmajor can calculate size", {
     tibble(x = NA_integer_, y = list_of(tibble(a = 1:2), tibble(a = 1)))
   )
 
-  # TODO should mention path
   expect_snapshot(
     (expect_error(
       tibblify(

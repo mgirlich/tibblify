@@ -90,75 +90,70 @@ void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-bool colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows) {
+void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
   if (value == r_null) {
-    return false;
+    return;
   }
 
-  *n_rows = short_vec_size(value);
-  return true;
+  r_ssize n_value = short_vec_size(value);
+  check_colmajor_size2(n_value, n_rows, path, nrow_path);
 }
 
-bool colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows) {
+void colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
   if (value == r_null) {
-    return false;
+    return;
   }
 
-  *n_rows = get_collector_vec_rows(value, v_collector);
-  return true;
+  r_ssize n_value = get_collector_vec_rows(v_collector, value, n_rows, path, nrow_path);
+  check_colmajor_size2(n_value, n_rows, path, nrow_path);
 }
 
-r_ssize get_collector_vec_rows(r_obj* object_list,
-                               struct collector* v_collector) {
+r_ssize get_collector_vec_rows(struct collector* v_collector,
+                               r_obj* object_list,
+                               r_ssize* n_rows,
+                               struct Path* path,
+                               struct Path* nrow_path) {
   if (r_typeof(object_list) != R_TYPE_list) {
-    // TODO should mention path
-    r_obj* ffi_path = KEEP(r_alloc_list(2));
-    r_obj* depth = KEEP(r_alloc_integer(1));
-    r_int_poke(depth, 0, -1);
-    r_list_poke(ffi_path, 0, depth);
-    r_obj* path_elts = KEEP(r_alloc_list(30));
-    r_list_poke(ffi_path, 1, path_elts);
-
-    struct Path path = (struct Path) {
-      .data = ffi_path,
-      .depth = r_int_begin(depth),
-      .path_elts = path_elts
-    };
-    stop_colmajor_non_list_element(path.data, object_list);
+    // TODO error message should mention why it has to be a list
+    stop_colmajor_non_list_element(path->data, object_list);
   }
 
   r_obj* field_names = r_names(object_list);
   const r_ssize n_fields = short_vec_size(object_list);
 
   if (n_fields == 0) {
-    r_ssize n_rows = 0;
-    return n_rows;
+    // TODO check if this makes sense...
+    *n_rows = 0;
+    return *n_rows;
   }
 
   struct multi_collector* v_multi_coll = &v_collector->details.multi_coll;
-  r_ssize n_rows;
   match_chr(v_multi_coll->keys,
             field_names,
             v_multi_coll->p_key_match_ind,
             r_length(field_names));
 
   r_obj* const * v_object_list = r_list_cbegin(object_list);
+  r_obj* const * v_keys = r_chr_cbegin(v_multi_coll->keys);
   struct collector* v_collectors = v_multi_coll->collectors;
+
+  path_down(path);
   for (int key_index = 0; key_index < v_multi_coll->n_keys; ++key_index) {
     int loc = v_multi_coll->p_key_match_ind[key_index];
+    r_obj* cur_key = v_keys[key_index];
+    path_replace_key(path, cur_key);
 
     if (loc < 0) {
       continue;
     }
 
     r_obj* field = v_object_list[loc];
-    if (v_collectors[key_index].colmajor_nrows(&v_collectors[key_index], field, &n_rows)) {
-      return(n_rows);
-    }
+    struct collector* v_coll_cur = &v_collectors[key_index];
+    v_coll_cur->check_colmajor_nrows(v_coll_cur, field, n_rows, path, nrow_path);
   }
+  path_up(path);
 
-  // TODO better error
-  r_abort("Could not determine number of rows.");
+  return *n_rows;
 }
 
 r_obj* get_ptype_scalar(struct collector* v_collector) {
@@ -263,7 +258,7 @@ struct collector* new_scalar_collector(bool required,
     p_coll->details.scalar_coll.ptype_inner = ptype_inner;
     p_coll->details.scalar_coll.na = na;
   }
-  p_coll->colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
   p_coll->get_ptype = &get_ptype_scalar;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
@@ -303,7 +298,7 @@ struct collector* new_vector_collector(bool required,
   p_coll->add_value_colmajor = &add_value_vector_colmajor;
   p_coll->add_default = &add_default_vector;
   p_coll->finalize = &finalize_vec;
-  p_coll->colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
   assign_f_absent(p_coll, required);
@@ -355,7 +350,7 @@ struct collector* new_variant_collector(bool required,
   p_coll->add_value_colmajor = &add_value_variant_colmajor;
   p_coll->add_default = &add_default_variant;
   p_coll->finalize = &finalize_variant;
-  p_coll->colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
   assign_f_absent(p_coll, required);
@@ -401,7 +396,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_value_colmajor = &add_value_row_colmajor;
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
-    p_coll->colmajor_nrows = &colmajor_nrows_row;
+    p_coll->check_colmajor_nrows = &colmajor_nrows_row;
     p_coll->unpack = coll_type == COLLECTOR_TYPE_sub;
     break;
   case COLLECTOR_TYPE_df:
@@ -411,7 +406,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_value_colmajor = &add_value_df_colmajor;
     p_coll->add_default = &add_default_df;
     p_coll->finalize = &finalize_df;
-    p_coll->colmajor_nrows = &colmajor_nrows_coll;
+    p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
     p_coll->unpack = false;
     break;
   default:

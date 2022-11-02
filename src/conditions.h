@@ -80,10 +80,36 @@ void stop_colmajor_wrong_size_element(r_obj* path, r_ssize size_exp, r_ssize siz
 }
 
 static inline
-void check_colmajor_size(r_obj* value, r_ssize n_rows, struct Path* path) {
-  r_ssize size = short_vec_size(value);
-  if (n_rows != size) {
-    stop_colmajor_wrong_size_element(path->data, n_rows, size);
+void stop_colmajor_wrong_size_element2(r_obj* path, r_ssize size_act, r_obj* nrow_path, r_ssize size_exp) {
+  r_obj* call = KEEP(r_call5(r_sym("stop_colmajor_wrong_size_element2"),
+                             path,
+                             r_int(size_act),
+                             nrow_path,
+                             r_int(size_exp)));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void check_colmajor_size2(r_ssize n_value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
+  if (*n_rows == -1) {
+    *n_rows = n_value;
+    // *nrow_path = *path;
+
+    r_obj* depth = KEEP(r_int(*path->depth));
+    r_list_poke(nrow_path->data, 0, depth);
+    nrow_path->depth = r_int_begin(depth);
+
+    nrow_path->path_elts = KEEP(r_clone(path->path_elts));
+    r_list_poke(nrow_path->data, 1, nrow_path->path_elts);
+
+    FREE(2);
+    return;
+  }
+
+  if (*n_rows != n_value) {
+    stop_colmajor_wrong_size_element2(path->data, n_value, nrow_path->data, *n_rows);
+    // TODO proper error message
+    // r_abort("All fields must have the same size\nprev: %i - cur: %i.", *n_rows, n_value);
   }
 }
 

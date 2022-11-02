@@ -114,7 +114,7 @@ struct multi_collector {
 struct collector {
   r_obj* shelter;
 
-  bool (*colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows);
+  void (*check_colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path);
   r_obj* (*get_ptype)(struct collector* v_collector);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
@@ -222,7 +222,11 @@ r_obj* vec_init_along(r_obj* ptype, r_ssize n) {
 }
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
-r_ssize get_collector_vec_rows(r_obj* object_list, struct collector* v_collector);
+r_ssize get_collector_vec_rows(struct collector* v_collector,
+                               r_obj* value,
+                               r_ssize* n_rows,
+                               struct Path* path,
+                               struct Path* nrow_path);
 r_obj* get_ptype_row(struct collector* v_collector);
 
 void assign_in_multi_collector(r_obj* x, r_obj* xi, bool unpack, r_obj* ffi_locs);

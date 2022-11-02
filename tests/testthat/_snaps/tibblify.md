@@ -366,7 +366,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x` must be a list, not a string.
+      ! `x$row` must be a list, not a string.
 
 # colmajor checks size
 
@@ -376,23 +376,23 @@
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Not all fields of `x` have the same size.
-      x Field y has size 3.
-      x Other fields have size 2.
+      x Field x$y has size 3.
+      x Field x$x has size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_row("y", tib_int("x")), x = 1:2, y = list(
         x = 1:3))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Not all fields of `x$y` have the same size.
-      x Field x has size 3.
-      x Other fields have size 2.
+      ! Not all fields of `x` have the same size.
+      x Field x$y$x has size 3.
+      x Field x$x has size 2.
     Code
       (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Not all fields of `x` have the same size.
-      x Field y has size 1.
-      x Other fields have size 2.
+      x Field x$y has size 1.
+      x Field x$x has size 2.
 

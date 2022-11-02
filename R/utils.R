@@ -94,7 +94,6 @@ stop_object_vector_names_is_null <- function(path) {
   tibblify_abort(msg)
 }
 
-# stop_vector_non_list_element <- function(path, input_form, x) {
 stop_vector_non_list_element <- function(path, input_form, x) {
   # FIXME {.code} cannot be interpolated correctly
   path_str <- path_to_string(path)
@@ -131,6 +130,17 @@ stop_colmajor_wrong_size_element <- function(path, size_exp, size_act) {
     "Not all fields of {.arg {path_str}} have the same size.",
     x = "Field {.field {field}} has size {.val {size_act}}.",
     x = "Other fields have size {.val {size_exp}}."
+  )
+  tibblify_abort(msg)
+}
+
+stop_colmajor_wrong_size_element2 <- function(path, size_act, path_exp, size_exp) {
+  path_str <- path_to_string(path)
+  path_str_exp <- path_to_string(path_exp)
+  msg <- c(
+    "Not all fields of {.arg x} have the same size.",
+    x = "Field {.field {path_str}} has size {.val {size_act}}.",
+    x = "Field {.field {path_str_exp}} has size {.val {size_exp}}."
   )
   tibblify_abort(msg)
 }
