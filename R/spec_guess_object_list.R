@@ -92,7 +92,8 @@ guess_object_list_field_spec <- function(value,
 
   if (ptype_type == "df") {
     # TODO should this actually be supported?
-    cli::cli_abort("a list of dataframes is not yet supported", call = call)
+    # TODO fix error call?
+    cli::cli_abort("a list of dataframes is not yet supported")
   }
 
   if (ptype_type != "list") {
@@ -173,7 +174,7 @@ is_field_scalar <- function(value) {
     return(FALSE)
   }
 
-  size_0_is_null <- vec_equal_na(value[sizes == 0])
+  size_0_is_null <- vec_detect_missing(value[sizes == 0])
   if (all(size_0_is_null)) {
     return(TRUE)
   }

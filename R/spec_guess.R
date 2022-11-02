@@ -146,7 +146,7 @@ is_unspecified <- function(x) {
 make_unchop <- function(ptype) {
   rlang::new_function(
     pairlist2(x = ),
-    call2(sym("vec_unchop"), x = sym("x"), ptype = ptype)
+    call2(sym("list_unchop"), x = sym("x"), ptype = ptype)
   )
 }
 

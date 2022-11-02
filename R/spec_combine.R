@@ -246,7 +246,7 @@ tib_combine_fill <- function(tib_list, type, ptype, call) {
 
   scalar_idx <- types == "scalar"
   scalar_fill <- vec_c(!!!fill_list[scalar_idx], .ptype = ptype)
-  scalar_na_idx <- vec_equal_na(scalar_fill)
+  scalar_na_idx <- vec_detect_missing(scalar_fill)
   scalar_replace_idx <- scalar_idx[scalar_na_idx]
   fill_list[scalar_replace_idx] <- list(NULL)
 
@@ -304,7 +304,7 @@ tib_combine_input_form <- function(tib_list, call) {
 tib_combine_names_col <- function(tib_list, call) {
   names_col <- purrr::map_chr(tib_list, "names_col", .default = NA)
   names_col_locs <- vec_unique_loc(names_col)
-  na_locs <- which(vec_equal_na(names_col))
+  na_locs <- which(vec_detect_missing(names_col))
 
   names_col_locs <- names_col_locs[!names_col_locs %in% na_locs]
 

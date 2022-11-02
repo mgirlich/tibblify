@@ -2,81 +2,146 @@
 #include "utils.h"
 #include "Path.h"
 
-inline void stop_scalar(const Path& path, R_xlen_t size_act) {
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_scalar"),
-                               PROTECT(path.data()),
-                               cpp11::as_sexp(size_act)));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_scalar(r_ssize size_act, r_obj* path) {
+  r_obj* call = KEEP(r_call3(r_sym("stop_scalar"),
+                             path,
+                             r_int(size_act)));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_required(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_required"),
-                               PROTECT(path.data())));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_required(r_obj* path) {
+  r_obj* call = KEEP(r_call2(r_sym("stop_required"),
+                             path));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_duplicate_name(const Path& path, SEXPREC* field_nm) {
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_duplicate_name"),
-                               PROTECT(path.data()),
-                               cpp11::as_sexp(cpp11::r_string(field_nm))));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_duplicate_name(r_obj* path, r_obj* field_nm_str) {
+  r_obj* field_nm_chr = KEEP(r_alloc_character(1));
+  r_chr_poke(field_nm_chr, 0, field_nm_str);
+
+  r_obj* call = KEEP(r_call3(r_sym("stop_duplicate_name"),
+                             path,
+                             field_nm_chr));
+  FREE(1);
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_empty_name(const Path& path, const int& index) {
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_empty_name"),
-                               PROTECT(path.data()),
-                               cpp11::as_sexp(index)));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_empty_name(r_obj* path, const int index) {
+  r_obj* call = KEEP(r_call3(r_sym("stop_empty_name"),
+                             path,
+                             r_int(index)));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_names_is_null(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_names_is_null"),
-                               PROTECT(path.data())));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_names_is_null(r_obj* path) {
+  r_obj* call = KEEP(r_call2(r_sym("stop_names_is_null"),
+                             path));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_object_vector_names_is_null(const Path& path) {
-  SEXP call = PROTECT(Rf_lang2(Rf_install("stop_object_vector_names_is_null"),
-                               PROTECT(path.data())));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+r_obj* check_names_not_null(r_obj* x, struct Path* v_path) {
+  r_obj* field_names = r_names(x);
+  if (field_names == r_null) {
+    stop_names_is_null(v_path->data);
+  }
+
+  return field_names;
 }
 
-inline void stop_vector_non_list_element(const Path& path, vector_input_form input_form, SEXP x) {
-  cpp11::sexp input_form_string = vector_input_form_to_sexp(input_form);
-  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_vector_non_list_element"),
-                               PROTECT(path.data()),
-                               input_form_string,
-                               x));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_object_vector_names_is_null(r_obj* path) {
+  SEXP call = KEEP(r_call2(r_sym("stop_object_vector_names_is_null"),
+                               path));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_vector_wrong_size_element(const Path& path, vector_input_form input_form, SEXP x) {
-  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_vector_wrong_size_element"),
-                               PROTECT(path.data()),
-                               vector_input_form_to_sexp(input_form),
-                               x));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_vector_non_list_element(r_obj* path, enum vector_form input_form, r_obj* x) {
+  r_obj* input_form_string = KEEP(vector_input_form_to_sexp(input_form));
+  r_obj* call = KEEP(r_call4(r_sym("stop_vector_non_list_element"),
+                             path,
+                             input_form_string,
+                             x));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void stop_colmajor_wrong_size_element(const Path& path, R_xlen_t size_exp, R_xlen_t size_act) {
-  SEXP call = PROTECT(Rf_lang4(Rf_install("stop_colmajor_wrong_size_element"),
-                               PROTECT(path.data()),
-                               cpp11::as_sexp(size_exp),
-                               // cpp11::integers{size_exp},
-                               cpp11::as_sexp(size_act)));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_vector_wrong_size_element(r_obj* path, enum vector_form input_form, r_obj* x) {
+  r_obj* call = KEEP(r_call4(r_sym("stop_vector_wrong_size_element"),
+                             path,
+                             vector_input_form_to_sexp(input_form),
+                             x));
+  r_eval(call, tibblify_ns_env);
 }
 
-inline void check_colmajor_size(SEXP value, R_xlen_t n_rows, const Path& path) {
-  R_len_t size = short_vec_size(value);
-  if (n_rows != size) {
-    stop_colmajor_wrong_size_element(path, n_rows, size);
+static inline
+void stop_colmajor_no_size() {
+  r_obj* call = KEEP(r_call(r_sym("stop_colmajor_no_size")));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void stop_colmajor_null(r_obj* path) {
+  r_obj* call = KEEP(r_call2(r_sym("stop_colmajor_null"),
+                             path));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void stop_colmajor_wrong_size_element(r_obj* path, r_ssize size_act, r_obj* nrow_path, r_ssize size_exp) {
+  r_obj* call = KEEP(r_call5(r_sym("stop_colmajor_wrong_size_element"),
+                             path,
+                             r_int(size_act),
+                             nrow_path,
+                             r_int(size_exp)));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void check_colmajor_size(r_ssize n_value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
+  if (*n_rows == -1) {
+    *n_rows = n_value;
+
+    r_obj* depth = KEEP(r_int(*path->depth));
+    r_list_poke(nrow_path->data, 0, depth);
+    nrow_path->depth = r_int_begin(depth);
+
+    nrow_path->path_elts = KEEP(r_clone(path->path_elts));
+    r_list_poke(nrow_path->data, 1, nrow_path->path_elts);
+
+    FREE(2);
+    return;
+  }
+
+  if (*n_rows != n_value) {
+    stop_colmajor_wrong_size_element(path->data, n_value, nrow_path->data, *n_rows);
   }
 }
 
-inline void stop_colmajor_non_list_element(const Path& path, SEXP x) {
-  SEXP call = PROTECT(Rf_lang3(Rf_install("stop_colmajor_non_list_element"),
-                               PROTECT(path.data()),
-                               x));
-  Rf_eval(call, tibblify_ns_env);
+static inline
+void stop_required_colmajor(r_obj* path) {
+  r_obj* call = KEEP(r_call2(r_sym("stop_required_colmajor"),
+                             path));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void stop_non_list_element(r_obj* path, r_obj* x) {
+  r_obj* call = KEEP(r_call3(r_sym("stop_non_list_element"),
+                             path,
+                             x));
+  r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void check_list(r_obj* x, struct Path* v_path) {
+  if (r_typeof(x) != R_TYPE_list) {
+    stop_non_list_element(v_path->data, x);
+  }
 }

@@ -53,20 +53,22 @@ tibblify <- function(x,
   }
 
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
-  spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
-  path_ptr <- init_tibblify_path()
+  spec <- spec_prep(spec)
+  spec$rowmajor <- spec$input_form == "rowmajor"
+
+  path <- list(depth = 0, path_elts = list())
   call <- current_call()
   try_fetch(
-    out <- tibblify_impl(x, spec, path_ptr),
+    out <- .Call(ffi_tibblify, x, spec, path),
     error = function(cnd) {
       if (inherits(cnd, "tibblify_error")) {
         cnd$call <- call
         cnd_signal(cnd)
       }
 
-      path <- format_path(path_ptr)
+      path_str <- path_to_string(path)
       tibblify_abort(
-        "Problem while tibblifying {.arg {path}}",
+        "Problem while tibblifying {.arg {path_str}}",
         parent = cnd,
         call = call
       )
@@ -111,16 +113,30 @@ finalize_tspec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
 
-spec_prep <- function(spec, shift = FALSE) {
-  for (i in seq_along(spec)) {
-    spec[[i]]$location <- i - 1L + as.integer(shift)
-    spec[[i]]$name <- names(spec)[[i]]
+spec_prep <- function(spec) {
+  n_cols <- length(spec$fields)
+  if (is_null(spec$names_col)) {
+    coll_locations <- seq2(1, n_cols) - 1L
+    spec$col_names <- names2(spec$fields)
+  } else {
+    coll_locations <- seq2(1, n_cols)
+    n_cols <- n_cols + 1L
+    spec$col_names <- c(spec$names_col, names(spec$fields))
   }
+  spec$coll_locations <- as.list(coll_locations)
+  spec$n_cols <- n_cols
 
-  prep_nested_keys(spec)
+  spec$ptype_dummy <- vctrs::vec_init(list(), n_cols)
+  result <- prep_nested_keys2(spec$fields, coll_locations)
+  spec$fields <- result$fields
+  spec$keys <- result$keys
+  spec$coll_locations <- result$coll_locations
+  # TODO maybe add `key_match_ind`?
+
+  spec
 }
 
-prep_nested_keys <- function(spec, shift = FALSE) {
+prep_nested_keys2 <- function(spec, coll_locations) {
   remove_first_key <- function(x) {
     x$key <- x$key[-1]
     x
@@ -134,28 +150,11 @@ prep_nested_keys <- function(spec, shift = FALSE) {
       x$key <- unlist(x$key)
 
       if (x$type == "row" || x$type == "df") {
-        x$fields <- spec_prep(x$fields, shift = !is.null(x$names_col))
-      }
-
-      if (x$type == "scalar") {
-        x$na <- vec_init(x$ptype_inner)
+        x <- spec_prep(x)
+      } else if (x$type == "scalar") {
+        x <- prep_tib_scalar(x)
       } else if (x$type == "vector") {
-        x$na <- vec_init(x$ptype)
-      }
-
-      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
-        if (is_null(x$names_to)) {
-          fill_list <- set_names(
-            list(unname(x$fill)),
-            x$values_to
-          )
-        } else {
-          fill_list <- set_names(
-            list(names(x$fill), unname(x$fill)),
-            c(x$names_to, x$values_to)
-          )
-        }
-        x$fill <- tibble::as_tibble(fill_list)
+        x <- prep_tib_vector(x)
       }
 
       x
@@ -170,18 +169,77 @@ prep_nested_keys <- function(spec, shift = FALSE) {
   spec_complex_prepped <- purrr::map2(
     spec_split$key, spec_split$val,
     function(key, sub_spec) {
-      list(
+      out <- list(
         key = key,
         type = "sub",
-        spec = prep_nested_keys(sub_spec)
+        fields = sub_spec
       )
+
+      spec_prep(out)
     }
   )
 
-  c(
+  spec_out <- c(
     spec_simple_prepped,
     spec_complex_prepped
   )
+
+  coll_locations <- c(
+    vec_chop(coll_locations[!is_sub]),
+    vec_split(coll_locations[is_sub], first_keys)$val
+  )
+
+  keys <- purrr::map_chr(spec_out, list("key", 1))
+  key_order <- order(keys)
+
+  list(
+    fields = spec_out[key_order],
+    coll_locations = coll_locations[key_order],
+    keys = keys[key_order]
+  )
+}
+
+prep_tib <- function(x) {
+  if (x$type == "scalar") {
+    prep_tib_scalar(x)
+  } else if (x$type == "vector") {
+    prep_tib_vector(x)
+  } else if (x$type %in% c("row", "df")) {
+
+  }
+}
+
+prep_tib_scalar <- function(x) {
+  x$na <- vctrs::vec_init(x$ptype_inner, 1L)
+  x
+}
+
+prep_tib_vector <- function(x) {
+  if (!is.null(x$names_to) || !is.null(x$values_to)) {
+    if (!is.null(x$names_to)) {
+      col_names <- c(x$names_to, x$values_to)
+      list_of_ptype <- list(character(), x$ptype)
+      fill_list <- list(names(x$fill), unname(x$fill))
+    } else {
+      col_names <- x$values_to
+      list_of_ptype <- list(x$ptype)
+      fill_list <- list(unname(x$fill))
+    }
+    if (!is.null(x$fill)) {
+      x$fill <- tibble::as_tibble(set_names(fill_list, col_names))
+    }
+    list_of_ptype <- set_names(list_of_ptype, col_names)
+    list_of_ptype <- tibble::as_tibble(list_of_ptype)
+  } else {
+    col_names <- NULL
+    list_of_ptype <- x$ptype
+  }
+
+  x["col_names"] <- list(col_names)
+  x$list_of_ptype <- list_of_ptype
+  x$na <- vec_init(x$ptype)
+
+  x
 }
 
 tibblify_prepare_unspecified <- function(spec, unspecified, call) {

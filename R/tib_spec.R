@@ -4,6 +4,10 @@
 #' Use `tspec_row()` resp. `tspec_object()` to specify how to convert an object
 #' to a one row tibble resp. a list.
 #'
+#' @details
+#' In column major format all fields are required, regardless of the `required`
+#' argument.
+#'
 #' @param ... Column specification created by `tib_*()` or `tspec_*()`.
 #' @param .input_form The input form of data frame like lists. Can be one of:
 #'   * `"rowmajor"`: The default. The data frame is formed by a list of rows.
@@ -871,7 +875,7 @@ check_key <- function(key, call = caller_env()) {
     }
   }
 
-  na_idx <- purrr::detect_index(vec_equal_na(key), ~ .x)
+  na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
   if (na_idx != 0) {
     msg <- "`key[{.field {na_idx}}] must not be NA."
     cli::cli_abort(msg, call = call)

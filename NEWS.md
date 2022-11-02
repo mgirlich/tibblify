@@ -1,5 +1,9 @@
 # tibblify (development version)
 
+* In column major format all fields are required.
+
+* Fixed a memory leak.
+
 * `tib_vector()` is now uses less memory and is faster.
 
 * `tspec_*()`, `tib_df()`, and `tib_row()` now discard `NULL` in `...`. This

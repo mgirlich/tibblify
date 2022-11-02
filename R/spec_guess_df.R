@@ -96,13 +96,13 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
       col_required <- TRUE
       has_non_vec_cols <- purrr::detect_index(ptype, ~ !is_vec(.x) || is.data.frame(.x)) > 0
       if (has_non_vec_cols) {
-        col_flat <- vec_unchop(col, ptype = ptype)
+        col_flat <- list_unchop(col, ptype = ptype)
       } else {
         col_flat <- ptype
       }
     } else {
       col_required <- df_guess_required(col, colnames(ptype))
-      col_flat <- vec_unchop(col, ptype = ptype)
+      col_flat <- list_unchop(col, ptype = ptype)
     }
 
     fields_spec <- purrr::imap(col_flat, col_to_spec, empty_list_unspecified)

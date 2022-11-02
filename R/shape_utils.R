@@ -49,7 +49,7 @@ is_object_list <- function(x) {
 
   if (n == 0) return(FALSE)
 
-  all_names <- vec_unchop(names_list, ptype = character(), name_spec = "{inner}")
+  all_names <- list_unchop(names_list, ptype = character(), name_spec = "{inner}")
   names_count <- vec_count(all_names, "location")
 
   n_min <- floor(0.9 * n)

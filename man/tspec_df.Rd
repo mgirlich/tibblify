@@ -49,6 +49,10 @@ Use \code{tspec_df()} to specify how to convert a list of objects to a tibble.
 Use \code{tspec_row()} resp. \code{tspec_object()} to specify how to convert an object
 to a one row tibble resp. a list.
 }
+\details{
+In column major format all fields are required, regardless of the \code{required}
+argument.
+}
 \examples{
 tspec_df(
   id = tib_int("id"),
