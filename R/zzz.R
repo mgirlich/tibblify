@@ -5,7 +5,7 @@
   requireNamespace("vctrs", quietly = TRUE)
 
   # Initialize tibblify C globals
-  .Call(tibblify_initialize, ns_env("tibblify"))
+  .Call("tibblify_initialize", ns_env("tibblify"))
 }
 
 # nocov end
