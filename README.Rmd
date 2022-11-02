@@ -20,6 +20,7 @@ knitr::opts_chunk$set(
 [![CRAN status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.org/package=tibblify)
 [![Codecov test coverage](https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg)](https://app.codecov.io/gh/mgirlich/tibblify?branch=master)
 [![R build status](https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg)](https://github.com/mgirlich/tibblify/actions)
+[![R-CMD-check](https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of tibblify is to provide an easy way of converting a nested list into a tibble.
