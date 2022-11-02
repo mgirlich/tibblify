@@ -114,15 +114,15 @@ struct multi_collector {
 struct collector {
   r_obj* shelter;
 
-  void (*check_colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path);
+  void (*check_colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path);
   r_obj* (*get_ptype)(struct collector* v_collector);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
-  void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* path);
-  void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, struct Path* path);
+  void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* v_path);
+  void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, struct Path* v_path);
   // add default value
-  void (*add_default)(struct collector* v_collector, struct Path* path);
+  void (*add_default)(struct collector* v_collector, struct Path* v_path);
   // error if required, otherwise add default value
-  void (*add_default_absent)(struct collector* v_collector, struct Path* path);
+  void (*add_default_absent)(struct collector* v_collector, struct Path* v_path);
   r_obj* (*finalize)(struct collector* v_collector);
   bool rowmajor;
   bool unpack;
@@ -209,17 +209,6 @@ struct collector* new_parser(int n_keys,
                              r_obj* ptype_dummy,
                              int n_cols,
                              bool rowmajor);
-
-static inline
-r_obj* vec_init_along(r_obj* ptype, r_ssize n) {
-  r_obj* ffi_n = KEEP(r_int(n));
-  r_obj* call = KEEP(r_call3(r_sym("vec_init"),
-                             ptype,
-                             ffi_n));
-  r_obj* out = r_eval(call, tibblify_ns_env);
-  FREE(2);
-  return(out);
-}
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(struct collector* v_collector,

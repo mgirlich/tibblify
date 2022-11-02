@@ -45,6 +45,16 @@ void stop_names_is_null(r_obj* path) {
 }
 
 static inline
+r_obj* check_names_not_null(r_obj* x, struct Path* v_path) {
+  r_obj* field_names = r_names(x);
+  if (field_names == r_null) {
+    stop_names_is_null(v_path->data);
+  }
+
+  return field_names;
+}
+
+static inline
 void stop_object_vector_names_is_null(r_obj* path) {
   SEXP call = KEEP(r_call2(r_sym("stop_object_vector_names_is_null"),
                                path));
@@ -122,9 +132,16 @@ void stop_required_colmajor(r_obj* path) {
 }
 
 static inline
-void stop_colmajor_non_list_element(r_obj* path, r_obj* x) {
-  r_obj* call = KEEP(r_call3(r_sym("stop_colmajor_non_list_element"),
+void stop_non_list_element(r_obj* path, r_obj* x) {
+  r_obj* call = KEEP(r_call3(r_sym("stop_non_list_element"),
                              path,
                              x));
   r_eval(call, tibblify_ns_env);
+}
+
+static inline
+void check_list(r_obj* x, struct Path* v_path) {
+  if (r_typeof(x) != R_TYPE_list) {
+    stop_non_list_element(v_path->data, x);
+  }
 }

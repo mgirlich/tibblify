@@ -90,38 +90,35 @@ void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
+void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
   if (value == r_null) {
-    stop_colmajor_null(path->data);
+    stop_colmajor_null(v_path->data);
   }
 
   r_ssize n_value = short_vec_size(value);
-  check_colmajor_size(n_value, n_rows, path, nrow_path);
+  check_colmajor_size(n_value, n_rows, v_path, nrow_path);
 }
 
-void colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* path, struct Path* nrow_path) {
-  r_ssize n_value = get_collector_vec_rows(v_collector, value, n_rows, path, nrow_path);
-  check_colmajor_size(n_value, n_rows, path, nrow_path);
+void colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
+  r_ssize n_value = get_collector_vec_rows(v_collector, value, n_rows, v_path, nrow_path);
+  check_colmajor_size(n_value, n_rows, v_path, nrow_path);
 }
 
 r_ssize get_collector_vec_rows(struct collector* v_collector,
                                r_obj* object_list,
                                r_ssize* n_rows,
-                               struct Path* path,
+                               struct Path* v_path,
                                struct Path* nrow_path) {
-  if (r_typeof(object_list) != R_TYPE_list) {
-    // TODO error message should mention why it has to be a list
-    stop_colmajor_non_list_element(path->data, object_list);
-  }
+  check_list(object_list, v_path);
 
-  r_obj* field_names = r_names(object_list);
   const r_ssize n_fields = short_vec_size(object_list);
-
   if (n_fields == 0) {
     // TODO check if this makes sense...
     *n_rows = 0;
     return *n_rows;
   }
+
+  r_obj* field_names = check_names_not_null(object_list, v_path);
 
   struct multi_collector* v_multi_coll = &v_collector->details.multi_coll;
   match_chr(v_multi_coll->keys,
@@ -133,21 +130,21 @@ r_ssize get_collector_vec_rows(struct collector* v_collector,
   r_obj* const * v_keys = r_chr_cbegin(v_multi_coll->keys);
   struct collector* v_collectors = v_multi_coll->collectors;
 
-  path_down(path);
+  path_down(v_path);
   for (int key_index = 0; key_index < v_multi_coll->n_keys; ++key_index) {
     int loc = v_multi_coll->p_key_match_ind[key_index];
     r_obj* cur_key = v_keys[key_index];
-    path_replace_key(path, cur_key);
+    path_replace_key(v_path, cur_key);
 
     if (loc < 0) {
-      stop_required_colmajor(path->data);
+      stop_required_colmajor(v_path->data);
     }
 
     r_obj* field = v_object_list[loc];
     struct collector* v_coll_cur = &v_collectors[key_index];
-    v_coll_cur->check_colmajor_nrows(v_coll_cur, field, n_rows, path, nrow_path);
+    v_coll_cur->check_colmajor_nrows(v_coll_cur, field, n_rows, v_path, nrow_path);
   }
-  path_up(path);
+  path_up(v_path);
 
   return *n_rows;
 }

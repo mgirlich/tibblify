@@ -156,7 +156,7 @@ stop_required_colmajor <- function(path) {
   tibblify_abort(msg)
 }
 
-stop_colmajor_non_list_element <- function(path, x) {
+stop_non_list_element <- function(path, x) {
   path_str <- path_to_string(path)
   msg <- c(
     "{.arg {path_str}} must be a list, not {obj_type_friendly(x)}."

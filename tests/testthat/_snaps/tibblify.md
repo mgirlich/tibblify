@@ -303,6 +303,51 @@
       ! Field a is required but does not exist in `x[[1]]$x[[2]]`.
       i Use `required = FALSE` if the field is optional.
 
+# colmajor: names are checked
+
+    Code
+      (expect_error(tibblify(list(1, 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! An object must be named.
+      x `x` is not named.
+    Code
+      (expect_error(tibblify(list(x = 1, 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(1, x = 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 1.
+    Code
+      (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Field x is required but does not exist in `x`.
+      i For `.input_form = "colmajor"` every field is required.
+    Code
+      (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object can't be empty.
+      x `x` has an empty name at location 2.
+    Code
+      (expect_error(tibblify(list(x = 1, x = 2), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! The names of an object must be unique.
+      x `x` has the duplicated name "x".
+
 # colmajor: tib_scalar works
 
     Code

@@ -53,11 +53,9 @@ tibblify <- function(x,
   }
 
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
-  # spec$fields <- spec_prep(spec$fields, !is.null(spec$names_col))
-  spec <- spec_prep2(spec)
+  spec <- spec_prep(spec)
   spec$rowmajor <- spec$input_form == "rowmajor"
 
-  # path_ptr <- init_tibblify_path()
   path <- list(depth = 0, path_elts = list())
   call <- current_call()
   try_fetch(
@@ -115,80 +113,7 @@ finalize_tspec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
 
-spec_prep <- function(spec, shift = FALSE) {
-  for (i in seq_along(spec)) {
-    spec[[i]]$location <- i - 1L + as.integer(shift)
-    spec[[i]]$name <- names(spec)[[i]]
-  }
-
-  prep_nested_keys(spec)
-}
-
-prep_nested_keys <- function(spec, shift = FALSE) {
-  remove_first_key <- function(x) {
-    x$key <- x$key[-1]
-    x
-  }
-
-  is_sub <- purrr::map_lgl(spec, ~ length(.x$key) > 1)
-  spec_simple <- spec[!is_sub]
-  spec_simple_prepped <- purrr::map(
-    spec_simple,
-    function(x) {
-      x$key <- unlist(x$key)
-
-      if (x$type == "row" || x$type == "df") {
-        x$fields <- spec_prep(x$fields, shift = !is.null(x$names_col))
-      }
-
-      if (x$type == "scalar") {
-        x$na <- vec_init(x$ptype_inner)
-      } else if (x$type == "vector") {
-        x$na <- vec_init(x$ptype)
-      }
-
-      if (x$type == "vector" && !is_null(x$values_to) && !is_null(x$fill)) {
-        if (is_null(x$names_to)) {
-          fill_list <- set_names(
-            list(unname(x$fill)),
-            x$values_to
-          )
-        } else {
-          fill_list <- set_names(
-            list(names(x$fill), unname(x$fill)),
-            c(x$names_to, x$values_to)
-          )
-        }
-        x$fill <- tibble::as_tibble(fill_list)
-      }
-
-      x
-    }
-  )
-
-  spec_complex <- spec[is_sub]
-
-  first_keys <- purrr::map_chr(spec_complex, list("key", 1))
-  spec_complex <- purrr::map(spec_complex, remove_first_key)
-  spec_split <- vec_split(spec_complex, first_keys)
-  spec_complex_prepped <- purrr::map2(
-    spec_split$key, spec_split$val,
-    function(key, sub_spec) {
-      list(
-        key = key,
-        type = "sub",
-        spec = prep_nested_keys(sub_spec)
-      )
-    }
-  )
-
-  c(
-    spec_simple_prepped,
-    spec_complex_prepped
-  )
-}
-
-spec_prep2 <- function(spec) {
+spec_prep <- function(spec) {
   n_cols <- length(spec$fields)
   if (is_null(spec$names_col)) {
     coll_locations <- seq2(1, n_cols) - 1L
@@ -225,7 +150,7 @@ prep_nested_keys2 <- function(spec, coll_locations) {
       x$key <- unlist(x$key)
 
       if (x$type == "row" || x$type == "df") {
-        x <- spec_prep2(x)
+        x <- spec_prep(x)
       } else if (x$type == "scalar") {
         x <- prep_tib_scalar(x)
       } else if (x$type == "vector") {
@@ -247,12 +172,10 @@ prep_nested_keys2 <- function(spec, coll_locations) {
       out <- list(
         key = key,
         type = "sub",
-        # fields = prep_nested_keys(sub_spec)
         fields = sub_spec
       )
 
-      # browser()
-      spec_prep2(out)
+      spec_prep(out)
     }
   )
 

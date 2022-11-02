@@ -1019,26 +1019,25 @@ test_that("guesses spec by default", {
 
 # colmajor ----------------------------------------------------------------
 
-# TODO
-# test_that("colmajor: names are checked", {
-#   spec <- tspec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
-#
-#   expect_snapshot({
-#     # no names
-#     (expect_error(tibblify(list(1, 2), spec)))
-#
-#     # partial names
-#     (expect_error(tibblify(list(x = 1, 2), spec)))
-#     (expect_error(tibblify(list(1, x = 2), spec)))
-#     (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
-#
-#     # `NA` name
-#     (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
-#
-#     # duplicate name
-#     (expect_error(tibblify(list(x = 1, x = 2), spec)))
-#   })
-# })
+test_that("colmajor: names are checked", {
+  spec <- tspec_df(.input_form = "colmajor", x = tib_int("x", required = FALSE))
+
+  expect_snapshot({
+    # no names
+    (expect_error(tibblify(list(1, 2), spec)))
+
+    # partial names
+    (expect_error(tibblify(list(x = 1, 2), spec)))
+    (expect_error(tibblify(list(1, x = 2), spec)))
+    (expect_error(tibblify(list(z = 1, y = 2, 3, a = 4), spec)))
+
+    # `NA` name
+    (expect_error(tibblify(set_names(list(1, 2), c("x", NA)), spec)))
+
+    # duplicate name
+    (expect_error(tibblify(list(x = 1, x = 2), spec)))
+  })
+})
 
 test_that("colmajor: tib_scalar works", {
   dtt <- vctrs::new_datetime(1)
@@ -1190,7 +1189,7 @@ test_that("colmajor: tib_row works", {
   )
 })
 
-test_that("colmajor: tib_row works", {
+test_that("colmajor: tib_df works", {
   # can parse
   expect_equal(
     tib_cm(

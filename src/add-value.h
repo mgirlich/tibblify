@@ -53,7 +53,7 @@ r_obj* vec_prep_simple(r_obj* value_casted, r_obj* names, r_obj* col_names) {
 
 static inline
 r_obj* vec_prep_values(r_obj* value_casted, r_obj* names, r_obj* col_names) {
-  r_obj* df = KEEP(r_alloc_vector(R_TYPE_list, 1));
+  r_obj* df = KEEP(r_alloc_list(1));
   r_attrib_poke_names(df, col_names);
   r_init_tibble(df, short_vec_size(value_casted));
 
@@ -64,10 +64,10 @@ r_obj* vec_prep_values(r_obj* value_casted, r_obj* names, r_obj* col_names) {
 
 static inline
 r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names) {
-  r_obj* df = KEEP(r_alloc_vector(R_TYPE_list, 2));
+  r_obj* df = KEEP(r_alloc_list(2));
+  r_attrib_poke_names(df, col_names);
   r_ssize n = short_vec_size(value_casted);
   r_init_tibble(df, n);
-  r_attrib_poke_names(df, col_names);
 
   if (names == r_null) {
     names = KEEP(r_alloc_character(n));
@@ -82,7 +82,7 @@ r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names
   return df;
 }
 
-r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* path);
-r_obj* parse_colmajor(struct collector* v_collector, r_obj* value, struct Path* path);
+r_obj* parse(struct collector* v_collector, r_obj* value, struct Path* v_path);
+r_obj* parse_colmajor(struct collector* v_collector, r_obj* value, struct Path* v_path);
 
 #endif
