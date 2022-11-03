@@ -53,6 +53,7 @@ tibblify <- function(x,
   }
 
   spec <- tibblify_prepare_unspecified(spec, unspecified, call = current_call())
+  spec_org <- spec
   spec <- spec_prep(spec)
   spec$rowmajor <- spec$input_form == "rowmajor"
 
@@ -75,12 +76,12 @@ tibblify <- function(x,
     }
   )
 
-  if (inherits(spec, "tspec_object")) {
-    out <- purrr::map2(spec$fields, out, finalize_tspec_object)
+  if (inherits(spec_org, "tspec_object")) {
+    out <- purrr::map2(spec_org$fields, out, finalize_tspec_object)
   }
 
-  set_spec(out, spec)
-
+  out <- set_spec(out, spec_org)
+  attr(out, "waldo_opts") <- list(ignore_attr = c("tib_spec", "waldo_opts"))
   out
 }
 

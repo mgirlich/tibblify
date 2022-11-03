@@ -945,6 +945,21 @@ test_that("tspec_object() works", {
       )
     )
   )
+
+  # can handle sub collector + different order
+  spec3 <- tspec_object(
+    tib_chr("c"),
+    bb = tib_chr(c("b", "b")),
+    tib_chr("a"),
+    ba = tib_chr(c("b", "a")),
+  )
+  expect_equal(
+    tibblify(
+      list(a = "a", c = "c", b = list(a = "ba", b = "bb")),
+      spec3
+    ),
+    list(c = "c", bb = "bb", a = "a", ba = "ba")
+  )
 })
 
 test_that("spec_replace_unspecified works", {
@@ -1133,7 +1148,7 @@ test_that("colmajor: tib_vector works", {
       x = list(c(dtt - 1, dtt))
     ),
     tibble(x = list_of(c(dtt, dtt + 1))),
-    ignore_attr = "tzone"
+    ignore_attr = c("tzone", "waldo_opts", "tib_spec")
   )
 
   # elt_transform works
