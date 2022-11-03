@@ -538,22 +538,35 @@ which is not very nice.</p>
 <span></span>
 <span><span class="va">api_output_list</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">api_output</span>, <span class="va">object_spec</span><span class="op">)</span></span>
 <span><span class="va">api_output_list</span></span>
-<span><span class="co">#&gt; $data</span></span>
+<span><span class="co">#&gt; $status</span></span>
 <span><span class="co">#&gt; [1] "success"</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; $status</span></span>
-<span><span class="co">#&gt; &lt;list_of&lt;tbl_df&lt;x:integer&gt;&gt;[1]&gt;</span></span>
-<span><span class="co">#&gt; [[1]]</span></span>
+<span><span class="co">#&gt; $data</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 1</span></span></span>
+<span><span class="co">#&gt;       x</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attr(,"tib_spec")</span></span>
+<span><span class="co">#&gt; tspec_object(</span></span>
+<span><span class="co">#&gt;   <span style="color: #BB0000;">tib_chr</span>("status"),</span></span>
+<span><span class="co">#&gt;   tib_df(</span></span>
+<span><span class="co">#&gt;     "data",</span></span>
+<span><span class="co">#&gt;     <span style="color: #00BB00;">tib_int</span>("x"),</span></span>
+<span><span class="co">#&gt;   ),</span></span>
+<span><span class="co">#&gt; )attr(,"waldo_opts")</span></span>
+<span><span class="co">#&gt; attr(,"waldo_opts")$ignore_attr</span></span>
+<span><span class="co">#&gt; [1] "tib_spec"   "waldo_opts"</span></span></code></pre></div>
+<p>Now accessing <code>data</code> does not required an extra subsetting
+step</p>
+<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">api_output_list</span><span class="op">$</span><span class="va">data</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 2 × 1</span></span></span>
 <span><span class="co">#&gt;       x</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>     1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>     2</span></span></code></pre></div>
-<p>Now accessing <code>data</code> does not required an extra subsetting
-step</p>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">api_output_list</span><span class="op">$</span><span class="va">data</span></span>
-<span><span class="co">#&gt; [1] "success"</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
