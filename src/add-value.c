@@ -77,6 +77,13 @@ void add_default_df(struct collector* v_collector, struct Path* v_path) {
   ++v_collector->current_row;
 }
 
+void add_default_recursive(struct collector* v_collector, struct Path* v_path) {
+  // TODO
+  // `df` have no default value. Use `NULL` instead
+  r_list_poke(v_collector->data, v_collector->current_row, r_null);
+  ++v_collector->current_row;
+}
+
 #define ADD_VALUE(COLL, NA, EMPTY, CAST)                       \
   if (value == r_null) {                                       \
     *v_collector->details.COLL.v_data = NA;                    \
@@ -428,6 +435,26 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct P
     FREE(1);
     ++v_collector->current_row;
   }
+}
+
+void add_value_recursive(struct collector* v_collector, r_obj* value, struct Path* v_path) {
+  r_obj* data;
+  if (value == r_null) {
+    data = r_null;
+  } else {
+    struct collector* parent_coll = v_collector->details.rec_coll.v_parent;
+    struct collector* p_parser = parent_coll->copy(parent_coll);
+    KEEP(p_parser->shelter);
+
+    data = parse(p_parser, value, v_path);
+    FREE(1);
+  }
+  r_list_poke(v_collector->data, v_collector->current_row, data);
+  ++v_collector->current_row;
+}
+
+void add_value_recursive_colmajor(struct collector* v_collector, r_obj* value, struct Path* v_path) {
+  r_stop_internal("Not yet implemented");
 }
 
 r_obj* parse(struct collector* v_collector,

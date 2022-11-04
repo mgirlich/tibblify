@@ -44,9 +44,10 @@ enum collector_type {
   COLLECTOR_TYPE_scalar_chr    = 6,
   COLLECTOR_TYPE_vector        = 7,
   COLLECTOR_TYPE_variant       = 8,
-  COLLECTOR_TYPE_row           = 9,
-  COLLECTOR_TYPE_df            = 10,
-  COLLECTOR_TYPE_sub           = 11,
+  COLLECTOR_TYPE_sub           = 9,
+  COLLECTOR_TYPE_row           = 10,
+  COLLECTOR_TYPE_df            = 11,
+  COLLECTOR_TYPE_recursive     = 12,
 };
 
 struct lgl_collector {
@@ -113,6 +114,10 @@ struct multi_collector {
   r_obj* names_col;
 };
 
+struct recursive_collector {
+  struct collector* v_parent;
+};
+
 struct collector {
   r_obj* shelter;
 
@@ -126,6 +131,7 @@ struct collector {
   // error if required, otherwise add default value
   void (*add_default_absent)(struct collector* v_collector, struct Path* v_path);
   r_obj* (*finalize)(struct collector* v_collector);
+  struct collector* (*copy)(struct collector* v_collector);
   bool rowmajor;
   bool unpack;
 
@@ -144,6 +150,7 @@ struct collector {
     struct vector_collector vec_coll;
     struct variant_collector variant_coll;
     struct multi_collector multi_coll;
+    struct recursive_collector rec_coll;
   } details;
 };
 
@@ -211,6 +218,8 @@ struct collector* new_parser(int n_keys,
                              r_obj* ptype_dummy,
                              int n_cols,
                              bool rowmajor);
+
+struct collector* new_rec_collector();
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(struct collector* v_collector,

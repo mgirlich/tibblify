@@ -34,6 +34,10 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
 
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
 
+  if (type == r_string_types.recursive) {
+    return new_rec_collector();
+  }
+
   if (type == r_string_types.row || type == r_string_types.df) {
     r_obj* ffi_fields_spec = r_list_get_by_name(spec_elt, "fields");
     r_obj* coll_locations = r_list_get_by_name(spec_elt, "coll_locations");
@@ -160,7 +164,7 @@ struct collector* create_parser(r_obj* spec) {
 
   r_obj* type = r_chr_get(r_list_get_by_name(spec, "type"), 0);
   r_obj* names_col;
-  if (type == strings_df) {
+  if (type == r_string_types.df) {
     names_col = r_list_get_by_name(spec, "names_col");
   } else {
     names_col = r_null;
@@ -178,6 +182,12 @@ struct collector* create_parser(r_obj* spec) {
 
   bool vector_allows_empty_list = r_lgl_get(r_list_get_by_name(spec, "vector_allows_empty_list"), 0);
   collector_add_fields(p_parser, fields, vector_allows_empty_list, rowmajor);
+
+  if (type == r_string_types.recursive) {
+    int child_coll_pos = r_int_get(r_list_get_by_name(spec, "child_coll_pos"), 0);
+    struct collector* v_coll = &p_parser->details.multi_coll.collectors[child_coll_pos];
+    v_coll->details.rec_coll.v_parent = p_parser;
+  }
 
   FREE(1);
   return p_parser;

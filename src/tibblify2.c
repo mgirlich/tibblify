@@ -29,7 +29,7 @@ r_obj* ffi_tibblify(r_obj* data, r_obj* spec, r_obj* ffi_path) {
   r_obj* out;
 
   if (coll_parser->rowmajor) {
-    if (type == strings_df) {
+    if (type == r_string_types.df || type == r_string_types.recursive) {
       out = parse(coll_parser, data, &path);
     } else {
       alloc_row_collector(coll_parser, 1);

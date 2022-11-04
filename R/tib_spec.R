@@ -93,6 +93,31 @@ tspec_object <- function(...,
 
 #' @rdname tspec_df
 #' @export
+tspec_recursive <- function(...,
+                            .child,
+                            .input_form = c("rowmajor", "colmajor"),
+                            vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
+  # TODO check that key is unique
+  # browser()
+  # fields <- prep_spec_fields(list2(...), call)
+  # fields[[.child]] <- tib_recursive(
+  #   .child,
+  #   !!!fields,
+  #   .child = .child
+  # )
+
+  tspec(
+    list2(...),
+    "recursive_dummy",
+    child = .child,
+    input_form = .input_form,
+    vector_allows_empty_list = vector_allows_empty_list
+  )
+}
+
+#' @rdname tspec_df
+#' @export
 tspec_row <- function(...,
                       .input_form = c("rowmajor", "colmajor"),
                       vector_allows_empty_list = FALSE) {
@@ -788,6 +813,18 @@ tib_variant <- function(key,
     fill = fill,
     transform = prep_transform(transform, call = current_env()),
     elt_transform = prep_transform(elt_transform, call = current_env(), arg = "elt_transform")
+  )
+}
+
+#' @rdname tib_scalar
+#' @export
+tib_recursive <- function(.key, ..., .child, .required = TRUE) {
+  tib_collector(
+    key = .key,
+    type = "row",
+    required = .required,
+    child = .child,
+    fields = prep_spec_fields(list2(...), call = current_env())
   )
 }
 

@@ -78,3 +78,7 @@ r_obj* finalize_df(struct collector* v_collector) {
   FREE(1);
   return data;
 }
+
+r_obj* finalize_recursive(struct collector* v_collector) {
+  return v_collector->data;
+}
