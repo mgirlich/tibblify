@@ -3,6 +3,7 @@
 \name{tspec_df}
 \alias{tspec_df}
 \alias{tspec_object}
+\alias{tspec_recursive}
 \alias{tspec_row}
 \title{Create a Tibblify Specification}
 \usage{
@@ -15,6 +16,13 @@ tspec_df(
 
 tspec_object(
   ...,
+  .input_form = c("rowmajor", "colmajor"),
+  vector_allows_empty_list = FALSE
+)
+
+tspec_recursive(
+  ...,
+  .child,
   .input_form = c("rowmajor", "colmajor"),
   vector_allows_empty_list = FALSE
 )

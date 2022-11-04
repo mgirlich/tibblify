@@ -35,6 +35,7 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
 
   if (type == r_string_types.recursive) {
+    // TODO this is not correct for `tib_recursive()`, only for `tspec_recursive()`
     return new_rec_collector();
   }
 
@@ -148,6 +149,11 @@ void collector_add_fields(struct collector* p_coll,
     struct collector* coll_i = parse_spec_elt(v_spec[i], vector_allows_empty_list, rowmajor);
     r_list_poke(p_coll->shelter, 5 + i, coll_i->shelter);
     p_multi_coll->collectors[i] = *coll_i;
+
+    r_obj* type = r_chr_get(r_list_get_by_name(v_spec[i], "type"), 0);
+    if (type == r_string_types.recursive) {
+      p_multi_coll->collectors[i].details.rec_coll.v_parent = p_coll;
+    }
   }
 }
 
@@ -182,12 +188,6 @@ struct collector* create_parser(r_obj* spec) {
 
   bool vector_allows_empty_list = r_lgl_get(r_list_get_by_name(spec, "vector_allows_empty_list"), 0);
   collector_add_fields(p_parser, fields, vector_allows_empty_list, rowmajor);
-
-  if (type == r_string_types.recursive) {
-    int child_coll_pos = r_int_get(r_list_get_by_name(spec, "child_coll_pos"), 0);
-    struct collector* v_coll = &p_parser->details.multi_coll.collectors[child_coll_pos];
-    v_coll->details.rec_coll.v_parent = p_parser;
-  }
 
   FREE(1);
   return p_parser;

@@ -114,8 +114,15 @@ finalize_tspec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
 
+#' @export
+finalize_tspec_object.tib_recursive_dummy <- function(field_spec, field) {
+  field[[1]]
+}
+
 spec_prep <- function(spec) {
-  if (spec$type == "recursive_dummy") {
+  # browser()
+  type <- spec$type
+  if (type == "recursive_dummy") {
     # TODO how to rename?
     spec$fields[[spec$child]] <- tib_df(
       spec$child,
@@ -144,8 +151,8 @@ spec_prep <- function(spec) {
   spec$coll_locations <- result$coll_locations
   # TODO maybe add `key_match_ind`?
 
-  if (spec$type == "recursive_dummy") {
-    spec$type <- "recursive"
+  if (type == "recursive_dummy") {
+    spec$type <- "df"
     spec["names_col"] <- list(NULL)
     spec$child_coll_pos <- which(purrr::map_chr(spec$fields, "type") == "recursive") - 1L
   }
@@ -166,7 +173,7 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     function(x) {
       x$key <- unlist(x$key)
 
-      if (x$type == "row" || x$type == "df") {
+      if (x$type == "row" || x$type == "df" || x$type == "recursive_dummy") {
         x <- spec_prep(x)
       } else if (x$type == "scalar") {
         x <- prep_tib_scalar(x)

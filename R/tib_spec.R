@@ -821,7 +821,7 @@ tib_variant <- function(key,
 tib_recursive <- function(.key, ..., .child, .required = TRUE) {
   tib_collector(
     key = .key,
-    type = "row",
+    type = "recursive_dummy",
     required = .required,
     child = .child,
     fields = prep_spec_fields(list2(...), call = current_env())

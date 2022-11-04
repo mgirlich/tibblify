@@ -1375,10 +1375,24 @@ test_that("recursive: works", {
     tib_chr("name"),
     .child = "children"
   )
+  spec2 <- tspec_object(
+    tib_recursive(
+      "data",
+      tib_int("id"),
+      tib_chr("name"),
+      .child = "children"
+    )
+  )
 
+  expected <- tibble(id = 1L, name = "a", children = list(NULL))
   expect_equal(
     tibblify(list(list(id = 1, name = "a")), spec),
-    tibble(id = 1L, name = "a", children = list(NULL))
+    expected
+  )
+
+  expect_equal(
+    tibblify(list(data = list(list(id = 1, name = "a"))), spec2),
+    list(data = expected)
   )
 
   expect_equal(
@@ -1396,6 +1410,7 @@ test_that("recursive: works", {
     )
   )
 
+  # deeply nested works
   x <- list(
     list(id = 1, name = "a", children = list(
       list(id = 11, name = "aa"),
@@ -1413,39 +1428,37 @@ test_that("recursive: works", {
     ))
   )
 
-  # deeply nested works
-  expect_equal(
-    tibblify(x, spec),
-    tibble(
-      id = 1:2,
-      name = c("a", "b"),
-      children = list(
-        tibble(
-          id = 11:12,
-          name = c("aa", "ab"),
-          children = list(
-            NULL,
-            tibble(id = 121, name = "aba", children = list(NULL))
-          )
-        ),
-        tibble(
-          id = 21:22,
-          name = c("ba", "bb"),
-          children = list(
-            tibble(
-              id = 121,
-              name = "bba",
-              children = list(
-                tibble(id = 1211, name = "bbaa", children = list(NULL))
-              )
-            ),
-            NULL
-          )
+  expected <- tibble(
+    id = 1:2,
+    name = c("a", "b"),
+    children = list(
+      tibble(
+        id = 11:12,
+        name = c("aa", "ab"),
+        children = list(
+          NULL,
+          tibble(id = 121, name = "aba", children = list(NULL))
+        )
+      ),
+      tibble(
+        id = 21:22,
+        name = c("ba", "bb"),
+        children = list(
+          tibble(
+            id = 121,
+            name = "bba",
+            children = list(
+              tibble(id = 1211, name = "bbaa", children = list(NULL))
+            )
+          ),
+          NULL
         )
       )
     )
   )
 
+  expect_equal(tibblify(x, spec), expected)
+  expect_equal(tibblify(list(data = x), spec2), list(data = expected))
 
   x2 <- x
   x2[[1]]$children[[2]]$children[[1]]$id <- "does not work"

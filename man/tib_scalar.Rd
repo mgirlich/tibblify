@@ -17,6 +17,7 @@
 \alias{tib_date_vec}
 \alias{tib_chr_date_vec}
 \alias{tib_variant}
+\alias{tib_recursive}
 \alias{tib_row}
 \alias{tib_df}
 \title{Create a Field Specification}
@@ -178,6 +179,8 @@ tib_variant(
   transform = NULL,
   elt_transform = NULL
 )
+
+tib_recursive(.key, ..., .child, .required = TRUE)
 
 tib_row(.key, ..., .required = TRUE)
 
