@@ -1365,3 +1365,113 @@ test_that("colmajor: checks size", {
     (expect_error(tib_cm(tib_int("x"), tib_int_vec("y"), x = 1:2, y = list(1))))
   })
 })
+
+
+# recursive ---------------------------------------------------------------
+
+test_that("recursive: works", {
+  spec <- tspec_recursive(
+    tib_int("id"),
+    tib_chr("name"),
+    .child = "children"
+  )
+
+  expect_equal(
+    tibblify(list(list(id = 1, name = "a")), spec),
+    tibble(id = 1L, name = "a", children = list(NULL))
+  )
+
+  expect_equal(
+    tibblify(list(list(id = 1, name = "a", children = NULL)), spec),
+    tibble(id = 1L, name = "a", children = list(NULL))
+  )
+
+  # TODO not quite sure
+  expect_equal(
+    tibblify(list(list(id = 1, name = "a", children = list())), spec),
+    tibble(
+      id = 1L,
+      name = "a",
+      children = list(tibble(id = integer(), name = character(), children = list()))
+    )
+  )
+
+  x <- list(
+    list(id = 1, name = "a", children = list(
+      list(id = 11, name = "aa"),
+      list(id = 12, name = "ab", children = list(
+        list(id = 121, name = "aba")
+      ))
+    )),
+    list(id = 2, name = "b", children = list(
+      list(id = 21, name = "ba", children = list(
+        list(id = 121, name = "bba", children = list(
+          list(id = 1211, name = "bbaa")
+        ))
+      )),
+      list(id = 22, name = "bb")
+    ))
+  )
+
+  # deeply nested works
+  expect_equal(
+    tibblify(x, spec),
+    tibble(
+      id = 1:2,
+      name = c("a", "b"),
+      children = list(
+        tibble(
+          id = 11:12,
+          name = c("aa", "ab"),
+          children = list(
+            NULL,
+            tibble(id = 121, name = "aba", children = list(NULL))
+          )
+        ),
+        tibble(
+          id = 21:22,
+          name = c("ba", "bb"),
+          children = list(
+            tibble(
+              id = 121,
+              name = "bba",
+              children = list(
+                tibble(id = 1211, name = "bbaa", children = list(NULL))
+              )
+            ),
+            NULL
+          )
+        )
+      )
+    )
+  )
+
+
+  x2 <- x
+  x2[[1]]$children[[2]]$children[[1]]$id <- "does not work"
+  expect_snapshot(
+    (expect_error(tibblify(x2, spec)))
+  )
+})
+
+test_that("recursive: empty input works", {
+  spec <- tspec_recursive(
+    tib_int("id"),
+    tib_chr("name"),
+    .child = "children"
+  )
+
+  expect_equal(
+    tibblify(list(), spec),
+    tibble(id = integer(), name = character(), children = list())
+  )
+})
+
+test_that("recursive: empty spec works", {
+  expect_equal(
+    tibblify(list(), tspec_recursive(.child = "children")),
+    tibble(children = list())
+  )
+})
+
+
