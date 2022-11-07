@@ -384,6 +384,18 @@
       Caused by error:
       ! Can't convert <character> to <logical>.
 
+# colmajor: tib_df works
+
+    Code
+      (expect_error(tib_cm(tib_df("x", tib_int("a"), tib_chr("b")), x = list(list(b = c(
+        "a", "b"), a = 1:2), list(a = character(), b = "c")))))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! Not all fields of `x` have the same size.
+      x Field x$x[[2]]$b has size 1.
+      x Field x$x[[2]]$a has size 0.
+
 # colmajor: errors if field is absent
 
     Code

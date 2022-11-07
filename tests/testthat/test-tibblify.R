@@ -1236,6 +1236,17 @@ test_that("colmajor: tib_df works", {
       tibble(row = tibble(int = 3), df = list_of(NULL, .ptype = tibble(df_int = integer())))
     ))
   )
+
+  # Field x$x[[2]]$b has size 1
+  expect_snapshot({
+    (expect_error(tib_cm(
+      tib_df("x", tib_int("a"), tib_chr("b")),
+      x = list(
+        list(b = c("a", "b"), a = 1:2),
+        list(a = character(), b = "c")
+      )
+    )))
+  })
 })
 
 test_that("colmajor: tibble with list columns work - #43", {

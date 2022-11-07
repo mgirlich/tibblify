@@ -421,7 +421,9 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct P
 
   r_obj* const * v_value = r_list_cbegin(value);
   r_ssize n_value = short_vec_size(value);
+  path_down(v_path);
   for (r_ssize row = 0; row < n_value; ++row) {
+    path_replace_int(v_path, row);
     r_obj* row_value = v_value[row];
 
     r_obj* parsed_row;
@@ -435,6 +437,7 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct P
     FREE(1);
     ++v_collector->current_row;
   }
+  path_up(v_path);
 }
 
 void add_value_recursive(struct collector* v_collector, r_obj* value, struct Path* v_path) {
