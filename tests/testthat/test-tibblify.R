@@ -1471,6 +1471,46 @@ test_that("recursive: works", {
   expect_equal(tibblify(x, spec), expected)
   expect_equal(tibblify(list(data = x), spec2), list(data = expected))
 
+  # tibble input
+  expect_equal(tibblify(expected, spec), expected)
+  # colmajor
+  spec_colmajor <- tspec_recursive(
+    tib_int("id"),
+    tib_chr("name"),
+    .child = "children",
+    .input_form = "colmajor"
+  )
+
+  x_cm <- list(
+    id = 1:2,
+    name = c("a", "b"),
+    children = list(
+      list(
+        id = 11:12,
+        name = c("aa", "ab"),
+        children = list(
+          NULL,
+          list(id = 121, name = "aba", children = list(NULL))
+        )
+      ),
+      list(
+        id = 21:22,
+        name = c("ba", "bb"),
+        children = list(
+          list(
+            id = 121,
+            name = "bba",
+            children = list(
+              list(id = 1211, name = "bbaa", children = list(NULL))
+            )
+          ),
+          NULL
+        )
+      )
+    )
+  )
+  expect_equal(tibblify(x_cm, spec_colmajor), expected)
+
   x2 <- x
   x2[[1]]$children[[2]]$children[[1]]$id <- "does not work"
   expect_snapshot(

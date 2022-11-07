@@ -457,7 +457,29 @@ void add_value_recursive(struct collector* v_collector, r_obj* value, struct Pat
 }
 
 void add_value_recursive_colmajor(struct collector* v_collector, r_obj* value, struct Path* v_path) {
-  r_stop_internal("Not yet implemented");
+  check_list(value, v_path);
+
+  r_obj* const * v_value = r_list_cbegin(value);
+  r_ssize n_value = short_vec_size(value);
+  for (r_ssize row = 0; row < n_value; ++row) {
+    r_obj* row_value = v_value[row];
+
+    r_obj* parsed_row;
+    if (row_value == r_null) {
+      parsed_row = KEEP(r_null);
+    } else {
+      struct collector* parent_coll = v_collector->details.rec_coll.v_parent;
+      struct collector* p_parser = parent_coll->copy(parent_coll);
+      KEEP(p_parser->shelter);
+
+      parsed_row = parse_colmajor(p_parser, v_value[row], v_path);
+    }
+    KEEP(parsed_row);
+
+    r_list_poke(v_collector->data, v_collector->current_row, parsed_row);
+    FREE(2);
+    ++v_collector->current_row;
+  }
 }
 
 r_obj* parse(struct collector* v_collector,
