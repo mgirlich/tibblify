@@ -16,12 +16,11 @@ unnest_tree(
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> A column that uniquely
-identifies each observation.}
+\item{id_col}{A column that uniquely identifies each observation.}
 
-\item{child_col}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Column containing the
-children of an observation. This must be a list where each element is either
-\code{NULL} or a data frame with the same columns as \code{data}.}
+\item{child_col}{Column containing the children of an observation. This must
+be a list where each element is either \code{NULL} or a data frame with the same
+columns as \code{data}.}
 
 \item{level_to}{A string (\code{"level"} by default) specifying the new column to
 store the level of an observation. Use \code{NULL} if you don't need this

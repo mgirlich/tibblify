@@ -1,11 +1,9 @@
 #' Convert a data frame to a tree
 #'
 #' @param data A data frame.
-#' @param id_col <[`tidy-select`][tidyr_tidy_select]> Id column. The values
-#'   must be unique and non-missing.
-#' @param parent_col <[`tidy-select`][tidyr_tidy_select]> Parent column. Each
-#'   value must either be missing (for the root elements) or appear in the
-#'   `id_col` column.
+#' @param id_col Id column. The values must be unique and non-missing.
+#' @param parent_col Parent column. Each value must either be missing (for the
+#'   root elements) or appear in the `id_col` column.
 #' @param children_to Name of the column the children should be put.
 #'
 #' @return A tree like data frame.

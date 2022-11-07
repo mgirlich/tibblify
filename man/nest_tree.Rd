@@ -9,12 +9,10 @@ nest_tree(data, id_col, parent_col, children_to)
 \arguments{
 \item{data}{A data frame.}
 
-\item{id_col}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Id column. The values
-must be unique and non-missing.}
+\item{id_col}{Id column. The values must be unique and non-missing.}
 
-\item{parent_col}{<\code{\link[=tidyr_tidy_select]{tidy-select}}> Parent column. Each
-value must either be missing (for the root elements) or appear in the
-\code{id_col} column.}
+\item{parent_col}{Parent column. Each value must either be missing (for the
+root elements) or appear in the \code{id_col} column.}
 
 \item{children_to}{Name of the column the children should be put.}
 }

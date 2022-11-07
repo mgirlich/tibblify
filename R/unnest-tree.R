@@ -1,11 +1,10 @@
 #' Unnest a recursive data frame
 #'
 #' @param data A data frame.
-#' @param id_col <[`tidy-select`][tidyr_tidy_select]> A column that uniquely
-#'   identifies each observation.
-#' @param child_col <[`tidy-select`][tidyr_tidy_select]> Column containing the
-#'   children of an observation. This must be a list where each element is either
-#'   `NULL` or a data frame with the same columns as `data`.
+#' @param id_col A column that uniquely identifies each observation.
+#' @param child_col Column containing the children of an observation. This must
+#'   be a list where each element is either `NULL` or a data frame with the same
+#'   columns as `data`.
 #' @param level_to A string (`"level"` by default) specifying the new column to
 #'   store the level of an observation. Use `NULL` if you don't need this
 #'   information.
@@ -73,7 +72,7 @@ unnest_tree <- function(data,
   level_parent_ids <- list()
   level_ancestors <- list()
   level_data <- list()
-  out_ptype <- vctrs::vec_ptype(dplyr::select(data, -any_of(child_col)))
+  out_ptype <- vctrs::vec_ptype(data[, setdiff(names(data), child_col)])
 
   level <- 1L
   parent_ids <- vctrs::vec_init(data[[id_col]])
@@ -86,7 +85,7 @@ unnest_tree <- function(data,
     # -> this would require tracking the current ancestors. Worth it?
     vctrs::vec_check_list(children, arg = child_col)
 
-    data <- dplyr::select(data, -any_of(child_col))
+    data <- data[, setdiff(names(data), child_col)]
     # keep track of the out ptype to error earlier and better error messages (in the future...)
     out_ptype <- vctrs::vec_ptype2(out_ptype, data)
     level_data[[level]] <- data
