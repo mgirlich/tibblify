@@ -147,11 +147,12 @@ spec_prep <- function(spec) {
   type <- spec$type
   if (type == "recursive") {
     # TODO how to rename?
-    spec$fields[[spec$children_to]] <- tib_df(
+    recursive_helper_field <- tib_df(
       spec$child,
       .required = FALSE
     )
-    spec$fields[[spec$children_to]]$type <- "recursive_helper"
+    recursive_helper_field$type <- "recursive_helper"
+    spec$fields[[spec$children_to]] <- recursive_helper_field
   }
 
   n_cols <- length(spec$fields)
