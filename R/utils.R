@@ -6,6 +6,21 @@ check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
   }
 }
 
+check_arg_different <- function(arg,
+                                ...,
+                                arg_name = caller_arg(arg),
+                                call = caller_env()) {
+  other_args <- dots_list(..., .named = TRUE)
+
+  for (i in seq_along(other_args)) {
+    if (identical(arg, other_args[[i]])) {
+      other_arg_nm <- names(other_args)[[i]]
+      msg <- "{.arg {arg_name}} must be different from {.arg {other_arg_nm}}."
+      cli_abort(msg, call = call)
+    }
+  }
+}
+
 path_to_string <- function(path) {
   depth <- path[[1]] + 1L
   path_elts <- path[[2]]
