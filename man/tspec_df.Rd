@@ -22,7 +22,8 @@ tspec_object(
 
 tspec_recursive(
   ...,
-  .child,
+  .children,
+  .children_to = .children,
   .input_form = c("rowmajor", "colmajor"),
   vector_allows_empty_list = FALSE
 )
@@ -48,6 +49,10 @@ column is created}
 
 \item{vector_allows_empty_list}{Should empty lists for \code{input_form = "vector"}
 be accepted and treated as empty vector?}
+
+\item{.children}{A string giving the name of field that contains the children.}
+
+\item{.children_to}{A string giving the column name to store the children.}
 }
 \value{
 A tibblify specification.

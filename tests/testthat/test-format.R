@@ -207,7 +207,7 @@ test_that("format for tib_recursive works", {
   expect_snapshot(
     tib_recursive(
       "data",
-      .child = "children",
+      .children = "children",
       tib_int("id"),
       tib_chr("name"),
     ) %>%
@@ -217,7 +217,7 @@ test_that("format for tib_recursive works", {
   expect_snapshot(
     tib_recursive(
       "data",
-      .child = "children",
+      .children = "children",
       tib_int("id"),
       tib_chr("name"),
       .required = FALSE
@@ -281,8 +281,8 @@ test_that("prints arguments of spec_*", {
 
 test_that("prints arguments of tspec_recursive", {
   expect_equal(
-    format(tspec_recursive(tib_int("a"), .child = "children")),
-    'tspec_recursive(\n  .child = "children",\n  tib_int("a"),\n)'
+    format(tspec_recursive(tib_int("a"), .children = "children")),
+    'tspec_recursive(\n  .children = "children",\n  tib_int("a"),\n)'
   )
 })
 

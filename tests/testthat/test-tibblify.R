@@ -1384,14 +1384,14 @@ test_that("recursive: works", {
   spec <- tspec_recursive(
     tib_int("id"),
     tib_chr("name"),
-    .child = "children"
+    .children = "children"
   )
   spec2 <- tspec_object(
     tib_recursive(
       "data",
       tib_int("id"),
       tib_chr("name"),
-      .child = "children"
+      .children = "children"
     )
   )
 
@@ -1477,7 +1477,7 @@ test_that("recursive: works", {
   spec_colmajor <- tspec_recursive(
     tib_int("id"),
     tib_chr("name"),
-    .child = "children",
+    .children = "children",
     .input_form = "colmajor"
   )
 
@@ -1522,7 +1522,7 @@ test_that("recursive: empty input works", {
   spec <- tspec_recursive(
     tib_int("id"),
     tib_chr("name"),
-    .child = "children"
+    .children = "children"
   )
 
   expect_equal(
@@ -1533,9 +1533,14 @@ test_that("recursive: empty input works", {
 
 test_that("recursive: empty spec works", {
   expect_equal(
-    tibblify(list(), tspec_recursive(.child = "children")),
+    tibblify(list(), tspec_recursive(.children = "children")),
     tibble(children = list())
   )
 })
 
-
+test_that("recursive: .children_to works", {
+  expect_equal(
+    tibblify(list(), tspec_recursive(.children = "children", .children_to = "child_col")),
+    tibble(child_col = list())
+  )
+})

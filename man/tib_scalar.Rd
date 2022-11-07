@@ -180,7 +180,7 @@ tib_variant(
   elt_transform = NULL
 )
 
-tib_recursive(.key, ..., .child, .required = TRUE)
+tib_recursive(.key, ..., .children, .children_to = .children, .required = TRUE)
 
 tib_row(.key, ..., .required = TRUE)
 
@@ -229,6 +229,10 @@ specified column.
 or \code{"vector"} and 2) \code{values_to} is a string. The inner names of the
 field go into the specified column.
 }}
+
+\item{.children}{A string giving the name of field that contains the children.}
+
+\item{.children_to}{A string giving the column name to store the children.}
 
 \item{.names_to}{A string giving the name of the column which will contain
 the names of elements of the object list. If \code{NULL}, the default, no name

@@ -16,6 +16,9 @@
   
   * There is a new `elt_transform` argument that is applied to every element.
 
+* New `tspec_recursive()` and `tib_recursive()` to parse tree like structure,
+  e.g. a directory structure with its children.
+
 # tibblify 0.2.0
 
 Major rewrite of the tibblify package with lots of benefits:

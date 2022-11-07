@@ -78,7 +78,8 @@ format.tspec_recursive <- function(x, width = NULL, ..., names = NULL) {
     fields = x$fields,
     width = width,
     args = list(
-      .child = double_tick(x$child),
+      .children = double_tick(x$child),
+      .children_to = if (x$child != x$children_to) double_tick(x$children_to),
       vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list,
       .input_form = if (x$input_form != "rowmajor") double_tick(x$input_form)
     ),
@@ -304,7 +305,8 @@ format.tib_recursive <- function(x, ..., width = NULL, names = NULL) {
     width = width,
     args = list(
       deparse(x$key),
-      `.child` = double_tick(x$child),
+      `.children` = double_tick(x$child),
+      .children_to = if (x$child != x$children_to) double_tick(x$children_to),
       `.required` = if (!x$required) FALSE
     ),
     force_names = names
