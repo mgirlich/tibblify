@@ -79,6 +79,14 @@ to a one row tibble resp. a list.</p>
 <span>  vector_allows_empty_list <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">tspec_recursive</span><span class="op">(</span></span>
+<span>  <span class="va">...</span>,</span>
+<span>  <span class="va">.children</span>,</span>
+<span>  .children_to <span class="op">=</span> <span class="va">.children</span>,</span>
+<span>  .input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rowmajor"</span>, <span class="st">"colmajor"</span><span class="op">)</span>,</span>
+<span>  vector_allows_empty_list <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">tspec_row</span><span class="op">(</span></span>
 <span>  <span class="va">...</span>,</span>
 <span>  .input_form <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"rowmajor"</span>, <span class="st">"colmajor"</span><span class="op">)</span>,</span>
@@ -107,6 +115,14 @@ column is created</p></dd>
 <dt>vector_allows_empty_list</dt>
 <dd><p>Should empty lists for <code>input_form = "vector"</code>
 be accepted and treated as empty vector?</p></dd>
+
+
+<dt>.children</dt>
+<dd><p>A string giving the name of field that contains the children.</p></dd>
+
+
+<dt>.children_to</dt>
+<dd><p>A string giving the column name to store the children.</p></dd>
 
 </dl></div>
     <div class="section level2">

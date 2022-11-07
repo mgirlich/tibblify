@@ -218,6 +218,8 @@
 <span>  elt_transform <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">tib_recursive</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, <span class="va">.children</span>, .children_to <span class="op">=</span> <span class="va">.children</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">tib_row</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tib_df</span><span class="op">(</span><span class="va">.key</span>, <span class="va">...</span>, .required <span class="op">=</span> <span class="cn">TRUE</span>, .names_to <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
@@ -284,6 +286,14 @@ specified column.</p></li>
 or <code>"vector"</code> and 2) <code>values_to</code> is a string. The inner names of the
 field go into the specified column.</p></li>
 </ul></dd>
+
+
+<dt>.children</dt>
+<dd><p>A string giving the name of field that contains the children.</p></dd>
+
+
+<dt>.children_to</dt>
+<dd><p>A string giving the column name to store the children.</p></dd>
 
 
 <dt>.names_to</dt>
