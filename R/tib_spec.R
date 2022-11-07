@@ -99,17 +99,10 @@ tspec_recursive <- function(...,
                             vector_allows_empty_list = FALSE) {
   .input_form <- arg_match(.input_form)
   # TODO check that key is unique
-  # browser()
-  # fields <- prep_spec_fields(list2(...), call)
-  # fields[[.child]] <- tib_recursive(
-  #   .child,
-  #   !!!fields,
-  #   .child = .child
-  # )
 
   tspec(
     list2(...),
-    "recursive_dummy",
+    "recursive",
     child = .child,
     input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
@@ -821,7 +814,7 @@ tib_variant <- function(key,
 tib_recursive <- function(.key, ..., .child, .required = TRUE) {
   tib_collector(
     key = .key,
-    type = "recursive_dummy",
+    type = "recursive",
     required = .required,
     child = .child,
     fields = prep_spec_fields(list2(...), call = current_env())

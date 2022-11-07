@@ -152,7 +152,7 @@ void tibblify_init_utils(SEXP ns) {
   r_preserve_global(r_string_types.scalar = r_str("scalar"));
   r_preserve_global(r_string_types.vector = r_str("vector"));
   r_preserve_global(r_string_types.variant = r_str("variant"));
-  r_preserve_global(r_string_types.recursive = r_str("recursive"));
+  r_preserve_global(r_string_types.recursive = r_str("recursive_helper"));
 
   r_preserve_global(r_vector_form.vector = r_str("vector"));
   r_preserve_global(r_vector_form.scalar_list = r_str("scalar_list"));
