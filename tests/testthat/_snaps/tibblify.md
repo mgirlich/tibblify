@@ -5,7 +5,7 @@
     Output
       <error/rlang_error>
       Error in `tibblify()`:
-      ! `spec` must be a tibblify spec, not a string.
+      ! `spec` must be a tibblify spec, not the string "x".
     Code
       (expect_error(tibblify(list(), tib_int("x"))))
     Output
@@ -212,7 +212,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` must be a list, not a number.
+      ! `x[[1]]$x` must be a list, not the number 1.
       x `input_form = "vector"` can only parse lists.
       i Use `input_form = "vector"` (the default) if the field is already a vector.
     Code
@@ -220,7 +220,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` must be a list, not a number.
+      ! `x[[1]]$x` must be a list, not the number 1.
       x `input_form = "object"` can only parse lists.
       i Use `input_form = "vector"` (the default) if the field is already a vector.
 
@@ -374,7 +374,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x$x` must be a list, not a string.
+      ! `x$x` must be a list, not the string "a".
     Code
       (expect_error(tib_cm(tib_lgl_vec("x"), x = list("a"))))
     Output
@@ -422,7 +422,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x$row` must be a list, not a string.
+      ! `x$row` must be a list, not the string "a".
 
 # colmajor: errors on NULL value
 

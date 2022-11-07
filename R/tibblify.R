@@ -16,6 +16,7 @@
 #' @export
 #'
 #' @examples
+#' # List of Objects -----------------------------------------------------------
 #' x <- list(
 #'   list(id = 1, name = "Tyrion Lannister"),
 #'   list(id = 2, name = "Victarion Greyjoy")
@@ -29,8 +30,31 @@
 #' )
 #' tibblify(x, spec)
 #'
+#' # Object --------------------------------------------------------------------
 #' # Provide a specification for a single object
 #' tibblify(x[[1]], tspec_object(spec))
+#'
+#' # Recursive Trees -----------------------------------------------------------
+#' x <- list(
+#'   list(
+#'     id = 1,
+#'     name = "a",
+#'     children = list(
+#'       list(id = 11, name = "aa"),
+#'       list(id = 12, name = "ab", children = list(
+#'         list(id = 121, name = "aba")
+#'       ))
+#'     ))
+#' )
+#' spec <- tspec_recursive(
+#'   tib_int("id"),
+#'   tib_chr("name"),
+#'   .children = "children"
+#' )
+#' out <- tibblify(x, spec)
+#' out
+#' out$children
+#' out$children[[1]]$children[[2]]
 tibblify <- function(x,
                      spec = NULL,
                      names_to = NULL,

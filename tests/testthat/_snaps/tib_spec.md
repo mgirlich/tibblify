@@ -16,13 +16,13 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! ..1 must be a tib collector, not a number.
+      ! ..1 must be a tib collector, not the number 1.
     Code
       (expect_error(tspec_df(x = tib_int("x"), y = "a")))
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! y must be a tib collector, not a string.
+      ! y must be a tib collector, not the string "a".
 
 # can infer name from key
 
@@ -67,7 +67,7 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! `.names_to` must be a single string or `NULL`, not a number.
+      ! `.names_to` must be a single string or `NULL`, not the number 1.
 
 # errors if `.names_to` column name is not unique
 
@@ -100,7 +100,7 @@
     Output
       <error/rlang_error>
       Error in `tspec_df()`:
-      ! `vector_allows_empty_list` must be `TRUE` or `FALSE`, not a string.
+      ! `vector_allows_empty_list` must be `TRUE` or `FALSE`, not the string "a".
 
 # errors on invalid `key`
 
@@ -127,7 +127,7 @@
     Output
       <error/rlang_error>
       Error in `tib_int()`:
-      ! `key` must be a character vector, not an integer.
+      ! `key` must be a character vector, not the number 1.
     Code
       (expect_error(tib_int(c("x", NA))))
     Output
@@ -160,7 +160,7 @@
     Output
       <error/rlang_error>
       Error in `tib_int()`:
-      ! `required` must be `TRUE` or `FALSE`, not an integer.
+      ! `required` must be `TRUE` or `FALSE`, not the number 1.
     Code
       (expect_error(tib_int("x", required = c(TRUE, FALSE))))
     Output
@@ -278,7 +278,7 @@
     Output
       <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! `values_to` must be a single string, not a number.
+      ! `values_to` must be a single string, not the number 1.
     Code
       (expect_error(tib_int_vec("x", values_to = c("a", "b"))))
     Output
@@ -314,7 +314,7 @@
     Output
       <error/rlang_error>
       Error in `tib_int_vec()`:
-      ! `names_to` must be a single string, not a number.
+      ! `names_to` must be a single string, not the number 1.
     Code
       (expect_error(tib_int_vec("x", input_form = "object", values_to = "val",
         names_to = c("a", "b"))))
@@ -330,5 +330,5 @@
     Output
       <error/rlang_error>
       Error in `tib_df()`:
-      ! `.names_to` must be a single string, not a number.
+      ! `.names_to` must be a single string, not the number 1.
 

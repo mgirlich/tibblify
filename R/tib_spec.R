@@ -75,7 +75,7 @@ check_names_to <- function(.names_to, input_form, call = caller_env()) {
       msg <- 'Can\'t use {.arg .names_to} with {.code .input_form = "colmajor"}.'
       cli::cli_abort(msg, call = call)
     }
-    check_string(.names_to, what = "a single string or `NULL`", call = call)
+    check_string(.names_to, allow_null = TRUE, call = call)
   }
 }
 
