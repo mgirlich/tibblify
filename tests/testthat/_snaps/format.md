@@ -340,6 +340,33 @@
         tib_chr("text"),
       )
 
+# format for tib_recursive works
+
+    Code
+      tib_recursive("data", .children = "children", tib_int("id"), tib_chr("name"), ) %>%
+        print()
+    Output
+      tib_df(
+        "data",
+        .children = "children",
+        tib_int("id"),
+        tib_chr("name"),
+      )
+
+---
+
+    Code
+      tib_recursive("data", .children = "children", tib_int("id"), tib_chr("name"),
+      .required = FALSE) %>% print()
+    Output
+      tib_df(
+        "data",
+        .children = "children",
+        .required = FALSE,
+        tib_int("id"),
+        tib_chr("name"),
+      )
+
 # prints non-canonical names
 
     Code

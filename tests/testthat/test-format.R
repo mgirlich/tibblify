@@ -202,6 +202,30 @@ test_that("format for tib_df works", {
   )
 })
 
+test_that("format for tib_recursive works", {
+  local_options(cli.num_colors = 1)
+  expect_snapshot(
+    tib_recursive(
+      "data",
+      .children = "children",
+      tib_int("id"),
+      tib_chr("name"),
+    ) %>%
+      print()
+  )
+
+  expect_snapshot(
+    tib_recursive(
+      "data",
+      .children = "children",
+      tib_int("id"),
+      tib_chr("name"),
+      .required = FALSE
+    ) %>%
+      print()
+  )
+})
+
 test_that("prints non-canonical names", {
   expect_snapshot({
     tspec_df(b = tib_int("a")) %>% format()
@@ -252,6 +276,13 @@ test_that("prints arguments of spec_*", {
   expect_equal(
     format(tspec_df(tib_int("a"), vector_allows_empty_list = TRUE)),
     'tspec_df(\n  vector_allows_empty_list = TRUE,\n  tib_int("a"),\n)'
+  )
+})
+
+test_that("prints arguments of tspec_recursive", {
+  expect_equal(
+    format(tspec_recursive(tib_int("a"), .children = "children")),
+    'tspec_recursive(\n  .children = "children",\n  tib_int("a"),\n)'
   )
 })
 

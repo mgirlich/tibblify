@@ -69,6 +69,25 @@ format.tspec_row <- function(x, width = NULL, ..., names = NULL) {
 }
 
 #' @export
+format.tspec_recursive <- function(x, width = NULL, ..., names = NULL) {
+  names <- names %||% should_force_names()
+  check_flag(names)
+
+  format_fields(
+    "tspec_recursive",
+    fields = x$fields,
+    width = width,
+    args = list(
+      .children = double_tick(x$child),
+      .children_to = if (x$child != x$children_to) double_tick(x$children_to),
+      vector_allows_empty_list = if (x$vector_allows_empty_list) x$vector_allows_empty_list,
+      .input_form = if (x$input_form != "rowmajor") double_tick(x$input_form)
+    ),
+    force_names = names
+  )
+}
+
+#' @export
 format.tspec_object <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
   check_flag(names)
@@ -275,6 +294,25 @@ format.tib_df <- function(x, ..., width = NULL, names = NULL) {
   )
 }
 
+#' @export
+format.tib_recursive <- function(x, ..., width = NULL, names = NULL) {
+  names <- names %||% should_force_names()
+  check_flag(names)
+
+  format_fields(
+    "tib_df",
+    fields = x$fields,
+    width = width,
+    args = list(
+      deparse(x$key),
+      `.children` = double_tick(x$child),
+      .children_to = if (x$child != x$children_to) double_tick(x$children_to),
+      `.required` = if (!x$required) FALSE
+    ),
+    force_names = names
+  )
+}
+
 
 # colours -----------------------------------------------------------------
 
@@ -322,6 +360,8 @@ format_tib_f.tib_variant <- function(x) {"tib_variant"}
 format_tib_f.tib_row <- function(x) {cli::col_magenta("tib_row")}
 #' @export
 format_tib_f.tib_df <- function(x) {cli::col_magenta("tib_df")}
+#' @export
+format_tib_f.tib_recursive <- function(x) {cli::col_magenta("tib_recursive")}
 
 #' @export
 format_tib_f.default <- function(x) {class(x)[[1]]}

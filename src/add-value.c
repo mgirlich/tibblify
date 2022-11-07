@@ -77,6 +77,13 @@ void add_default_df(struct collector* v_collector, struct Path* v_path) {
   ++v_collector->current_row;
 }
 
+void add_default_recursive(struct collector* v_collector, struct Path* v_path) {
+  // TODO
+  // `df` have no default value. Use `NULL` instead
+  r_list_poke(v_collector->data, v_collector->current_row, r_null);
+  ++v_collector->current_row;
+}
+
 #define ADD_VALUE(COLL, NA, EMPTY, CAST)                       \
   if (value == r_null) {                                       \
     *v_collector->details.COLL.v_data = NA;                    \
@@ -414,7 +421,9 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct P
 
   r_obj* const * v_value = r_list_cbegin(value);
   r_ssize n_value = short_vec_size(value);
+  path_down(v_path);
   for (r_ssize row = 0; row < n_value; ++row) {
+    path_replace_int(v_path, row);
     r_obj* row_value = v_value[row];
 
     r_obj* parsed_row;
@@ -426,6 +435,49 @@ void add_value_df_colmajor(struct collector* v_collector, r_obj* value, struct P
 
     r_list_poke(v_collector->data, v_collector->current_row, parsed_row);
     FREE(1);
+    ++v_collector->current_row;
+  }
+  path_up(v_path);
+}
+
+void add_value_recursive(struct collector* v_collector, r_obj* value, struct Path* v_path) {
+  r_obj* data;
+  if (value == r_null) {
+    data = r_null;
+  } else {
+    struct collector* parent_coll = v_collector->details.rec_coll.v_parent;
+    struct collector* p_parser = parent_coll->copy(parent_coll);
+    KEEP(p_parser->shelter);
+
+    data = parse(p_parser, value, v_path);
+    FREE(1);
+  }
+  r_list_poke(v_collector->data, v_collector->current_row, data);
+  ++v_collector->current_row;
+}
+
+void add_value_recursive_colmajor(struct collector* v_collector, r_obj* value, struct Path* v_path) {
+  check_list(value, v_path);
+
+  r_obj* const * v_value = r_list_cbegin(value);
+  r_ssize n_value = short_vec_size(value);
+  for (r_ssize row = 0; row < n_value; ++row) {
+    r_obj* row_value = v_value[row];
+
+    r_obj* parsed_row;
+    if (row_value == r_null) {
+      parsed_row = KEEP(r_null);
+    } else {
+      struct collector* parent_coll = v_collector->details.rec_coll.v_parent;
+      struct collector* p_parser = parent_coll->copy(parent_coll);
+      KEEP(p_parser->shelter);
+
+      parsed_row = parse_colmajor(p_parser, v_value[row], v_path);
+    }
+    KEEP(parsed_row);
+
+    r_list_poke(v_collector->data, v_collector->current_row, parsed_row);
+    FREE(2);
     ++v_collector->current_row;
   }
 }

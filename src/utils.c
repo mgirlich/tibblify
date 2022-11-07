@@ -5,9 +5,6 @@ SEXP tibblify_ns_env = NULL;
 
 SEXP classes_list_of = NULL;
 
-SEXP strings_object = NULL;
-SEXP strings_df = NULL;
-SEXP strings_row = NULL;
 SEXP strings_empty = NULL;
 
 SEXP syms_ptype = NULL;
@@ -155,6 +152,7 @@ void tibblify_init_utils(SEXP ns) {
   r_preserve_global(r_string_types.scalar = r_str("scalar"));
   r_preserve_global(r_string_types.vector = r_str("vector"));
   r_preserve_global(r_string_types.variant = r_str("variant"));
+  r_preserve_global(r_string_types.recursive = r_str("recursive_helper"));
 
   r_preserve_global(r_vector_form.vector = r_str("vector"));
   r_preserve_global(r_vector_form.scalar_list = r_str("scalar_list"));
@@ -169,9 +167,6 @@ void tibblify_init_utils(SEXP ns) {
   r_chr_poke(classes_list_of, 2, strings_list);
 
   r_preserve_global(strings_empty = r_str(""));
-  r_preserve_global(strings_object = r_str("object"));
-  r_preserve_global(strings_df = r_str("df"));
-  r_preserve_global(strings_row = r_str("row"));
 
   syms_ptype = r_sym("ptype");
   syms_transform = r_sym("transform");

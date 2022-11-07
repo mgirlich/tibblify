@@ -80,8 +80,8 @@ tibblify <- function(x,
     out <- purrr::map2(spec_org$fields, out, finalize_tspec_object)
   }
 
-  out <- set_spec(out, spec_org)
-  attr(out, "waldo_opts") <- list(ignore_attr = c("tib_spec", "waldo_opts"))
+  # out <- set_spec(out, spec_org)
+  # attr(out, "waldo_opts") <- list(ignore_attr = c("tib_spec", "waldo_opts"))
   out
 }
 
@@ -114,7 +114,22 @@ finalize_tspec_object.tib_vector <- function(field_spec, field) {
   field[[1]]
 }
 
+#' @export
+finalize_tspec_object.tib_recursive <- function(field_spec, field) {
+  field[[1]]
+}
+
 spec_prep <- function(spec) {
+  type <- spec$type
+  if (type == "recursive") {
+    # TODO how to rename?
+    spec$fields[[spec$children_to]] <- tib_df(
+      spec$child,
+      .required = FALSE
+    )
+    spec$fields[[spec$children_to]]$type <- "recursive_helper"
+  }
+
   n_cols <- length(spec$fields)
   if (is_null(spec$names_col)) {
     coll_locations <- seq2(1, n_cols) - 1L
@@ -124,6 +139,7 @@ spec_prep <- function(spec) {
     n_cols <- n_cols + 1L
     spec$col_names <- c(spec$names_col, names(spec$fields))
   }
+
   spec$coll_locations <- as.list(coll_locations)
   spec$n_cols <- n_cols
 
@@ -133,6 +149,12 @@ spec_prep <- function(spec) {
   spec$keys <- result$keys
   spec$coll_locations <- result$coll_locations
   # TODO maybe add `key_match_ind`?
+
+  if (type == "recursive") {
+    spec$type <- "df"
+    spec["names_col"] <- list(NULL)
+    spec$child_coll_pos <- which(purrr::map_chr(spec$fields, "type") == "recursive_helper") - 1L
+  }
 
   spec
 }
@@ -150,7 +172,7 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     function(x) {
       x$key <- unlist(x$key)
 
-      if (x$type == "row" || x$type == "df") {
+      if (x$type == "row" || x$type == "df" || x$type == "recursive") {
         x <- spec_prep(x)
       } else if (x$type == "scalar") {
         x <- prep_tib_scalar(x)

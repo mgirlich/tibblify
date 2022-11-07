@@ -17,6 +17,8 @@
 #'   column is created
 #' @param vector_allows_empty_list Should empty lists for `input_form = "vector"`
 #'   be accepted and treated as empty vector?
+#' @param .children A string giving the name of field that contains the children.
+#' @param .children_to A string giving the column name to store the children.
 #'
 #' @return A tibblify specification.
 #' @export
@@ -86,6 +88,28 @@ tspec_object <- function(...,
   tspec(
     list2(...),
     "object",
+    input_form = .input_form,
+    vector_allows_empty_list = vector_allows_empty_list
+  )
+}
+
+#' @rdname tspec_df
+#' @export
+tspec_recursive <- function(...,
+                            .children,
+                            .children_to = .children,
+                            .input_form = c("rowmajor", "colmajor"),
+                            vector_allows_empty_list = FALSE) {
+  .input_form <- arg_match(.input_form)
+  check_string(.children)
+  check_string(.children_to)
+  # TODO check that key is unique
+
+  tspec(
+    list2(...),
+    "recursive",
+    child = .children,
+    children_to = .children_to,
     input_form = .input_form,
     vector_allows_empty_list = vector_allows_empty_list
   )
@@ -788,6 +812,26 @@ tib_variant <- function(key,
     fill = fill,
     transform = prep_transform(transform, call = current_env()),
     elt_transform = prep_transform(elt_transform, call = current_env(), arg = "elt_transform")
+  )
+}
+
+#' @rdname tib_scalar
+#' @export
+tib_recursive <- function(.key,
+                          ...,
+                          .children,
+                          .children_to = .children,
+                          .required = TRUE) {
+  check_string(.children)
+  check_string(.children_to)
+
+  tib_collector(
+    key = .key,
+    type = "recursive",
+    required = .required,
+    child = .children,
+    children_to = .children_to,
+    fields = prep_spec_fields(list2(...), call = current_env())
   )
 }
 

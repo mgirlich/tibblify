@@ -197,6 +197,73 @@ r_obj* get_ptype_df(struct collector* v_collector) {
   return ptype;
 }
 
+r_obj* get_ptype_recursive(struct collector* v_collector) {
+  return r_globals.empty_list;
+}
+
+struct collector* copy_collector_generic(int shelter_size,
+                                         struct collector* p_coll) {
+  r_obj* shelter = KEEP(r_alloc_list(shelter_size));
+
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
+  r_list_poke(shelter, 1, coll_raw);
+  struct collector* p_coll_new = r_raw_begin(coll_raw);
+  *p_coll_new = *p_coll;
+  p_coll_new->shelter = shelter;
+
+  FREE(1);
+  return p_coll_new;
+}
+
+struct collector* copy_collector(struct collector* p_coll) {
+  return copy_collector_generic(2, p_coll);
+}
+
+struct collector* copy_multi_collector(struct collector* p_coll) {
+  struct multi_collector* p_multi_coll = &p_coll->details.multi_coll;
+  r_ssize n_keys = p_multi_coll->n_keys;
+
+  struct collector* p_coll_new = copy_collector_generic(5 + n_keys, p_coll);
+  KEEP(p_coll_new->shelter);
+
+  r_obj* multi_coll_raw = KEEP(r_alloc_raw(sizeof(struct multi_collector)));
+  r_list_poke(p_coll_new->shelter, 2, multi_coll_raw);
+  struct multi_collector* p_multi_coll_new = r_raw_begin(multi_coll_raw);
+  *p_multi_coll_new = p_coll_new->details.multi_coll;
+
+  r_obj* key_match_ind = KEEP(r_alloc_raw(n_keys * sizeof(r_ssize)));
+  r_list_poke(p_coll_new->shelter, 3, key_match_ind);
+  p_multi_coll_new->key_match_ind = key_match_ind;
+
+  int* p_key_match_ind = r_raw_begin(key_match_ind);
+  for (int i = 0; i < n_keys; ++i) {
+    p_key_match_ind[i] = (r_ssize) i;
+  }
+  p_multi_coll_new->p_key_match_ind = p_key_match_ind;
+
+  // TODO should not really be required, right?
+  // for (int i = 0; i < 256; ++i) {
+  //   p_multi_coll_new->field_order_ind[i] = i;
+  // }
+  p_multi_coll_new->field_names_prev = r_globals.empty_chr;
+
+  r_obj* collectors_raw = KEEP(r_alloc_raw(sizeof(struct collector) * n_keys));
+  r_list_poke(p_coll_new->shelter, 4, collectors_raw);
+  p_multi_coll_new->collectors = r_raw_begin(collectors_raw);
+
+  for (r_ssize i = 0; i < n_keys; ++i) {
+    struct collector* p_coll_i = &p_multi_coll->collectors[i];
+    struct collector* p_coll_i_new = p_coll_i->copy(p_coll_i);
+    r_list_poke(p_coll_new->shelter, 5 + i, p_coll_i_new->shelter);
+    p_multi_coll_new->collectors[i] = *p_coll_i_new;
+  }
+
+  p_coll_new->details.multi_coll = *p_multi_coll_new;
+
+  FREE(4);
+  return p_coll_new;
+}
+
 struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype,
                                        r_obj* ptype_inner,
@@ -252,6 +319,7 @@ struct collector* new_scalar_collector(bool required,
   }
   p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
   p_coll->get_ptype = &get_ptype_scalar;
+  p_coll->copy = &copy_collector;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
   assign_f_absent(p_coll, required);
@@ -285,6 +353,7 @@ struct collector* new_vector_collector(bool required,
 
   p_coll->shelter = shelter;
   p_coll->get_ptype = &get_ptype_vector;
+  p_coll->copy = &copy_collector;
   p_coll->alloc = &alloc_vector_coll;
   p_coll->add_value = &add_value_vector;
   p_coll->add_value_colmajor = &add_value_vector_colmajor;
@@ -337,6 +406,7 @@ struct collector* new_variant_collector(bool required,
 
   p_coll->shelter = shelter;
   p_coll->get_ptype = &get_ptype_variant;
+  p_coll->copy = &copy_collector;
   p_coll->alloc = &alloc_vector_coll;
   p_coll->add_value = &add_value_variant;
   p_coll->add_value_colmajor = &add_value_variant_colmajor;
@@ -404,6 +474,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
   default:
     r_stop_internal("Unexpected collector type.");
   }
+  p_coll->copy = &copy_multi_collector;
 
   assign_f_absent(p_coll, required);
   p_coll->ptype = ptype_dummy;
@@ -522,6 +593,35 @@ struct collector* new_df_collector(bool required,
                              ptype_dummy,
                              n_cols,
                              rowmajor);
+}
+
+struct collector* new_rec_collector() {
+  r_obj* shelter = KEEP(r_alloc_list(3));
+
+  r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
+  r_list_poke(shelter, 1, coll_raw);
+  struct collector* p_coll = r_raw_begin(coll_raw);
+
+  p_coll->shelter = shelter;
+  p_coll->get_ptype = &get_ptype_recursive;
+  p_coll->copy = &copy_collector;
+  p_coll->alloc = &alloc_coll_df;
+  p_coll->add_value = &add_value_recursive;
+  p_coll->add_value_colmajor = &add_value_recursive_colmajor;
+  p_coll->add_default = &add_default_recursive;
+  p_coll->finalize = &finalize_recursive;
+  // TODO
+  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->unpack = false;
+  assign_f_absent(p_coll, false);
+
+  r_obj* rec_coll_raw = r_alloc_raw(sizeof(struct recursive_collector));
+  r_list_poke(shelter, 2, rec_coll_raw);
+  struct recursive_collector* p_rec_coll = r_raw_begin(rec_coll_raw);
+  p_coll->details.rec_coll = *p_rec_coll;
+
+  FREE(1);
+  return p_coll;
 }
 
 void assign_in_multi_collector(r_obj* x, r_obj* xi, bool unpack, r_obj* ffi_locs) {

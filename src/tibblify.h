@@ -16,8 +16,6 @@ extern SEXP classes_list_of;
 
 extern SEXP strings_empty;
 extern SEXP strings_object;
-extern SEXP strings_df;
-extern SEXP strings_row;
 
 extern SEXP syms_transform;
 extern SEXP syms_value;
@@ -41,6 +39,7 @@ struct r_string_types_struct {
   r_obj* vector;
   r_obj* unspecified;
   r_obj* variant;
+  r_obj* recursive;
 };
 extern struct r_string_types_struct r_string_types;
 
