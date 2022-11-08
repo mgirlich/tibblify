@@ -26,7 +26,7 @@
 #' print(spec, names = TRUE)
 print.tspec <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
   cat(format(x, width = width, ..., names = names))
 
   invisible(x)
@@ -36,7 +36,7 @@ print.tspec <- function(x, width = NULL, ..., names = NULL) {
 #' @export
 format.tspec_df <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tspec_df",
@@ -54,7 +54,7 @@ format.tspec_df <- function(x, width = NULL, ..., names = NULL) {
 #' @export
 format.tspec_row <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tspec_row",
@@ -71,7 +71,7 @@ format.tspec_row <- function(x, width = NULL, ..., names = NULL) {
 #' @export
 format.tspec_recursive <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tspec_recursive",
@@ -90,7 +90,7 @@ format.tspec_recursive <- function(x, width = NULL, ..., names = NULL) {
 #' @export
 format.tspec_object <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tspec_object",
@@ -163,7 +163,7 @@ is_tib_name_canonical <- function(field, name) {
 #' @export
 print.tib_collector <- function(x, width = NULL, ..., names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   cat(format(x, width = width, ..., names = names))
   invisible(x)
@@ -262,7 +262,7 @@ format.tib_vector_chr_date <- format.tib_scalar_chr_date
 #' @export
 format.tib_row <- function(x, ..., width = NULL, names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tib_row",
@@ -279,7 +279,7 @@ format.tib_row <- function(x, ..., width = NULL, names = NULL) {
 #' @export
 format.tib_df <- function(x, ..., width = NULL, names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tib_df",
@@ -297,7 +297,7 @@ format.tib_df <- function(x, ..., width = NULL, names = NULL) {
 #' @export
 format.tib_recursive <- function(x, ..., width = NULL, names = NULL) {
   names <- names %||% should_force_names()
-  check_flag(names)
+  check_bool(names)
 
   format_fields(
     "tib_df",

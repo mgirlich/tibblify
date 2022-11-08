@@ -7,9 +7,9 @@ guess_tspec_df <- function(x,
                           inform_unspecified = should_inform_unspecified(),
                           call = rlang::current_call()) {
   check_dots_empty()
-  check_flag(empty_list_unspecified, call = call)
-  check_flag(simplify_list, call = call)
-  check_flag(inform_unspecified, call = call)
+  check_bool(empty_list_unspecified, call = call)
+  check_bool(simplify_list, call = call)
+  check_bool(inform_unspecified, call = call)
 
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {

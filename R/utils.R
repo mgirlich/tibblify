@@ -1,11 +1,3 @@
-check_flag <- function(x, arg = caller_arg(x), call = caller_env()) {
-  vctrs::vec_assert(x, logical(), size = 1L, arg = arg, call = call)
-
-  if (is.na(x)) {
-    cli::cli_abort("{.arg arg} must not be {.code NA}.", call = call)
-  }
-}
-
 check_arg_different <- function(arg,
                                 ...,
                                 arg_name = caller_arg(arg),

@@ -59,9 +59,9 @@ guess_tspec_list <- function(x,
                              inform_unspecified = should_inform_unspecified(),
                              call = current_call()) {
   check_dots_empty()
-  check_flag(empty_list_unspecified, call = call)
-  check_flag(simplify_list, call = call)
-  check_flag(inform_unspecified, call = call)
+  check_bool(empty_list_unspecified, call = call)
+  check_bool(simplify_list, call = call)
+  check_bool(inform_unspecified, call = call)
 
   if (vec_is(x) && !vec_is_list(x)) {
     cli::cli_abort(c(
