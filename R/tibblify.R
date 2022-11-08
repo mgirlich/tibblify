@@ -190,30 +190,46 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     x
   }
 
-  is_sub <- purrr::map_lgl(spec, ~ length(.x$key) > 1)
-  spec_simple <- spec[!is_sub]
-  spec_simple_prepped <- purrr::map(
-    spec_simple,
-    function(x) {
-      x$key <- unlist(x$key)
+  keys <- lapply(spec, `[[`, "key")
+  first_keys <- vapply(keys, `[[`, 1L, FUN.VALUE = character(1))
+  key_order <- order(first_keys, method = "radix")
 
-      if (x$type == "row" || x$type == "df" || x$type == "recursive") {
-        x <- spec_prep(x)
-      } else if (x$type == "scalar") {
-        x <- prep_tib_scalar(x)
-      } else if (x$type == "vector") {
-        x <- prep_tib_vector(x)
-      }
+  spec <- spec[key_order]
+  coll_locations <- coll_locations[key_order]
+  keys <- keys[key_order]
+  first_keys <- first_keys[key_order]
+
+  is_sub <- lengths(keys) > 1
+  spec_simple_prepped <- purrr::map(
+    spec[!is_sub],
+    function(x) {
+      x$key <- x$key[[1]]
+
+      x <- switch (x$type,
+        scalar = prep_tib_scalar(x),
+        vector = prep_tib_vector(x),
+        row = spec_prep(x),
+        df = spec_prep(x),
+        recursive = spec_prep(x),
+        x
+      )
 
       x
     }
   )
 
-  spec_complex <- spec[is_sub]
+  if (!any(is_sub)) {
+    out <- list(
+      fields = spec_simple_prepped,
+      coll_locations = vctrs::vec_chop(coll_locations),
+      keys = first_keys
+    )
 
-  first_keys <- purrr::map_chr(spec_complex, list("key", 1))
-  spec_complex <- purrr::map(spec_complex, remove_first_key)
-  spec_split <- vec_split(spec_complex, first_keys)
+    return(out)
+  }
+
+  spec_complex <- purrr::map(spec[is_sub], remove_first_key)
+  spec_split <- vec_split(spec_complex, first_keys[is_sub])
   spec_complex_prepped <- purrr::map2(
     spec_split$key, spec_split$val,
     function(key, sub_spec) {
@@ -231,19 +247,18 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     spec_simple_prepped,
     spec_complex_prepped
   )
-
   coll_locations <- c(
     vec_chop(coll_locations[!is_sub]),
-    vec_split(coll_locations[is_sub], first_keys)$val
+    vec_split(coll_locations[is_sub], first_keys[is_sub])$val
   )
 
-  keys <- purrr::map_chr(spec_out, list("key", 1))
-  key_order <- order(keys)
+  first_keys <- purrr::map_chr(spec_out, list("key", 1))
+  key_order <- order(first_keys)
 
   list(
     fields = spec_out[key_order],
     coll_locations = coll_locations[key_order],
-    keys = keys[key_order]
+    keys = first_keys[key_order]
   )
 }
 
@@ -292,7 +307,12 @@ prep_tib_vector <- function(x) {
 
 tibblify_prepare_unspecified <- function(spec, unspecified, call) {
   unspecified <- unspecified %||% "error"
-  unspecified <- arg_match(unspecified, c("error", "inform", "drop", "list"))
+  unspecified <- arg_match0(
+    unspecified,
+    c("error", "inform", "drop", "list"),
+    arg_nm = "unspecified",
+    error_call = call
+  )
 
   if (unspecified %in% c("inform", "error")) {
     spec_inform_unspecified(spec, action = unspecified, call = call)
@@ -302,7 +322,6 @@ tibblify_prepare_unspecified <- function(spec, unspecified, call) {
 }
 
 spec_replace_unspecified <- function(spec, unspecified) {
-  unspecified <- arg_match(unspecified, c("drop", "list"))
   fields <- spec$fields
 
   # need to go backwards over fields because some are removed
