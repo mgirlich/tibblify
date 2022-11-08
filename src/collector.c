@@ -193,7 +193,7 @@ r_obj* get_ptype_df(struct collector* v_collector) {
   r_obj* list_of_ptype = KEEP(get_ptype_row(v_collector));
   r_attrib_poke(ptype, syms_ptype, list_of_ptype);
 
-  FREE(1);
+  FREE(2);
   return ptype;
 }
 

@@ -581,6 +581,42 @@ test_that("tib_df works", {
     ),
     tibble(x = list_of(NULL, .ptype = tibble(a = logical())))
   )
+
+  # can handle every `tib_*()`
+  dtt <- vctrs::new_datetime(1)
+  x <- list(
+    atomic_scalar = 1L,
+    scalar = dtt,
+    vector = 1:2,
+    variant = list(1L, "a"),
+    row = list(a = 1, b = "b"),
+    df = list(list(x = 1))
+  )
+  spec <- tspec_object(
+    tib_df(
+      "df",
+      tib_int("atomic_scalar"),
+      tib_scalar("scalar", dtt),
+      tib_int_vec("vector"),
+      tib_variant("variant"),
+      tib_row("row", tib_int("a"), tib_chr("b")),
+      tib_df("df", tib_int("x")),
+    )
+  )
+
+  expect_equal(
+    tibblify(list(df = list(x)), spec),
+    list(
+      df = tibble(
+        atomic_scalar = 1L,
+        scalar = dtt,
+        vector = list_of(1:2),
+        variant = list(list(1L, "a")),
+        row = tibble(a = 1L, b = "b"),
+        df = list_of(tibble(x = 1L))
+      )
+    )
+  )
 })
 
 test_that("tib_df can use names_to", {

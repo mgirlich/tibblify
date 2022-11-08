@@ -27,8 +27,8 @@ r_obj* r_list_get_by_name(r_obj* x, const char* nm) {
     }
   }
 
-  r_stop_internal("Field `%s` not found", nm);
-  return r_null;
+  r_stop_internal("Field `%s` not found", nm); // # nocov
+  return r_null; // # nocov
 }
 
 r_obj* apply_transform(r_obj* value, r_obj* fn) {

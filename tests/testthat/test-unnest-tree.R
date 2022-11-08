@@ -16,15 +16,18 @@ test_that("checks arguments", {
 
     (expect_error(unnest_tree(df, children, children)))
     (expect_error(unnest_tree(df, id, children, level_to = 1L)))
+    (expect_error(unnest_tree(df, id, children, level_to = "id")))
     (expect_error(unnest_tree(df, id, children, level_to = c("a", "b"))))
 
     (expect_error(unnest_tree(df, id, children, parent_to = "level")))
     (expect_error(unnest_tree(df, id, children, parent_to = 1L)))
+    (expect_error(unnest_tree(df, id, children, parent_to = "id")))
     (expect_error(unnest_tree(df, id, children, parent_to = c("a", "b"))))
 
     (expect_error(unnest_tree(df, id, children, ancestors_to = "level")))
     (expect_error(unnest_tree(df, id, children, ancestors_to = "parent")))
     (expect_error(unnest_tree(df, id, children, ancestors_to = 1L)))
+    (expect_error(unnest_tree(df, id, children, ancestors_to = "id")))
     (expect_error(unnest_tree(df, id, children, ancestors_to = c("a", "b"))))
   })
 
@@ -152,6 +155,34 @@ test_that("can unnest", {
         c(1L, 3L),
         c(1L, 3L, 5L)
       )
+    )
+  )
+})
+
+test_that("can handle list_of children", {
+  df <- tibble::tibble(
+    id = 1L,
+    x = "a",
+    children = list_of(
+      tibble::tibble(
+        id = 2:3,
+        x = c("b", "c"),
+        children = list_of(
+          tibble(id = 4, x = "d"),
+          NULL
+        )
+      )
+    )
+  )
+
+  expect_equal(
+    unnest_tree(df, id, children, ancestors_to = "ancestors"),
+    tibble::tibble(
+      id = 1:4,
+      x = c("a", "b", "c", "d"),
+      level = c(1L, 2L, 2L, 3L),
+      parent = c(NA, 1L, 1L, 2),
+      ancestors = list(NULL, 1L, 1L, c(1L, 2L))
     )
   )
 })

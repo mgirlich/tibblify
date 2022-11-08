@@ -59,10 +59,7 @@ unnest_tree <- function(data,
   child_col <- names(eval_pull(data, enquo(child_col), "child_col"))
   check_arg_different(child_col, id_col)
 
-  if (!is_null(level_to)) {
-    level_to <- vctrs::vec_cast(level_to, character())
-    vctrs::vec_assert(level_to, size = 1L)
-  }
+  level_to <- check_unnest_level_to(level_to, data)
   parent_to <- check_unnest_parent_to(parent_to, data, level_to)
   ancestors_to <- check_unnest_ancestors_to(ancestors_to, data, level_to, parent_to)
 
@@ -176,6 +173,16 @@ eval_pull <- function(data, col, col_arg) {
 
   nm <- colnames(data)[[col]]
   set_names(col, nm)
+}
+
+check_unnest_level_to <- function(level_to, data, call = caller_env()) {
+  if (!is_null(level_to)) {
+    level_to <- vctrs::vec_cast(level_to, character(), call = call)
+    vctrs::vec_assert(level_to, size = 1L, call = call)
+    check_col_new(data, level_to, call = call)
+  }
+
+  level_to
 }
 
 check_unnest_parent_to <- function(parent_to, data, level_to, call = caller_env()) {

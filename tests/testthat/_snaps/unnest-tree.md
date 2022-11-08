@@ -40,6 +40,12 @@
       Error in `unnest_tree()`:
       ! Can't convert `level_to` <integer> to <character>.
     Code
+      (expect_error(unnest_tree(df, id, children, level_to = "id")))
+    Output
+      <error/rlang_error>
+      Error in `unnest_tree()`:
+      ! `level_to` must not be a column in `data`.
+    Code
       (expect_error(unnest_tree(df, id, children, level_to = c("a", "b"))))
     Output
       <error/vctrs_error_assert_size>
@@ -57,6 +63,12 @@
       <error/vctrs_error_cast>
       Error in `unnest_tree()`:
       ! Can't convert `parent_to` <integer> to <character>.
+    Code
+      (expect_error(unnest_tree(df, id, children, parent_to = "id")))
+    Output
+      <error/rlang_error>
+      Error in `unnest_tree()`:
+      ! `parent_to` must not be a column in `data`.
     Code
       (expect_error(unnest_tree(df, id, children, parent_to = c("a", "b"))))
     Output
@@ -81,6 +93,12 @@
       <error/vctrs_error_cast>
       Error in `unnest_tree()`:
       ! Can't convert `ancestors_to` <integer> to <character>.
+    Code
+      (expect_error(unnest_tree(df, id, children, ancestors_to = "id")))
+    Output
+      <error/rlang_error>
+      Error in `unnest_tree()`:
+      ! `ancestors_to` must not be a column in `data`.
     Code
       (expect_error(unnest_tree(df, id, children, ancestors_to = c("a", "b"))))
     Output
