@@ -89,6 +89,14 @@ test_that("format for tib_vector works", {
       fill = 1:2
     )
   )
+
+  expect_snapshot({
+    tib_lgl_vec("lgl")
+    tib_int_vec("int")
+    tib_dbl_vec("dbl")
+    tib_chr_vec("chr")
+    tib_date_vec("date")
+  })
 })
 
 test_that("format for tib_chr_date works", {
@@ -291,4 +299,22 @@ test_that("format uses trailing comma", {
     format(tib_df("x", a = tib_int("a"))),
     'tib_df(\n  "x",\n  tib_int("a"),\n)'
   )
+})
+
+test_that("special ptypes are cprrectly formatted", {
+  check_native <- function(ptype, ctr) {
+    # native
+    expect_equal(format_ptype(ptype), ctr)
+
+    # non-native
+    class(ptype) <- c("a", class(ptype))
+    expect_equal(format_ptype(ptype), deparse(ptype))
+  }
+
+  check_native(logical(), "logical(0)")
+  check_native(character(), "character(0)")
+  check_native(integer(), "integer(0)")
+  check_native(numeric(), "numeric(0)")
+  check_native(vctrs::new_date(), "vctrs::new_date()")
+  check_native(vctrs::new_duration(), "vctrs::new_duration()")
 })

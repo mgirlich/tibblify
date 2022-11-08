@@ -19,19 +19,19 @@ enum vector_form r_to_vector_form(r_obj* input_form) {
   } else if (input_form == r_vector_form.object_list) {
     return VECTOR_FORM_object;
   } else {
-    r_stop_internal("unexpected vector input form");
+    r_stop_internal("unexpected vector input form"); // # nocov
   }
 }
 
 static inline
 r_obj* vector_input_form_to_sexp(enum vector_form input_form) {
   switch (input_form) {
-  case VECTOR_FORM_vector: return r_chr("scalar_list");
-  case VECTOR_FORM_scalar_list: return r_chr("vector");
+  case VECTOR_FORM_vector: return r_chr("vector"); // # nocov
+  case VECTOR_FORM_scalar_list: return r_chr("scalar_list");
   case VECTOR_FORM_object: return r_chr("object");
   }
 
-  r_stop_unreachable();
+  r_stop_unreachable(); // # nocov
 }
 
 enum collector_type {

@@ -39,8 +39,10 @@ tspec_combine <- function(...) {
   } else if (type == "object") {
     return(tspec_object(!!!fields))
   } else if( type == "df") {
-    # TODO .names_to
-    return(tspec_df(!!!fields))
+    # TODO input_form, vector_allows_empty_list
+    names_to <- tib_combine_names_col(spec_list, current_call())
+
+    return(tspec_df(!!!fields, .names_to = names_to))
   }
 
   cli::cli_abort("Unknown spec type", .internal = TRUE) # nocov

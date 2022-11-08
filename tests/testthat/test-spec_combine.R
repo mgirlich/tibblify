@@ -154,3 +154,18 @@ test_that("can't combine different input forms", {
     (expect_error(tspec_combine(spec_scalar, spec_vec_object)))
   })
 })
+
+test_that("can't combine different names_to", {
+  spec1 <- tspec_df(a = tib_int("a"), .names_to = "name1")
+  spec2 <- tspec_df(a = tib_int("a"), .names_to = "name2")
+
+  spec1_df <- tspec_object(a = tib_df("a", .names_to = "name1"))
+  spec2_df <- tspec_object(a = tib_df("a", .names_to = "name2"))
+
+  expect_equal(tspec_combine(spec1, spec1), spec1)
+
+  expect_snapshot({
+    (expect_error(tspec_combine(spec1, spec2)))
+    (expect_error(tspec_combine(spec1_df, spec2_df)))
+  })
+})

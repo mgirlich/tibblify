@@ -177,6 +177,29 @@
         ptype_inner = character(0),
       )
 
+---
+
+    Code
+      tib_lgl_vec("lgl")
+    Output
+      tib_lgl_vec("lgl")
+    Code
+      tib_int_vec("int")
+    Output
+      tib_int_vec("int")
+    Code
+      tib_dbl_vec("dbl")
+    Output
+      tib_dbl_vec("dbl")
+    Code
+      tib_chr_vec("chr")
+    Output
+      tib_chr_vec("chr")
+    Code
+      tib_date_vec("date")
+    Output
+      tib_date_vec("date")
+
 # format for tib_chr_date works
 
     Code
@@ -346,7 +369,7 @@
       tib_recursive("data", .children = "children", tib_int("id"), tib_chr("name"), ) %>%
         print()
     Output
-      tib_df(
+      tib_recursive(
         "data",
         .children = "children",
         tib_int("id"),
@@ -359,7 +382,7 @@
       tib_recursive("data", .children = "children", tib_int("id"), tib_chr("name"),
       .required = FALSE) %>% print()
     Output
-      tib_df(
+      tib_recursive(
         "data",
         .children = "children",
         .required = FALSE,

@@ -111,7 +111,7 @@ stop_vector_non_list_element <- function(path, input_form, x) {
 stop_vector_wrong_size_element <- function(path, input_form, x) {
   path_str <- path_to_string(path)
   sizes <- list_sizes(x)
-  idx <- which(sizes != 1)
+  idx <- which(sizes != 1 & !vctrs::vec_detect_missing(x))
   if (input_form == "scalar_list") {
     desc <- "a list of scalars"
   } else {
@@ -130,10 +130,6 @@ stop_colmajor_null <- function(path) {
     "Field {.field {path_str}} must not be {.val NULL}."
   )
   tibblify_abort(msg)
-}
-
-stop_colmajor_no_size <- function(path) {
-  tibblify_abort("Could not determine size.")
 }
 
 stop_colmajor_wrong_size_element <- function(path, size_act, path_exp, size_exp) {

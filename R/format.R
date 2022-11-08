@@ -265,7 +265,7 @@ format.tib_row <- function(x, ..., width = NULL, names = NULL) {
   check_bool(names)
 
   format_fields(
-    "tib_row",
+    format_tib_f(x),
     fields = x$fields,
     width = width,
     args = list(
@@ -282,7 +282,7 @@ format.tib_df <- function(x, ..., width = NULL, names = NULL) {
   check_bool(names)
 
   format_fields(
-    "tib_df",
+    format_tib_f(x),
     fields = x$fields,
     width = width,
     args = list(
@@ -300,7 +300,7 @@ format.tib_recursive <- function(x, ..., width = NULL, names = NULL) {
   check_bool(names)
 
   format_fields(
-    "tib_df",
+    format_tib_f(x),
     fields = x$fields,
     width = width,
     args = list(
@@ -328,7 +328,7 @@ format_tib_f.tib_scalar_logical <- function(x) {cli::col_yellow("tib_lgl")}
 #' @export
 format_tib_f.tib_scalar_integer <- function(x) {cli::col_green("tib_int")}
 #' @export
-format_tib_f.tib_scalar_double <- function(x) {cli::col_green("tib_dbl")}
+format_tib_f.tib_scalar_numeric <- function(x) {cli::col_green("tib_dbl")}
 #' @export
 format_tib_f.tib_scalar_character <- function(x) {cli::col_red("tib_chr")}
 #' @export
@@ -343,7 +343,7 @@ format_tib_f.tib_vector_logical <- function(x) {cli::col_yellow("tib_lgl_vec")}
 #' @export
 format_tib_f.tib_vector_integer <- function(x) {cli::col_green("tib_int_vec")}
 #' @export
-format_tib_f.tib_vector_double <- function(x) {cli::col_green("tib_dbl_vec")}
+format_tib_f.tib_vector_numeric <- function(x) {cli::col_green("tib_dbl_vec")}
 #' @export
 format_tib_f.tib_vector_character <- function(x) {cli::col_red("tib_chr_vec")}
 #' @export
@@ -364,7 +364,7 @@ format_tib_f.tib_df <- function(x) {cli::col_magenta("tib_df")}
 format_tib_f.tib_recursive <- function(x) {cli::col_magenta("tib_recursive")}
 
 #' @export
-format_tib_f.default <- function(x) {class(x)[[1]]}
+format_tib_f.default <- function(x) {class(x)[[1]]} # nocov
 
 
 # format ptype ------------------------------------------------------------
@@ -391,9 +391,17 @@ format_ptype <- function(x) {
 format_ptype.default <- function(x) {deparse(x)}
 
 #' @export
-format_ptype.difftime <- function(x) {"vctrs::new_duration()"}
+format_ptype.difftime <- function(x) {
+  if (!identical(class(x), "difftime")) return(deparse(x))
+
+  "vctrs::new_duration()"
+}
 #' @export
-format_ptype.Date <- function(x) {"vctrs::new_date()"}
+format_ptype.Date <- function(x) {
+  if (!vec_is(x, vctrs::new_date())) return(deparse(x))
+
+  "vctrs::new_date()"
+}
 #' @export
 format_ptype.POSIXct <- function(x) {
   tzone <- attr(x, "tzone")

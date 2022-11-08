@@ -236,17 +236,24 @@ test_that("tib_df() drops NULL", {
 })
 
 test_that("special ptypes are not incorrectly recognized", {
-  check_native <- function(ptype) {
+  check_native <- function(ptype, class) {
     expect_s3_class(
-      tib_scalar("a", ptype = vctrs::new_vctr(ptype, inherit_base_type = TRUE)),
+      tib_scalar("a", ptype = ptype),
+      c(paste0("tib_scalar_", class), "tib_scalar", "tib_collector"),
+      exact = TRUE
+    )
+
+    class(ptype) <- c("a", class(ptype))
+    expect_s3_class(
+      tib_scalar("a", ptype = ptype),
       c("tib_scalar", "tib_collector"),
       exact = TRUE
     )
   }
 
-  check_native(logical())
-  check_native(character())
-  check_native(integer())
-  check_native(double())
-  check_native(vctrs::new_date())
+  check_native(logical(), "logical")
+  check_native(character(), "character")
+  check_native(integer(), "integer")
+  check_native(numeric(), "numeric")
+  check_native(vctrs::new_date(), "date")
 })

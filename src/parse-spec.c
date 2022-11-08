@@ -71,7 +71,7 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                      n_cols,
                                      rowmajor);
     } else {
-      r_stop_internal("Unexpected collector type.");
+      r_stop_internal("Unexpected collector type."); // # nocov
     }
 
     KEEP(p_collector->shelter);
@@ -90,13 +90,6 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
   r_obj* default_value = r_list_get_by_name(spec_elt, "fill");
   r_obj* transform = r_list_get_by_name(spec_elt, "transform");
 
-  if (type == r_string_types.unspecified) {
-    return new_variant_collector(required,
-                                 default_value,
-                                 transform,
-                                 r_null,
-                                 rowmajor);
-  }
   if (type == r_string_types.variant) {
     r_obj* elt_transform = r_list_get_by_name(spec_elt, "elt_transform");
     return new_variant_collector(required,
@@ -135,8 +128,8 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                 r_list_get_by_name(spec_elt, "list_of_ptype"),
                                 rowmajor);
   } else {
-    r_printf(CHAR(type));
-    r_printf(CHAR(r_string_types.scalar));
+    r_printf(CHAR(type)); // # nocov
+    r_printf(CHAR(r_string_types.scalar)); // # nocov
     r_stop_internal("Internal Error: Unsupported type"); // # nocov
   }
 }

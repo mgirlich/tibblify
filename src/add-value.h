@@ -74,7 +74,7 @@ r_obj* vec_prep_values_names(r_obj* value_casted, r_obj* names, r_obj* col_names
 
   if (names == r_null) {
     names = KEEP(r_alloc_character(n));
-    r_chr_fill(names, r_strs.empty, n);
+    r_chr_fill(names, r_globals.na_str, n);
   } else {
     KEEP(names);
   }

@@ -472,7 +472,7 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->unpack = false;
     break;
   default:
-    r_stop_internal("Unexpected collector type.");
+    r_stop_internal("Unexpected collector type."); // # nocov
   }
   p_coll->copy = &copy_multi_collector;
 

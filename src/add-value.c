@@ -395,7 +395,7 @@ void add_value_row_colmajor(struct collector* v_collector, r_obj* value, struct 
 
     struct collector* v_cur_coll = &v_collectors[key_index];
     if (loc < 0) {
-      r_stop_internal("Field is absent in colmajor.");
+      r_stop_internal("Field is absent in colmajor."); // # nocov
     } else {
       r_obj* cur_value = v_value[loc];
       v_cur_coll->add_value_colmajor(v_cur_coll, cur_value, v_path);
@@ -529,7 +529,7 @@ r_obj* parse_colmajor(struct collector* v_collector,
 
   if (n_rows == -1) {
     // TODO this should probably be an internal error
-    r_abort("Could not determine number of rows.");
+    r_abort("Could not determine number of rows."); // # nocov
   }
 
   alloc_row_collector(v_collector, n_rows);

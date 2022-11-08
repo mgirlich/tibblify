@@ -213,15 +213,7 @@
       <error/tibblify_error>
       Error in `tibblify()`:
       ! `x[[1]]$x` must be a list, not the number 1.
-      x `input_form = "vector"` can only parse lists.
-      i Use `input_form = "vector"` (the default) if the field is already a vector.
-    Code
-      (expect_error(tib(list(x = 1), tspec_object)))
-    Output
-      <error/tibblify_error>
-      Error in `tibblify()`:
-      ! `x[[1]]$x` must be a list, not the number 1.
-      x `input_form = "object"` can only parse lists.
+      x `input_form = "scalar_list"` can only parse lists.
       i Use `input_form = "vector"` (the default) if the field is already a vector.
 
 ---
@@ -231,15 +223,25 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` is not an object.
+      ! `x[[1]]$x` is not a list of scalars.
       x Element 2 must have size 1, not size 2.
     Code
       (expect_error(tib(list(x = list(integer())), spec)))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! `x[[1]]$x` is not an object.
+      ! `x[[1]]$x` is not a list of scalars.
       x Element 1 must have size 1, not size 0.
+
+---
+
+    Code
+      (expect_error(tib(list(x = list(NULL, 1, 1:2)), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! `x[[1]]$x` is not a list of scalars.
+      x Element 3 must have size 1, not size 2.
 
 ---
 
@@ -261,6 +263,27 @@
       Error in `tibblify()`:
       ! A vector must be a named list for `input_form = "object."`
       x `x[[1]]$x` is not named.
+
+---
+
+    Code
+      (expect_error(tib(list(x = 1), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! `x[[1]]$x` must be a list, not the number 1.
+      x `input_form = "object"` can only parse lists.
+      i Use `input_form = "vector"` (the default) if the field is already a vector.
+
+---
+
+    Code
+      (expect_error(tib(list(x = list(a = 1, b = 1:2)), spec)))
+    Output
+      <error/tibblify_error>
+      Error in `tibblify()`:
+      ! `x[[1]]$x` is not an object.
+      x Element 2 must have size 1, not size 2.
 
 # tib_variant works
 

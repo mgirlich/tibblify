@@ -153,3 +153,18 @@
       Error in `tspec_combine()`:
       ! Cannot combine input form "object" with `tib_scalar()`.
 
+# can't combine different names_to
+
+    Code
+      (expect_error(tspec_combine(spec1, spec2)))
+    Output
+      <error/rlang_error>
+      Error in `tspec_combine()`:
+      ! Cannot combine different `names_col`
+    Code
+      (expect_error(tspec_combine(spec1_df, spec2_df)))
+    Output
+      <error/rlang_error>
+      Error in `tspec_combine()`:
+      ! Cannot combine different `names_col`
+

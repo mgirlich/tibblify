@@ -104,8 +104,8 @@ tibblify <- function(x,
     out <- purrr::map2(spec_org$fields, out, finalize_tspec_object)
   }
 
-  # out <- set_spec(out, spec_org)
-  # attr(out, "waldo_opts") <- list(ignore_attr = c("tib_spec", "waldo_opts"))
+  out <- set_spec(out, spec_org)
+  attr(out, "waldo_opts") <- list(ignore_attr = c("tib_spec", "waldo_opts"))
   out
 }
 
@@ -260,16 +260,6 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     coll_locations = coll_locations[key_order],
     keys = first_keys[key_order]
   )
-}
-
-prep_tib <- function(x) {
-  if (x$type == "scalar") {
-    prep_tib_scalar(x)
-  } else if (x$type == "vector") {
-    prep_tib_vector(x)
-  } else if (x$type %in% c("row", "df")) {
-
-  }
 }
 
 prep_tib_scalar <- function(x) {

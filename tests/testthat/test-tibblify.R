@@ -77,6 +77,9 @@ test_that("tib_scalar works", {
 
   # fallback default works
   expect_equal(tib(list(), tib_lgl("x", required = FALSE)), tibble(x = NA))
+  expect_equal(tib(list(), tib_int("x", required = FALSE)), tibble(x = NA_integer_))
+  expect_equal(tib(list(), tib_dbl("x", required = FALSE)), tibble(x = NA_real_))
+  expect_equal(tib(list(), tib_chr("x", required = FALSE)), tibble(x = NA_character_))
   expect_equal(tib(list(), tib_scalar("x", dtt, required = FALSE)), tibble(x = vctrs::new_datetime(NA_real_)))
 
   # use NA if NULL
@@ -105,6 +108,10 @@ test_that("tib_scalar works", {
 })
 
 test_that("tib_scalar with record objects work", {
+  skip_on_cran()
+  # skip due to issue:
+  # `attr(actual$x, 'balanced')`:   <NA>
+  # `attr(expected$x, 'balanced')`: TRUE
   x_rcrd <- as.POSIXlt(Sys.time(), tz = "UTC")
 
   expect_equal(
@@ -227,6 +234,12 @@ test_that("tib_vector works", {
     ),
     tibble(x = list_of(c(FALSE, TRUE)))
   )
+
+  # keeps names
+  expect_equal(
+    tib(list(x = c(a = 1L, b = 2L)), tib_int_vec("x")),
+    tibble(x = list_of(c(a = 1L, b = 2L), .ptype = integer()))
+  )
 })
 
 test_that("tib_vector respect ptype_inner", {
@@ -337,18 +350,23 @@ test_that("tib_vector can parse scalar list", {
     tibble(x = list_of(1:2, integer()))
   )
 
-  tspec_object <- spec
-  tspec_object$input_form <- "object"
+  # checks that input is a list
   expect_snapshot({
     (expect_error(tib(list(x = 1), spec)))
-    (expect_error(tib(list(x = 1), tspec_object)))
   })
 
+  # each element must have size 1
   expect_snapshot({
     (expect_error(tib(list(x = list(1, 1:2)), spec)))
     (expect_error(tib(list(x = list(integer())), spec)))
   })
 
+  # each element must have size 1 also after encountering a NULL
+  expect_snapshot({
+    (expect_error(tib(list(x = list(NULL, 1, 1:2)), spec)))
+  })
+
+  # each element must have the correct type
   expect_snapshot({
     (expect_error(tib(list(x = list(1, "a")), spec)))
   })
@@ -375,9 +393,34 @@ test_that("tib_vector can parse object", {
     tib(list(x = list(a = 1, a = 2)), spec),
     tibble(x = list_of(c(1L, 2L)))
   )
+
+  # must be a list
+  expect_snapshot({
+    (expect_error(tib(list(x = 1), spec)))
+  })
+
+  # each element must have size 1
+  expect_snapshot({
+    (expect_error(tib(list(x = list(a = 1, b = 1:2)), spec)))
+  })
 })
 
 test_that("tib_vector creates tibble with names_to", {
+  # TODO not quite sure whether `val` should be named
+  expect_equal(
+    tib(list(x = c(a = 1L, b = 2L)), tib_int_vec("x", names_to = "name", values_to = "val")),
+    tibble(x = list_of(
+      tibble(name = c("a", "b"), val = c(a = 1L, b = 2L)),
+      .ptype = tibble(name = character(), val = integer())
+    ))
+  )
+
+  # can handle missing names
+  expect_equal(
+    tib(list(x = 1:2), tib_int_vec("x", names_to = "name", values_to = "val")),
+    tibble(x = list_of(tibble(name = NA_character_, val = 1:2)))
+  )
+
   spec <- tib_int_vec("x", input_form = "object", values_to = "val", names_to = "name")
   expect_equal(
     tib(list(x = list(a = 1, b = NULL)), spec),
@@ -505,13 +548,25 @@ test_that("tib_row works", {
   expect_equal(
     tibblify(
       list(
-        list(x = list(a = TRUE)),
+        list(x = list(a = 1)),
         list(x = list()),
         list()
       ),
-      tspec_df(x = tib_row("x", .required = FALSE, a = tib_lgl("a", required = FALSE)))
+      tspec_df(x = tib_row("x", .required = FALSE, a = tib_int("a", required = FALSE, fill = -1)))
     ),
-    tibble(x = tibble(a = c(TRUE, NA, NA)))
+    tibble(x = tibble(a = c(1L, -1L, -1L)))
+  )
+
+  # can handle NULL
+  # TODO not quite sure about this
+  expect_equal(
+    tibblify(
+      list(
+        list(x = NULL)
+      ),
+      tspec_df(x = tib_row("x", .required = FALSE, a = tib_int("a", required = FALSE, fill = -1)))
+    ),
+    tibble(x = tibble(a = -1L))
   )
 })
 

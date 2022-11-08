@@ -304,10 +304,10 @@ tib_native_ptype.integer <- function(ptype, class, fields) {
   paste0("tib_", fields$type, "_integer")
 }
 #' @export
-tib_native_ptype.double <- function(ptype, class, fields) {
-  if (!vec_is(ptype, double())) return(NULL)
+tib_native_ptype.numeric <- function(ptype, class, fields) {
+  if (!vec_is(ptype, numeric())) return(NULL)
 
-  paste0("tib_", fields$type, "_double")
+  paste0("tib_", fields$type, "_numeric")
 }
 #' @export
 tib_native_ptype.character <- function(ptype, class, fields) {
@@ -887,10 +887,6 @@ is_tib_variant <- function(x) {
 
 is_tib_row <- function(x) {
   inherits(x, "tib_row")
-}
-
-is_tib_df <- function(x) {
-  inherits(x, "tib_df")
 }
 
 prep_transform <- function(f, call, arg = "transform") {

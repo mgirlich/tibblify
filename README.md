@@ -13,6 +13,7 @@ status](https://www.r-pkg.org/badges/version/tibblify)](https://CRAN.R-project.o
 coverage](https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg)](https://app.codecov.io/gh/mgirlich/tibblify?branch=master)
 [![R build
 status](https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg)](https://github.com/mgirlich/tibblify/actions)
+[![R-CMD-check](https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of tibblify is to provide an easy way of converting a nested
@@ -343,7 +344,6 @@ tibblify(gh_repos_small, spec)
 #>  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…
 #> 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…
 #> # … with 20 more rows
-#> # ℹ Use `print(n = ...)` to see more rows
 ```
 
 If you don’t like the tibble column you can unpack it with
@@ -380,7 +380,6 @@ tibblify(gh_repos_small, spec2)
 #>  9 63152619 conditions    660288 gaborcsardi
 #> 10 24343686 crayon        660288 gaborcsardi
 #> # … with 20 more rows
-#> # ℹ Use `print(n = ...)` to see more rows
 ```
 
 ## Required and Optional Fields
@@ -401,7 +400,7 @@ spec <- tspec_df(
 
 tibblify(x, spec)
 #> Error in `tibblify()`:
-#> ! Field y is required but does not exist in `x[[2]]`.
+#> ! Field 1 is required but does not exist in `x`.
 #> ℹ Use `required = FALSE` if the field is optional.
 ```
 

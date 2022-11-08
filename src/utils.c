@@ -173,10 +173,12 @@ void tibblify_init_utils(SEXP ns) {
   syms_value = r_sym("value");
   syms_x = r_sym("x");
 
-  r_obj* vctrs_package = r_env_find(R_NamespaceRegistry, r_sym("vctrs"));
+  r_obj* vctrs_package = KEEP(r_env_find(R_NamespaceRegistry, r_sym("vctrs")));
   syms_vec_is = Rf_findFun(r_sym("vec_is"), vctrs_package);
 
   r_obj* tibblify_symbol = r_sym("tibblify");
-  r_obj* tibblify_package = r_env_find(R_NamespaceRegistry, tibblify_symbol);
+  r_obj* tibblify_package = KEEP(r_env_find(R_NamespaceRegistry, tibblify_symbol));
   syms_vec_flatten = Rf_findFun(r_sym("vec_flatten"), tibblify_package);
+
+  FREE(2);
 }
