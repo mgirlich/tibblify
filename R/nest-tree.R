@@ -113,7 +113,6 @@ data_field_name <- function(col) {
   paste0("data$", col)
 }
 
-# TODO same code as for `unnest_tree()` -> keep only one implementation
 eval_pull <- function(data, col, col_arg) {
   # TODO use `eval_pull()` once implemented
   # https://github.com/r-lib/tidyselect/issues/189

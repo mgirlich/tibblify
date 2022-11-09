@@ -163,18 +163,6 @@ unclass_list_of <- function(x, child_col, call = caller_env()) {
   vctrs::new_data_frame(x)
 }
 
-eval_pull <- function(data, col, col_arg) {
-  # TODO use `eval_pull()` once implemented
-  # https://github.com/r-lib/tidyselect/issues/189
-  col <- tidyselect::eval_select(col, data, allow_rename = FALSE)
-  if (length(col) != 1L) {
-    cli_abort("{.arg {col_arg}} must select 1 column, not {length(col)}.")
-  }
-
-  nm <- colnames(data)[[col]]
-  set_names(col, nm)
-}
-
 check_unnest_level_to <- function(level_to, data, call = caller_env()) {
   if (!is_null(level_to)) {
     level_to <- vctrs::vec_cast(level_to, character(), call = call)

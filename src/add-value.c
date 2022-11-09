@@ -78,7 +78,6 @@ void add_default_df(struct collector* v_collector, struct Path* v_path) {
 }
 
 void add_default_recursive(struct collector* v_collector, struct Path* v_path) {
-  // TODO
   // `df` have no default value. Use `NULL` instead
   r_list_poke(v_collector->data, v_collector->current_row, r_null);
   ++v_collector->current_row;
@@ -526,7 +525,6 @@ r_obj* parse_colmajor(struct collector* v_collector,
                          &nrow_path);
 
   if (n_rows == -1) {
-    // TODO this should probably be an internal error
     r_abort("Could not determine number of rows."); // # nocov
   }
 

@@ -241,10 +241,6 @@ struct collector* copy_multi_collector(struct collector* p_coll) {
   }
   p_multi_coll_new->p_key_match_ind = p_key_match_ind;
 
-  // TODO should not really be required, right?
-  // for (int i = 0; i < 256; ++i) {
-  //   p_multi_coll_new->field_order_ind[i] = i;
-  // }
   p_multi_coll_new->field_names_prev = r_globals.empty_chr;
 
   r_obj* collectors_raw = KEEP(r_alloc_raw(sizeof(struct collector) * n_keys));
