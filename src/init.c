@@ -26,10 +26,10 @@ export void R_init_tibblify(DllInfo* dll){
 }
 
 // tibblify-vctrs-private.c
-void tibblify_initialize_vctrs_private();
+void tibblify_initialize_vctrs_private(void);
 
 // tibblify-vctrs-public.c
-void tibblify_initialize_vctrs_public();
+void tibblify_initialize_vctrs_public(void);
 
 // utils.c
 void tibblify_init_utils(SEXP);

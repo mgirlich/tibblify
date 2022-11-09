@@ -219,7 +219,7 @@ struct collector* new_parser(int n_keys,
                              int n_cols,
                              bool rowmajor);
 
-struct collector* new_rec_collector();
+struct collector* new_rec_collector(void);
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(struct collector* v_collector,

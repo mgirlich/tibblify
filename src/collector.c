@@ -591,7 +591,7 @@ struct collector* new_df_collector(bool required,
                              rowmajor);
 }
 
-struct collector* new_rec_collector() {
+struct collector* new_rec_collector(void) {
   r_obj* shelter = KEEP(r_alloc_list(3));
 
   r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
