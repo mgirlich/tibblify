@@ -369,8 +369,7 @@
 <span><span class="co">#&gt;  8 67959624 cmark       gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span>
-<span><span class="co">#&gt; # ℹ Use `print(n = ...)` to see more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
 <p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
@@ -401,8 +400,7 @@
 <span><span class="co">#&gt;  8 67959624 cmark         660288 gaborcsardi</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions    660288 gaborcsardi</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon        660288 gaborcsardi</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span>
-<span><span class="co">#&gt; # ℹ Use `print(n = ...)` to see more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
@@ -422,7 +420,7 @@
 <span></span>
 <span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error in `tibblify()`:</span></span>
-<span><span class="co">#&gt; ! Field y is required but does not exist in `x[[2]]`.</span></span>
+<span><span class="co">#&gt; ! Field 1 is required but does not exist in `x`.</span></span>
 <span><span class="co">#&gt; ℹ Use `required = FALSE` if the field is optional.</span></span></code></pre></div>
 <p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -566,6 +564,7 @@
 <li><a href="https://CRAN.R-project.org/package=tibblify" class="external-link"><img src="https://www.r-pkg.org/badges/version/tibblify" alt="CRAN status"></a></li>
 <li><a href="https://app.codecov.io/gh/mgirlich/tibblify?branch=master" class="external-link"><img src="https://codecov.io/gh/mgirlich/tibblify/branch/master/graph/badge.svg" alt="Codecov test coverage"></a></li>
 <li><a href="https://github.com/mgirlich/tibblify/actions" class="external-link"><img src="https://github.com/mgirlich/tibblify/workflows/R-CMD-check/badge.svg" alt="R build status"></a></li>
+<li><a href="https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml" class="external-link"><img src="https://github.com/mgirlich/tibblify/actions/workflows/R-CMD-check.yaml/badge.svg" alt="R-CMD-check"></a></li>
 </ul>
 </div>
 
