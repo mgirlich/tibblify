@@ -106,14 +106,14 @@
 # tib_scalar works
 
     Code
-      (expect_error(tib(list(), tib_lgl("x"))))
+      (expect_error(tib(list(a = 1), tib_lgl("x"))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Field x is required but does not exist in `x[[1]]`.
       i Use `required = FALSE` if the field is optional.
     Code
-      (expect_error(tib(list(), tib_scalar("x", dtt))))
+      (expect_error(tib(list(a = 1), tib_scalar("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
@@ -169,14 +169,14 @@
 # tib_vector works
 
     Code
-      (expect_error(tib(list(), tib_lgl_vec("x"))))
+      (expect_error(tib(list(a = 1), tib_lgl_vec("x"))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
       ! Field x is required but does not exist in `x[[1]]`.
       i Use `required = FALSE` if the field is optional.
     Code
-      (expect_error(tib(list(), tib_vector("x", dtt))))
+      (expect_error(tib(list(a = 1), tib_vector("x", dtt))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
@@ -293,7 +293,7 @@
     Output
       <error/tibblify_error>
       Error in `tibblify()`:
-      ! Field 1 is required but does not exist in `x`.
+      ! Field x is required but does not exist in `x[[2]]`.
       i Use `required = FALSE` if the field is optional.
 
 # tib_row works
@@ -311,7 +311,7 @@
 
     Code
       (expect_error(tibblify(list(list(x = list(list(a = TRUE), list(a = FALSE))),
-      list()), tspec_df(x = tib_df("x", a = tib_lgl("a"))))))
+      list(a = 1)), tspec_df(x = tib_df("x", a = tib_lgl("a"))))))
     Output
       <error/tibblify_error>
       Error in `tibblify()`:

@@ -366,9 +366,7 @@ void add_value_row(struct collector* v_collector, r_obj* value, struct Path* v_p
 
     struct collector* v_cur_coll = &v_collectors[key_index];
     if (loc < 0) {
-      path_up(v_path);
       v_cur_coll->add_default_absent(v_cur_coll, v_path);
-      path_down(v_path);
     } else {
       r_obj* cur_value = v_value[loc];
       v_cur_coll->add_value(v_cur_coll, cur_value, v_path);

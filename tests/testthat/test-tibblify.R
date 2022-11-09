@@ -57,8 +57,8 @@ test_that("tib_scalar works", {
 
   # errors if required but absent
   expect_snapshot({
-    (expect_error(tib(list(), tib_lgl("x"))))
-    (expect_error(tib(list(), tib_scalar("x", dtt))))
+    (expect_error(tib(list(a = 1), tib_lgl("x"))))
+    (expect_error(tib(list(a = 1), tib_scalar("x", dtt))))
   })
 
   # errors if bad size
@@ -198,8 +198,8 @@ test_that("tib_vector works", {
 
   # errors if required but absent
   expect_snapshot({
-    (expect_error(tib(list(), tib_lgl_vec("x"))))
-    (expect_error(tib(list(), tib_vector("x", dtt))))
+    (expect_error(tib(list(a = 1), tib_lgl_vec("x"))))
+    (expect_error(tib(list(a = 1), tib_vector("x", dtt))))
   })
 
   # errors if bad type
@@ -593,7 +593,7 @@ test_that("tib_df works", {
           list(a = TRUE),
           list(a = FALSE)
         )),
-        list()
+        list(a = 1)
       ),
       tspec_df(x = tib_df("x", a = tib_lgl("a")))
     )))
