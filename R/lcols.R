@@ -1,10 +1,14 @@
 #' Create list parser specification
 #'
+#' This is the deprecated way of creating a `tibblify()` specification. Use the
+#' `tspec_*()` + `tib_*()` functions instead.
+#'
 #' @param ... Column specification objects created by `lcol_*()`.
 #' @param .default Deprecated.
 #'
 #' @keywords internal
 #' @export
+#' @return A tibblify specification object.
 #' @examples
 #' lcols(
 #'   id = lcol_int("id"),
@@ -44,9 +48,12 @@ lcols <- function(..., .default = zap()) {
 #'
 #' @keywords internal
 #' @export
+#' @return A tibblify field collector.
+#' @examples
+#' \dontrun{lcol_lgl("a")}
 lcol_lgl <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_lgl()", "tib_lgl()")
-  tib_lgl(path, required = is_zap(.default), default = if (!is_zap(.default)) .default, transform = .parser)
+  tib_lgl(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)
 }
 
 #' @export

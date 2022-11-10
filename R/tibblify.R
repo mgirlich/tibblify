@@ -339,9 +339,13 @@ set_spec <- function(x, spec) {
 
 #' Examine the column specification
 #'
-#' @param x The data frame object to extract from
+#' @param x The data frame object to extract from.
 #'
 #' @export
+#' @return A tibblify specification object.
+#' @examples
+#' df <- tibblify(list(list(x = 1, y = "a"), list(x = 2)))
+#' get_spec(df)
 get_spec <- function(x) {
   attr(x, "tib_spec")
 }

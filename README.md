@@ -400,7 +400,7 @@ spec <- tspec_df(
 
 tibblify(x, spec)
 #> Error in `tibblify()`:
-#> ! Field 1 is required but does not exist in `x`.
+#> ! Field y is required but does not exist in `x[[2]]`.
 #> ℹ Use `required = FALSE` if the field is optional.
 ```
 
@@ -500,6 +500,17 @@ api_output_list
 #>   <int>
 #> 1     1
 #> 2     2
+#> 
+#> attr(,"tib_spec")
+#> tspec_object(
+#>   tib_chr("status"),
+#>   tib_df(
+#>     "data",
+#>     tib_int("x"),
+#>   ),
+#> )attr(,"waldo_opts")
+#> attr(,"waldo_opts")$ignore_attr
+#> [1] "tib_spec"   "waldo_opts"
 ```
 
 Now accessing `data` does not required an extra subsetting step

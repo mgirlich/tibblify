@@ -7,8 +7,15 @@
 get_spec(x)
 }
 \arguments{
-\item{x}{The data frame object to extract from}
+\item{x}{The data frame object to extract from.}
+}
+\value{
+A tibblify specification object.
 }
 \description{
 Examine the column specification
+}
+\examples{
+df <- tibblify(list(list(x = 1, y = "a"), list(x = 2)))
+get_spec(df)
 }

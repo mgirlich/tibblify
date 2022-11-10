@@ -55,7 +55,13 @@ lcol_df(path, ..., .default = zap())
 
 \item{...}{Column specification passed on to \code{lcols()}.}
 }
+\value{
+A tibblify field collector.
+}
 \description{
 \code{lcols()} includes all fields in the input data, skipping the column types as the default.
+}
+\examples{
+\dontrun{lcol_lgl("a")}
 }
 \keyword{internal}
