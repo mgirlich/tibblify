@@ -420,7 +420,7 @@
 <span></span>
 <span><span class="fu"><a href="reference/tibblify.html">tibblify</a></span><span class="op">(</span><span class="va">x</span>, <span class="va">spec</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Error in `tibblify()`:</span></span>
-<span><span class="co">#&gt; ! Field 1 is required but does not exist in `x`.</span></span>
+<span><span class="co">#&gt; ! Field y is required but does not exist in `x[[2]]`.</span></span>
 <span><span class="co">#&gt; ℹ Use `required = FALSE` if the field is optional.</span></span></code></pre></div>
 <p>You can mark a field as optional with the argument <code>required = FALSE</code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
@@ -500,7 +500,18 @@
 <span><span class="co">#&gt;       x</span></span>
 <span><span class="co">#&gt;   &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1     1</span></span>
-<span><span class="co">#&gt; 2     2</span></span></code></pre></div>
+<span><span class="co">#&gt; 2     2</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; attr(,"tib_spec")</span></span>
+<span><span class="co">#&gt; tspec_object(</span></span>
+<span><span class="co">#&gt;   tib_chr("status"),</span></span>
+<span><span class="co">#&gt;   tib_df(</span></span>
+<span><span class="co">#&gt;     "data",</span></span>
+<span><span class="co">#&gt;     tib_int("x"),</span></span>
+<span><span class="co">#&gt;   ),</span></span>
+<span><span class="co">#&gt; )attr(,"waldo_opts")</span></span>
+<span><span class="co">#&gt; attr(,"waldo_opts")$ignore_attr</span></span>
+<span><span class="co">#&gt; [1] "tib_spec"   "waldo_opts"</span></span></code></pre></div>
 <p>Now accessing <code>data</code> does not required an extra subsetting step</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">api_output_list</span><span class="op">$</span><span class="va">data</span></span>
