@@ -50,7 +50,7 @@ lcols <- function(..., .default = zap()) {
 #' @export
 #' @return A tibblify field collector.
 #' @examples
-#' \dontrun{lcol_lgl("a")}
+#' lcol_lgl("a")
 lcol_lgl <- function(path, .default = zap(), .parser = NULL) {
   lifecycle::deprecate_warn("0.2.0", "lcol_lgl()", "tib_lgl()")
   tib_lgl(path, required = is_zap(.default), fill = if (!is_zap(.default)) .default, transform = .parser)

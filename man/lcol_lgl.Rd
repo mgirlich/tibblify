@@ -62,6 +62,6 @@ A tibblify field collector.
 \code{lcols()} includes all fields in the input data, skipping the column types as the default.
 }
 \examples{
-\dontrun{lcol_lgl("a")}
+lcol_lgl("a")
 }
 \keyword{internal}
