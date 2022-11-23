@@ -155,10 +155,10 @@ unchop_fields <- function(fields, names_repair, names_clean, error_call) {
 #' @export
 #' @rdname unpack_tspec
 camel_case_to_snake_case <- function(names) {
-  stringr::str_replace_all(
-    names,
-    r"{([A-Z]+)}",
-    r"{_\1}"
+  gsub(
+    "([A-Z]+)",
+    "_\\1",
+    names
   ) |>
     tolower()
 }
