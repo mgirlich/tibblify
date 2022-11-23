@@ -2,6 +2,7 @@
 % Please edit documentation in R/unpack-tspec.R
 \name{unpack_tspec}
 \alias{unpack_tspec}
+\alias{camel_case_to_snake_case}
 \title{Unpack a tibblify specification}
 \usage{
 unpack_tspec(
@@ -11,8 +12,11 @@ unpack_tspec(
   recurse = TRUE,
   names_sep = NULL,
   names_repair = c("unique", "universal", "check_unique", "unique_quiet",
-    "universal_quiet")
+    "universal_quiet"),
+  names_clean = NULL
 )
+
+camel_case_to_snake_case(names)
 }
 \arguments{
 \item{spec}{A tibblify specification.}
@@ -37,6 +41,11 @@ Must be one of the following options:
 }
 
 See \code{\link[vctrs:vec_as_names]{vctrs::vec_as_names()}} for more information.}
+
+\item{names_clean}{A function to clean names after repairing. For example
+use \code{\link[=camel_case_to_snake_case]{camel_case_to_snake_case()}}.}
+
+\item{names}{Names to clean}
 }
 \value{
 A tibblify spec.

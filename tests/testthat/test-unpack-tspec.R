@@ -142,3 +142,20 @@ test_that("names are repaired", {
     )
   )
 })
+
+test_that("names are cleaned", {
+  spec <- tspec_df(
+    tib_int("someId"),
+    tib_row("aRow", tib_int("subId"))
+  )
+
+  expect_equal(
+    unpack_tspec(spec, names_sep = "_", names_clean = camel_case_to_snake_case),
+    tspec_df(
+      some_id = tib_int("someId"),
+      a_row_sub_id = tib_int(
+        c("aRow", "subId"),
+      ),
+    )
+  )
+})

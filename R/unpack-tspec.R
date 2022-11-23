@@ -19,6 +19,8 @@
 #' * a function: apply custom name repair.
 #'
 #' See [vctrs::vec_as_names()] for more information.
+#' @param names_clean A function to clean names after repairing. For example
+#'   use [camel_case_to_snake_case()].
 #'
 #' @return A tibblify spec.
 #' @export
@@ -40,14 +42,16 @@ unpack_tspec <- function(spec,
                          fields = NULL,
                          recurse = TRUE,
                          names_sep = NULL,
-                         names_repair = c("unique", "universal", "check_unique", "unique_quiet", "universal_quiet")) {
+                         names_repair = c("unique", "universal", "check_unique", "unique_quiet", "universal_quiet"),
+                         names_clean = NULL) {
   rlang::check_dots_empty()
   check_character(fields, allow_null = TRUE)
   check_bool(recurse)
   check_string(names_sep, allow_null = TRUE)
+  names_repair <- arg_match(names_repair)
+  check_function(names_clean, allow_null = TRUE)
 
   fields_to_unpack <- check_unpack_cols(fields, spec)
-  names_repair <- arg_match(names_repair)
   error_call <- current_call()
 
   spec$fields <- purrr::imap(
@@ -63,12 +67,13 @@ unpack_tspec <- function(spec,
         name = name,
         names_sep = names_sep,
         names_repair = names_repair,
+        names_clean = names_clean,
         error_call = error_call
       )
     }
   )
 
-  spec$fields <- unchop_fields(spec$fields, names_repair, error_call)
+  spec$fields <- unchop_fields(spec$fields, names_repair, names_clean, error_call)
   spec
 }
 
@@ -87,7 +92,13 @@ check_unpack_cols <- function(fields, spec, error_call = caller_env()) {
   fields
 }
 
-unpack_field <- function(field_spec, recurse, name, names_sep, names_repair, error_call) {
+unpack_field <- function(field_spec,
+                         recurse,
+                         name,
+                         names_sep,
+                         names_repair,
+                         names_clean,
+                         error_call) {
   if (recurse && field_spec$type %in% c("row", "df")) {
     field_spec$fields <- purrr::imap(
       field_spec$fields,
@@ -98,12 +109,18 @@ unpack_field <- function(field_spec, recurse, name, names_sep, names_repair, err
           name = name,
           names_sep = names_sep,
           names_repair = names_repair,
+          names_clean = names_clean,
           error_call = error_call
         )
       }
     )
 
-    field_spec$fields <- unchop_fields(field_spec$fields, names_repair, error_call)
+    field_spec$fields <- unchop_fields(
+      field_spec$fields,
+      names_repair,
+      names_clean,
+      error_call
+    )
   }
 
   if (field_spec$type != "row") {
@@ -123,9 +140,25 @@ unpack_field <- function(field_spec, recurse, name, names_sep, names_repair, err
   }
 }
 
-unchop_fields <- function(fields, names_repair, error_call) {
+unchop_fields <- function(fields, names_repair, names_clean, error_call) {
   fields <- vctrs::list_unchop(fields, name_spec = "{inner}")
   nms <- names(fields)
   nms <- vctrs::vec_as_names(nms, repair = names_repair, call = error_call)
+  if (!is.null(names_clean)) {
+    nms <- names_clean(nms)
+  }
   set_names(fields, nms)
+}
+
+#' @param names Names to clean
+#'
+#' @export
+#' @rdname unpack_tspec
+camel_case_to_snake_case <- function(names) {
+  stringr::str_replace_all(
+    names,
+    r"{([A-Z]+)}",
+    r"{_\1}"
+  ) |>
+    tolower()
 }
