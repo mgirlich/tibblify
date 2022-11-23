@@ -2,6 +2,8 @@
 
 * New `unpack_tspec()` to unpack the elements of `tib_row()` fields (#165).
 
+* Improved printing of lists parsed with `tspec_object()`.
+
 # tibblify 0.3.0
 
 * In column major format all fields are required.

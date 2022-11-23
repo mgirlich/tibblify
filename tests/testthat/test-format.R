@@ -318,3 +318,13 @@ test_that("special ptypes are cprrectly formatted", {
   check_native(vctrs::new_date(), "vctrs::new_date()")
   check_native(vctrs::new_duration(), "vctrs::new_duration()")
 })
+
+test_that("correctly print results of tspec_object()", {
+  expect_snapshot({
+    tibblify(
+      list(a = 1L),
+      tspec_object(tib_int("a"))
+    ) %>%
+      print()
+  })
+})
