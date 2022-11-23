@@ -1,5 +1,7 @@
 # tibblify (development version)
 
+* Improved printing of lists parsed with `tspec_object()`.
+
 # tibblify 0.3.0
 
 * In column major format all fields are required.
