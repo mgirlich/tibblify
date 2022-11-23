@@ -419,3 +419,12 @@
     Output
       [1] "tib_chr(\"a\", ptype_inner = vctrs::new_datetime(tzone = \"\"))"
 
+# correctly print results of tspec_object()
+
+    Code
+      tibblify(list(a = 1L), tspec_object(tib_int("a"))) %>% print()
+    Output
+      $a
+      [1] 1
+      
+

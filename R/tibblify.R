@@ -102,6 +102,7 @@ tibblify <- function(x,
 
   if (inherits(spec_org, "tspec_object")) {
     out <- purrr::map2(spec_org$fields, out, finalize_tspec_object)
+    class(out) <- "tibblify_object"
   }
 
   out <- set_spec(out, spec_org)
