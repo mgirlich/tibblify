@@ -1,5 +1,7 @@
 # tibblify (development version)
 
+* New `unpack_tspec()` to unpack the elements of `tib_row()` fields (#165).
+
 # tibblify 0.3.0
 
 * In column major format all fields are required.
