@@ -153,13 +153,17 @@ prep_spec_fields <- function(fields, call) {
     return(list())
   }
 
-  bad_idx <- purrr::detect_index(fields, ~ !is_tib(.x))
-  if (bad_idx != 0) {
-    name <- names2(fields)[[bad_idx]]
-    if (name == "") {
-      name <- paste0("..", bad_idx)
+  for (i in seq_along(fields)) {
+    field <- fields[[i]]
+    if (is_tib(field)) {
+      next
     }
-    friendly_type <- obj_type_friendly(fields[[bad_idx]])
+
+    name <- names2(fields)[[i]]
+    if (name == "") {
+      name <- paste0("..", i)
+    }
+    friendly_type <- obj_type_friendly(fields[[i]])
 
     msg <- "{.field {name}} must be a tib collector, not {friendly_type}."
     cli::cli_abort(msg, call = call)
@@ -174,10 +178,10 @@ spec_auto_name_fields <- function(fields, call) {
   auto_nms <- purrr::map2_chr(
     fields[unnamed],
     seq_along(fields)[unnamed],
-    ~ {
-      key <- .x$key
+    function(field, index) {
+      key <- field$key
       if (!is_string(key)) {
-        loc <- paste0("..", .y)
+        loc <- paste0("..", index)
         msg <- c(
           "{.arg key} must be a single string to infer name.",
           x = "{.arg key} of {.field {loc}} has length {length(key)}."
