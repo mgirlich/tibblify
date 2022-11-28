@@ -132,15 +132,15 @@ tspec_row <- function(...,
 tspec <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
   check_bool(vector_allows_empty_list, call = call)
 
-  structure(
-    list2(
-      type = type,
-      fields = prep_spec_fields(fields, call),
-      ...,
-      vector_allows_empty_list = vector_allows_empty_list
-    ),
-    class = c(paste0("tspec_", type), "tspec")
+  out <- list2(
+    type = type,
+    fields = prep_spec_fields(fields, call),
+    ...,
+    vector_allows_empty_list = vector_allows_empty_list
   )
+
+  class(out) <- c(paste0("tspec_", type), "tspec")
+  out
 }
 
 is_tspec <- function(x) {
@@ -221,18 +221,17 @@ tib_collector <- function(key,
   check_key(key, call)
   check_bool(required, call = call)
 
-  fields <- list(
+  out <- list(
     type = type,
     key = key,
     required = required,
     ...
   )
 
-  class <- tib_native_ptype(fields$ptype, class, fields)
-  structure(
-    fields,
-    class = c(class, paste0("tib_", type), "tib_collector")
-  )
+  class <- tib_native_ptype(out$ptype, class, out)
+  class(out) <- c(class, paste0("tib_", type), "tib_collector")
+
+  out
 }
 
 #' @rdname tib_scalar
