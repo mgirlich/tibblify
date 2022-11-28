@@ -219,7 +219,7 @@ tib_collector <- function(key,
                           class = NULL,
                           call = caller_env()) {
   check_key(key, call)
-  check_required(required, call)
+  check_bool(required, call = call)
 
   fields <- list(
     type = type,
@@ -926,8 +926,4 @@ check_key <- function(key, call = caller_env()) {
     msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
     cli::cli_abort(msg, call = call)
   }
-}
-
-check_required <- function(required, call) {
-  check_bool(required, call = call)
 }
