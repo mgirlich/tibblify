@@ -51,7 +51,7 @@ tspec_df <- function(...,
                      .input_form = c("rowmajor", "colmajor"),
                      .names_to = NULL,
                      vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   check_names_to(.names_to, .input_form)
 
   out <- tspec(
@@ -84,7 +84,7 @@ check_names_to <- function(.names_to, input_form, call = caller_env()) {
 tspec_object <- function(...,
                          .input_form = c("rowmajor", "colmajor"),
                          vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   tspec(
     list2(...),
     "object",
@@ -100,7 +100,7 @@ tspec_recursive <- function(...,
                             .children_to = .children,
                             .input_form = c("rowmajor", "colmajor"),
                             vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   check_string(.children)
   check_string(.children_to)
   # TODO check that key is unique
@@ -120,7 +120,7 @@ tspec_recursive <- function(...,
 tspec_row <- function(...,
                       .input_form = c("rowmajor", "colmajor"),
                       vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   tspec(
     list2(...),
     "row",
