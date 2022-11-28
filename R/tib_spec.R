@@ -200,17 +200,17 @@ spec_auto_name_fields <- function(fields, call) {
 
 flatten_fields <- function(fields) {
   ns <- lengths(fields)
-  fields_nested <- purrr::map(
-    fields[ns != 0],
-    function(x) {
-      if (is_tspec(x)) {
-        x$fields
-      } else {
-        list(x)
-      }
+  fields <- fields[ns != 0]
+  for (i in seq_along(fields)) {
+    field_i <- fields[[i]]
+    if (is_tspec(field_i)) {
+      fields[[i]] <- field_i$fields
+    } else {
+      fields[[i]] <- list(field_i)
     }
-  )
-  vctrs::vec_c(!!!fields_nested, .name_spec = "{inner}")
+  }
+
+  vctrs::vec_c(!!!fields, .name_spec = "{inner}")
 }
 
 
@@ -902,17 +902,17 @@ check_key <- function(key, call = caller_env()) {
     if (key == "") {
       cli::cli_abort("{.arg key} must not be an empty string.", call = call)
     }
-  }
+  } else {
+    if (vctrs::vec_any_missing(key)) {
+      na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
+      msg <- "`key[{.field {na_idx}}] must not be NA."
+      cli::cli_abort(msg, call = call)
+    }
 
-  if (vctrs::vec_any_missing(key)) {
-    na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
-    msg <- "`key[{.field {na_idx}}] must not be NA."
-    cli::cli_abort(msg, call = call)
-  }
-
-  if (any(key == "")) {
-    empty_string_idx <- purrr::detect_index(key == "", ~ .x)
-    msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
-    cli::cli_abort(msg, call = call)
+    if (any(key == "")) {
+      empty_string_idx <- purrr::detect_index(key == "", ~ .x)
+      msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
+      cli::cli_abort(msg, call = call)
+    }
   }
 }
