@@ -51,7 +51,7 @@ tspec_df <- function(...,
                      .input_form = c("rowmajor", "colmajor"),
                      .names_to = NULL,
                      vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   check_names_to(.names_to, .input_form)
 
   out <- tspec(
@@ -84,7 +84,7 @@ check_names_to <- function(.names_to, input_form, call = caller_env()) {
 tspec_object <- function(...,
                          .input_form = c("rowmajor", "colmajor"),
                          vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   tspec(
     list2(...),
     "object",
@@ -100,7 +100,7 @@ tspec_recursive <- function(...,
                             .children_to = .children,
                             .input_form = c("rowmajor", "colmajor"),
                             vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   check_string(.children)
   check_string(.children_to)
   # TODO check that key is unique
@@ -120,7 +120,7 @@ tspec_recursive <- function(...,
 tspec_row <- function(...,
                       .input_form = c("rowmajor", "colmajor"),
                       vector_allows_empty_list = FALSE) {
-  .input_form <- arg_match(.input_form)
+  .input_form <- arg_match0(.input_form, c("rowmajor", "colmajor"))
   tspec(
     list2(...),
     "row",
@@ -132,15 +132,15 @@ tspec_row <- function(...,
 tspec <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
   check_bool(vector_allows_empty_list, call = call)
 
-  structure(
-    list2(
-      type = type,
-      fields = prep_spec_fields(fields, call),
-      ...,
-      vector_allows_empty_list = vector_allows_empty_list
-    ),
-    class = c(paste0("tspec_", type), "tspec")
+  out <- list2(
+    type = type,
+    fields = prep_spec_fields(fields, call),
+    ...,
+    vector_allows_empty_list = vector_allows_empty_list
   )
+
+  class(out) <- c(paste0("tspec_", type), "tspec")
+  out
 }
 
 is_tspec <- function(x) {
@@ -148,19 +148,22 @@ is_tspec <- function(x) {
 }
 
 prep_spec_fields <- function(fields, call) {
-  fields <- purrr::discard(fields, is_null)
   fields <- flatten_fields(fields)
   if (is_null(fields)) {
     return(list())
   }
 
-  bad_idx <- purrr::detect_index(fields, ~ !is_tib(.x))
-  if (bad_idx != 0) {
-    name <- names2(fields)[[bad_idx]]
-    if (name == "") {
-      name <- paste0("..", bad_idx)
+  for (i in seq_along(fields)) {
+    field <- fields[[i]]
+    if (is_tib(field)) {
+      next
     }
-    friendly_type <- obj_type_friendly(fields[[bad_idx]])
+
+    name <- names2(fields)[[i]]
+    if (name == "") {
+      name <- paste0("..", i)
+    }
+    friendly_type <- obj_type_friendly(fields[[i]])
 
     msg <- "{.field {name}} must be a tib collector, not {friendly_type}."
     cli::cli_abort(msg, call = call)
@@ -175,10 +178,10 @@ spec_auto_name_fields <- function(fields, call) {
   auto_nms <- purrr::map2_chr(
     fields[unnamed],
     seq_along(fields)[unnamed],
-    ~ {
-      key <- .x$key
+    function(field, index) {
+      key <- field$key
       if (!is_string(key)) {
-        loc <- paste0("..", .y)
+        loc <- paste0("..", index)
         msg <- c(
           "{.arg key} must be a single string to infer name.",
           x = "{.arg key} of {.field {loc}} has length {length(key)}."
@@ -196,17 +199,18 @@ spec_auto_name_fields <- function(fields, call) {
 }
 
 flatten_fields <- function(fields) {
-  fields_nested <- purrr::map(
-    fields,
-    function(x) {
-      if (is_tspec(x)) {
-        x$fields
-      } else {
-        list(x)
-      }
+  ns <- lengths(fields)
+  fields <- fields[ns != 0]
+  for (i in seq_along(fields)) {
+    field_i <- fields[[i]]
+    if (is_tspec(field_i)) {
+      fields[[i]] <- field_i$fields
+    } else {
+      fields[[i]] <- list(field_i)
     }
-  )
-  vctrs::vec_c(!!!fields_nested, .name_spec = "{inner}")
+  }
+
+  vctrs::vec_c(!!!fields, .name_spec = "{inner}")
 }
 
 
@@ -219,20 +223,19 @@ tib_collector <- function(key,
                           class = NULL,
                           call = caller_env()) {
   check_key(key, call)
-  check_required(required, call)
+  check_bool(required, call = call)
 
-  fields <- list(
+  out <- list(
     type = type,
     key = key,
     required = required,
     ...
   )
 
-  class <- tib_native_ptype(fields$ptype, class, fields)
-  structure(
-    fields,
-    class = c(class, paste0("tib_", type), "tib_collector")
-  )
+  class <- tib_native_ptype(out$ptype, class, out)
+  class(out) <- c(class, paste0("tib_", type), "tib_collector")
+
+  out
 }
 
 #' @rdname tib_scalar
@@ -286,41 +289,27 @@ tib_native_ptype <- function(ptype, class, fields) {
   if (!is_null(class)) return(class)
   if (!fields$type %in% c("scalar", "vector")) return(NULL)
 
+  cls <- class(ptype)
+  if (length(cls) == 1L) {
+    out <- switch (cls,
+      logical = paste0("tib_", fields$type, "_logical"),
+      integer = paste0("tib_", fields$type, "_integer"),
+      numeric = paste0("tib_", fields$type, "_numeric"),
+      character = paste0("tib_", fields$type, "_character"),
+      Date = paste0("tib_", fields$type, "_date"),
+      NULL
+    )
+
+    if (!is.null(out)) {
+      return(out)
+    }
+  }
+
   UseMethod("tib_native_ptype")
 }
 
 #' @export
 tib_native_ptype.default <- function(ptype, class, fields) NULL
-#' @export
-tib_native_ptype.logical <- function(ptype, class, fields) {
-  if (!vec_is(ptype, logical())) return(NULL)
-
-  paste0("tib_", fields$type, "_logical")
-}
-#' @export
-tib_native_ptype.integer <- function(ptype, class, fields) {
-  if (!vec_is(ptype, integer())) return(NULL)
-
-  paste0("tib_", fields$type, "_integer")
-}
-#' @export
-tib_native_ptype.numeric <- function(ptype, class, fields) {
-  if (!vec_is(ptype, numeric())) return(NULL)
-
-  paste0("tib_", fields$type, "_numeric")
-}
-#' @export
-tib_native_ptype.character <- function(ptype, class, fields) {
-  if (!vec_is(ptype, character())) return(NULL)
-
-  paste0("tib_", fields$type, "_character")
-}
-#' @export
-tib_native_ptype.Date <- function(ptype, class, fields) {
-  if (!vec_is(ptype, vctrs::new_date())) return(NULL)
-
-  paste0("tib_", fields$type, "_date")
-}
 
 #' Create a Field Specification
 #'
@@ -913,21 +902,17 @@ check_key <- function(key, call = caller_env()) {
     if (key == "") {
       cli::cli_abort("{.arg key} must not be an empty string.", call = call)
     }
-  }
+  } else {
+    if (vctrs::vec_any_missing(key)) {
+      na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
+      msg <- "`key[{.field {na_idx}}] must not be NA."
+      cli::cli_abort(msg, call = call)
+    }
 
-  na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
-  if (na_idx != 0) {
-    msg <- "`key[{.field {na_idx}}] must not be NA."
-    cli::cli_abort(msg, call = call)
+    if (any(key == "")) {
+      empty_string_idx <- purrr::detect_index(key == "", ~ .x)
+      msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
+      cli::cli_abort(msg, call = call)
+    }
   }
-
-  empty_string_idx <- purrr::detect_index(key == "", ~ .x)
-  if (empty_string_idx != 0) {
-    msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
-    cli::cli_abort(msg, call = call)
-  }
-}
-
-check_required <- function(required, call) {
-  check_bool(required, call = call)
 }
