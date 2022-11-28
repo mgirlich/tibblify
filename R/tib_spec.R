@@ -148,7 +148,6 @@ is_tspec <- function(x) {
 }
 
 prep_spec_fields <- function(fields, call) {
-  fields <- purrr::discard(fields, is_null)
   fields <- flatten_fields(fields)
   if (is_null(fields)) {
     return(list())
