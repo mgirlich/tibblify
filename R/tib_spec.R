@@ -286,41 +286,27 @@ tib_native_ptype <- function(ptype, class, fields) {
   if (!is_null(class)) return(class)
   if (!fields$type %in% c("scalar", "vector")) return(NULL)
 
+  cls <- class(ptype)
+  if (length(cls) == 1L) {
+    out <- switch (cls,
+      logical = paste0("tib_", fields$type, "_logical"),
+      integer = paste0("tib_", fields$type, "_integer"),
+      numeric = paste0("tib_", fields$type, "_numeric"),
+      character = paste0("tib_", fields$type, "_character"),
+      Date = paste0("tib_", fields$type, "_date"),
+      NULL
+    )
+
+    if (!is.null(out)) {
+      return(out)
+    }
+  }
+
   UseMethod("tib_native_ptype")
 }
 
 #' @export
 tib_native_ptype.default <- function(ptype, class, fields) NULL
-#' @export
-tib_native_ptype.logical <- function(ptype, class, fields) {
-  if (!vec_is(ptype, logical())) return(NULL)
-
-  paste0("tib_", fields$type, "_logical")
-}
-#' @export
-tib_native_ptype.integer <- function(ptype, class, fields) {
-  if (!vec_is(ptype, integer())) return(NULL)
-
-  paste0("tib_", fields$type, "_integer")
-}
-#' @export
-tib_native_ptype.numeric <- function(ptype, class, fields) {
-  if (!vec_is(ptype, numeric())) return(NULL)
-
-  paste0("tib_", fields$type, "_numeric")
-}
-#' @export
-tib_native_ptype.character <- function(ptype, class, fields) {
-  if (!vec_is(ptype, character())) return(NULL)
-
-  paste0("tib_", fields$type, "_character")
-}
-#' @export
-tib_native_ptype.Date <- function(ptype, class, fields) {
-  if (!vec_is(ptype, vctrs::new_date())) return(NULL)
-
-  paste0("tib_", fields$type, "_date")
-}
 
 #' Create a Field Specification
 #'
