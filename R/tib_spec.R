@@ -196,8 +196,9 @@ spec_auto_name_fields <- function(fields, call) {
 }
 
 flatten_fields <- function(fields) {
+  ns <- lengths(fields)
   fields_nested <- purrr::map(
-    fields,
+    fields[ns != 0],
     function(x) {
       if (is_tspec(x)) {
         x$fields
@@ -915,14 +916,14 @@ check_key <- function(key, call = caller_env()) {
     }
   }
 
-  na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
-  if (na_idx != 0) {
+  if (vctrs::vec_any_missing(key)) {
+    na_idx <- purrr::detect_index(vec_detect_missing(key), ~ .x)
     msg <- "`key[{.field {na_idx}}] must not be NA."
     cli::cli_abort(msg, call = call)
   }
 
-  empty_string_idx <- purrr::detect_index(key == "", ~ .x)
-  if (empty_string_idx != 0) {
+  if (any(key == "")) {
+    empty_string_idx <- purrr::detect_index(key == "", ~ .x)
     msg <- "`key[{.field {empty_string_idx}}] must not be an empty string."
     cli::cli_abort(msg, call = call)
   }
