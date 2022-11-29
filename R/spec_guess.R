@@ -69,35 +69,49 @@ guess_tspec_list <- function(x,
     cli::cli_abort("Cannot guess spec for empty {.arg x}.")
   }
 
-  if (should_guess_object_list(x)) {
+  type <- guess_type(x)
+  if (type == "object list") {
     spec <- guess_tspec_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
       call = call
     )
-    if (inform_unspecified) spec_inform_unspecified(spec)
-    return(spec)
-  }
-
-  if (is_object(x)) {
+  } else {
     spec <- guess_tspec_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
       call = call
     )
-    if (inform_unspecified) spec_inform_unspecified(spec)
-    return(spec)
   }
 
-  cli::cli_abort(c(
-    "Cannot guess spec.",
-    "v" = "The object is a list.",
-    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object_list()}.",
-    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object()}.",
-    "i" = "Try to check the specs of the individual elements with {.code purrr::map(x, guess_spec)}."
-  ))
+  if (inform_unspecified) spec_inform_unspecified(spec)
+
+  spec
+}
+
+guess_type <- function(x, error_call = caller_env()) {
+  if (is_object(x)) {
+    if (is_object_list(x)) {
+      cli::cli_inform("{.arg x} is an object and a named object list.")
+      # TODO show some parts of x
+
+      title <- "How do you want to parse `x`?"
+      choice <- menu(c("object", "object list"), title = title)
+      return(choice)
+    } else {
+      return("object")
+    }
+  }
+
+  if (is_object_list(x)) {
+    return("object list")
+  }
+
+  # TODO more informative error message?
+  msg <- "{.arg x} is neither an object nor an object list."
+  cli::cli_abort(msg, call = error_call)
 }
 
 guess_make_tib_df <- function(name,
