@@ -1,3 +1,28 @@
+check_list <- function(x,
+                       ...,
+                       allow_null = FALSE,
+                       arg = caller_arg(x),
+                       call = caller_env()) {
+  if (!missing(x)) {
+    if (vctrs::vec_is_list(x)) {
+      return(invisible(NULL))
+    }
+    if (allow_null && is_null(x)) {
+      return(invisible(NULL))
+    }
+  }
+
+  stop_input_type(
+    x,
+    c("a list"),
+    ...,
+    allow_na = FALSE,
+    allow_null = allow_null,
+    arg = arg,
+    call = call
+  )
+}
+
 check_arg_different <- function(arg,
                                 ...,
                                 arg_name = caller_arg(arg),

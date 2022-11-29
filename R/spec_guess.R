@@ -63,17 +63,7 @@ guess_tspec_list <- function(x,
   check_bool(simplify_list, call = call)
   check_bool(inform_unspecified, call = call)
 
-  if (vec_is(x) && !vec_is_list(x)) {
-    cli::cli_abort(c(
-      `!` = "{.arg x} must be a list.",
-      "Instead, it is a vector with type <{vctrs::vec_ptype_full(x)}>"
-    ))
-  }
-
-  if (!is.list(x)) {
-    cli::cli_abort("{.arg x} must be a list")
-  }
-
+  check_list(x)
   if (is_empty(x)) {
     # TODO not completely sure about this
     return(tspec_object())
