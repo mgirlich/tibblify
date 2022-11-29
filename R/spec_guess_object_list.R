@@ -101,7 +101,7 @@ guess_object_list_field_spec <- function(value,
   }
 
   value_flat <- vec_flatten(value, ptype, name_spec = NULL)
-  if (is_object_list(value_flat)) {
+  if (should_guess_object_list(value_flat)) {
     spec <- guess_make_tib_df(
       name,
       values_flat = value_flat,
@@ -183,5 +183,5 @@ is_field_scalar <- function(value) {
 }
 
 is_field_row <- function(value) {
-  is_object_list(value)
+  should_guess_object_list(value)
 }

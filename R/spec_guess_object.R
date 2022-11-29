@@ -80,7 +80,7 @@ guess_object_field_spec <- function(value,
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE) # nocov
   }
 
-  if (is_object_list(value)) {
+  if (should_guess_object_list(value)) {
     spec <- guess_make_tib_df(
       name,
       values_flat = value,

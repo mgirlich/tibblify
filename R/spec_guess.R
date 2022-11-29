@@ -79,7 +79,7 @@ guess_tspec_list <- function(x,
     return(tspec_object())
   }
 
-  if (is_object_list(x)) {
+  if (should_guess_object_list(x)) {
     spec <- guess_tspec_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
