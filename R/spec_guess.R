@@ -65,8 +65,8 @@ guess_tspec_list <- function(x,
 
   check_list(x)
   if (is_empty(x)) {
-    # TODO not completely sure about this
-    return(tspec_object())
+    # TODO test this
+    cli::cli_abort("Cannot guess spec for empty {.arg x}.")
   }
 
   if (should_guess_object_list(x)) {
