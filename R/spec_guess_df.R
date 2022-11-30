@@ -61,6 +61,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
+  # `col` must be a list, so we need to check what its elements are
   list_of_col <- is_list_of(col)
   if (list_of_col) {
     ptype <- col %@% ptype
@@ -125,7 +126,8 @@ col_to_spec_df <- function(ptype,
     col_required <- TRUE
     has_non_vec_cols <- purrr::detect_index(ptype, ~ !is_vec(.x) || is.data.frame(.x)) > 0
     if (has_non_vec_cols) {
-      # TODO why?
+      # non-vector columns need to be inspected further to actually get their
+      # specification
       col_flat <- list_unchop(col, ptype = ptype)
     } else {
       col_flat <- ptype
@@ -143,85 +145,13 @@ col_to_spec_df <- function(ptype,
   tib_df(name, !!!fields_spec)
 }
 
-tib_type_of <- function(x, name, other) {
-  if (is.data.frame(x)) {
-    "df"
-  } else if (vec_is_list(x)) {
-    "list"
-  } else if (vec_is(x)) {
-    "vector"
-  } else {
-    if (!other) {
-      msg <- c(
-        "Column {name} is not a dataframe, a list or a vector.",
-        i = "Instead it has classes {.cls class(x)}."
-      )
-      cli::cli_abort(msg, .internal = TRUE)
-    }
-    "other"
-  }
-}
-
-is_vec <- function(x) {
-  # `vec_is()` considers `list()` to be a vector but we don't
-  if (vec_is_list(x)) {
-    return(FALSE)
-  }
-
-  vec_is(x)
-}
-
-get_ptype_common <- function(x, empty_list_unspecified) {
-  try_fetch({
-    if (empty_list_unspecified) {
-      x <- drop_empty_lists(x)
-    }
-
-    ptype <- vec_ptype_common(!!!x)
-    list(
-      has_common_ptype = TRUE,
-      ptype = special_ptype_handling(ptype),
-      had_empty_lists = x %@% had_empty_lists
-    )
-  }, vctrs_error_incompatible_type = function(cnd) {
-    list(has_common_ptype = FALSE)
-  }, vctrs_error_scalar_type = function(cnd) {
-    list(has_common_ptype = FALSE)
-  })
-}
-
-drop_empty_lists <- function(x) {
-  # TODO this could be implement in C for performance
-  # for performance reasons don't check for every single element if it is
-  # an empty list. Instead, only look at the ones with vec size 0.
-  empty_flag <- list_sizes(x) == 0
-  empty_list_flag <- purrr::map_lgl(x[empty_flag], ~ identical(.x, list()))
-  empty_flag[empty_flag] <- empty_list_flag
-  if (any(empty_flag)) {
-    x <- x[!empty_flag]
-    x %@% had_empty_lists <- TRUE
-  }
-
-  x
-}
-
-special_ptype_handling <- function(ptype) {
-  # convert POSIXlt to POSIXct to be in line with vctrs
-  # https://github.com/r-lib/vctrs/issues/1576
-  if (inherits(ptype, "POSIXlt")) {
-    return(vec_cast(ptype, vctrs::new_datetime()))
-  }
-
-  ptype
-}
-
 df_guess_required <- function(df_list, all_cols) {
-  # TODO this could be implement in C for performance
-  cols_list <- purrr::map(df_list, colnames)
-
   col_required <- rep_named(all_cols, TRUE)
   for (col in all_cols) {
-    bad_idx <- purrr::detect_index(cols_list, ~ !col %in% .x)
+    bad_idx <- purrr::detect_index(
+      df_list,
+      function(df) !col %in% colnames(df)
+    )
     col_required[[col]] <- bad_idx == 0
   }
 
