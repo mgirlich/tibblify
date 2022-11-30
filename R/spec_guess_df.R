@@ -15,6 +15,7 @@ guess_tspec_df <- function(x,
   # FIXME should use global variable?
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
+    # TODO inform that `simplify_list` is not used for data frames
     fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
     spec <- tspec_df(
       !!!fields,

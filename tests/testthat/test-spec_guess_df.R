@@ -335,41 +335,35 @@ test_that("can guess required for list of tibble columns", {
 test_that("can guess spec for nested df columns", {
   # row in row element
   expect_equal(
-    guess_tspec_df(
-      tibble(df = tibble(df2 = tibble(int2 = 1L, chr2 = "a")))
-    ),
-    tspec_df(
-      df = tib_row(
-        "df",
-        df2 = tib_row(
-          "df2",
-          int2 = tib_int("int2"),
-          chr2 = tib_chr("chr2")
-        )
+    col_to_spec(tibble(df2 = tibble(int2 = 1L, chr2 = "a")), "df", FALSE),
+    tib_row(
+      "df",
+      df2 = tib_row(
+        "df2",
+        int2 = tib_int("int2"),
+        chr2 = tib_chr("chr2")
       )
     )
   )
 
   # df in row element
   expect_equal(
-    guess_tspec_df(
+    col_to_spec(
       tibble(
-        df = tibble(
-          df2 = list(
-            tibble(dbl2 = 1L),
-            tibble(dbl2 = 2.5, chr2 = "a")
-          )
+        df2 = list(
+          tibble(dbl2 = 1L),
+          tibble(dbl2 = 2.5, chr2 = "a")
         )
-      )
+      ),
+      "df",
+      FALSE
     ),
-    tspec_df(
-      df = tib_row(
-        "df",
-        df2 = tib_df(
-          "df2",
-          dbl2 = tib_dbl("dbl2"),
-          chr2 = tib_chr("chr2", required = FALSE)
-        )
+    tib_row(
+      "df",
+      df2 = tib_df(
+        "df2",
+        dbl2 = tib_dbl("dbl2"),
+        chr2 = tib_chr("chr2", required = FALSE)
       )
     )
   )
@@ -379,43 +373,37 @@ test_that("can guess spec for nested df columns", {
 test_that("can guess spec for nested list of df columns", {
   # row in df element
   expect_equal(
-    guess_tspec_df(
-      tibble(df = list(tibble(df2 = tibble(int2 = 1L, chr2 = "a"))))
-    ),
-    tspec_df(
-      df = tib_df(
-        "df",
-        df2 = tib_row(
-          "df2",
-          int2 = tib_int("int2"),
-          chr2 = tib_chr("chr2")
-        )
+    col_to_spec(list(tibble(df2 = tibble(int2 = 1L, chr2 = "a"))), "df", FALSE),
+    tib_df(
+      "df",
+      df2 = tib_row(
+        "df2",
+        int2 = tib_int("int2"),
+        chr2 = tib_chr("chr2")
       )
     )
   )
 
   # df in df element
   expect_equal(
-    guess_tspec_df(
-      tibble(
-        df = list(
-          tibble(
-            df2 = list(
-              tibble(dbl2 = 1L),
-              tibble(dbl2 = 2.5, chr2 = "a")
-            )
+    col_to_spec(
+      list(
+        tibble(
+          df2 = list(
+            tibble(dbl2 = 1L),
+            tibble(dbl2 = 2.5, chr2 = "a")
           )
         )
-      )
+      ),
+      "df",
+      FALSE
     ),
-    tspec_df(
-      df = tib_df(
-        "df",
-        df2 = tib_df(
-          "df2",
-          dbl2 = tib_dbl("dbl2"),
-          chr2 = tib_chr("chr2", required = FALSE)
-        )
+    tib_df(
+      "df",
+      df2 = tib_df(
+        "df2",
+        dbl2 = tib_dbl("dbl2"),
+        chr2 = tib_chr("chr2", required = FALSE)
       )
     )
   )
