@@ -2,23 +2,19 @@ guess_tspec_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
                                    simplify_list = FALSE,
+                                   arg = caller_arg(x),
                                    call = current_call()) {
   check_dots_empty()
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     msg <- c(
-      "{.arg x} must not be a dataframe.",
+      "{.arg {arg}} must not be a dataframe.",
       i = "Did you want to use {.fn guess_tspec_df} instead?"
     )
     cli::cli_abort(msg, call = call)
   }
 
-  if (!is.list(x)) {
-    cls <- class(x)[[1]]
-    msg <- "{.arg x} must be a list. Instead, it is a {.cls {cls}}."
-    cli::cli_abort(msg, call = call)
-  }
-
+  check_list(x)
   fields <- guess_object_list_spec(
     x,
     empty_list_unspecified = empty_list_unspecified,
