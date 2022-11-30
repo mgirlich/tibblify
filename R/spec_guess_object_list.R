@@ -153,7 +153,7 @@ get_required <- function(x, sample_size = 10e3) {
     x <- vec_slice(x, sample(n, sample_size))
   }
 
-  all_names <- vec_c(!!!lapply(x, names), .ptype = character())
+  all_names <- list_unchop(lapply(x, names), ptype = character())
   names_count <- vec_count(all_names, "location")
 
   empty_loc <- lengths(x) == 0L
