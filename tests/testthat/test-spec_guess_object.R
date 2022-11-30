@@ -276,17 +276,17 @@ test_that("can guess tib_unspecified for an object", {
   # in a row
   expect_equal(
     guess_tspec_object(list(x = list(a = NULL))),
-    tspec_object(x = tib_row("x", a = tib_unspecified("a")))
+    tspec_object(x = tib_row("x", tib_unspecified("a")))
   )
 
   expect_equal(
     guess_tspec_object(list(x = list(a = list()))),
-    tspec_object(x = tib_row("x", a = tib_unspecified("a")))
+    tspec_object(x = tib_row("x", tib_unspecified("a")))
   )
 
   expect_equal(
     guess_tspec_object(list(x = list(a = list())), empty_list_unspecified = FALSE),
-    tspec_object(x = tib_row("x", a = tib_unspecified("a")))
+    tspec_object(x = tib_row("x", tib_unspecified("a")))
   )
 
   # in a df
