@@ -5,13 +5,13 @@
     Output
       <error/rlang_error>
       Error in `guess_tspec_df()`:
-      ! `x` is a list but not a list of objects.
+      ! Not every element of `list(a = 1)` is an object.
     Code
       (expect_error(guess_tspec_df(1:3)))
     Output
       <error/rlang_error>
       Error in `guess_tspec_df()`:
-      ! Cannot guess the specification for type integer.
+      ! `1:3` must be a list, not an integer vector.
 
 # inform about unspecified elements
 

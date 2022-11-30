@@ -14,12 +14,7 @@ guess_tspec_object <- function(x,
     )
     cli::cli_abort(msg, call = call)
   }
-
-  if (!is.list(x)) {
-    cls <- class(x)[[1]]
-    msg <- "{.arg x} must be a list. Instead, it is a {.cls {cls}}."
-    cli::cli_abort(msg, call = call)
-  }
+  check_list(x)
 
   check_object_names(x, call)
 
@@ -81,6 +76,7 @@ guess_object_field_spec <- function(value,
   }
 
   if (should_guess_object_list(value)) {
+    # TODO should ask user what to do
     spec <- guess_make_tib_df(
       name,
       values_flat = value,
@@ -112,7 +108,6 @@ guess_object_field_spec <- function(value,
 }
 
 check_object_names <- function(x, call) {
-  # TODO should this be more strict and also expect names for an empty list?
   if (!is_named2(x)) {
     msg <- "{.arg x} must be fully named."
     cli::cli_abort(msg, call = call)

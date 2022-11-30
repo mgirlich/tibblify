@@ -5,12 +5,14 @@ guess_tspec_df <- function(x,
                           empty_list_unspecified = FALSE,
                           simplify_list = FALSE,
                           inform_unspecified = should_inform_unspecified(),
-                          call = rlang::current_call()) {
+                          call = rlang::current_call(),
+                          arg = rlang::caller_arg(x)) {
   check_dots_empty()
   check_bool(empty_list_unspecified, call = call)
   check_bool(simplify_list, call = call)
   check_bool(inform_unspecified, call = call)
 
+  # FIXME should use global variable?
   withr::local_options(list(tibblify.used_empty_list_arg = NULL))
   if (is.data.frame(x)) {
     fields <- purrr::imap(x, col_to_spec, empty_list_unspecified)
@@ -18,9 +20,11 @@ guess_tspec_df <- function(x,
       !!!fields,
       vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
     )
-  } else if (is.list(x)) {
+  } else {
+    check_list(x, arg = arg)
+
     if (!is_object_list(x)) {
-      msg <- "{.arg x} is a list but not a list of objects."
+      msg <- "Not every element of {.arg {arg}} is an object."
       cli::cli_abort(msg, call = call)
     }
 
@@ -30,9 +34,6 @@ guess_tspec_df <- function(x,
       simplify_list = simplify_list,
       call = call
     )
-  } else {
-    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
-    cli::cli_abort(msg, call = call)
   }
 
   if (inform_unspecified) spec_inform_unspecified(spec)

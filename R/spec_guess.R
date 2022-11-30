@@ -30,6 +30,10 @@ guess_tspec <- function(x,
                         inform_unspecified = should_inform_unspecified(),
                         call = rlang::current_call()) {
   check_dots_empty()
+  check_bool(empty_list_unspecified, call = call)
+  check_bool(simplify_list, call = call)
+  check_bool(inform_unspecified, call = call)
+
   if (is.data.frame(x)) {
     guess_tspec_df(
       x,
@@ -38,7 +42,7 @@ guess_tspec <- function(x,
       inform_unspecified = inform_unspecified,
       call = call
     )
-  } else if (is.list(x)) {
+  } else if (vec_is_list(x)) {
     guess_tspec_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
@@ -47,8 +51,12 @@ guess_tspec <- function(x,
       call = call
     )
   } else {
-    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
-    cli::cli_abort(msg, call = call)
+    stop_input_type(
+      x,
+      c("a data frame", "a list"),
+      arg = caller_arg(x),
+      call = call
+    )
   }
 }
 
@@ -57,6 +65,7 @@ guess_tspec_list <- function(x,
                              empty_list_unspecified = FALSE,
                              simplify_list = FALSE,
                              inform_unspecified = should_inform_unspecified(),
+                             arg = caller_arg(x),
                              call = current_call()) {
   check_dots_empty()
   check_bool(empty_list_unspecified, call = call)
@@ -65,53 +74,33 @@ guess_tspec_list <- function(x,
 
   check_list(x)
   if (is_empty(x)) {
-    # TODO test this
-    cli::cli_abort("Cannot guess spec for empty {.arg x}.")
+    msg <- "{.arg {arg}} must not be empty."
+    cli::cli_abort(msg, call = call)
   }
 
-  type <- guess_type(x)
-  if (type == "object list") {
+  # if `x` is both, an object list and an object, it should be very rare that
+  # it should be parsed as an object.
+  if (is_object_list(x)) {
     spec <- guess_tspec_object_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
       call = call
     )
-  } else {
+  } else if (is_object(x)) {
     spec <- guess_tspec_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
       call = call
     )
+  } else {
+    abort_not_tibblifiable(x, arg, call)
   }
 
   if (inform_unspecified) spec_inform_unspecified(spec)
 
   spec
-}
-
-guess_type <- function(x, error_call = caller_env()) {
-  if (is_object(x)) {
-    if (is_object_list(x)) {
-      cli::cli_inform("{.arg x} is an object and a named object list.")
-      # TODO show some parts of x
-
-      title <- "How do you want to parse `x`?"
-      choice <- menu(c("object", "object list"), title = title)
-      return(choice)
-    } else {
-      return("object")
-    }
-  }
-
-  if (is_object_list(x)) {
-    return("object list")
-  }
-
-  # TODO more informative error message?
-  msg <- "{.arg x} is neither an object nor an object list."
-  cli::cli_abort(msg, call = error_call)
 }
 
 guess_make_tib_df <- function(name,
@@ -145,20 +134,6 @@ tib_ptype <- function(x) {
 
 is_unspecified <- function(x) {
   inherits(x, "vctrs_unspecified")
-}
-
-make_unchop <- function(ptype) {
-  rlang::new_function(
-    pairlist2(x = ),
-    call2(sym("list_unchop"), x = sym("x"), ptype = ptype)
-  )
-}
-
-make_new_list_of <- function(ptype) {
-  rlang::new_function(
-    pairlist2(x = ),
-    call2(sym("new_list_of"), x = sym("x"), ptype = ptype)
-  )
 }
 
 maybe_tib_row <- function(name, fields, required = TRUE) {

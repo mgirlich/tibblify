@@ -12,7 +12,7 @@
     Output
       <error/rlang_error>
       Error in `guess_tspec_object()`:
-      ! `x` must be a list. Instead, it is a <integer>.
+      ! `x` must be a list, not an integer vector.
 
 ---
 

@@ -1,3 +1,9 @@
+test_that("checks input", {
+  expect_snapshot({
+    expect_error(guess_tspec("a"))
+  })
+})
+
 test_that("can guess spec for discog", {
   expect_snapshot(guess_tspec(discog) %>% print())
 })
@@ -48,6 +54,25 @@ test_that("can guess spec for twitter", {
   x <- read_sample_json("twitter.json")
   expect_snapshot(guess_tspec(x))
 })
+
+# guess_tspec_list() ------------------------------------------------------
+
+test_that("", {
+  # errors for empty input
+  expect_snapshot({
+    (expect_error(guess_tspec_list(list())))
+  })
+
+  # neither object nor object list
+  expect_snapshot({
+    # not fully named
+    (expect_error(guess_tspec_list(list(a = 1, 1))))
+    # not unique names
+    (expect_error(guess_tspec_list(list(a = 1, a = 1))))
+  })
+})
+
+# spec_inform_unspecified() -----------------------------------------------
 
 test_that("informing about unspecified looks good", {
   spec <- tspec_df(
