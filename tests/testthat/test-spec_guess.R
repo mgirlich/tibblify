@@ -41,6 +41,17 @@ test_that("can guess spec for citm_catalog", {
   # TODO think about `$topicSubTopics`
   expect_snapshot(guess_tspec(x))
 
+  # These fields are empty
+  # • blockNames
+  # • events->description
+  # • events->subjectCode
+  # • events->subtitle
+  # • performances->logo
+  # • performances->name
+  # • performances->seatCategories->areas->blockIds
+  # • performances->seatMapImage
+  # • subjectNames
+
   expect_snapshot(guess_tspec_list(x, simplify_list = FALSE))
 })
 
@@ -57,7 +68,7 @@ test_that("can guess spec for twitter", {
 
 # guess_tspec_list() ------------------------------------------------------
 
-test_that("", {
+test_that("checks input", {
   # errors for empty input
   expect_snapshot({
     (expect_error(guess_tspec_list(list())))

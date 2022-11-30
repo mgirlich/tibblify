@@ -80,7 +80,6 @@ guess_object_field_spec <- function(value,
     spec <- guess_make_tib_df(
       name,
       values_flat = value,
-      required = TRUE,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list
     )

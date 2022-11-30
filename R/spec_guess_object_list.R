@@ -40,24 +40,31 @@ guess_object_list_spec <- function(x,
 
   # need to remove empty elements for `purrr::transpose()` to work...
   x <- vctrs::list_drop_empty(x)
-
   x_t <- purrr::transpose(unname(x), names(required))
 
-  purrr::pmap(
+  fields <- purrr::pmap(
     tibble::tibble(
       value = x_t,
-      name = names(required),
-      required = unname(required)
+      name = names(required)
     ),
     guess_object_list_field_spec,
     empty_list_unspecified = empty_list_unspecified,
     simplify_list = simplify_list
   )
+
+  update_required_fields(fields, required)
+}
+
+update_required_fields <- function(fields, required) {
+  for (field_name in names(required)) {
+    fields[[field_name]]$required <- required[[field_name]]
+  }
+
+  fields
 }
 
 guess_object_list_field_spec <- function(value,
                                          name,
-                                         required,
                                          empty_list_unspecified,
                                          simplify_list) {
   ptype_result <- get_ptype_common(value, empty_list_unspecified)
@@ -67,22 +74,22 @@ guess_object_list_field_spec <- function(value,
   # * it contains incompatible types
   # in both cases `tib_variant()` is used
   if (!ptype_result$has_common_ptype) {
-    return(tib_variant(name, required = required))
+    return(tib_variant(name))
   }
 
   # now we know that every element essentially has type `ptype`
   ptype <- ptype_result$ptype
   if (is_null(ptype)) {
-    return(tib_unspecified(name, required = required))
+    return(tib_unspecified(name))
   }
 
   ptype_type <- tib_type_of(ptype, name, other = FALSE)
   if (ptype_type == "vector") {
     if (is_field_scalar(value)) {
-      return(tib_scalar(name, ptype, required = required))
+      return(tib_scalar(name, ptype))
     } else {
       mark_empty_list_argument(is_true(ptype_result$had_empty_lists))
-      return(tib_vector(name, ptype, required = required))
+      return(tib_vector(name, ptype))
     }
   }
 
@@ -96,53 +103,124 @@ guess_object_list_field_spec <- function(value,
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
   }
 
-  value_flat <- vec_flatten(value, ptype, name_spec = NULL)
-  if (should_guess_object_list(value_flat)) {
+  # every element is a list at this point
+  if (!vec_is_list(ptype)) {
+    cli::cli_abort("{.arg ptype} is not a list", .interal = TRUE)
+  }
+
+  object <- is_object_list(value)
+  object_list <- is_list_of_object_lists(value)
+
+  value_flat <- vec_flatten(value, list(), name_spec = NULL)
+  if (object_list && object) {
+    if (all(list_sizes(value) == 0)) {
+      return(tib_unspecified(name))
+    }
+
+    choice <- user_choose_row_or_df(
+      name,
+      value_flat,
+      empty_list_unspecified = empty_list_unspecified,
+      simplify_list = simplify_list
+    )
+
+    if (choice == "row") {
+      object_list <- FALSE
+    } else {
+      object <- FALSE
+    }
+  }
+
+  if (object_list) {
     spec <- guess_make_tib_df(
       name,
       values_flat = value_flat,
-      required = required,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list
     )
     return(spec)
   }
 
-  if (is_field_row(value)) {
+  ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
+  if (object) {
+    # it could also be a vector with input form `object`
+    if (simplify_list && ptype_result$has_common_ptype && is_field_scalar(value_flat)) {
+      # TODO should ask user
+      user_choose_row_or_object_vector()
+    }
+
     fields <- guess_object_list_spec(
       value,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list
     )
-    return(maybe_tib_row(name, fields, required))
+    return(maybe_tib_row(name, fields))
   }
 
-  ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
   if (!ptype_result$has_common_ptype) {
-    return(tib_variant(name, required = required))
+    return(tib_variant(name))
   }
 
   ptype <- ptype_result$ptype
-  if (is_null(ptype)) {
-    return(tib_unspecified(name, required = required))
-  }
-  if (identical(ptype, list()) || identical(ptype, set_names(list()))) {
-    return(tib_unspecified(name, required = required))
+  if (is_null(ptype) || identical(unname(ptype), list())) {
+    return(tib_unspecified(name))
   }
 
   if (!simplify_list) {
-    return(tib_variant(name, required = required))
+    return(tib_variant(name))
   }
 
   if (is_field_scalar(value_flat)) {
     if (is_named(value_flat)) {
-      return(tib_vector(name, ptype, required = required, input_form = "object"))
+      return(tib_vector(name, ptype, input_form = "object"))
     } else {
-      return(tib_vector(name, ptype, required = required, input_form = "scalar_list"))
+      return(tib_vector(name, ptype, input_form = "scalar_list"))
     }
   }
 
-  tib_variant(name, required = required)
+  tib_variant(name)
+}
+
+user_choose_row_or_df <- function(name,
+                                  value_flat,
+                                  empty_list_unspecified,
+                                  simplify_list) {
+  if (!rlang::is_interactive()) {
+    return("data frame")
+  }
+
+  # TODO need full path
+  # TODO simplify...
+  inner_spec_df <- guess_make_tib_df(
+    name,
+    values_flat = value_flat,
+    empty_list_unspecified = empty_list_unspecified,
+    simplify_list = simplify_list
+  )
+  spec_df <- tspec_df(
+    .names_to = inner_spec_df$names_col,
+    !!!inner_spec_df$fields
+  )
+  required <- rep_named(names(spec_df$fields), FALSE)
+  spec_df$fields <- update_required_fields(spec_df$fields, required)
+
+  fields <- guess_object_list_spec(
+    value,
+    empty_list_unspecified = empty_list_unspecified,
+    simplify_list = simplify_list
+  )
+  spec_object <- tspec_row(!!!fields)
+
+  title <- cli::format_message("How should field {.val {name}} be parsed?")
+  utils::menu(c("row", "data frame"), title = title)
+}
+
+user_choose_row_or_object_vector <- function() {
+  if (!rlang::is_interactive()) {
+    return("row")
+  }
+
+  "row"
 }
 
 get_required <- function(x, sample_size = 10e3) {
@@ -170,12 +248,14 @@ is_field_scalar <- function(value) {
     return(FALSE)
   }
 
-  size_0_is_null <- vec_detect_missing(value[sizes == 0])
-  if (all(size_0_is_null)) {
+  # early exit for performance
+  if (!any(sizes == 0)) {
     return(TRUE)
   }
 
-  FALSE
+  # check that all elements are `NULL`
+  size_0_is_null <- vec_detect_missing(value[sizes == 0])
+  all(size_0_is_null)
 }
 
 is_field_row <- function(value) {

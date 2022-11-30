@@ -11,6 +11,16 @@ is_object_list <- function(x) {
   .Call(ffi_is_object_list, x)
 }
 
+is_list_of_object_lists <- function(x) {
+  for (x_i in x) {
+    if (!is_object_list(x_i) && !is.null(x_i)) {
+      return(FALSE)
+    }
+  }
+
+  TRUE
+}
+
 should_guess_object_list <- function(x) {
   if (!.Call(ffi_is_object_list, x)) {
     return(FALSE)
