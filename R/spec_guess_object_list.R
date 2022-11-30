@@ -1,3 +1,5 @@
+# Guess the specification of an object list
+# The caller has to make sure that `x` is really a list of objects!
 guess_tspec_object_list <- function(x,
                                    ...,
                                    empty_list_unspecified = FALSE,
@@ -5,51 +7,43 @@ guess_tspec_object_list <- function(x,
                                    arg = caller_arg(x),
                                    call = current_call()) {
   check_dots_empty()
-  withr::local_options(list(tibblify.used_empty_list_arg = NULL))
-  if (is.data.frame(x)) {
-    msg <- c(
-      "{.arg {arg}} must not be a dataframe.",
-      i = "Did you want to use {.fn guess_tspec_df} instead?"
-    )
-    cli::cli_abort(msg, call = call)
-  }
-
   check_list(x)
+
+  withr::local_options(list(tibblify.used_empty_list_arg = NULL))
+
   fields <- guess_object_list_spec(
     x,
     empty_list_unspecified = empty_list_unspecified,
     simplify_list = simplify_list
   )
 
-  names_to <- NULL
-  if (is_named(x)) {
-    names_to <- ".names"
-  }
-
   tspec_df(
     !!!fields,
-    .names_to = names_to,
+    .names_to = if (is_named(x)) ".names",
     vector_allows_empty_list = is_true(getOption("tibblify.used_empty_list_arg"))
   )
 }
 
-guess_object_list_spec <- function(x,
+guess_object_list_spec <- function(object_list,
                                    empty_list_unspecified,
                                    simplify_list) {
-  required <- get_required(x)
+  required <- get_required(object_list)
 
   # need to remove empty elements for `purrr::transpose()` to work...
-  x <- vctrs::list_drop_empty(x)
-  x_t <- purrr::transpose(unname(x), names(required))
+  object_list <- vctrs::list_drop_empty(object_list)
+  x_t <- purrr::transpose(unname(object_list), names(required))
 
-  fields <- purrr::pmap(
-    tibble::tibble(
-      value = x_t,
-      name = names(required)
-    ),
-    guess_object_list_field_spec,
-    empty_list_unspecified = empty_list_unspecified,
-    simplify_list = simplify_list
+  fields <- purrr::map2(
+    x_t,
+    names(required),
+    function(value, name) {
+      guess_object_list_field_spec(
+        value,
+        name,
+        empty_list_unspecified = empty_list_unspecified,
+        simplify_list = simplify_list
+      )
+    }
   )
 
   update_required_fields(fields, required)
