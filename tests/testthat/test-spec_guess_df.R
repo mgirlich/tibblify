@@ -1,98 +1,97 @@
+
+# scalar columns ----------------------------------------------------------
+
 test_that("can guess scalar columns", {
   expect_equal(
-    guess_tspec_df(
-      tibble(
-        lgl = TRUE,
-        dtt = vctrs::new_datetime()
-      )
-    ),
-    tspec_df(
-      lgl = tib_lgl("lgl"),
-      dtt = tib_scalar("dtt", ptype = vctrs::new_datetime())
-    )
+    col_to_spec(TRUE, "lgl", FALSE),
+    tib_lgl("lgl")
+  )
+  expect_equal(
+    col_to_spec(vctrs::new_datetime(), "dtt", FALSE),
+    tib_scalar("dtt", ptype = vctrs::new_datetime())
   )
 
   # also for record types
   x_rat <- new_rational(1, 2)
   expect_equal(
-    guess_tspec_df(tibble(x = x_rat)),
-    tspec_df(x = tib_scalar("x", x_rat))
+    col_to_spec(x_rat, "x", FALSE),
+    tib_scalar("x", x_rat)
   )
 })
 
 test_that("scalar POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
-    guess_tspec_df(tibble(x = x_posixlt)),
-    tspec_df(x = tib_scalar("x", ptype = vctrs::new_datetime()))
+    col_to_spec(x_posixlt, "x", FALSE),
+    tib_scalar("x", ptype = vctrs::new_datetime())
   )
 })
 
 test_that("can guess scalar NA columns", {
   # typed NA creates tib_scalar
   expect_equal(
-    guess_tspec_df(tibble(int = NA_integer_)),
-    tspec_df(int = tib_int("int"))
+    col_to_spec(NA_integer_, "int", FALSE),
+    tib_int("int")
   )
 
   na_date <- vec_init(vctrs::new_date())
   expect_equal(
-    guess_tspec_df(tibble(date = na_date)),
-    tspec_df(date = tib_scalar("date", ptype = vctrs::new_date()))
+    col_to_spec(na_date, "date", FALSE),
+    tib_scalar("date", ptype = vctrs::new_date())
   )
 
   # simple NA creates tib_unspecified
   expect_equal(
-    guess_tspec_df(tibble(lgl = NA)),
-    tspec_df(lgl = tib_unspecified("lgl"))
+    col_to_spec(NA, "lgl", FALSE),
+    tib_unspecified("lgl")
   )
 })
 
+
+# vector columns ----------------------------------------------------------
+
 test_that("can guess vector columns", {
   expect_equal(
-    guess_tspec_df(
-      tibble(
-        lgl_vec = list(TRUE),
-        dtt_vec = list(vctrs::new_datetime()),
-      )
-    ),
-    tspec_df(
-      lgl_vec = tib_lgl_vec("lgl_vec"),
-      dtt_vec = tib_vector("dtt_vec", ptype = vctrs::new_datetime())
-    )
+    col_to_spec(list(TRUE), "lgl_vec", FALSE),
+    tib_lgl_vec("lgl_vec")
+  )
+  expect_equal(
+    col_to_spec(list(vctrs::new_datetime()), "dtt_vec", FALSE),
+    tib_vector("dtt_vec", ptype = vctrs::new_datetime())
   )
 
   # also for record types
   x_rat <- new_rational(1, 2)
   expect_equal(
-    guess_tspec_df(tibble(x = list(x_rat))),
-    tspec_df(x = tib_vector("x", x_rat))
+    col_to_spec(list(x_rat), "x", FALSE),
+    tib_vector("x", x_rat)
   )
 })
 
 test_that("vector POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
-    guess_tspec_df(tibble(x = list(x_posixlt))),
-    tspec_df(x = tib_vector("x", ptype = vctrs::new_datetime()))
+    col_to_spec(list(x_posixlt), "x", FALSE),
+    tib_vector("x", ptype = vctrs::new_datetime())
   )
 })
 
 test_that("can guess vector NA columns", {
   # TODO maybe this could also be `tib_unspecified()`?
   expect_equal(
-    guess_tspec_df(tibble(x = list(c(NA, NA), NA))),
-    tspec_df(x = tib_lgl_vec("x"))
+    col_to_spec(list(c(NA, NA), NA), "x", FALSE),
+    tib_lgl_vec("x")
   )
 })
 
 test_that("respect empty_list_unspecified for vector columns", {
-  x <- tibble(int_vec = list(1:2, list()))
   expect_equal(
-    guess_tspec_df(x, empty_list_unspecified = FALSE),
-    tspec_df(int_vec = tib_variant("int_vec"))
+    col_to_spec(list(1:2, list()), "int_vec", FALSE),
+    tib_variant("int_vec")
   )
 
+  # needs to check against `tspec_df()` for `vector_allows_empty_list`
+  x <- tibble(int_vec = list(1:2, list()))
   expect_equal(
     guess_tspec_df(x, empty_list_unspecified = TRUE),
     tspec_df(
@@ -104,25 +103,94 @@ test_that("respect empty_list_unspecified for vector columns", {
 
 test_that("can guess list of NULL columns", {
   expect_equal(
-    guess_tspec_df(tibble(x = list(NULL, NULL))),
-    tspec_df(x = tib_unspecified("x"))
+    col_to_spec(list(NULL, NULL), "x", FALSE),
+    tib_unspecified("x")
   )
 })
 
+test_that("can guess list of columns", {
+  expect_equal(
+    col_to_spec(list_of(1L, 2:3), "x", FALSE),
+    tib_int_vec("x")
+  )
+
+  expect_equal(
+    col_to_spec(list_of(.ptype = integer()), "x", FALSE),
+    tib_int_vec("x")
+  )
+})
+
+
+# variant columns ---------------------------------------------------------
+
 test_that("can guess mixed columns", {
   expect_equal(
-    guess_tspec_df(tibble(x = list(1, "a"))),
-    tspec_df(x = tib_variant("x"))
+    col_to_spec(list(1, "a"), "x", FALSE),
+    tib_variant("x")
   )
 })
 
 test_that("can guess non-vector objects", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
-    guess_tspec_df(tibble(x = list(model, 1))),
-    tspec_df(x = tib_variant("x"))
+    col_to_spec(list(1, model), "x", FALSE),
+    tib_variant("x")
   )
 })
+
+
+# tibble columns ----------------------------------------------------------
+
+test_that("can guess tibble columns", {
+  # scalar
+  expect_equal(
+    col_to_spec(tibble(int = 1L, chr = "a"), "df", FALSE),
+    tib_row(
+      "df",
+      int = tib_int("int"),
+      chr = tib_chr("chr")
+    )
+  )
+
+  # vector
+  expect_equal(
+    col_to_spec(tibble(int_vec = list(1L)), "df", FALSE),
+    tib_row("df", int_vec = tib_int_vec("int_vec"))
+  )
+
+  # mixed
+  expect_equal(
+    col_to_spec(tibble(x = list(1L, "a")), "df", FALSE),
+    tib_row("df", x = tib_variant("x"))
+  )
+
+  # tibble -> recursion
+  expect_equal(
+    col_to_spec(tibble(x = tibble(y = 1L)), "df", FALSE),
+    tib_row("df", x = tib_row("x", y = tib_int("y")))
+  )
+})
+
+test_that("respect empty_list_unspecified in tibble columns", {
+  x <- tibble(x = tibble(int_vec = list(1:2, list())))
+  expect_equal(
+    guess_tspec_df(x, empty_list_unspecified = FALSE),
+    tspec_df(
+      tib_row("x", tib_variant("int_vec"))
+    )
+  )
+
+  expect_equal(
+    guess_tspec_df(x, empty_list_unspecified = TRUE),
+    tspec_df(
+      vector_allows_empty_list = TRUE,
+      tib_row("x", tib_int_vec("int_vec"))
+    )
+  )
+})
+
+
+# list of tibble columns --------------------------------------------------
 
 test_that("can guess spec for list_of column", {
   expect_equal(
@@ -145,62 +213,6 @@ test_that("can guess spec for list_of column", {
       tibble(x = list_of(tibble(a = list(1, "a"))))
     ),
     tspec_df(tib_df("x", tib_variant("a")))
-  )
-})
-
-test_that("can guess tibble columns", {
-  # scalar
-  expect_equal(
-    guess_tspec_df(tibble(df = tibble(int = 1L, chr = "a"))),
-    tspec_df(
-      df = tib_row(
-        "df",
-        int = tib_int("int"),
-        chr = tib_chr("chr")
-      )
-    )
-  )
-
-  # vector
-  expect_equal(
-    guess_tspec_df(tibble(df = tibble(int_vec = list(1L)))),
-    tspec_df(
-      df = tib_row("df", int_vec = tib_int_vec("int_vec"))
-    )
-  )
-
-  # mixed
-  expect_equal(
-    guess_tspec_df(tibble(df = tibble(x = list(1L, "a")))),
-    tspec_df(
-      df = tib_row("df", x = tib_variant("x"))
-    )
-  )
-
-  # tibble -> recursion
-  expect_equal(
-    guess_tspec_df(tibble(df = tibble(x = tibble(y = 1L)))),
-    tspec_df(
-      df = tib_row("df", x = tib_row("x", y = tib_int("y")))
-    )
-  )
-})
-
-test_that("respect empty_list_unspecified in tibble columns", {
-  x <- tibble(x = tibble(int_vec = list(1:2, list())))
-  expect_equal(
-    guess_tspec_df(x, empty_list_unspecified = FALSE),
-    tspec_df(
-      tib_row("x", tib_variant("int_vec"))
-    )
-  )
-
-  expect_equal(
-    guess_tspec_df(x, empty_list_unspecified = TRUE),
-    tspec_df(
-      vector_allows_empty_list = TRUE,
-      tib_row("x", tib_int_vec("int_vec"))
-    )
   )
 })
 
@@ -408,6 +420,9 @@ test_that("can guess spec for nested list of df columns", {
     )
   )
 })
+
+
+# edge cases --------------------------------------------------------------
 
 test_that("can guess 0 row tibbles", {
   expect_equal(

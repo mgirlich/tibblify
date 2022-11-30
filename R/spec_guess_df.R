@@ -79,6 +79,7 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
 
     ptype <- ptype_common$ptype
     if (is_null(ptype)) {
+      # this means that every element is `NULL`
       return(tib_unspecified(name))
     }
 
@@ -86,31 +87,23 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
     used_empty_list_argument <- ptype_common$had_empty_lists
   }
 
+  # At this point each element has type `ptype_type`
   # TODO should this care about names?
   if (ptype_type == "vector") {
+    # TODO why?
     mark_empty_list_argument(used_empty_list_argument)
     return(tib_vector(name, ptype))
   }
 
   if (ptype_type == "df") {
-    if (list_of_col) {
-      col_required <- TRUE
-      has_non_vec_cols <- purrr::detect_index(ptype, ~ !is_vec(.x) || is.data.frame(.x)) > 0
-      if (has_non_vec_cols) {
-        col_flat <- list_unchop(col, ptype = ptype)
-      } else {
-        col_flat <- ptype
-      }
-    } else {
-      col_required <- df_guess_required(col, colnames(ptype))
-      col_flat <- list_unchop(col, ptype = ptype)
-    }
-
-    fields_spec <- purrr::imap(col_flat, col_to_spec, empty_list_unspecified)
-    for (col in names(col_required)) {
-      fields_spec[[col]]$required <- col_required[[col]]
-    }
-    return(tib_df(name, !!!fields_spec))
+    out <- col_to_spec_df(
+      ptype,
+      col = col,
+      name = name,
+      list_of_col = list_of_col,
+      empty_list_unspecified = empty_list_unspecified
+    )
+    return(out)
   }
 
   if (ptype_type == "list") {
@@ -121,6 +114,33 @@ col_to_spec <- function(col, name, empty_list_unspecified) {
   if (col_type != "list") {
     cli::cli_abort("{.fn get_col_type} returned an unexpected type", .internal = TRUE)
   }
+}
+
+col_to_spec_df <- function(ptype,
+                           col,
+                           name,
+                           list_of_col,
+                           empty_list_unspecified) {
+  if (list_of_col) {
+    col_required <- TRUE
+    has_non_vec_cols <- purrr::detect_index(ptype, ~ !is_vec(.x) || is.data.frame(.x)) > 0
+    if (has_non_vec_cols) {
+      # TODO why?
+      col_flat <- list_unchop(col, ptype = ptype)
+    } else {
+      col_flat <- ptype
+    }
+  } else {
+    col_required <- df_guess_required(col, colnames(ptype))
+    col_flat <- list_unchop(col, ptype = ptype)
+  }
+
+  fields_spec <- purrr::imap(col_flat, col_to_spec, empty_list_unspecified)
+  for (col in names(col_required)) {
+    fields_spec[[col]]$required <- col_required[[col]]
+  }
+
+  tib_df(name, !!!fields_spec)
 }
 
 tib_type_of <- function(x, name, other) {
