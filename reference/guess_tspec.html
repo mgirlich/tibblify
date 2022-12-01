@@ -81,7 +81,8 @@ Use <code>guess_tspec_objecte()</code> is the input is an object.</p>
 <span>  empty_list_unspecified <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  simplify_list <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  inform_unspecified <span class="op">=</span> <span class="fu"><a href="should_inform_unspecified.html">should_inform_unspecified</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">current_call</a></span><span class="op">(</span><span class="op">)</span></span>
+<span>  call <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/stack.html" class="external-link">current_call</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  arg <span class="op">=</span> <span class="fu">rlang</span><span class="fu">::</span><span class="fu"><a href="https://rlang.r-lib.org/reference/caller_arg.html" class="external-link">caller_arg</a></span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">guess_tspec_object</span><span class="op">(</span></span>
@@ -121,6 +122,11 @@ determined?</p></dd>
 <code>caller_env()</code>. The function will be mentioned in error messages as the
 source of the error. See the <code>call</code> argument of <code>abort()</code> for more
 information.</p></dd>
+
+
+<dt>arg</dt>
+<dd><p>An argument name as a string. This argument will be mentioned in
+error messages as the input that is at the origin of a problem.</p></dd>
 
 </dl></div>
     <div class="section level2">
