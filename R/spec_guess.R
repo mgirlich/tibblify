@@ -14,6 +14,8 @@
 #'   `caller_env()`. The function will be mentioned in error messages as the
 #'   source of the error. See the `call` argument of [`abort()`] for more
 #'   information.
+#' @param arg An argument name as a string. This argument will be mentioned in
+#'   error messages as the input that is at the origin of a problem.
 #'
 #' @return A specification object that can used in `tibblify()`.
 #' @export
@@ -30,6 +32,10 @@ guess_tspec <- function(x,
                         inform_unspecified = should_inform_unspecified(),
                         call = rlang::current_call()) {
   check_dots_empty()
+  check_bool(empty_list_unspecified, call = call)
+  check_bool(simplify_list, call = call)
+  check_bool(inform_unspecified, call = call)
+
   if (is.data.frame(x)) {
     guess_tspec_df(
       x,
@@ -38,7 +44,7 @@ guess_tspec <- function(x,
       inform_unspecified = inform_unspecified,
       call = call
     )
-  } else if (is.list(x)) {
+  } else if (vec_is_list(x)) {
     guess_tspec_list(
       x,
       empty_list_unspecified = empty_list_unspecified,
@@ -47,8 +53,12 @@ guess_tspec <- function(x,
       call = call
     )
   } else {
-    msg <- "Cannot guess the specification for type {vctrs::vec_ptype_full(x)}."
-    cli::cli_abort(msg, call = call)
+    stop_input_type(
+      x,
+      c("a data frame", "a list"),
+      arg = caller_arg(x),
+      call = call
+    )
   }
 }
 
@@ -57,28 +67,21 @@ guess_tspec_list <- function(x,
                              empty_list_unspecified = FALSE,
                              simplify_list = FALSE,
                              inform_unspecified = should_inform_unspecified(),
+                             arg = caller_arg(x),
                              call = current_call()) {
   check_dots_empty()
   check_bool(empty_list_unspecified, call = call)
   check_bool(simplify_list, call = call)
   check_bool(inform_unspecified, call = call)
 
-  if (vec_is(x) && !vec_is_list(x)) {
-    cli::cli_abort(c(
-      `!` = "{.arg x} must be a list.",
-      "Instead, it is a vector with type <{vctrs::vec_ptype_full(x)}>"
-    ))
-  }
-
-  if (!is.list(x)) {
-    cli::cli_abort("{.arg x} must be a list")
-  }
-
+  check_list(x)
   if (is_empty(x)) {
-    # TODO not completely sure about this
-    return(tspec_object())
+    msg <- "{.arg {arg}} must not be empty."
+    cli::cli_abort(msg, call = call)
   }
 
+  # if `x` is both, an object list and an object, it should be very rare that
+  # it should be parsed as an object.
   if (is_object_list(x)) {
     spec <- guess_tspec_object_list(
       x,
@@ -86,96 +89,45 @@ guess_tspec_list <- function(x,
       simplify_list = simplify_list,
       call = call
     )
-    if (inform_unspecified) spec_inform_unspecified(spec)
-    return(spec)
-  }
-
-  if (is_object(x)) {
+  } else if (is_object(x)) {
     spec <- guess_tspec_object(
       x,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list,
       call = call
     )
-    if (inform_unspecified) spec_inform_unspecified(spec)
-    return(spec)
+  } else {
+    abort_not_tibblifiable(x, arg, call)
   }
 
-  cli::cli_abort(c(
-    "Cannot guess spec.",
-    "v" = "The object is a list.",
-    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object_list()}.",
-    "x" = "It doesn't meet the criteria of {.code tibblify:::is_object()}.",
-    "i" = "Try to check the specs of the individual elements with {.code purrr::map(x, guess_spec)}."
-  ))
+  if (inform_unspecified) spec_inform_unspecified(spec)
+
+  spec
 }
 
 guess_make_tib_df <- function(name,
                               values_flat,
-                              required,
                               empty_list_unspecified,
                               simplify_list) {
+  check_list(values_flat)
+
+  # TODO could use `vec_detect_missing()`
   list_of_null <- all(purrr::map_lgl(values_flat, is_null))
   if (list_of_null) {
     if (is_named(values_flat) && !is_empty(values_flat)) {
       fields <- purrr::map(set_names(names(values_flat)), tib_unspecified)
-      return(maybe_tib_row(name, fields, required))
+      return(maybe_tib_row(name, fields))
     }
 
-    return(tib_unspecified(name, required = required))
+    return(tib_unspecified(name))
   }
 
   fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)
   names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
 
-  maybe_tib_df(name, fields, required, names_to = names_to)
+  maybe_tib_df(name, fields, names_to = names_to)
 }
 
-
-# helpers -----------------------------------------------------------------
-
-tib_ptype <- function(x) {
-  ptype <- vec_ptype(x)
-  special_ptype_handling(ptype)
-}
-
-is_unspecified <- function(x) {
-  inherits(x, "vctrs_unspecified")
-}
-
-make_unchop <- function(ptype) {
-  rlang::new_function(
-    pairlist2(x = ),
-    call2(sym("list_unchop"), x = sym("x"), ptype = ptype)
-  )
-}
-
-make_new_list_of <- function(ptype) {
-  rlang::new_function(
-    pairlist2(x = ),
-    call2(sym("new_list_of"), x = sym("x"), ptype = ptype)
-  )
-}
-
-maybe_tib_row <- function(name, fields, required = TRUE) {
-  if (is_empty(fields)) return(tib_unspecified(name, required))
-
-  tib_row(name, !!!fields, .required = required)
-}
-
-maybe_tib_df <- function(name, fields, required = TRUE, names_to = NULL) {
-  if (is_empty(fields) && is_null(names_to)) {
-    return(tib_unspecified(name, required))
-  }
-
-  tib_df(name, !!!fields, .required = required, .names_to = names_to)
-}
-
-mark_empty_list_argument <- function(used_empty_list_arg) {
-  if (is_true(used_empty_list_arg)) {
-    options(tibblify.used_empty_list_arg = TRUE)
-  }
-}
 
 #' Determine whether to inform about unspecified fields in spec
 #'
@@ -204,62 +156,4 @@ should_inform_unspecified <- function() {
 
 is_testing <- function() {
   identical(Sys.getenv("TESTTHAT"), "true")
-}
-
-spec_inform_unspecified <- function(spec, action = "inform", call = caller_env()) {
-  unspecified_paths <- get_unspecfied_paths(spec)
-
-  lines <- format_unspecified_paths(unspecified_paths)
-  if (is_empty(lines)) return(spec)
-
-  msg <- c(
-    "The spec contains {length(lines)} unspecified field{?s}:",
-    set_names(lines, "*"),
-    "\n"
-  )
-
-  switch (action,
-          inform = cli::cli_inform(msg),
-          error = cli::cli_abort(msg, call = call)
-  )
-
-  invisible(spec)
-}
-
-format_unspecified_paths <- function(path_list, path = character()) {
-  nms <- names(path_list)
-  lines <- character()
-
-  for (i in seq_along(path_list)) {
-    nm <- nms[i]
-    elt <- path_list[[i]]
-    if (is.character(elt)) {
-      new_lines <- paste0(path, cli::style_bold(nm))
-    } else {
-      new_path <- paste0(path, nm, "->")
-      new_lines <- format_unspecified_paths(elt, path = new_path)
-    }
-
-    lines <- c(lines, new_lines)
-  }
-
-  lines
-}
-
-get_unspecfied_paths <- function(spec) {
-  fields <- spec$fields
-  unspecified_paths <- list()
-
-  for (i in seq_along(fields)) {
-    field <- fields[[i]]
-    nm <- names(fields)[[i]]
-    if (field$type == "unspecified") {
-      unspecified_paths[[nm]] <- nm
-    } else if (field$type %in% c("df", "row")) {
-      sub_paths <- get_unspecfied_paths(field)
-      unspecified_paths[[nm]] <- sub_paths
-    }
-  }
-
-  unspecified_paths
 }
