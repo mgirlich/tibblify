@@ -136,6 +136,14 @@ guess_object_list_field_spec <- function(value,
   ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
   could_be_vector <- ptype_result$has_common_ptype && is_field_scalar(value_flat)
 
+  if (could_be_vector) {
+    if (is_named(value_flat)) {
+      return(tib_vector(name, ptype_result$ptype, input_form = "object"))
+    } else {
+      return(tib_vector(name, ptype_result$ptype, input_form = "scalar_list"))
+    }
+  }
+
   if (object) {
     fields <- guess_object_list_spec(
       value,
@@ -143,21 +151,7 @@ guess_object_list_field_spec <- function(value,
       simplify_list = simplify_list
     )
 
-    # it could also be a vector with input form `object`
-    if (could_be_vector) {
-      # TODO should ask user
-      # TODO return `tib_undecided(c("row", "vector"))`
-    }
-
     return(maybe_tib_row(name, fields))
-  }
-
-  if (could_be_vector) {
-    if (is_named(value_flat)) {
-      return(tib_vector(name, ptype_result$ptype, input_form = "object"))
-    } else {
-      return(tib_vector(name, ptype_result$ptype, input_form = "scalar_list"))
-    }
   }
 
   tib_variant(name)
@@ -170,48 +164,6 @@ guess_object_list_vector_spec <- function(value, name, ptype, had_empty_lists) {
     mark_empty_list_argument(is_true(had_empty_lists))
     tib_vector(name, ptype)
   }
-}
-
-user_choose_row_or_df <- function(name,
-                                  value_flat,
-                                  empty_list_unspecified,
-                                  simplify_list) {
-  if (!rlang::is_interactive()) {
-    return("data frame")
-  }
-
-  # TODO need full path
-  # TODO simplify...
-  inner_spec_df <- guess_make_tib_df(
-    name,
-    values_flat = value_flat,
-    empty_list_unspecified = empty_list_unspecified,
-    simplify_list = simplify_list
-  )
-  spec_df <- tspec_df(
-    .names_to = inner_spec_df$names_col,
-    !!!inner_spec_df$fields
-  )
-  required <- rep_named(names(spec_df$fields), FALSE)
-  spec_df$fields <- update_required_fields(spec_df$fields, required)
-
-  fields <- guess_object_list_spec(
-    value,
-    empty_list_unspecified = empty_list_unspecified,
-    simplify_list = simplify_list
-  )
-  spec_object <- tspec_row(!!!fields)
-
-  title <- cli::format_message("How should field {.val {name}} be parsed?")
-  utils::menu(c("row", "data frame"), title = title)
-}
-
-user_choose_row_or_object_vector <- function() {
-  if (!rlang::is_interactive()) {
-    return("row")
-  }
-
-  "row"
 }
 
 get_required <- function(x, sample_size = 10e3) {
