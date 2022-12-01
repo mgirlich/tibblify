@@ -50,6 +50,9 @@ determined?}
 \code{caller_env()}. The function will be mentioned in error messages as the
 source of the error. See the \code{call} argument of \code{\link[=abort]{abort()}} for more
 information.}
+
+\item{arg}{An argument name as a string. This argument will be mentioned in
+error messages as the input that is at the origin of a problem.}
 }
 \value{
 A specification object that can used in \code{tibblify()}.

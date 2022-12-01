@@ -14,6 +14,8 @@
 #'   `caller_env()`. The function will be mentioned in error messages as the
 #'   source of the error. See the `call` argument of [`abort()`] for more
 #'   information.
+#' @param arg An argument name as a string. This argument will be mentioned in
+#'   error messages as the input that is at the origin of a problem.
 #'
 #' @return A specification object that can used in `tibblify()`.
 #' @export
