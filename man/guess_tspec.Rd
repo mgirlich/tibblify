@@ -22,7 +22,8 @@ guess_tspec_df(
   empty_list_unspecified = FALSE,
   simplify_list = FALSE,
   inform_unspecified = should_inform_unspecified(),
-  call = rlang::current_call()
+  call = rlang::current_call(),
+  arg = rlang::caller_arg(x)
 )
 
 guess_tspec_object(

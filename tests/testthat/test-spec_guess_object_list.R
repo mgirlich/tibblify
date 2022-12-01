@@ -63,7 +63,7 @@ test_that("respect empty_list_unspecified for scalar elements", {
     guess_tspec_object_list(x, empty_list_unspecified = TRUE),
     tspec_df(
       vector_allows_empty_list = TRUE,
-      x = tib_int_vec("x")
+      tib_int_vec("x")
     )
   )
 })
