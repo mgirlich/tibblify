@@ -79,12 +79,8 @@ guess_object_list_field_spec <- function(value,
 
   ptype_type <- tib_type_of(ptype, name, other = FALSE)
   if (ptype_type == "vector") {
-    if (is_field_scalar(value)) {
-      return(tib_scalar(name, ptype))
-    } else {
-      mark_empty_list_argument(is_true(ptype_result$had_empty_lists))
-      return(tib_vector(name, ptype))
-    }
+    out <- guess_object_list_vector_spec(value, name, ptype, ptype_result$had_empty_lists)
+    return(out)
   }
 
   if (ptype_type == "df") {
@@ -93,38 +89,27 @@ guess_object_list_field_spec <- function(value,
     cli::cli_abort("a list of dataframes is not yet supported")
   }
 
-  if (ptype_type != "list") {
-    cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE)
-  }
-
-  # every element is a list at this point
-  if (!vec_is_list(ptype)) {
-    cli::cli_abort("{.arg ptype} is not a list", .interal = TRUE)
+  # every element is a list or NULL at this point
+  if (all(list_sizes(value) == 0)) {
+    return(tib_unspecified(name))
   }
 
   object <- is_object_list(value)
   object_list <- is_list_of_object_lists(value)
 
-  value_flat <- vec_flatten(value, list(), name_spec = NULL)
   if (object_list && object) {
-    if (all(list_sizes(value) == 0)) {
-      return(tib_unspecified(name))
-    }
+    # TODO return `tib_undecided(c("row", "df"))`
+    # choice <- user_choose_row_or_df(
+    #   name,
+    #   value_flat,
+    #   empty_list_unspecified = empty_list_unspecified,
+    #   simplify_list = simplify_list
+    # )
 
-    choice <- user_choose_row_or_df(
-      name,
-      value_flat,
-      empty_list_unspecified = empty_list_unspecified,
-      simplify_list = simplify_list
-    )
-
-    if (choice == "row") {
-      object_list <- FALSE
-    } else {
-      object <- FALSE
-    }
+    object <- FALSE
   }
 
+  value_flat <- vec_flatten(value, list(), name_spec = NULL)
   if (object_list) {
     spec <- guess_make_tib_df(
       name,
@@ -135,44 +120,56 @@ guess_object_list_field_spec <- function(value,
     return(spec)
   }
 
-  ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
-  if (object) {
-    # it could also be a vector with input form `object`
-    if (simplify_list && ptype_result$has_common_ptype && is_field_scalar(value_flat)) {
-      # TODO should ask user
-      user_choose_row_or_object_vector()
+  if (!simplify_list) {
+    if (object) {
+      fields <- guess_object_list_spec(
+        value,
+        empty_list_unspecified = empty_list_unspecified,
+        simplify_list = simplify_list
+      )
+      return(maybe_tib_row(name, fields))
     }
 
+    return(tib_variant(name))
+  }
+
+  ptype_result <- get_ptype_common(value_flat, empty_list_unspecified)
+  could_be_vector <- ptype_result$has_common_ptype && is_field_scalar(value_flat)
+
+  if (object) {
     fields <- guess_object_list_spec(
       value,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list
     )
+
+    # it could also be a vector with input form `object`
+    if (could_be_vector) {
+      # TODO should ask user
+      # TODO return `tib_undecided(c("row", "vector"))`
+    }
+
     return(maybe_tib_row(name, fields))
   }
 
-  if (!ptype_result$has_common_ptype) {
-    return(tib_variant(name))
-  }
-
-  ptype <- ptype_result$ptype
-  if (is_null(ptype) || identical(unname(ptype), list())) {
-    return(tib_unspecified(name))
-  }
-
-  if (!simplify_list) {
-    return(tib_variant(name))
-  }
-
-  if (is_field_scalar(value_flat)) {
+  if (could_be_vector) {
     if (is_named(value_flat)) {
-      return(tib_vector(name, ptype, input_form = "object"))
+      return(tib_vector(name, ptype_result$ptype, input_form = "object"))
     } else {
-      return(tib_vector(name, ptype, input_form = "scalar_list"))
+      return(tib_vector(name, ptype_result$ptype, input_form = "scalar_list"))
     }
   }
 
   tib_variant(name)
+}
+
+guess_object_list_vector_spec <- function(value, name, ptype, had_empty_lists) {
+  if (is_field_scalar(value)) {
+    tib_scalar(name, ptype)
+  } else {
+    mark_empty_list_argument(is_true(had_empty_lists))
+    tib_vector(name, ptype)
+  }
 }
 
 user_choose_row_or_df <- function(name,
