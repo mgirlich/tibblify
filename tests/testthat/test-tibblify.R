@@ -921,7 +921,6 @@ test_that("discog works", {
     rating = 0L
   )
 
-  # TODO think about issue with "description"
   spec_collection <- tspec_df(
     tib_int("instance_id"),
     tib_chr("date_added"),
