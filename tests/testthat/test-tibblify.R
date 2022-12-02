@@ -647,7 +647,7 @@ test_that("tib_df works", {
     row = list(a = 1, b = "b"),
     df = list(list(x = 1))
   )
-  spec <- tspec_object(
+  spec <- tspec_df(
     tib_df(
       "df",
       tib_int("atomic_scalar"),
@@ -659,20 +659,22 @@ test_that("tib_df works", {
     )
   )
 
+  # This also tests whether the ptypes are calculated correctly
   expect_equal(
-    tibblify(list(df = list(x)), spec),
+    tibblify(list(list(df = list(x))), spec),
     structure(
-      list(
-        df = tibble(
-          atomic_scalar = 1L,
-          scalar = dtt,
-          vector = list_of(1:2),
-          variant = list(list(1L, "a")),
-          row = tibble(a = 1L, b = "b"),
-          df = list_of(tibble(x = 1L))
+      tibble(
+        df = list_of(
+          tibble(
+            atomic_scalar = 1L,
+            scalar = dtt,
+            vector = list_of(1:2),
+            variant = list(list(1L, "a")),
+            row = tibble(a = 1L, b = "b"),
+            df = list_of(tibble(x = 1L))
+          )
         )
-      ),
-      class = "tibblify_object"
+      )
     )
   )
 })
@@ -905,7 +907,7 @@ test_that("discog works", {
       title = "Demo",
       formats = list_of(
         tibble(
-          # descriptions = list_of("Numbered"),
+          descriptions = list_of("Numbered"),
           text         = "Black",
           name         = "Cassette",
           qty          = "1"
@@ -919,7 +921,6 @@ test_that("discog works", {
     rating = 0L
   )
 
-  # TODO think about issue with "description"
   spec_collection <- tspec_df(
     tib_int("instance_id"),
     tib_chr("date_added"),
@@ -951,11 +952,11 @@ test_that("discog works", {
       tib_chr("title"),
       tib_df(
         "formats",
-        # tib_chr_vec(
-        #   "descriptions",
-        #   required = FALSE,
-        #   input_form = "scalar_list",
-        # ),
+        tib_chr_vec(
+          "descriptions",
+          required = FALSE,
+          input_form = "scalar_list",
+        ),
         tib_chr("text", required = FALSE),
         tib_chr("name"),
         tib_chr("qty"),
@@ -969,7 +970,10 @@ test_that("discog works", {
   )
 
   expect_equal(tibblify(discog[1], spec_collection), row1)
-  expect_equal(tibblify(row1, spec_collection), row1)
+  spec_collection2 <- spec_collection
+  spec_collection2$fields$basic_information$fields$formats$fields$descriptions <-
+    tib_chr_vec("descriptions", required = FALSE)
+  expect_equal(tibblify(row1, spec_collection2), row1)
 
   specs_object <- tspec_row(!!!spec_collection$fields)
   expect_equal(tibblify(discog[[1]], specs_object), row1)
