@@ -153,7 +153,12 @@ r_obj* get_ptype_scalar(struct collector* v_collector) {
 }
 
 r_obj* get_ptype_vector(struct collector* v_collector) {
-  return v_collector->details.vec_coll.list_of_ptype;
+  r_obj* ptype = KEEP(r_alloc_list(0));
+  r_attrib_poke_class(ptype, classes_list_of);
+  r_attrib_poke(ptype, syms_ptype, v_collector->details.vec_coll.list_of_ptype);
+  FREE(1);
+
+  return ptype;
 }
 
 r_obj* get_ptype_variant(struct collector* v_collector) {
