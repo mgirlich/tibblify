@@ -1,12 +1,14 @@
-#' Parse a swagger spec
+#' Parse an OpenAPI spec
 #'
-#' Use `parse_swagger_spec()` to parse a [Swagger spec](https://swagger.io/specification/)
-#' or use `parse_swagger_schema()` to parse a Swagger schema.
+#' @description
+#' `r lifecycle::badge("experimental")`
+#' Use `parse_openapi_spec()` to parse a [OpenAPI spec](https://swagger.io/specification/)
+#' or use `parse_openapi_schema()` to parse a OpenAPI schema.
 #'
 #' @param file Either a path to a file, a connection, or literal data (a
 #'   single string).
 #'
-#' @return For `parse_swagger_spec()` a data frame with the columns
+#' @return For `parse_openapi_spec()` a data frame with the columns
 #'
 #'   * `endpoint` `<character>` Name of the endpoint.
 #'   * `operation` `<character>` The http operation; one of `"get"`, `"put"`,
@@ -16,7 +18,7 @@
 #'   * `media_type` `<character>` The media type.
 #'   * `spec` `<list>` A list of tibblify specifications.
 #'
-#'   For `parse_swagger_schema()` a tibblify spec.
+#'   For `parse_openapi_schema()` a tibblify spec.
 #' @export
 #'
 #' @examples
@@ -52,25 +54,25 @@
 #'   ]
 #' }'
 #'
-#' parse_swagger_schema(file)
-parse_swagger_spec <- function(file) {
+#' parse_openapi_schema(file)
+parse_openapi_spec <- function(file) {
   rlang::check_installed("memoise")
-  swagger_spec <- read_spec(file)
-  version <- swagger_spec$openapi %||% swagger_spec$info$version
+  openapi_spec <- read_spec(file)
+  version <- openapi_spec$openapi %||% openapi_spec$info$version
   if (version < "3") {
     cli_abort("OpenAPI versions before 3 are not supported.")
   }
-  # cannot use `swagger_spec` for memoising, as hashing it takes much more time
+  # cannot use `openapi_spec` for memoising, as hashing it takes much more time
   # than everything else. To still make sure the result is correct simply forget
   # previous results.
   memoise::forget(parse_schema_memoised)
 
   out <- purrr::imap(
-    swagger_spec$paths,
+    openapi_spec$paths,
     ~ {
       parse_path_object(
         path_object = .x,
-        swagger_spec = swagger_spec
+        openapi_spec = openapi_spec
       )
     }
   )
@@ -79,11 +81,11 @@ parse_swagger_spec <- function(file) {
 }
 
 #' @export
-#' @rdname parse_swagger_spec
-parse_swagger_schema <- function(file) {
+#' @rdname parse_openapi_spec
+parse_openapi_schema <- function(file) {
   rlang::check_installed("memoise")
-  swagger_spec <- read_spec(file)
-  out <- parse_schema(swagger_spec, "a", swagger_spec)
+  openapi_spec <- read_spec(file)
+  out <- parse_schema(openapi_spec, "a", openapi_spec)
   memoise::forget(parse_schema_memoised)
 
   if (out$type == "row") {
@@ -113,57 +115,48 @@ read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
   }
 }
 
-parse_path_object <- function(path_object, swagger_spec) {
+parse_path_object <- function(path_object, openapi_spec) {
   ops <- c("get", "put", "post", "delete", "options", "head", "patch", "trace")
 
   operations <- path_object[intersect(names(path_object), ops)]
-  out <- purrr::imap(operations, ~ parse_operation_object(.x, swagger_spec))
+  out <- purrr::imap(operations, ~ parse_operation_object(.x, openapi_spec))
   vctrs::vec_rbind(!!!out, .names_to = "operation")
 }
 
-parse_operation_object <- function(operation_object, swagger_spec) {
-  operation_object <- swagger_get_schema(operation_object, swagger_spec)
+parse_operation_object <- function(operation_object, openapi_spec) {
+  operation_object <- openapi_get_schema(operation_object, openapi_spec)
 
-  out <- purrr::map(operation_object$responses, ~ parse_response_object(.x, swagger_spec))
+  out <- purrr::map(operation_object$responses, ~ parse_response_object(.x, openapi_spec))
   vctrs::vec_rbind(!!!out, .names_to = "status_code")
 }
 
-parse_response_object <- function(response_object, swagger_spec) {
-  response_object <- swagger_get_schema(response_object, swagger_spec)
+parse_response_object <- function(response_object, openapi_spec) {
+  response_object <- openapi_get_schema(response_object, openapi_spec)
 
-  out <- purrr::map(response_object$content, ~ parse_media_type_object(.x, swagger_spec))
+  out <- purrr::map(response_object$content, ~ parse_media_type_object(.x, openapi_spec))
   vctrs::new_data_frame(
     list(media_type = names(out), spec = unname(out)),
     n = length(out)
   )
 }
 
-parse_media_type_object <- function(media_type_object, swagger_spec) {
-  schema_to_tspec(media_type_object$schema, swagger_spec)
+parse_media_type_object <- function(media_type_object, openapi_spec) {
+  schema_to_tspec(media_type_object$schema, openapi_spec)
 }
 
-schema_to_tspec <- function(schema, swagger_spec) {
-  schema <- swagger_get_schema(schema, swagger_spec)
+schema_to_tspec <- function(schema, openapi_spec) {
+  schema <- openapi_get_schema(schema, openapi_spec)
 
-  # if (is_empty(schema)) {
-  #   browser()
-  # }
-  # tryCatch(
-  #   {type <- get_swagger_type(schema)},
-  #   error = function(cnd) {
-  #     browser()
-  #   }
-  # )
-  type <- get_swagger_type(schema)
+  type <- get_openapi_type(schema)
   if (type == "object") {
-    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, swagger_spec))
+    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
     fields <- apply_required(fields, schema$required)
 
     tspec_row(!!!fields)
   } else if (type == "array") {
-    schema <- swagger_get_schema(schema$items, swagger_spec)
+    schema <- openapi_get_schema(schema$items, openapi_spec)
 
-    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, swagger_spec))
+    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
     fields <- apply_required(fields, schema$required)
 
     tspec_df(!!!fields)
@@ -178,7 +171,7 @@ apply_required <- function(fields, required) {
   fields
 }
 
-swagger_get_schema <- function(schema, swagger_spec) {
+openapi_get_schema <- function(schema, openapi_spec) {
   ref <- schema$`$ref`
   # FIXME this is probably quite a hack...
   ref <- ref %||% schema$allOf[[1]]$`$ref`
@@ -189,12 +182,12 @@ swagger_get_schema <- function(schema, swagger_spec) {
     }
     # TODO better error message
     tryCatch({
-      schema <- purrr::chuck(swagger_spec, !!!ref_parts[-1])
+      schema <- purrr::chuck(openapi_spec, !!!ref_parts[-1])
     }, error = function(cnd) {
       browser()
     }
     )
-    schema <- purrr::chuck(swagger_spec, !!!ref_parts[-1])
+    schema <- purrr::chuck(openapi_spec, !!!ref_parts[-1])
   }
 
   if (is.null(schema)) {
@@ -205,7 +198,7 @@ swagger_get_schema <- function(schema, swagger_spec) {
   schema
 }
 
-get_swagger_type <- function(schema) {
+get_openapi_type <- function(schema) {
   type <- schema$type
   if (is_null(type)) {
     if (!is_null(schema$properties)) {
@@ -219,16 +212,16 @@ get_swagger_type <- function(schema) {
   type
 }
 
-parse_schema <- function(schema, name, swagger_spec) {
-  schema <- swagger_get_schema(schema, swagger_spec)
-  type <- get_swagger_type(schema)
+parse_schema <- function(schema, name, openapi_spec) {
+  schema <- openapi_get_schema(schema, openapi_spec)
+  type <- get_openapi_type(schema)
 
   # TODO description, example
   # TODO format?!
 
   if (is_empty(type)) {
   } else if (type == "object") {
-    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, swagger_spec))
+    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
     fields <- apply_required(fields, schema$required)
     tib_row(name, !!!fields, .required = FALSE)
 
@@ -253,7 +246,7 @@ parse_schema <- function(schema, name, swagger_spec) {
 
     # might need to resolve ref
     # need to check type...
-    inner_tib <- parse_schema_memoised(schema$items, name, swagger_spec)
+    inner_tib <- parse_schema_memoised(schema$items, name, openapi_spec)
     if (is_empty(inner_tib$type)) {
       browser()
     }
@@ -285,4 +278,4 @@ parse_schema <- function(schema, name, swagger_spec) {
   # TODO `anyOf`
 }
 
-parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "swagger_spec")
+parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "openapi_spec")
