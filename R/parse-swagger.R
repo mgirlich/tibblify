@@ -1,14 +1,19 @@
 schema_to_tspec <- function(schema, swagger_spec) {
   schema <- swagger_get_schema(schema, swagger_spec)
 
-  if (schema$type == "object") {
+  type <- get_swagger_type(schema)
+  if (type == "object") {
     fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, swagger_spec))
     fields <- apply_required(fields, schema$required)
 
     tspec_row(!!!fields)
-  } else if (schema$type == "array") {
-    browser()
-    # fields
+  } else if (type == "array") {
+    schema <- swagger_get_schema(schema$items, swagger_spec)
+
+    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, swagger_spec))
+    fields <- apply_required(fields, schema$required)
+
+    tspec_df(!!!fields)
   }
 }
 
@@ -25,26 +30,38 @@ swagger_get_schema <- function(schema, swagger_spec) {
   if (!is.null(ref)) {
     ref_parts <- strsplit(ref, "/")[[1]]
     if (ref_parts[[1]] != "#") {
-      # TODO better error message
-      cli_abort("Don't know how to handle ref")
+      cli_abort("{.field ref} does not start with {.value #}", .internal = TRUE)
     }
     # TODO better error message
     schema <- purrr::chuck(swagger_spec, !!!ref_parts[-1])
   }
 
   if (is.null(schema)) {
-    browser()
+    cli_abort("No schema found for reference {.value {ref}}")
   }
 
   # TODO check schema?
   schema
 }
 
+get_swagger_type <- function(schema) {
+  type <- schema$type
+  if (is_null(type)) {
+    if (!is_null(schema$properties)) {
+      type <- "object"
+    } else if (!is_null(schema$items)) {
+      type <- "array"
+    }
+  }
+
+  check_string(type)
+  type
+}
+
 parse_schema <- function(schema, name, swagger_spec) {
   schema <- swagger_get_schema(schema, swagger_spec)
 
-  type <- schema$type
-  check_string(type)
+  type <- get_swagger_type(schema)
 
   # TODO description, example
   # TODO format?!
@@ -112,14 +129,6 @@ parse_path_object <- function(path_object, swagger_spec) {
 
 parse_operation_object <- function(operation_object, swagger_spec) {
   responses <- operation_object$responses
-
-  # use first success response
-  respone_names <- names(responses)
-  response_names <- sort(respone_names[grepl("2..", respone_names)])
-  success <- responses[[response_names[1]]]
-  if (is.null(success)) {
-    cli_abort("No success response found.")
-  }
 
   purrr::map(
     responses,
