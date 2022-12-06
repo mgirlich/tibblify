@@ -11,6 +11,8 @@
 extern SEXP ffi_tibblify(SEXP, SEXP, SEXP);
 extern SEXP ffi_is_object(SEXP);
 extern SEXP ffi_is_object_list(SEXP);
+extern SEXP ffi_is_null_list(SEXP);
+extern SEXP ffi_list_is_list_null(SEXP);
 
 // Defined below
 extern SEXP tibblify_initialize(SEXP);
@@ -19,6 +21,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"ffi_tibblify",           (DL_FUNC) &ffi_tibblify,           3},
     {"ffi_is_object",          (DL_FUNC) &ffi_is_object,          1},
     {"ffi_is_object_list",     (DL_FUNC) &ffi_is_object_list,     1},
+    {"ffi_is_null_list",       (DL_FUNC) &ffi_is_null_list,       1},
+    {"ffi_list_is_list_null",  (DL_FUNC) &ffi_list_is_list_null,  1},
     {"tibblify_initialize",    (DL_FUNC) &tibblify_initialize,    1},
     {NULL, NULL, 0}
 };

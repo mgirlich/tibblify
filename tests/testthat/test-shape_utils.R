@@ -42,3 +42,19 @@ test_that("is_object_list() works", {
 test_that("detect lists of length 1 (#50)", {
   expect_true(is_object_list(list(list(x = 1, y = 2))))
 })
+
+test_that("is_list_of_null() works", {
+  expect_true(is_list_of_null(list()))
+  expect_true(is_list_of_null(list(NULL)))
+  expect_true(is_list_of_null(list(NULL, NULL)))
+
+  expect_false(is_list_of_null(list(NULL, 1)))
+})
+
+test_that("list_is_list_of_null() works", {
+  expect_true(list_is_list_of_null(list()))
+  expect_true(list_is_list_of_null(list(NULL)))
+  expect_true(list_is_list_of_null(list(NULL, list())))
+  expect_true(list_is_list_of_null(list(list(NULL))))
+  expect_false(list_is_list_of_null(list(list(NULL, 1))))
+})
