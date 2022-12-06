@@ -1,5 +1,8 @@
 # tibblify (development version)
 
+* New `parse_openapi_spec()` and `parse_openapi_schema()` to convert an
+  OpenAPI specification to a tibblify specification.
+
 * Fix ptype of a `tib_vector()` inside a `tib_df()`.
 
 * New `unpack_tspec()` to unpack the elements of `tib_row()` fields (#165).
