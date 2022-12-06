@@ -1,4 +1,5 @@
 test_that("can parse open api spec", {
+  skip_on_cran()
   expect_no_error(
     # supprss `incomplete final line` warning
     suppressWarnings(
