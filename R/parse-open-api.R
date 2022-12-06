@@ -147,8 +147,6 @@ parse_media_type_object <- function(media_type_object, openapi_spec) {
 schema_to_tspec <- function(schema, openapi_spec) {
   schema <- openapi_get_schema(schema, openapi_spec)
 
-  # Explanation for `allOf`, `oneOf`, and `anyOf`
-  # https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
   if (!is.null(schema$oneOf)) {
     out <- handle_one_of_tspec(schema, openapi_spec)
     return(out)
@@ -172,7 +170,11 @@ schema_to_tspec <- function(schema, openapi_spec) {
 
     tspec_df(!!!fields)
   } else {
-    browser()
+    # this is a bit of a hack...
+    out <- parse_schema(schema, "dummy", openapi_spec)
+    out$required <- TRUE
+
+    out
   }
 }
 
@@ -249,14 +251,7 @@ parse_schema <- function(schema, name, openapi_spec) {
 
     # TODO additionalProperties?
   } else if (type == "string") {
-    # details$default <- schema$default %||% NA_character_
-    # if (!is.null(schema$enum)) {
-    #   out$type <- "enum"
-    #   details$enum <- schema$enum %||% NA_character_
-    # } else {
-    #   details$pattern <- schema$pattern %||% NA_character_
-    # }
-
+    # TODO support for `enum` or `pattern`?
     tib_chr(name, required = FALSE)
   } else if (type == "array") {
     items <- schema$items
@@ -266,12 +261,7 @@ parse_schema <- function(schema, name, openapi_spec) {
       return(field_spec)
     }
 
-    # might need to resolve ref
-    # need to check type...
     inner_tib <- parse_schema_memoised(schema$items, name, openapi_spec)
-    if (is_empty(inner_tib$type)) {
-      browser()
-    }
     if (inner_tib$type == "scalar") {
       tib_vector(name, inner_tib$ptype, required = FALSE)
     } else if (inner_tib$type == "row") {
@@ -279,15 +269,8 @@ parse_schema <- function(schema, name, openapi_spec) {
     } else {
       inner_tib
     }
-
-    # details$minItems <- schema$minItems %||% NA_integer_
-    # details$maxItems <- schema$maxItems %||% NA_integer_
-    # details$items <- schema$items %||% NA_integer_
+    # TODO support for `minItems`, `maxItems`?
   } else if (type == "integer") {
-    # details$minimum <- schema$minimum %||% NA_integer_
-    # details$maximum <- schema$maximum %||% NA_integer_
-    # details$default <- schema$default %||% NA_integer_
-
     tib_int(name, required = FALSE)
   } else if (type == "boolean") {
     tib_lgl(name, required = FALSE)
@@ -296,7 +279,7 @@ parse_schema <- function(schema, name, openapi_spec) {
   } else if (type == "variant") {
     tib_variant(name, required = FALSE)
   } else {
-    browser()
+    cli_abort("Unsupported type")
   }
 }
 
