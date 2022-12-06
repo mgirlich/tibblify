@@ -147,6 +147,17 @@ parse_media_type_object <- function(media_type_object, openapi_spec) {
 schema_to_tspec <- function(schema, openapi_spec) {
   schema <- openapi_get_schema(schema, openapi_spec)
 
+  # Explanation for `allOf`, `oneOf`, and `anyOf`
+  # https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
+  if (!is.null(schema$oneOf)) {
+    out <- handle_one_of_tspec(schema, openapi_spec)
+    return(out)
+  }
+  if (!is.null(schema$allOf)) {
+    out <- handle_all_of_tspec(schema, openapi_spec)
+    return(out)
+  }
+
   type <- get_openapi_type(schema)
   if (type == "object") {
     fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
@@ -160,6 +171,8 @@ schema_to_tspec <- function(schema, openapi_spec) {
     fields <- apply_required(fields, schema$required)
 
     tspec_df(!!!fields)
+  } else {
+    browser()
   }
 }
 
@@ -208,12 +221,21 @@ get_openapi_type <- function(schema) {
     }
   }
 
-  check_string(type)
-  type
+  check_string(type, allow_null = TRUE)
+  type %||% "variant"
 }
 
 parse_schema <- function(schema, name, openapi_spec) {
   schema <- openapi_get_schema(schema, openapi_spec)
+  if (!is.null(schema$oneOf)) {
+    out <- handle_one_of(schema, name, openapi_spec)
+    return(out)
+  }
+  if (!is.null(schema$allOf)) {
+    out <- handle_all_of(schema, name, openapi_spec)
+    return(out)
+  }
+
   type <- get_openapi_type(schema)
 
   # TODO description, example
@@ -255,7 +277,7 @@ parse_schema <- function(schema, name, openapi_spec) {
     } else if (inner_tib$type == "row") {
       tib_df(name, !!!inner_tib$fields, .required = FALSE)
     } else {
-      browser()
+      inner_tib
     }
 
     # details$minItems <- schema$minItems %||% NA_integer_
@@ -271,11 +293,50 @@ parse_schema <- function(schema, name, openapi_spec) {
     tib_lgl(name, required = FALSE)
   } else if (type == "number") {
     tib_dbl(name, required = FALSE)
+  } else if (type == "variant") {
+    tib_variant(name, required = FALSE)
   } else {
     browser()
   }
+}
 
-  # TODO `anyOf`
+# # Explanation for `allOf`, `oneOf`, and `anyOf`
+# # https://swagger.io/docs/specification/data-models/oneof-anyof-allof-not/
+handle_all_of <- function(schema, name, openapi_spec) {
+  # must satisfy all the schemas -> combine them
+  out <- purrr::map(schema$allOf, ~ parse_schema(.x, name, openapi_spec))
+  # TODO fix `call`
+  tib_combine(out, name, current_call())
+}
+
+handle_all_of_tspec <- function(schema, openapi_spec) {
+  # must satisfy all the schemas -> combine them
+  out <- purrr::map(schema$allOf, ~ schema_to_tspec(.x, openapi_spec))
+  tspec_combine(!!!out)
+}
+
+handle_one_of <- function(schema, name, openapi_spec) {
+  out <- purrr::map(schema$oneOf, ~ parse_schema(.x, name, openapi_spec))
+  # must satisfy one of the schemas
+  # for now simply try to combine them...
+  tryCatch({
+    # TODO fix `call`
+    tib_combine(out, name, current_call())
+  }, error = function(cnd) {
+    tib_variant(name, required = FALSE)
+  })
+}
+
+handle_one_of_tspec <- function(schema, openapi_spec) {
+  out <- purrr::map(schema$oneOf, ~ schema_to_tspec(.x, openapi_spec))
+  # must satisfy one of the schemas
+  # for now simply try to combine them...
+  tryCatch({
+    tspec_combine(!!!out)
+  }, error = function(cnd) {
+    browser()
+    tib_variant()
+  })
 }
 
 parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "openapi_spec")
