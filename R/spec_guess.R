@@ -105,19 +105,6 @@ guess_tspec_list <- function(x,
   spec
 }
 
-guess_make_tib_df <- function(name,
-                              values_flat,
-                              empty_list_unspecified,
-                              simplify_list) {
-  check_list(values_flat)
-
-  fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)
-  names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
-
-  tib_df(name, !!!fields, .names_to = names_to)
-}
-
-
 #' Determine whether to inform about unspecified fields in spec
 #'
 #' Wrapper around `getOption("tibblify.show_unspecified")` that implements some

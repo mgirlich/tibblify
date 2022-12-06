@@ -115,12 +115,10 @@ guess_object_list_field_spec <- function(value,
 
   value_flat <- vec_flatten(value, list(), name_spec = NULL)
   if (object_list) {
-    spec <- guess_make_tib_df(
-      name,
-      values_flat = value_flat,
-      empty_list_unspecified = empty_list_unspecified,
-      simplify_list = simplify_list
-    )
+    fields <- guess_object_list_spec(value_flat, empty_list_unspecified, simplify_list)
+    names_to <- if (is_named(value_flat) && !is_empty(value_flat)) ".names"
+
+    spec <- tib_df(name, !!!fields, .names_to = names_to)
     return(spec)
   }
 

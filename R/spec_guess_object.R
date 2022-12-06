@@ -86,13 +86,11 @@ guess_object_field_spec <- function(value,
     # TODO should ask user what to do
   }
 
-  if (is_object_list(value)) {
-    spec <- guess_make_tib_df(
-      name,
-      values_flat = value,
-      empty_list_unspecified = empty_list_unspecified,
-      simplify_list = simplify_list
-    )
+  if (object_list) {
+    fields <- guess_object_list_spec(value, empty_list_unspecified, simplify_list)
+    names_to <- if (is_named(value) && !is_empty(value)) ".names"
+
+    spec <- tib_df(name, !!!fields, .names_to = names_to)
     return(spec)
   }
 
@@ -103,7 +101,7 @@ guess_object_field_spec <- function(value,
     }
   }
 
-  if (is_object(value)) {
+  if (object) {
     fields <- purrr::imap(
       value,
       guess_object_field_spec,
