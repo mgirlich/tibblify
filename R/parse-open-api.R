@@ -56,7 +56,6 @@
 #'
 #' parse_openapi_schema(file)
 parse_openapi_spec <- function(file) {
-  rlang::check_installed("memoise")
   openapi_spec <- read_spec(file)
   version <- openapi_spec$openapi %||% openapi_spec$info$version
   if (version < "3") {
@@ -65,7 +64,9 @@ parse_openapi_spec <- function(file) {
   # cannot use `openapi_spec` for memoising, as hashing it takes much more time
   # than everything else. To still make sure the result is correct simply forget
   # previous results.
-  memoise::forget(parse_schema_memoised)
+  if (is_installed("memoise")) {
+    memoise::forget(parse_schema_memoised)
+  }
 
   out <- purrr::imap(
     openapi_spec$paths,
@@ -322,4 +323,8 @@ handle_one_of_tspec <- function(schema, openapi_spec) {
   })
 }
 
-parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "openapi_spec")
+if (is_installed("memoise")) {
+  parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "openapi_spec")
+} else {
+  parse_schema_memoised <- parse_schema
+}
