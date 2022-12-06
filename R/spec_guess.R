@@ -114,7 +114,7 @@ guess_make_tib_df <- function(name,
   fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)
   names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
 
-  maybe_tib_df(name, fields, names_to = names_to)
+  tib_df(name, !!!fields, .names_to = names_to)
 }
 
 

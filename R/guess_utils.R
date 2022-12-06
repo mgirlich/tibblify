@@ -79,20 +79,6 @@ is_unspecified <- function(x) {
   inherits(x, "vctrs_unspecified")
 }
 
-maybe_tib_row <- function(name, fields, required = TRUE) {
-  if (is_empty(fields)) return(tib_unspecified(name, required))
-
-  tib_row(name, !!!fields, .required = required)
-}
-
-maybe_tib_df <- function(name, fields, required = TRUE, names_to = NULL) {
-  if (is_empty(fields) && is_null(names_to)) {
-    return(tib_unspecified(name, required))
-  }
-
-  tib_df(name, !!!fields, .required = required, .names_to = names_to)
-}
-
 mark_empty_list_argument <- function(used_empty_list_arg) {
   if (is_true(used_empty_list_arg)) {
     options(tibblify.used_empty_list_arg = TRUE)

@@ -131,7 +131,7 @@ guess_object_list_field_spec <- function(value,
         empty_list_unspecified = empty_list_unspecified,
         simplify_list = simplify_list
       )
-      return(maybe_tib_row(name, fields))
+      return(tib_row(name, !!!fields))
     }
 
     return(tib_variant(name))
@@ -154,8 +154,7 @@ guess_object_list_field_spec <- function(value,
       empty_list_unspecified = empty_list_unspecified,
       simplify_list = simplify_list
     )
-
-    return(maybe_tib_row(name, fields))
+    return(tib_row(name, !!!fields))
   }
 
   tib_variant(name)
