@@ -94,6 +94,10 @@ guess_object_list_field_spec <- function(value,
     return(tib_unspecified(name))
   }
 
+  if (list_is_list_of_null(value)) {
+    return(tib_unspecified(name))
+  }
+
   object <- is_object_list(value)
   object_list <- is_list_of_object_lists(value)
 

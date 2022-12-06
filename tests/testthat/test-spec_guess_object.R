@@ -276,7 +276,7 @@ test_that("can guess tib_unspecified for an object", {
   # in a row
   expect_equal(
     guess_tspec_object(list(x = list(a = NULL))),
-    tspec_object(x = tib_row("x", tib_unspecified("a")))
+    tspec_object(x = tib_unspecified("x"))
   )
 
   # TODO undecided

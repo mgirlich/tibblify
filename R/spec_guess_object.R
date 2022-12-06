@@ -76,6 +76,10 @@ guess_object_field_spec <- function(value,
     cli::cli_abort("{.fn tib_type_of} returned an unexpected type", .internal = TRUE) # nocov
   }
 
+  if (is_list_of_null(value)) {
+    return(tib_unspecified(name))
+  }
+
   object_list <- is_object_list(value)
   object <- is_object(value)
   if (object_list && object) {

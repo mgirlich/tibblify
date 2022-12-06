@@ -21,6 +21,14 @@ is_list_of_object_lists <- function(x) {
   TRUE
 }
 
+is_list_of_null <- function(x) {
+  all(purrr::map_lgl(x, is_null))
+}
+
+list_is_list_of_null <- function(x) {
+  all(purrr::map_lgl(x, is_list_of_null))
+}
+
 should_guess_object_list <- function(x) {
   if (!.Call(ffi_is_object_list, x)) {
     return(FALSE)

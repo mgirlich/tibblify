@@ -111,17 +111,6 @@ guess_make_tib_df <- function(name,
                               simplify_list) {
   check_list(values_flat)
 
-  # TODO could use `vec_detect_missing()`
-  list_of_null <- all(purrr::map_lgl(values_flat, is_null))
-  if (list_of_null) {
-    if (is_named(values_flat) && !is_empty(values_flat)) {
-      fields <- purrr::map(set_names(names(values_flat)), tib_unspecified)
-      return(maybe_tib_row(name, fields))
-    }
-
-    return(tib_unspecified(name))
-  }
-
   fields <- guess_object_list_spec(values_flat, empty_list_unspecified, simplify_list)
   names_to <- if (is_named(values_flat) && !is_empty(values_flat)) ".names"
 
