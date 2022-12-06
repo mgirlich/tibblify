@@ -1,95 +1,102 @@
+
+# get_required() ----------------------------------------------------------
+
+
+# guess_object_list_field_spec() ------------------------------------------
+
+guess_ol_field <- function(value,
+                           name = "x",
+                           empty_list_unspecified = FALSE,
+                           simplify_list = FALSE) {
+  guess_object_list_field_spec(
+    value = value,
+    name = name,
+    empty_list_unspecified = empty_list_unspecified,
+    simplify_list = simplify_list
+  )
+}
+
 test_that("can guess scalar elements", {
   expect_equal(
-    guess_tspec_object_list(list(list(x = TRUE), list(x = FALSE))),
-    tspec_df(x = tib_lgl("x"))
+    guess_ol_field(list(TRUE, FALSE)),
+    tib_lgl("x")
   )
 
   expect_equal(
-    guess_tspec_object_list(list(list(x = new_datetime(1)), list(x = new_datetime(2)))),
-    tspec_df(x = tib_scalar("x", new_datetime()))
+    guess_ol_field(list(new_datetime(1), new_datetime(2))),
+    tib_scalar("x", new_datetime())
   )
 
   # also for record types
   x_rat <- new_rational(1, 2)
   expect_equal(
-    guess_tspec_object_list(list(list(x = x_rat), list(x = x_rat))),
-    tspec_df(x = tib_scalar("x", x_rat))
+    guess_ol_field(list(x = x_rat, x_rat)),
+    tib_scalar("x", x_rat)
+  )
+})
+
+test_that("can guess scalar elements with NULL", {
+  expect_equal(
+    guess_ol_field(list(1L, NULL)),
+    tib_int("x")
   )
 })
 
 test_that("POSIXlt is converted to POSIXct", {
   x_posixlt <- as.POSIXlt(vctrs::new_date(0))
   expect_equal(
-    guess_tspec_object_list(list(list(x = x_posixlt), list(x = x_posixlt))),
-    tspec_df(x = tib_scalar("x", vctrs::new_datetime(tzone = "UTC")))
-  )
-})
-
-test_that("can guess required for scalars", {
-  expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = 1.5),
-        list()
-      )
-    ),
-    tspec_df(x = tib_dbl("x", required = FALSE))
+    guess_ol_field(list(x_posixlt, x_posixlt)),
+    tib_scalar("x", vctrs::new_datetime(tzone = "UTC"))
   )
 })
 
 test_that("respect empty_list_unspecified for scalar elements", {
-  x <- list(list(x = 1L), list(x = list()))
+  x <- list(x = 1L, list())
   expect_equal(
-    guess_tspec_object_list(x, empty_list_unspecified = FALSE),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field(x, empty_list_unspecified = FALSE),
+    tib_variant("x")
   )
 
   # this should be `tib_vector` because a list cannot occur for a scalar
+  x <- list(list(x = 1L), list(x = list()))
   expect_equal(
     guess_tspec_object_list(x, empty_list_unspecified = TRUE),
     tspec_df(
       vector_allows_empty_list = TRUE,
-      x = tib_int_vec("x")
+      tib_int_vec("x")
     )
   )
 })
 
 test_that("can guess vector elements", {
   expect_equal(
-    guess_tspec_object_list(list(list(x = c(TRUE, FALSE)), list(x = FALSE))),
-    tspec_df(x = tib_lgl_vec("x"))
+    guess_ol_field(list(c(TRUE, FALSE), FALSE)),
+    tib_lgl_vec("x")
   )
 
   expect_equal(
-    guess_tspec_object_list(
+    guess_ol_field(
       list(
-        list(x = new_datetime(1)),
-        list(x = c(new_datetime(2), new_datetime(3)))
+        new_datetime(1),
+        c(new_datetime(2), new_datetime(3))
       )
     ),
-    tspec_df(x = tib_vector("x", new_datetime()))
+    tib_vector("x", new_datetime())
   )
 
   expect_equal(
-    guess_tspec_object_list(list(list(x = 1L), list(x = integer()))),
-    tspec_df(x = tib_int_vec("x"))
-  )
-})
-
-test_that("can guess required for vector elements", {
-  expect_equal(
-    guess_tspec_object_list(list(list(x = c(TRUE, FALSE)), list())),
-    tspec_df(x = tib_lgl_vec("x", required = FALSE))
+    guess_ol_field(list(x = 1L, integer())),
+    tib_int_vec("x")
   )
 })
 
 test_that("respect empty_list_unspecified for vector elements", {
-  x <- list(list(x = 1:2), list(x = list()))
   expect_equal(
-    guess_tspec_object_list(x, empty_list_unspecified = FALSE),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field(list(x = 1:2, list()), empty_list_unspecified = FALSE),
+    tib_variant("x")
   )
 
+  x <- list(list(x = 1:2), list(x = list()))
   expect_equal(
     guess_tspec_object_list(x, empty_list_unspecified = TRUE),
     tspec_df(
@@ -100,26 +107,25 @@ test_that("respect empty_list_unspecified for vector elements", {
 })
 
 test_that("can guess vector input form", {
-  x <- list(list(x = list(1, 2)), list(x = list()))
   expect_equal(
-    guess_tspec_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
-    tspec_df(x = tib_dbl_vec("x", input_form = "scalar_list"))
+    guess_ol_field(list(list(1, 2), list()), simplify_list = TRUE, empty_list_unspecified = FALSE),
+    tib_dbl_vec("x", input_form = "scalar_list")
   )
 
   # checks size
-  x <- list(list(x = list(1, 1:2)))
   expect_equal(
-    guess_tspec_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field(list(list(1, 1:2)), simplify_list = TRUE, empty_list_unspecified = FALSE),
+    tib_variant("x")
   )
 
-  x <- list(list(x = list(1, integer())))
   expect_equal(
-    guess_tspec_object_list(x, simplify_list = TRUE, empty_list_unspecified = FALSE),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field( list(list(1, integer())), simplify_list = TRUE, empty_list_unspecified = FALSE),
+    tib_variant("x")
   )
 
   # there need to be enough different elements to be recognized as input_form = "object"
+  # TODO should ask the user?
+  skip("improve guessing logic")
   x <- list(
     list(x = list(a = 1, b = 2)),
     list(x = list(c = 1, d = 1, e = 1, f = 1)),
@@ -133,83 +139,38 @@ test_that("can guess vector input form", {
 
 test_that("can guess tib_variant", {
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = list(TRUE, "a")),
-        list(x = list(FALSE, "b"))
-      )
-    ),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field(list(list(TRUE, "a"), list(FALSE, "b"))),
+    tib_variant("x")
   )
 
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = "a"),
-        list(x = 1)
-      )
-    ),
-    tspec_df(x = tib_variant("x"))
+    guess_ol_field(list("a", 1)),
+    tib_variant("x")
   )
 })
 
 test_that("can handle non-vector elements", {
   model <- lm(Sepal.Length ~ Sepal.Width, data = iris)
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = model),
-        list(x = model)
-      )
-    ),
-    tspec_df(x = tib_variant("x"))
-  )
-})
-
-test_that("can guess required for tib_variant", {
-  expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = list(TRUE, "a")),
-        list(y = "a")
-      )
-    ),
-    tspec_df(
-      x = tib_variant("x", required = FALSE),
-      y = tib_chr("y", required = FALSE)
-    )
+    guess_ol_field(list(model, 1L)),
+    tib_variant("x")
   )
 })
 
 test_that("can guess object elements", {
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = list(a = 1L, b = "a")),
-        list(x = list(a = 2L, b = "b"))
-      )
-    ),
-    tspec_df(x = tib_row("x", a = tib_int("a"), b = tib_chr("b")))
+    guess_ol_field(list(list(a = 1L, b = "a"), list(a = 2L, b = "b"))),
+    tib_row("x", a = tib_int("a"), b = tib_chr("b"))
   )
 
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = list(a = 1L)),
-        list(x = list(a = 2:3))
-      )
-    ),
-    tspec_df(x = tib_row("x", a = tib_int_vec("a")))
+    guess_ol_field(list(list(a = 1L), list(a = 2:3))),
+    tib_row("x", a = tib_int_vec("a"))
   )
 
   expect_equal(
-    guess_tspec_object_list(
-      list(
-        list(x = list(a = 1L)),
-        list(x = list(a = "a"))
-      )
-    ),
-    tspec_df(x = tib_row("x", a = tib_variant("a")))
+    guess_ol_field(list(list(a = 1L), list(a = "a"))),
+    tib_row("x", a = tib_variant("a"))
   )
 })
 
@@ -263,10 +224,11 @@ test_that("can guess tib_unspecified", {
   )
 
   # in a row
-  expect_equal(
-    guess_tspec_object_list(list(list(x = list(a = NULL)), list(x = list(a = NULL)))),
-    tspec_df(x = tib_row("x", a = tib_unspecified("a")))
-  )
+  # TODO
+  # expect_equal(
+  #   guess_tspec_object_list(list(list(x = list(a = NULL)), list(x = list(a = NULL)))),
+  #   tspec_df(x = tib_row("x", a = tib_unspecified("a")))
+  # )
 
   # in a df
   expect_equal(

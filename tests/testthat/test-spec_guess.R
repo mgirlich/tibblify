@@ -1,3 +1,9 @@
+test_that("checks input", {
+  expect_snapshot({
+    expect_error(guess_tspec("a"))
+  })
+})
+
 test_that("can guess spec for discog", {
   expect_snapshot(guess_tspec(discog) %>% print())
 })
@@ -35,6 +41,17 @@ test_that("can guess spec for citm_catalog", {
   # TODO think about `$topicSubTopics`
   expect_snapshot(guess_tspec(x))
 
+  # These fields are empty
+  # • blockNames
+  # • events->description
+  # • events->subjectCode
+  # • events->subtitle
+  # • performances->logo
+  # • performances->name
+  # • performances->seatCategories->areas->blockIds
+  # • performances->seatMapImage
+  # • subjectNames
+
   expect_snapshot(guess_tspec_list(x, simplify_list = FALSE))
 })
 
@@ -48,25 +65,19 @@ test_that("can guess spec for twitter", {
   expect_snapshot(guess_tspec(x))
 })
 
-test_that("informing about unspecified looks good", {
-  spec <- tspec_df(
-    tib_int("1int"),
-    tib_unspecified("1un"),
-    tib_df(
-      "1df",
-      tib_int("2int"),
-      tib_unspecified("2un"),
-      tib_row(
-        "2row",
-        `3un` = tib_unspecified("key"),
-        `3un2` = tib_unspecified("key2"),
-      )
-    ),
-    tib_row(
-      "1row",
-      tib_unspecified("2un2"),
-      `2un3` = tib_unspecified("key")
-    )
-  )
-  expect_snapshot({spec_inform_unspecified(spec)})
+# guess_tspec_list() ------------------------------------------------------
+
+test_that("checks input", {
+  # errors for empty input
+  expect_snapshot({
+    (expect_error(guess_tspec_list(list())))
+  })
+
+  # neither object nor object list
+  expect_snapshot({
+    # not fully named
+    (expect_error(guess_tspec_list(list(a = 1, 1))))
+    # not unique names
+    (expect_error(guess_tspec_list(list(a = 1, a = 1))))
+  })
 })

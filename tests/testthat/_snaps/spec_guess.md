@@ -1,3 +1,48 @@
+# checks input
+
+    Code
+      expect_error(guess_tspec("a"))
+
+---
+
+    Code
+      (expect_error(guess_tspec_list(list())))
+    Output
+      <error/rlang_error>
+      Error in `guess_tspec_list()`:
+      ! `list()` must not be empty.
+
+---
+
+    Code
+      (expect_error(guess_tspec_list(list(a = 1, 1))))
+    Output
+      <error/rlang_error>
+      Error in `guess_tspec_list()`:
+      ! `list(a = 1, 1)` is neither an object nor a list of objects.
+      An object
+      v is a list,
+      x is fully named,
+      v and has unique names.
+      A list of objects is
+      x a data frame or
+      v a list and
+      x each element is `NULL` or an object.
+    Code
+      (expect_error(guess_tspec_list(list(a = 1, a = 1))))
+    Output
+      <error/rlang_error>
+      Error in `guess_tspec_list()`:
+      ! `list(a = 1, a = 1)` is neither an object nor a list of objects.
+      An object
+      v is a list,
+      v is fully named,
+      x and has unique names.
+      A list of objects is
+      x a data frame or
+      v a list and
+      x each element is `NULL` or an object.
+
 # can guess spec for discog
 
     Code
@@ -665,17 +710,4 @@
           tib_chr("since_id_str"),
         ),
       )
-
-# informing about unspecified looks good
-
-    Code
-      spec_inform_unspecified(spec)
-    Message
-      The spec contains 6 unspecified fields:
-      * 1un
-      * 1df->2un
-      * 1df->2row->3un
-      * 1df->2row->3un2
-      * 1row->2un2
-      * 1row->2un3
 
