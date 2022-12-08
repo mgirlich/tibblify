@@ -4,15 +4,13 @@
 \alias{tibblify}
 \title{Rectangle a nested list}
 \usage{
-tibblify(x, spec = NULL, names_to = NULL, unspecified = NULL)
+tibblify(x, spec = NULL, unspecified = NULL)
 }
 \arguments{
 \item{x}{A nested list.}
 
 \item{spec}{A specification how to convert \code{x}. Generated with \code{tspec_row()}
 or \code{tspec_df()}.}
-
-\item{names_to}{Deprecated. Use \code{tspec_df(.names_to)} instead.}
 
 \item{unspecified}{A string that describes what happens if the specification
 contains unspecified fields. Can be one of

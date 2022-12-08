@@ -3,7 +3,6 @@
 #' @param x A nested list.
 #' @param spec A specification how to convert `x`. Generated with `tspec_row()`
 #'   or `tspec_df()`.
-#' @param names_to Deprecated. Use `tspec_df(.names_to)` instead.
 #' @param unspecified A string that describes what happens if the specification
 #'   contains unspecified fields. Can be one of
 #'   * `"error"`: Throw an error.
@@ -57,13 +56,8 @@
 #' out$children[[1]]$children[[2]]
 tibblify <- function(x,
                      spec = NULL,
-                     names_to = NULL,
                      unspecified = NULL) {
   withr::local_locale(c(LC_COLLATE = "C"))
-
-  if (!is.null(names_to)) {
-    lifecycle::deprecate_stop("0.2.0", "tibblify(names_to)")
-  }
 
   if (is_null(spec)) {
     spec <- guess_tspec(x, inform_unspecified = TRUE, call = current_call())
