@@ -54,23 +54,26 @@ unpack_tspec <- function(spec,
   fields_to_unpack <- check_unpack_cols(fields, spec)
   error_call <- current_call()
 
-  spec$fields <- purrr::imap(
-    spec$fields,
-    function(field, name) {
-      if (!name %in% fields_to_unpack) {
-        return(set_names(list(field), name))
-      }
+  spec$fields <- with_indexed_errors(
+    purrr::imap(
+      spec$fields,
+      function(field, name) {
+        if (!name %in% fields_to_unpack) {
+          return(set_names(list(field), name))
+        }
 
-      unpack_field(
-        field,
-        recurse = recurse,
-        name = name,
-        names_sep = names_sep,
-        names_repair = names_repair,
-        names_clean = names_clean,
-        error_call = error_call
-      )
-    }
+        unpack_field(
+          field,
+          recurse = recurse,
+          name = name,
+          names_sep = names_sep,
+          names_repair = names_repair,
+          names_clean = names_clean,
+          error_call = NULL
+        )
+      }
+    ),
+    message = "In field {.field {cnd$name}}."
   )
 
   spec$fields <- unchop_fields(spec$fields, names_repair, names_clean, error_call)
