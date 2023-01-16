@@ -164,6 +164,7 @@ test_that("can't combine different names_to", {
 
   expect_equal(tspec_combine(spec1, spec1), spec1)
 
+  skip_if(paste0(version$major, ".", version$minor) <= '4.0')
   expect_snapshot({
     (expect_error(tspec_combine(spec1, spec2)))
     (expect_error(tspec_combine(spec1_df, spec2_df)))

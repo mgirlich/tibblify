@@ -126,12 +126,6 @@ test_that("names are repaired", {
     tib_row("y", tib_int("b"), tib_row("z", tib_chr("b"))),
   )
 
-  expect_snapshot({
-    # `minimal` isn't supported
-    (expect_error(unpack_tspec(spec, names_repair = "minimal")))
-    (expect_error(unpack_tspec(spec, names_repair = "check_unique")))
-  })
-
   expect_equal(
     unpack_tspec(spec, names_repair = "unique_quiet"),
     tspec_df(
@@ -141,6 +135,13 @@ test_that("names are repaired", {
       b...4 = tib_chr(c("y", "z", "b")),
     )
   )
+
+  skip_if(paste0(version$major, ".", version$minor) <= '4.0')
+  expect_snapshot({
+    # `minimal` isn't supported
+    (expect_error(unpack_tspec(spec, names_repair = "minimal")))
+    (expect_error(unpack_tspec(spec, names_repair = "check_unique")))
+  })
 })
 
 test_that("names are cleaned", {
