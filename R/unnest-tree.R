@@ -109,7 +109,10 @@ unnest_tree <- function(data,
 
     parent_ids <- data[[id_col]]
     # unclass `list_of` to avoid performance hit
-    children <- purrr::map(children, ~ unclass_list_of(.x, child_col, call = call))
+    children <- with_indexed_errors(
+      purrr::map(children, ~ unclass_list_of(.x, child_col, call = NULL)),
+      message = "In child {cnd$location}."
+    )
     data <- vctrs::list_unchop(children)
 
     level <- level + 1L
