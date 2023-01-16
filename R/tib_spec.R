@@ -175,22 +175,24 @@ prep_spec_fields <- function(fields, call) {
 spec_auto_name_fields <- function(fields, call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
-  auto_nms <- purrr::map2_chr(
-    fields[unnamed],
-    seq_along(fields)[unnamed],
-    function(field, index) {
-      key <- field$key
-      if (!is_string(key)) {
-        loc <- paste0("..", index)
-        msg <- c(
-          "{.arg key} must be a single string to infer name.",
-          x = "{.arg key} of {.field {loc}} has length {length(key)}."
-        )
-        cli::cli_abort(msg, call = call)
-      }
+  auto_nms <- with_indexed_errors(
+    purrr::map_chr(
+      fields[unnamed],
+      function(field) {
+        key <- field$key
+        if (!is_string(key)) {
+          msg <- c(
+            "{.arg key} must be a single string to infer name.",
+            x = "{.arg key} has length {length(key)}."
+          )
+          cli::cli_abort(msg, call = NULL)
+        }
 
-      key
-    }
+        key
+      }
+    ),
+    message = "In field {cnd$location}.",
+    error_call = call
   )
   field_nms[unnamed] <- auto_nms
   field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = call)
