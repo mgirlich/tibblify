@@ -246,8 +246,14 @@ parse_schema <- function(schema, name, openapi_spec) {
 
   if (is_empty(type)) {
   } else if (type == "object") {
-    fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
-    fields <- apply_required(fields, schema$required)
+    if (!is.null(schema$additionalProperties)) {
+      additional_properties <- openapi_get_schema(schema$additionalProperties, openapi_spec)
+    } else {
+      additional_properties <- NULL
+    }
+
+    fields <- purrr::imap(c(schema$properties, additional_properties$properties), ~ parse_schema_memoised(.x, .y, openapi_spec))
+    fields <- apply_required(fields, c(schema$required, additional_properties$required))
     tib_row(name, !!!fields, .required = FALSE)
 
     # TODO additionalProperties?
