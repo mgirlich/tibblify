@@ -4,7 +4,7 @@ pkgdown_sha: ~
 articles:
   overview-supported-structures: overview-supported-structures.html
   tibblify: tibblify.html
-last_built: 2023-01-16T08:40Z
+last_built: 2023-01-16T13:52Z
 urls:
   reference: https://mgirlich.github.io/tibblify/reference
   article: https://mgirlich.github.io/tibblify/articles
