@@ -126,6 +126,8 @@
     Output
       <error/rlang_error>
       Error in `unnest_tree()`:
+      ! In child 1.
+      Caused by error:
       ! `Each child` must be a data frame or `NULL`, not the number 1.
 
 ---
@@ -135,6 +137,8 @@
     Output
       <error/rlang_error>
       Error in `unnest_tree()`:
+      ! In child 1.
+      Caused by error:
       ! `Each child` must be a data frame or `NULL`, not the number 1.
 
 # can handle children of differen types

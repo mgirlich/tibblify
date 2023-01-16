@@ -129,12 +129,16 @@ tspec_row <- function(...,
   )
 }
 
-tspec <- function(fields, type, ..., vector_allows_empty_list = FALSE, call = caller_env()) {
-  check_bool(vector_allows_empty_list, call = call)
+tspec <- function(fields,
+                  type,
+                  ...,
+                  vector_allows_empty_list = FALSE,
+                  error_call = caller_env()) {
+  check_bool(vector_allows_empty_list, call = error_call)
 
   out <- list2(
     type = type,
-    fields = prep_spec_fields(fields, call),
+    fields = prep_spec_fields(fields, error_call),
     ...,
     vector_allows_empty_list = vector_allows_empty_list
   )
@@ -147,7 +151,7 @@ is_tspec <- function(x) {
   inherits(x, "tspec")
 }
 
-prep_spec_fields <- function(fields, call) {
+prep_spec_fields <- function(fields, error_call) {
   fields <- flatten_fields(fields)
   if (is_null(fields)) {
     return(list())
@@ -166,34 +170,36 @@ prep_spec_fields <- function(fields, call) {
     friendly_type <- obj_type_friendly(fields[[i]])
 
     msg <- "{.field {name}} must be a tib collector, not {friendly_type}."
-    cli::cli_abort(msg, call = call)
+    cli::cli_abort(msg, call = error_call)
   }
 
-  spec_auto_name_fields(fields, call)
+  spec_auto_name_fields(fields, error_call)
 }
 
-spec_auto_name_fields <- function(fields, call) {
+spec_auto_name_fields <- function(fields, error_call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
-  auto_nms <- purrr::map2_chr(
-    fields[unnamed],
-    seq_along(fields)[unnamed],
-    function(field, index) {
-      key <- field$key
-      if (!is_string(key)) {
-        loc <- paste0("..", index)
-        msg <- c(
-          "{.arg key} must be a single string to infer name.",
-          x = "{.arg key} of {.field {loc}} has length {length(key)}."
-        )
-        cli::cli_abort(msg, call = call)
-      }
+  auto_nms <- with_indexed_errors(
+    purrr::map_chr(
+      fields[unnamed],
+      function(field) {
+        key <- field$key
+        if (!is_string(key)) {
+          msg <- c(
+            "{.arg key} must be a single string to infer name.",
+            x = "{.arg key} has length {length(key)}."
+          )
+          cli::cli_abort(msg, call = NULL)
+        }
 
-      key
-    }
+        key
+      }
+    ),
+    message = "In field {cnd$location}.",
+    error_call = error_call
   )
   field_nms[unnamed] <- auto_nms
-  field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = call)
+  field_nms_repaired <- vec_as_names(field_nms, repair = "check_unique", call = error_call)
   names(fields) <- field_nms_repaired
   fields
 }
@@ -820,7 +826,7 @@ tib_recursive <- function(.key,
     required = .required,
     child = .children,
     children_to = .children_to,
-    fields = prep_spec_fields(list2(...), call = current_env())
+    fields = prep_spec_fields(list2(...), error_call = current_env())
   )
 }
 
@@ -831,7 +837,7 @@ tib_row <- function(.key, ..., .required = TRUE) {
     key = .key,
     type = "row",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env())
+    fields = prep_spec_fields(list2(...), error_call = current_env())
   )
 }
 
@@ -846,7 +852,7 @@ tib_df <- function(.key, ..., .required = TRUE, .names_to = NULL) {
     key = .key,
     type = "df",
     required = .required,
-    fields = prep_spec_fields(list2(...), call = current_env()),
+    fields = prep_spec_fields(list2(...), error_call = current_env()),
     names_col = .names_to
   )
 }

@@ -26,8 +26,10 @@
     Code
       (expect_error(unpack_tspec(spec, names_repair = "check_unique")))
     Output
-      <error/vctrs_error_names_must_be_unique>
+      <error/rlang_error>
       Error in `unpack_tspec()`:
+      ! In field y.
+      Caused by error:
       ! Names must be unique.
       x These names are duplicated:
         * "b" at locations 1 and 2.
