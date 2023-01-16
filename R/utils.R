@@ -199,3 +199,16 @@ list_drop_null <- function(x) {
 
   x
 }
+
+with_indexed_errors <- function(expr,
+                                message,
+                                error_call = caller_env(),
+                                env = caller_env()) {
+  try_fetch(
+    expr,
+    purrr_error_indexed = function(cnd) {
+      msg_env <- new_environment(list(cnd = cnd), parent = env)
+      cli::cli_abort(message, call = error_call, parent = cnd$parent, .envir = msg_env)
+    }
+  )
+}
