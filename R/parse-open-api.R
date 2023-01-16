@@ -180,7 +180,7 @@ schema_to_tspec <- function(schema, openapi_spec) {
 }
 
 apply_required <- function(fields, required) {
-  for (field_name in required) {
+  for (field_name in intersect(required, names(fields))) {
     fields[[field_name]]$required <- TRUE
   }
 
