@@ -77,7 +77,7 @@ check_tspec_combine_type <- function(spec_list, call = caller_env()) {
 tspec_combine_field_list <- function(spec_list, call) {
   fields_list <- purrr::map(spec_list, "fields")
   empty_idx <- lengths(fields_list) == 0
-  nms_list <- purrr::map(fields_list, names)
+  nms_list <- purrr::map(fields_list, function(x) names(x))
   nms <- vec_unique(vec_flatten(nms_list, character()))
   fields_list_t <- purrr::list_transpose(fields_list[!empty_idx], template = nms)
 
@@ -191,7 +191,7 @@ tib_combine_key <- function(tib_list, name, call) {
 }
 
 tib_combine_required <- function(tib_list) {
-  null_idx <- purrr::detect_index(tib_list, is_null)
+  null_idx <- purrr::detect_index(tib_list, function(x) is_null(x))
   if (null_idx != 0) {
     return(FALSE)
   }
