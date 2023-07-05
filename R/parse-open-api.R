@@ -98,7 +98,9 @@ parse_openapi_schema <- function(file) {
 
 read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
   rlang::check_installed("yaml")
-  if (is_character(file)) {
+  if (is_list(file)) {
+    file
+  } else if (is_character(file)) {
     check_string(file)
 
     if (grepl("\n", file)) {
