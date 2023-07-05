@@ -21,7 +21,7 @@ Imports:
     cli (>= 3.3.0),
     lifecycle (>= 1.0.1),
     purrr (>= 1.0.1),
-    rlang (>= 1.0.4),
+    rlang (>= 1.1.0),
     tibble (>= 3.1.8),
     tidyselect (>= 1.2.0),
     vctrs (>= 0.5.0),
