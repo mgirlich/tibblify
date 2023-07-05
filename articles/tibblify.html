@@ -122,13 +122,12 @@ applying <code><a href="../reference/tibblify.html">tibblify()</a></code> to it:
 <span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> <span style="font-weight: bold;">email</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 4 × 7</span></span></span>
-<span><span class="co">#&gt;   followers login      url                          name  locat…¹ email  publi…²</span></span>
-<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       780 jennybc    https://api.github.com/user… Jenn… Vancou… <span style="color: #949494;">&lt;NULL&gt;</span>      54</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      <span style="text-decoration: underline;">3</span>958 jtleek     https://api.github.com/user… Jeff… Baltim… <span style="color: #949494;">&lt;NULL&gt;</span>      12</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       115 juliasilge https://api.github.com/user… Juli… Salt L… <span style="color: #949494;">&lt;NULL&gt;</span>       4</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       213 leeper     https://api.github.com/user… Thom… London… <span style="color: #949494;">&lt;NULL&gt;</span>      46</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with abbreviated variable names ¹​location, ²​public_gists</span></span></span></code></pre></div>
+<span><span class="co">#&gt;   followers login      url                    name  location email  public_gists</span></span>
+<span><span class="co">#&gt;       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;list&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>       780 jennybc    https://api.github.co… Jenn… Vancouv… <span style="color: #949494;">&lt;NULL&gt;</span>           54</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>      <span style="text-decoration: underline;">3</span>958 jtleek     https://api.github.co… Jeff… Baltimo… <span style="color: #949494;">&lt;NULL&gt;</span>           12</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>       115 juliasilge https://api.github.co… Juli… Salt La… <span style="color: #949494;">&lt;NULL&gt;</span>            4</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>       213 leeper     https://api.github.co… Thom… London,… <span style="color: #949494;">&lt;NULL&gt;</span>           46</span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="../reference/tibblify.html">tibblify()</a></code> used for
 rectangling</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -404,7 +403,7 @@ to extract it uses <code><a href="../reference/tib_scalar.html">tib_row()</a></c
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 67<span style="text-decoration: underline;">959</span>624 cmark       gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 63<span style="text-decoration: underline;">152</span>619 conditions  gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 24<span style="text-decoration: underline;">343</span>686 crayon      gaborcsardi <span style="text-decoration: underline;">660</span>288 https://api.github.com/users/gaborcs…</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20 more rows</span></span></span></code></pre></div>
 <p>If you don’t like the tibble column you can unpack it with
 <code>tidyr::unpack()</code>. Alternatively, if you only want to extract
 some of the fields in <code>owner</code> you can use a nested path</p>
@@ -437,7 +436,7 @@ some of the fields in <code>owner</code> you can use a nested path</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 67<span style="text-decoration: underline;">959</span>624 cmark         <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 63<span style="text-decoration: underline;">152</span>619 conditions    <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 24<span style="text-decoration: underline;">343</span>686 crayon        <span style="text-decoration: underline;">660</span>288 gaborcsardi</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># … with 20 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 20 more rows</span></span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
