@@ -54,7 +54,7 @@ should_guess_object_list <- function(x) {
 }
 
 get_overview <- function(x) {
-  classes <- purrr::map_chr(x, ~ class(.x)[1])
+  classes <- compat_map_chr(x, ~ class(.x)[1])
   paste0("  ", names(classes), ": ", classes, collapse = "\n")
 }
 
@@ -136,7 +136,7 @@ choose_type <- function(x, arg) {
   }
 
   # TODO nicer overview
-  overviews <- purrr::map_chr(x, get_overview)
+  overviews <- compat_map_chr(x, get_overview)
   x_overview <- paste0(names(x), "\n", overviews, collapse = "\n")
 
   msg <- c(

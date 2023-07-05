@@ -173,7 +173,7 @@ spec_prep <- function(spec) {
   if (type == "recursive") {
     spec$type <- "df"
     spec["names_col"] <- list(NULL)
-    spec$child_coll_pos <- which(purrr::map_chr(spec$fields, "type") == "recursive_helper") - 1L
+    spec$child_coll_pos <- which(compat_map_chr(spec$fields, "type") == "recursive_helper") - 1L
   }
 
   spec
@@ -247,7 +247,7 @@ prep_nested_keys2 <- function(spec, coll_locations) {
     vec_split(coll_locations[is_sub], first_keys[is_sub])$val
   )
 
-  first_keys <- purrr::map_chr(spec_out, list("key", 1))
+  first_keys <- compat_map_chr(spec_out, list("key", 1))
   key_order <- order(first_keys)
 
   list(
