@@ -138,7 +138,7 @@ parse_response_object <- function(response_object, openapi_spec) {
 
   out <- purrr::map(response_object$content, ~ parse_media_type_object(.x, openapi_spec))
   vctrs::new_data_frame(
-    list(media_type = names(out), spec = unname(out)),
+    list(media_type = names2(out), spec = unname(out)),
     n = length(out)
   )
 }
