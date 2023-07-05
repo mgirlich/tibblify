@@ -11,7 +11,7 @@
     Output
       <error/rlang_error>
       Error in `tibblify()`:
-      ! `spec` must be a tibblify spec, not a <tib_scalar_integer/tib_scalar/tib_collector> object.
+      ! `spec` must be a tibblify spec, not a <tib_scalar_integer> object.
 
 # names are checked
 

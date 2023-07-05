@@ -1,7 +1,22 @@
-# nocov start --- r-lib/rlang compat-obj-type
+# Standalone file: do not edit by hand
+# Source: <https://github.com/r-lib/rlang/blob/main/R/standalone-obj-type.R>
+# ----------------------------------------------------------------------
 #
-# Changelog
-# =========
+# ---
+# repo: r-lib/rlang
+# file: standalone-obj-type.R
+# last-updated: 2023-05-01
+# license: https://unlicense.org
+# imports: rlang (>= 1.1.0)
+# ---
+#
+# ## Changelog
+#
+# 2023-05-01:
+# - `obj_type_friendly()` now only displays the first class of S3 objects.
+#
+# 2023-03-30:
+# - `stop_input_type()` now handles `I()` input literally in `arg`.
 #
 # 2022-10-04:
 # - `obj_type_friendly(value = TRUE)` now shows numeric scalars
@@ -36,7 +51,8 @@
 # - Added support for matrices and arrays (#141).
 # - Added documentation.
 # - Added changelog.
-
+#
+# nocov start
 
 #' Return English-friendly type
 #' @param x Any R object.
@@ -55,7 +71,7 @@ obj_type_friendly <- function(x, value = TRUE) {
     if (inherits(x, "quosure")) {
       type <- "quosure"
     } else {
-      type <- paste(class(x), collapse = "/")
+      type <- class(x)[[1L]]
     }
     return(sprintf("a <%s> object", type))
   }
@@ -288,7 +304,7 @@ stop_input_type <- function(x,
                             show_value = TRUE,
                             arg = caller_arg(x),
                             call = caller_env()) {
-  # From compat-cli.R
+  # From standalone-cli.R
   cli <- env_get_list(
     nms = c("format_arg", "format_code"),
     last = topenv(),
@@ -305,10 +321,15 @@ stop_input_type <- function(x,
   if (length(what)) {
     what <- oxford_comma(what)
   }
+  if (inherits(arg, "AsIs")) {
+    format_arg <- identity
+  } else {
+    format_arg <- cli$format_arg
+  }
 
   message <- sprintf(
     "%s must be %s, not %s.",
-    cli$format_arg(arg),
+    format_arg(arg),
     what,
     obj_type_friendly(x, value = show_value)
   )
