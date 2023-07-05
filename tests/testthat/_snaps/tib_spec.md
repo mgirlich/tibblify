@@ -237,7 +237,7 @@
     Output
       <error/rlang_error>
       Error in `tib_int()`:
-      ! Can't convert `transform`, an empty integer vector, to a function.
+      ! Can't convert `transform`, an integer vector, to a function.
 
 # tib_vector checks arguments
 
