@@ -201,8 +201,7 @@ list_drop_null <- function(x) {
 }
 
 compat_map_chr <- function(x, .f, ...) {
-  out <- purrr::map(x, .f, ...)
-  vctrs::list_unchop(out, ptype = character())
+  purrr::map_vec(x, .f, ..., .ptype = character())
 }
 
 with_indexed_errors <- function(expr,
