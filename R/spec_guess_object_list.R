@@ -31,7 +31,11 @@ guess_object_list_spec <- function(object_list,
 
   # need to remove empty elements for `purrr::transpose()` to work...
   object_list <- vctrs::list_drop_empty(object_list)
-  x_t <- purrr::transpose(unname(object_list), names(required))
+  x_t <- purrr::list_transpose(
+    unname(object_list),
+    template = names(required),
+    simplify = FALSE
+  )
 
   fields <- purrr::map2(
     x_t,

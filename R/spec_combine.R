@@ -79,7 +79,7 @@ tspec_combine_field_list <- function(spec_list, call) {
   empty_idx <- lengths(fields_list) == 0
   nms_list <- purrr::map(fields_list, names)
   nms <- vec_unique(vec_flatten(nms_list, character()))
-  fields_list_t <- purrr::transpose(fields_list[!empty_idx], nms)
+  fields_list_t <- purrr::list_transpose(fields_list[!empty_idx], template = nms)
 
   out <- purrr::imap(fields_list_t, ~ tib_combine(.x, .y, call))
   if (any(empty_idx)) {

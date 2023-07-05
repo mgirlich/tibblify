@@ -120,7 +120,7 @@
     Output
       <error/rlang_error>
       Error in `unnest_tree()`:
-      ! `children` must be a list, not an integer.
+      ! `children` must be a list, not the number 1.
     Code
       (expect_error(unnest_tree(df2, id, children)))
     Output
