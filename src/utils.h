@@ -27,6 +27,7 @@ r_obj* vec_flatten(r_obj* value, r_obj* ptype) {
 
 static inline
 r_obj* names2(r_obj* x) {
+  // simplified version of `rlang::ffi_names2()`
   r_obj* nms = r_names(x);
 
   if (nms == r_null) {
