@@ -1,28 +1,6 @@
 #include "tibblify.h"
 #include "utils.h"
 
-static inline
-bool obj_is_list(r_obj* x) {
-  // Require `x` to be a list internally
-  if (r_typeof(x) != R_TYPE_list) {
-    return false;
-  }
-
-  // Unclassed R_TYPE_list are lists
-  if (!r_is_object(x)) {
-    return true;
-  }
-
-  // vctrs code - needs other functions to work
-  // const enum vctrs_class_type type = class_type(x);
-  //
-  // // Classed R_TYPE_list are only lists if the last class is explicitly `"list"`
-  // // or if it is a bare "AsIs" type
-  // return (type == VCTRS_CLASS_list) || (type == VCTRS_CLASS_bare_asis);
-  return r_inherits(x, "list");
-}
-
-
 bool is_object(r_obj* x) {
   // TODO unsure if it needs to be this strict
   if (!(obj_is_list(x))) {
