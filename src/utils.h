@@ -21,6 +21,12 @@ r_obj* alloc_df(r_ssize n_rows, r_ssize n_cols, r_obj* col_names) {
   return(df);
 }
 
+static inline
+void r_poke_list_of(r_obj* x, r_obj* ptype) {
+  r_attrib_poke_class(x, classes_list_of);
+  r_attrib_poke(x, syms_ptype, ptype);
+}
+
 r_obj* r_list_get_by_name(r_obj* x, const char* nm);
 
 r_obj* apply_transform(r_obj* value, r_obj* fn);

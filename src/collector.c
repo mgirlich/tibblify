@@ -154,8 +154,7 @@ r_obj* get_ptype_scalar(struct collector* v_collector) {
 
 r_obj* get_ptype_vector(struct collector* v_collector) {
   r_obj* ptype = KEEP(r_alloc_list(0));
-  r_attrib_poke_class(ptype, classes_list_of);
-  r_attrib_poke(ptype, syms_ptype, v_collector->details.vec_coll.list_of_ptype);
+  r_poke_list_of(ptype, v_collector->details.vec_coll.list_of_ptype);
   FREE(1);
 
   return ptype;
@@ -191,9 +190,8 @@ r_obj* get_ptype_row(struct collector* v_collector) {
 r_obj* get_ptype_df(struct collector* v_collector) {
   r_obj* ptype = KEEP(r_alloc_list(0));
 
-  r_attrib_poke_class(ptype, classes_list_of);
   r_obj* list_of_ptype = KEEP(get_ptype_row(v_collector));
-  r_attrib_poke(ptype, syms_ptype, list_of_ptype);
+  r_poke_list_of(ptype, list_of_ptype);
 
   FREE(2);
   return ptype;
