@@ -5,7 +5,11 @@
 #include <R_ext/Rdynload.h>
 #include "tibblify-core.h"
 
+SEXP vec_unspecified(R_len_t n);
+bool vec_is_unspecified(SEXP x);
+
 #include "tibblify-vctrs.h"
+#include "vctrs-dim.h"
 #include "vctrs-utils.h"
 #include "vctrs-utils-dispatch.h"
 

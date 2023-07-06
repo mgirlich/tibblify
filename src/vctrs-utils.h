@@ -4,6 +4,8 @@
 
 void never_reached(const char* fn) __attribute__((noreturn));
 
+void r_lgl_fill(SEXP x, int value, R_len_t n);
+
 extern SEXP strings_tbl;
 extern SEXP strings_tbl_df;
 extern SEXP strings_data_frame;

@@ -8,6 +8,21 @@ inline void never_reached(const char* fn) {
   Rf_error("Internal error in `%s()`: Reached the unreachable.", fn);
 }
 
+
+#define FILL() {                      \
+  for (R_len_t i = 0; i < n; ++i) {   \
+    p_x[i] = value;                   \
+  }                                   \
+}
+
+void r_p_lgl_fill(int* p_x, int value, R_len_t n) {
+  FILL();
+}
+
+void r_lgl_fill(SEXP x, int value, R_len_t n) {
+  r_p_lgl_fill(LOGICAL(x), value, n);
+}
+
 SEXP strings_tbl = NULL;
 SEXP strings_tbl_df = NULL;
 SEXP strings_data_frame = NULL;
