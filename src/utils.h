@@ -11,6 +11,16 @@ bool is_data_frame(r_obj* x) {
   return r_inherits(x, "data.frame");
 }
 
+static inline
+r_obj* alloc_df(r_ssize n_rows, r_ssize n_cols, r_obj* col_names) {
+  r_obj* df = KEEP(r_alloc_list(n_cols));
+  r_attrib_poke_names(df, col_names);
+  r_init_tibble(df, n_rows);
+
+  FREE(1);
+  return(df);
+}
+
 r_obj* r_list_get_by_name(r_obj* x, const char* nm);
 
 r_obj* apply_transform(r_obj* value, r_obj* fn);

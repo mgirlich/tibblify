@@ -168,8 +168,7 @@ r_obj* get_ptype_variant(struct collector* v_collector) {
 r_obj* get_ptype_row(struct collector* v_collector) {
   struct multi_collector* p_multi_coll = &v_collector->details.multi_coll;
   r_ssize n_cols = p_multi_coll->n_cols;
-  r_obj* df = KEEP(r_alloc_list(n_cols));
-  r_attrib_poke_names(df, p_multi_coll->col_names);
+  r_obj* df = KEEP(alloc_df(0, n_cols, p_multi_coll->col_names));
 
   struct collector* v_collectors = p_multi_coll->collectors;
   for (r_ssize i = 0; i < p_multi_coll->n_keys; ++i) {
@@ -184,8 +183,6 @@ r_obj* get_ptype_row(struct collector* v_collector) {
   if (p_multi_coll->names_col != r_null) {
     r_list_poke(df, 0, r_globals.empty_chr);
   }
-
-  r_init_tibble(df, 0);
 
   FREE(1);
   return df;

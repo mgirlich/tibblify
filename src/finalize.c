@@ -15,6 +15,8 @@ r_obj* finalize_atomic_scalar(struct collector* v_collector) {
 
 r_obj* finalize_scalar(struct collector* v_collector) {
   r_obj* data = v_collector->data;
+  // non-atomic scalars are collected in a list. Therefore, they need to be
+  // flattened into a vector
   if (v_collector->rowmajor) {
     data = vec_flatten(v_collector->data, v_collector->details.vec_coll.ptype_inner);
   }
@@ -49,8 +51,7 @@ r_obj* finalize_variant(struct collector* v_collector) {
 r_obj* finalize_row(struct collector* v_collector) {
   struct multi_collector* p_multi_coll = &v_collector->details.multi_coll;
   r_ssize n_cols = p_multi_coll->n_cols;
-  r_obj* df = KEEP(r_alloc_list(n_cols));
-  r_attrib_poke_names(df, p_multi_coll->col_names);
+  r_obj* df = KEEP(alloc_df(p_multi_coll->n_rows, n_cols, p_multi_coll->col_names));
 
   struct collector* v_collectors = p_multi_coll->collectors;
   for (r_ssize i = 0; i < p_multi_coll->n_keys; ++i) {
@@ -61,8 +62,6 @@ r_obj* finalize_row(struct collector* v_collector) {
     assign_in_multi_collector(df, col, v_coll_i->unpack, ffi_locs);
     FREE(1);
   }
-
-  r_init_tibble(df, p_multi_coll->n_rows);
 
   FREE(1);
   return df;
