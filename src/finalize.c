@@ -22,9 +22,9 @@ r_obj* finalize_scalar(struct collector* v_collector) {
 
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
   KEEP(data);
-  r_obj* value_cast = KEEP(vec_cast(data, v_collector->ptype));
 
-  FREE(3);
+  r_obj* value_cast = vec_cast(data, v_collector->ptype);
+  FREE(2);
   return value_cast;
 }
 

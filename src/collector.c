@@ -45,8 +45,12 @@ void alloc_chr_collector(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-void alloc_vector_coll(struct collector* v_collector, r_ssize n_rows) {
+void alloc_scalar_coll(struct collector* v_collector, r_ssize n_rows) {
   v_collector->current_row = 0;
+
+  if (!v_collector->rowmajor) {
+    return;
+  }
 
   r_obj* col = KEEP(r_alloc_list(n_rows));
   r_list_poke(v_collector->shelter, 0, col);
@@ -55,12 +59,8 @@ void alloc_vector_coll(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-void alloc_scalar_coll(struct collector* v_collector, r_ssize n_rows) {
+void alloc_vector_coll(struct collector* v_collector, r_ssize n_rows) {
   v_collector->current_row = 0;
-
-  if (!v_collector->rowmajor) {
-    return;
-  }
 
   r_obj* col = KEEP(r_alloc_list(n_rows));
   r_list_poke(v_collector->shelter, 0, col);
