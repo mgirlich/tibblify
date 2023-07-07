@@ -180,7 +180,7 @@ spec_auto_name_fields <- function(fields, error_call) {
   field_nms <- names2(fields)
   unnamed <- !have_name(fields)
   auto_nms <- with_indexed_errors(
-    purrr::map_chr(
+    compat_map_chr(
       fields[unnamed],
       function(field) {
         key <- field$key

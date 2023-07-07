@@ -64,7 +64,7 @@ check_tspec_combine_dots <- function(..., .call = caller_env()) {
 }
 
 check_tspec_combine_type <- function(spec_list, call = caller_env()) {
-  types <- purrr::map_chr(spec_list, "type")
+  types <- compat_map_chr(spec_list, "type")
   type_locs <- vec_unique_loc(types)
 
   if (length(type_locs) > 1) {
@@ -77,7 +77,7 @@ check_tspec_combine_type <- function(spec_list, call = caller_env()) {
 tspec_combine_field_list <- function(spec_list, call) {
   fields_list <- purrr::map(spec_list, "fields")
   empty_idx <- lengths(fields_list) == 0
-  nms_list <- purrr::map(fields_list, names)
+  nms_list <- purrr::map(fields_list, function(x) names(x))
   nms <- vec_unique(vec_flatten(nms_list, character()))
   fields_list_t <- purrr::list_transpose(fields_list[!empty_idx], template = nms)
 
@@ -149,7 +149,7 @@ tib_combine <- function(tib_list, name, call) {
 }
 
 tib_combine_type <- function(tib_list, call) {
-  types <- purrr::map_chr(tib_list, "type")
+  types <- compat_map_chr(tib_list, "type")
   locs <- vec_unique_loc(types)
   types <- types[locs]
   unspecified_idx <- types == "unspecified"
@@ -191,7 +191,7 @@ tib_combine_key <- function(tib_list, name, call) {
 }
 
 tib_combine_required <- function(tib_list) {
-  null_idx <- purrr::detect_index(tib_list, is_null)
+  null_idx <- purrr::detect_index(tib_list, function(x) is_null(x))
   if (null_idx != 0) {
     return(FALSE)
   }
@@ -221,7 +221,7 @@ tib_combine_ptype <- function(tib_list, call) {
 }
 
 tib_combine_fill <- function(tib_list, type, ptype, call) {
-  types <- purrr::map_chr(tib_list, "type")
+  types <- compat_map_chr(tib_list, "type")
   unspecified_locs <- which(types == "unspecified")
 
   fill_list <- lapply(tib_list, `[[`, "fill")
@@ -238,7 +238,7 @@ tib_combine_fill <- function(tib_list, type, ptype, call) {
 
     if (length(fill_locs2) > 1) {
       # TODO better error message
-      values <- purrr::map_chr(fill_list_cast, as_label)
+      values <- compat_map_chr(fill_list_cast, as_label)
       value_infos <- loc_name_helper(fill_locs2, values)
       cli::cli_abort("Can't combine fill {value_infos}", call = call)
     }
@@ -281,12 +281,12 @@ tib_combine_transform <- function(tib_list, call) {
 }
 
 tib_combine_input_form <- function(tib_list, call) {
-  types <- purrr::map_chr(tib_list, "type")
+  types <- compat_map_chr(tib_list, "type")
   if (any(types != "vector")) {
     tib_list <- tib_list[types == "vector"]
   }
 
-  input_forms <- purrr::map_chr(tib_list, "input_form")
+  input_forms <- compat_map_chr(tib_list, "input_form")
   input_form_locs <- vec_unique_loc(input_forms)
 
   if (length(input_form_locs) > 1) {
@@ -304,7 +304,7 @@ tib_combine_input_form <- function(tib_list, call) {
 }
 
 tib_combine_names_col <- function(tib_list, call) {
-  names_col <- purrr::map_chr(tib_list, "names_col", .default = NA)
+  names_col <- compat_map_chr(tib_list, "names_col", .default = NA)
   names_col_locs <- vec_unique_loc(names_col)
   na_locs <- which(vec_detect_missing(names_col))
 

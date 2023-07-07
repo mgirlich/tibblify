@@ -46,7 +46,7 @@ path_to_string <- function(path) {
     return("x")
   }
 
-  path_elements <- purrr::map_chr(
+  path_elements <- compat_map_chr(
     path_elts[1:depth],
     function(elt) {
       if (is.character(elt)) {
@@ -198,6 +198,10 @@ list_drop_null <- function(x) {
   }
 
   x
+}
+
+compat_map_chr <- function(x, .f, ...) {
+  purrr::map_vec(x, .f, ..., .ptype = character())
 }
 
 with_indexed_errors <- function(expr,
