@@ -83,6 +83,8 @@ void add_default_recursive(struct collector* v_collector, struct Path* v_path) {
   ++v_collector->current_row;
 }
 
+// -----------------------------------------------------------------------------
+
 #define ADD_VALUE(COLL, NA, EMPTY, CAST)                       \
   if (value == r_null) {                                       \
     *v_collector->details.COLL.v_data = NA;                    \

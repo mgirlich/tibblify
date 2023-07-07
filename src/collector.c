@@ -7,7 +7,7 @@
 #include "finalize.h"
 
 
-// for colmajor there is no need to allocate space
+// for colmajor there is no need to allocate space as the data is used as is
 #define ALLOC_SCALAR_COLLECTOR(RTYPE, BEGIN, COLL)             \
   v_collector->current_row = 0;                                \
                                                                \
@@ -31,35 +31,35 @@ void alloc_int_collector(struct collector* v_collector, r_ssize n_rows) {
 void alloc_dbl_collector(struct collector* v_collector, r_ssize n_rows) {
   ALLOC_SCALAR_COLLECTOR(R_TYPE_double, r_dbl_begin, dbl_coll);
 }
+
+// character and non-atomic scalars can't assign via a pointer but need to use
+// a barrier. Therefore, `v_data` isn't assigned here.
+#define ALLOC_SCALAR_COLLECTOR_BARRIER(RTYPE)                  \
+  v_collector->current_row = 0;                                \
+                                                               \
+  if (!v_collector->rowmajor) {                                \
+    return;                                                    \
+  }                                                            \
+                                                               \
+  r_obj* col = KEEP(r_alloc_vector(RTYPE, n_rows));            \
+  r_list_poke(v_collector->shelter, 0, col);                   \
+  v_collector->data = col;                                     \
+                                                               \
+  FREE(1);                                                     \
+
 void alloc_chr_collector(struct collector* v_collector, r_ssize n_rows) {
-  v_collector->current_row = 0;
-
-  if (!v_collector->rowmajor) {
-    return;
-  }
-
-  r_obj* col = KEEP(r_alloc_character(n_rows));
-  r_list_poke(v_collector->shelter, 0, col);
-  v_collector->data = col;
-
-  FREE(1);
+  ALLOC_SCALAR_COLLECTOR_BARRIER(R_TYPE_character);
 }
 
-void alloc_scalar_coll(struct collector* v_collector, r_ssize n_rows) {
-  v_collector->current_row = 0;
-
-  if (!v_collector->rowmajor) {
-    return;
-  }
-
-  r_obj* col = KEEP(r_alloc_list(n_rows));
-  r_list_poke(v_collector->shelter, 0, col);
-  v_collector->data = col;
-
-  FREE(1);
+void alloc_scalar_collector(struct collector* v_collector, r_ssize n_rows) {
+  // non-atomic scalars are collected in a list
+  // FIXME use `vec_init()` and `vec_assign()` once they are exported by vctrs
+  ALLOC_SCALAR_COLLECTOR_BARRIER(R_TYPE_list);
 }
 
-void alloc_vector_coll(struct collector* v_collector, r_ssize n_rows) {
+// vector collectors need to allocate also for colmajor because they might need
+// to poke list elements.
+void alloc_vector_collector(struct collector* v_collector, r_ssize n_rows) {
   v_collector->current_row = 0;
 
   r_obj* col = KEEP(r_alloc_list(n_rows));
@@ -69,6 +69,11 @@ void alloc_vector_coll(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
+void alloc_variant_collector(struct collector* v_collector, r_ssize n_rows) {
+  alloc_vector_collector(v_collector, n_rows);
+}
+
+// a row collector doesn't store data itself but only its children.
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows) {
   v_collector->details.multi_coll.n_rows = n_rows;
   r_ssize n_coll = v_collector->details.multi_coll.n_keys;
@@ -79,7 +84,7 @@ void alloc_row_collector(struct collector* v_collector, r_ssize n_rows) {
   }
 }
 
-void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
+void alloc_df_collector(struct collector* v_collector, r_ssize n_rows) {
   v_collector->current_row = 0;
 
   r_obj* col = KEEP(r_alloc_list(n_rows));
@@ -89,7 +94,13 @@ void alloc_coll_df(struct collector* v_collector, r_ssize n_rows) {
   FREE(1);
 }
 
-void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
+void alloc_recursive_collector(struct collector* v_collector, r_ssize n_rows) {
+  alloc_df_collector(v_collector, n_rows);
+}
+
+// -----------------------------------------------------------------------------
+
+void check_colmajor_nrows_default(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
   if (value == r_null) {
     stop_colmajor_null(v_path->data);
   }
@@ -98,7 +109,7 @@ void colmajor_nrows_coll(struct collector* v_collector, r_obj* value, r_ssize* n
   check_colmajor_size(n_value, n_rows, v_path, nrow_path);
 }
 
-void colmajor_nrows_row(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
+void check_colmajor_nrows_row_collector(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path) {
   r_ssize n_value = get_collector_vec_rows(v_collector, value, n_rows, v_path, nrow_path);
   check_colmajor_size(n_value, n_rows, v_path, nrow_path);
 }
@@ -147,6 +158,8 @@ r_ssize get_collector_vec_rows(struct collector* v_collector,
 
   return *n_rows;
 }
+
+// -----------------------------------------------------------------------------
 
 r_obj* get_ptype_scalar(struct collector* v_collector) {
   return v_collector->ptype;
@@ -201,6 +214,8 @@ r_obj* get_ptype_recursive(struct collector* v_collector) {
   return r_globals.empty_list;
 }
 
+// -----------------------------------------------------------------------------
+
 struct collector* copy_collector_generic(int shelter_size,
                                          struct collector* p_coll) {
   r_obj* shelter = KEEP(r_alloc_list(shelter_size));
@@ -220,6 +235,7 @@ struct collector* copy_collector(struct collector* p_coll) {
 }
 
 struct collector* copy_multi_collector(struct collector* p_coll) {
+  // FIXME it might be more clear to actually call `new_multi_collector()` with the right arguments...
   struct multi_collector* p_multi_coll = &p_coll->details.multi_coll;
   r_ssize n_keys = p_multi_coll->n_keys;
 
@@ -259,6 +275,8 @@ struct collector* copy_multi_collector(struct collector* p_coll) {
   FREE(4);
   return p_coll_new;
 }
+
+// -----------------------------------------------------------------------------
 
 struct collector* new_scalar_collector(bool required,
                                        r_obj* ptype,
@@ -304,7 +322,7 @@ struct collector* new_scalar_collector(bool required,
     p_coll->finalize = &finalize_atomic_scalar;
     p_coll->details.chr_coll.default_value = r_chr_get(default_value, 0);
   } else {
-    p_coll->alloc = &alloc_scalar_coll;
+    p_coll->alloc = &alloc_scalar_collector;
     p_coll->add_value = &add_value_scalar;
     p_coll->add_value_colmajor = &add_value_scalar_colmajor;
     p_coll->add_default = &add_default_scalar;
@@ -313,7 +331,7 @@ struct collector* new_scalar_collector(bool required,
     p_coll->details.scalar_coll.ptype_inner = ptype_inner;
     p_coll->details.scalar_coll.na = na;
   }
-  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &check_colmajor_nrows_default;
   p_coll->get_ptype = &get_ptype_scalar;
   p_coll->copy = &copy_collector;
   p_coll->rowmajor = rowmajor;
@@ -350,12 +368,12 @@ struct collector* new_vector_collector(bool required,
   p_coll->shelter = shelter;
   p_coll->get_ptype = &get_ptype_vector;
   p_coll->copy = &copy_collector;
-  p_coll->alloc = &alloc_vector_coll;
+  p_coll->alloc = &alloc_vector_collector;
   p_coll->add_value = &add_value_vector;
   p_coll->add_value_colmajor = &add_value_vector_colmajor;
   p_coll->add_default = &add_default_vector;
-  p_coll->finalize = &finalize_vec;
-  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->finalize = &finalize_vector;
+  p_coll->check_colmajor_nrows = &check_colmajor_nrows_default;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
   assign_f_absent(p_coll, required);
@@ -403,12 +421,12 @@ struct collector* new_variant_collector(bool required,
   p_coll->shelter = shelter;
   p_coll->get_ptype = &get_ptype_variant;
   p_coll->copy = &copy_collector;
-  p_coll->alloc = &alloc_vector_coll;
+  p_coll->alloc = &alloc_variant_collector;
   p_coll->add_value = &add_value_variant;
   p_coll->add_value_colmajor = &add_value_variant_colmajor;
   p_coll->add_default = &add_default_variant;
   p_coll->finalize = &finalize_variant;
-  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &check_colmajor_nrows_default;
   p_coll->rowmajor = rowmajor;
   p_coll->unpack = false;
   assign_f_absent(p_coll, required);
@@ -454,17 +472,17 @@ struct collector* new_multi_collector(enum collector_type coll_type,
     p_coll->add_value_colmajor = &add_value_row_colmajor;
     p_coll->add_default = &add_default_row;
     p_coll->finalize = &finalize_row;
-    p_coll->check_colmajor_nrows = &colmajor_nrows_row;
+    p_coll->check_colmajor_nrows = &check_colmajor_nrows_row_collector;
     p_coll->unpack = coll_type == COLLECTOR_TYPE_sub;
     break;
   case COLLECTOR_TYPE_df:
     p_coll->get_ptype = &get_ptype_df;
-    p_coll->alloc = &alloc_coll_df;
+    p_coll->alloc = &alloc_df_collector;
     p_coll->add_value = &add_value_df;
     p_coll->add_value_colmajor = &add_value_df_colmajor;
     p_coll->add_default = &add_default_df;
     p_coll->finalize = &finalize_df;
-    p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+    p_coll->check_colmajor_nrows = &check_colmajor_nrows_default;
     p_coll->unpack = false;
     break;
   default:
@@ -591,7 +609,7 @@ struct collector* new_df_collector(bool required,
                              rowmajor);
 }
 
-struct collector* new_rec_collector(void) {
+struct collector* new_recursive_collector(void) {
   r_obj* shelter = KEEP(r_alloc_list(3));
 
   r_obj* coll_raw = r_alloc_raw(sizeof(struct collector));
@@ -601,13 +619,13 @@ struct collector* new_rec_collector(void) {
   p_coll->shelter = shelter;
   p_coll->get_ptype = &get_ptype_recursive;
   p_coll->copy = &copy_collector;
-  p_coll->alloc = &alloc_coll_df;
+  p_coll->alloc = &alloc_recursive_collector;
   p_coll->add_value = &add_value_recursive;
   p_coll->add_value_colmajor = &add_value_recursive_colmajor;
   p_coll->add_default = &add_default_recursive;
   p_coll->finalize = &finalize_recursive;
   // TODO
-  p_coll->check_colmajor_nrows = &colmajor_nrows_coll;
+  p_coll->check_colmajor_nrows = &check_colmajor_nrows_default;
   p_coll->unpack = false;
   assign_f_absent(p_coll, false);
 

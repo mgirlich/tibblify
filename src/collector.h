@@ -121,16 +121,23 @@ struct recursive_collector {
 struct collector {
   r_obj* shelter;
 
-  void (*check_colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path);
-  r_obj* (*get_ptype)(struct collector* v_collector);
   void (*alloc)(struct collector* v_collector, r_ssize n_rows);
   void (*add_value)(struct collector* v_collector, r_obj* value, struct Path* v_path);
   void (*add_value_colmajor)(struct collector* v_collector, r_obj* value, struct Path* v_path);
+  // check if `value` has size `n_rows`
+  void (*check_colmajor_nrows)(struct collector* v_collector, r_obj* value, r_ssize* n_rows, struct Path* v_path, struct Path* nrow_path);
   // add default value
   void (*add_default)(struct collector* v_collector, struct Path* v_path);
   // error if required, otherwise add default value
   void (*add_default_absent)(struct collector* v_collector, struct Path* v_path);
   r_obj* (*finalize)(struct collector* v_collector);
+  // get the prototype of the collector. This is needed to set the right ptype
+  // in the <list_of> column created in the `finalize()` step of the df collector.
+  // This can't be calculated from the elements as they might all be NULL.
+  // FIXME it might be easier to calculate this in R
+  r_obj* (*get_ptype)(struct collector* v_collector);
+  // `copy()` is needed in the recursive parser so that the collectors aren't
+  // overwritten.
   struct collector* (*copy)(struct collector* v_collector);
   bool rowmajor;
   bool unpack;
@@ -219,7 +226,7 @@ struct collector* new_parser(int n_keys,
                              int n_cols,
                              bool rowmajor);
 
-struct collector* new_rec_collector(void);
+struct collector* new_recursive_collector(void);
 
 void alloc_row_collector(struct collector* v_collector, r_ssize n_rows);
 r_ssize get_collector_vec_rows(struct collector* v_collector,

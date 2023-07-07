@@ -84,7 +84,7 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
   const bool required = r_lgl_get(r_list_get_by_name(spec_elt, "required"), 0);
 
   if (type == r_string_types.recursive) {
-    return new_rec_collector();
+    return new_recursive_collector();
   }
 
   r_obj* default_value = r_list_get_by_name(spec_elt, "fill");

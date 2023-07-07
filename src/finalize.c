@@ -31,7 +31,7 @@ r_obj* finalize_scalar(struct collector* v_collector) {
   return value_cast;
 }
 
-r_obj* finalize_vec(struct collector* v_collector) {
+r_obj* finalize_vector(struct collector* v_collector) {
   r_obj* data = v_collector->data;
   if (v_collector->transform != r_null) data = apply_transform(data, v_collector->transform);
   KEEP(data);
