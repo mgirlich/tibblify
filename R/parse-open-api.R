@@ -98,7 +98,9 @@ parse_openapi_schema <- function(file) {
 
 read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
   rlang::check_installed("yaml")
-  if (is_character(file)) {
+  if (is_list(file)) {
+    file
+  } else if (is_character(file)) {
     check_string(file)
 
     if (grepl("\n", file)) {
@@ -125,18 +127,18 @@ parse_path_object <- function(path_object, openapi_spec) {
 }
 
 parse_operation_object <- function(operation_object, openapi_spec) {
-  operation_object <- openapi_get_schema(operation_object, openapi_spec)
+  operation_object <- openapi_resolve_schema(operation_object, openapi_spec)
 
   out <- purrr::map(operation_object$responses, ~ parse_response_object(.x, openapi_spec))
   vctrs::vec_rbind(!!!out, .names_to = "status_code")
 }
 
 parse_response_object <- function(response_object, openapi_spec) {
-  response_object <- openapi_get_schema(response_object, openapi_spec)
+  response_object <- openapi_resolve_schema(response_object, openapi_spec)
 
   out <- purrr::map(response_object$content, ~ parse_media_type_object(.x, openapi_spec))
   vctrs::new_data_frame(
-    list(media_type = names(out), spec = unname(out)),
+    list(media_type = names2(out), spec = unname(out)),
     n = length(out)
   )
 }
@@ -146,7 +148,7 @@ parse_media_type_object <- function(media_type_object, openapi_spec) {
 }
 
 schema_to_tspec <- function(schema, openapi_spec) {
-  schema <- openapi_get_schema(schema, openapi_spec)
+  schema <- openapi_resolve_schema(schema, openapi_spec)
 
   if (!is.null(schema$oneOf)) {
     out <- handle_one_of_tspec(schema, openapi_spec)
@@ -164,7 +166,7 @@ schema_to_tspec <- function(schema, openapi_spec) {
 
     tspec_row(!!!fields)
   } else if (type == "array") {
-    schema <- openapi_get_schema(schema$items, openapi_spec)
+    schema <- openapi_resolve_schema(schema$items, openapi_spec)
 
     fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
     fields <- apply_required(fields, schema$required)
@@ -187,7 +189,7 @@ apply_required <- function(fields, required) {
   fields
 }
 
-openapi_get_schema <- function(schema, openapi_spec) {
+openapi_resolve_schema <- function(schema, openapi_spec) {
   ref <- schema$`$ref`
   # FIXME this is probably quite a hack...
   ref <- ref %||% schema$allOf[[1]]$`$ref`
@@ -196,18 +198,15 @@ openapi_get_schema <- function(schema, openapi_spec) {
     if (ref_parts[[1]] != "#") {
       cli_abort("{.field ref} does not start with {.value #}", .internal = TRUE)
     }
-    # TODO better error message
-    tryCatch({
-      schema <- purrr::chuck(openapi_spec, !!!ref_parts[-1])
-    }, error = function(cnd) {
-      browser()
-    }
-    )
     schema <- purrr::chuck(openapi_spec, !!!ref_parts[-1])
+
+    if (is.null(schema)) {
+      cli_abort("No schema found for reference {.value {ref}}")
+    }
   }
 
-  if (is.null(schema)) {
-    cli_abort("No schema found for reference {.value {ref}}")
+  if (has_name(schema, "$ref")) {
+    schema <- openapi_resolve_schema(schema, openapi_spec)
   }
 
   # TODO check schema?
@@ -229,7 +228,7 @@ get_openapi_type <- function(schema) {
 }
 
 parse_schema <- function(schema, name, openapi_spec) {
-  schema <- openapi_get_schema(schema, openapi_spec)
+  schema <- openapi_resolve_schema(schema, openapi_spec)
   if (!is.null(schema$oneOf)) {
     out <- handle_one_of(schema, name, openapi_spec)
     return(out)
@@ -247,7 +246,7 @@ parse_schema <- function(schema, name, openapi_spec) {
   if (is_empty(type)) {
   } else if (type == "object") {
     if (!is.null(schema$additionalProperties)) {
-      additional_properties <- openapi_get_schema(schema$additionalProperties, openapi_spec)
+      additional_properties <- openapi_resolve_schema(schema$additionalProperties, openapi_spec)
     } else {
       additional_properties <- NULL
     }
