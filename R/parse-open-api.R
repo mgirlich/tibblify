@@ -133,13 +133,7 @@ read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
 
 parse_path_item_object <- function(path_item_object, openapi_spec) {
   # https://spec.openapis.org/oas/v3.1.0#path-item-object
-  ops <- c("get", "put", "post", "delete", "options", "head", "patch", "trace")
-
-  # TODO `ref`: Allows for a referenced definition of this path item. The
-  # referenced structure MUST be in the form of a Path Item Object. In case a
-  # Path Item Object field appears both in the defined object and the referenced
-  # object, the behavior is undefined. See the rules for resolving Relative
-  # References.
+  path_item_object <- openapi_resolve_reference(path_item_object, openapi_spec)
 
   # FIXME pass along `parameters`?
   parameters <- parse_parameters(path_item_object$parameters, openapi_spec)
@@ -153,11 +147,11 @@ parse_path_item_object <- function(path_item_object, openapi_spec) {
   # name and location. The list can use the Reference Object to link to
   # parameters that are defined at the OpenAPI Object’s components/parameters.
   # if (has_name(path_item_object, "summary") ||
-  #     has_name(path_item_object, "ref") ||
   #     has_name(path_item_object, "description")) {
   #   browser()
   # }
 
+  ops <- c("get", "put", "post", "delete", "options", "head", "patch", "trace")
   operations <- path_item_object[intersect(names(path_item_object), ops)]
   parsed_operations <- purrr::map(operations, ~ parse_operation_object(.x, openapi_spec))
   out <- vctrs::vec_rbind(!!!parsed_operations, .names_to = "operation")
@@ -171,7 +165,7 @@ parse_path_item_object <- function(path_item_object, openapi_spec) {
 
 parse_operation_object <- function(operation_object, openapi_spec) {
   # https://spec.openapis.org/oas/v3.1.0#operation-object
-  operation_object <- openapi_resolve_schema(operation_object, openapi_spec)
+  operation_object <- openapi_resolve_reference(operation_object, openapi_spec)
 
   spec <- tspec_object(
     tib_chr("summary", required = FALSE),
@@ -198,7 +192,7 @@ parse_request_body <- function(request_body, openapi_spec) {
     return(NULL)
   }
 
-  request_body <- openapi_resolve_schema(request_body, openapi_spec)
+  request_body <- openapi_resolve_reference(request_body, openapi_spec)
 
   # TODO add extensions?
   spec <- tspec_row(
@@ -218,7 +212,7 @@ parse_parameters <- function(parameters, openapi_spec) {
     return(NULL)
   }
 
-  parameters <- purrr::map(parameters, ~ openapi_resolve_schema(.x, openapi_spec))
+  parameters <- purrr::map(parameters, ~ openapi_resolve_reference(.x, openapi_spec))
 
   spec <- tspec_df(
     tib_chr("in"),
@@ -247,7 +241,7 @@ parse_parameters <- function(parameters, openapi_spec) {
 
 parse_responses_object <- function(responses_object, openapi_spec) {
   # https://spec.openapis.org/oas/v3.1.0#responsesObject
-  responses_object <- purrr::map(responses_object, ~ openapi_resolve_schema(.x, openapi_spec))
+  responses_object <- purrr::map(responses_object, ~ openapi_resolve_reference(.x, openapi_spec))
   out <- purrr::map(responses_object, ~ parse_response_object(.x, openapi_spec))
   vctrs::vec_rbind(!!!out, .names_to = "status_code")
 }
@@ -295,7 +289,7 @@ parse_header_objects <- function(header_objects, openapi_spec) {
   # * `name` MUST NOT be specified, it is given in the corresponding headers map.
   # * `in` MUST NOT be specified, it is implicitly in header.
   # * All traits that are affected by the location MUST be applicable to a location of header (for example, style).
-  header_objects <- purrr::map(header_objects, ~ openapi_resolve_schema(.x, openapi_spec))
+  header_objects <- purrr::map(header_objects, ~ openapi_resolve_reference(.x, openapi_spec))
 
   spec <- tspec_df(
     .names_to = "name",
@@ -322,7 +316,7 @@ parse_header_objects <- function(header_objects, openapi_spec) {
 }
 
 schema_to_tspec <- function(schema, openapi_spec) {
-  schema <- openapi_resolve_schema(schema, openapi_spec)
+  schema <- openapi_resolve_reference(schema, openapi_spec)
 
   if (!is.null(schema$oneOf)) {
     out <- handle_one_of_tspec(schema, openapi_spec)
@@ -340,7 +334,7 @@ schema_to_tspec <- function(schema, openapi_spec) {
 
     tspec_row(!!!fields)
   } else if (type == "array") {
-    schema <- openapi_resolve_schema(schema$items, openapi_spec)
+    schema <- openapi_resolve_reference(schema$items, openapi_spec)
 
     fields <- purrr::imap(schema$properties, ~ parse_schema_memoised(.x, .y, openapi_spec))
     fields <- apply_required(fields, schema$required)
@@ -363,7 +357,7 @@ apply_required <- function(fields, required) {
   fields
 }
 
-openapi_resolve_schema <- function(schema, openapi_spec) {
+openapi_resolve_reference <- function(schema, openapi_spec) {
   ref <- schema$`$ref`
   # FIXME this is probably quite a hack...
   ref <- ref %||% schema$allOf[[1]]$`$ref`
@@ -380,10 +374,9 @@ openapi_resolve_schema <- function(schema, openapi_spec) {
   }
 
   if (has_name(schema, "$ref")) {
-    schema <- openapi_resolve_schema(schema, openapi_spec)
+    schema <- openapi_resolve_reference(schema, openapi_spec)
   }
 
-  # TODO check schema?
   schema
 }
 
@@ -402,7 +395,7 @@ get_openapi_type <- function(schema) {
 }
 
 parse_schema <- function(schema, name, openapi_spec) {
-  schema <- openapi_resolve_schema(schema, openapi_spec)
+  schema <- openapi_resolve_reference(schema, openapi_spec)
   if (!is.null(schema$oneOf)) {
     out <- handle_one_of(schema, name, openapi_spec)
     return(out)
@@ -423,7 +416,7 @@ parse_schema <- function(schema, name, openapi_spec) {
       # FIXME hack required for asana which somehow has `additionalProperties = TRUE`
       # openapi_spec$components$schemas$RuleTriggerRequest$properties$action_data$additionalProperties
       if (is.list(schema$additionalProperties)) {
-        additional_properties <- openapi_resolve_schema(schema$additionalProperties, openapi_spec)
+        additional_properties <- openapi_resolve_reference(schema$additionalProperties, openapi_spec)
       } else {
         additional_properties <- NULL
       }
