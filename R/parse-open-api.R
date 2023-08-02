@@ -56,9 +56,11 @@
 #'
 #' parse_openapi_schema(file)
 parse_openapi_spec <- function(file) {
+  # https://spec.openapis.org/oas/v3.1.0#openapi-object2
   openapi_spec <- read_spec(file)
-  version <- openapi_spec$openapi %||% openapi_spec$info$version
-  if (version < "3") {
+
+  version <- openapi_spec$openapi
+  if (is_null(version) || version < "3") {
     cli_abort("OpenAPI versions before 3 are not supported.")
   }
   # cannot use `openapi_spec` for memoising, as hashing it takes much more time
@@ -68,17 +70,22 @@ parse_openapi_spec <- function(file) {
     memoise::forget(parse_schema_memoised)
   }
 
-  out <- purrr::imap(
+  out <- purrr::map(
     openapi_spec$paths,
     ~ {
-      parse_path_object(
-        path_object = .x,
+      parse_path_item_object(
+        path_item_object = .x,
         openapi_spec = openapi_spec
       )
     }
   )
 
-  vctrs::vec_rbind(!!!out, .names_to = "endpoint")
+  fast_tibble(
+    list(
+      endpoint = names2(out),
+      operations = unname(out)
+    )
+  )
 }
 
 #' @export
@@ -118,26 +125,155 @@ read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
   }
 }
 
-parse_path_object <- function(path_object, openapi_spec) {
+parse_path_item_object <- function(path_item_object, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#path-item-object
   ops <- c("get", "put", "post", "delete", "options", "head", "patch", "trace")
 
-  operations <- path_object[intersect(names(path_object), ops)]
-  out <- purrr::imap(operations, ~ parse_operation_object(.x, openapi_spec))
-  vctrs::vec_rbind(!!!out, .names_to = "operation")
+  # TODO `ref`: Allows for a referenced definition of this path item. The
+  # referenced structure MUST be in the form of a Path Item Object. In case a
+  # Path Item Object field appears both in the defined object and the referenced
+  # object, the behavior is undefined. See the rules for resolving Relative
+  # References.
+
+  # FIXME pass along `parameters`?
+  parameters <- parse_parameters(path_item_object$parameters, openapi_spec)
+
+  # TODO `summary`: An optional, string summary, intended to apply to all operations in this path.
+  # TODO `description`: An optional, string description, intended to apply to all operations in this path. CommonMark syntax MAY be used for rich text representation.
+  # TODO `parameters`: A list of parameters that are applicable for all the
+  # operations described under this path. These parameters can be overridden at
+  # the operation level, but cannot be removed there. The list MUST NOT include
+  # duplicated parameters. A unique parameter is defined by a combination of a
+  # name and location. The list can use the Reference Object to link to
+  # parameters that are defined at the OpenAPI Object’s components/parameters.
+  # if (has_name(path_item_object, "summary") ||
+  #     has_name(path_item_object, "ref") ||
+  #     has_name(path_item_object, "description")) {
+  #   browser()
+  # }
+
+  operations <- path_item_object[intersect(names(path_item_object), ops)]
+  parsed_operations <- purrr::map(operations, ~ parse_operation_object(.x, openapi_spec))
+  out <- vctrs::vec_rbind(!!!parsed_operations, .names_to = "operation")
+  if (nrow(out) > 0) {
+    out$global_parameters <- list(parameters)
+  } else {
+    out$global_parameters <- list()
+  }
+  out
 }
 
 parse_operation_object <- function(operation_object, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#operation-object
   operation_object <- openapi_resolve_schema(operation_object, openapi_spec)
 
-  out <- purrr::map(operation_object$responses, ~ parse_response_object(.x, openapi_spec))
+  spec <- tspec_object(
+    tib_chr("summary", required = FALSE),
+    tib_chr("description", required = FALSE),
+    operation_id = tib_chr("operationId", required = FALSE),
+    tib_chr_vec("tags", required = FALSE),
+    tib_variant("parameters", required = FALSE),
+    request_body = tib_variant("requestBody", required = FALSE),
+    tib_variant("responses", required = FALSE),
+    tib_lgl("deprecated", required = FALSE, fill = FALSE),
+  )
+  data <- tibblify(operation_object, spec)
+
+  data$request_body <- list(parse_request_body(data$request_body, openapi_spec))
+  data$parameters <- list(parse_parameters(data$parameters, openapi_spec))
+  data$responses <- list(parse_responses_object(data$responses, openapi_spec))
+
+  fast_tibble(unclass(data), n = 1L)
+}
+
+parse_request_body <- function(request_body, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#requestBodyObject
+  if (is_null(request_body)) {
+    return(NULL)
+  }
+
+  request_body <- openapi_resolve_schema(request_body, openapi_spec)
+
+  # TODO add extensions?
+  spec <- tspec_row(
+    tib_chr("description", required = FALSE),
+    tib_variant("content"),
+    tib_lgl("required", required = FALSE, fill = FALSE)
+  )
+  parsed_request_body <- tibblify(request_body, spec)
+  parsed_request_body$content[[1]] <- parse_media_type_objects(parsed_request_body$content[[1]], openapi_spec)
+
+  parsed_request_body
+}
+
+parse_parameters <- function(parameters, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#parameter-object
+  if (is_null(parameters)) {
+    return(NULL)
+  }
+
+  parameters <- purrr::map(parameters, ~ openapi_resolve_schema(.x, openapi_spec))
+
+  spec <- tspec_df(
+    tib_chr("in"),
+    tib_chr("name"),
+    tib_chr("description", required = FALSE),
+    tib_lgl("required", required = FALSE, fill = FALSE),
+    tib_lgl("deprecated", required = FALSE, fill = FALSE),
+    tib_lgl("allowEmptyValue", required = FALSE, fill = FALSE),
+    # TODO can use `parse_schema()`?
+    tib_row(
+      "schema",
+      tib_chr("type", required = FALSE),
+      tib_chr("description", required = FALSE),
+      # FIXME `enum` and `format` should go into a details column
+      tib_chr_vec("enum", required = FALSE),
+      tib_chr("format", required = FALSE),
+      .required = FALSE
+    ),
+    # FIXME `explode` and `style` should go into a details column
+    tib_lgl("explode", required = FALSE, fill = FALSE),
+    tib_chr("style", required = FALSE),
+  )
+
+  tibblify(parameters, spec)
+}
+
+parse_responses_object <- function(responses_object, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#responsesObject
+  responses_object <- purrr::map(responses_object, ~ openapi_resolve_schema(.x, openapi_spec))
+  out <- purrr::map(responses_object, ~ parse_response_object(.x, openapi_spec))
   vctrs::vec_rbind(!!!out, .names_to = "status_code")
 }
 
 parse_response_object <- function(response_object, openapi_spec) {
-  response_object <- openapi_resolve_schema(response_object, openapi_spec)
+  spec <- tspec_object(
+    tib_chr("description"),
+    tib_variant("headers", required = FALSE),
+    tib_variant("content", required = FALSE),
+    tib_variant("links", required = FALSE),
+  )
+  parsed_response <- tibblify(response_object, spec)
 
-  out <- purrr::map(response_object$content, ~ parse_media_type_object(.x, openapi_spec))
-  vctrs::new_data_frame(
+  if (!is_empty(parsed_response$headers)) {
+    parsed_response$headers <- parse_header_objects(parsed_response$headers, openapi_spec)
+  }
+  # FIXME links
+  if (!is_empty(parsed_response$links)) {
+    browser()
+  }
+  parsed_response$content <- parse_media_type_objects(parsed_response$content, openapi_spec)
+
+  parsed_response$headers <- list(parsed_response$headers)
+  parsed_response$content <- list(parsed_response$content)
+  parsed_response$links <- list(parsed_response$links)
+
+  fast_tibble(parsed_response, n = 1L)
+}
+
+parse_media_type_objects <- function(media_type_objects, openapi_spec) {
+  out <- purrr::map(media_type_objects, ~ parse_media_type_object(.x, openapi_spec))
+  fast_tibble(
     list(media_type = names2(out), spec = unname(out)),
     n = length(out)
   )
@@ -145,6 +281,38 @@ parse_response_object <- function(response_object, openapi_spec) {
 
 parse_media_type_object <- function(media_type_object, openapi_spec) {
   schema_to_tspec(media_type_object$schema, openapi_spec)
+}
+
+parse_header_objects <- function(header_objects, openapi_spec) {
+  # https://spec.openapis.org/oas/v3.1.0#headerObject
+  # The Header Object follows the structure of the Parameter Object with the following changes:
+  # * `name` MUST NOT be specified, it is given in the corresponding headers map.
+  # * `in` MUST NOT be specified, it is implicitly in header.
+  # * All traits that are affected by the location MUST be applicable to a location of header (for example, style).
+  header_objects <- purrr::map(header_objects, ~ openapi_resolve_schema(.x, openapi_spec))
+
+  spec <- tspec_df(
+    .names_to = "name",
+    tib_chr("description", required = FALSE),
+    tib_lgl("required", required = FALSE, fill = FALSE),
+    tib_lgl("deprecated", required = FALSE, fill = FALSE),
+    tib_lgl("allowEmptyValue", required = FALSE, fill = FALSE),
+    # TODO can use `parse_schema()`?
+    tib_row(
+      "schema",
+      tib_chr("type", required = FALSE),
+      tib_chr("description", required = FALSE),
+      # FIXME `enum` and `format` should go into a details column
+      tib_chr_vec("enum", required = FALSE),
+      tib_chr("format", required = FALSE),
+      .required = FALSE
+    ),
+    # FIXME `explode` and `style` should go into a details column
+    tib_lgl("explode", required = FALSE, fill = FALSE),
+    tib_chr("style", required = FALSE),
+  )
+
+  tibblify(header_objects, spec)
 }
 
 schema_to_tspec <- function(schema, openapi_spec) {
@@ -246,7 +414,13 @@ parse_schema <- function(schema, name, openapi_spec) {
   if (is_empty(type)) {
   } else if (type == "object") {
     if (!is.null(schema$additionalProperties)) {
-      additional_properties <- openapi_resolve_schema(schema$additionalProperties, openapi_spec)
+      # FIXME hack required for asana which somehow has `additionalProperties = TRUE`
+      # openapi_spec$components$schemas$RuleTriggerRequest$properties$action_data$additionalProperties
+      if (is.list(schema$additionalProperties)) {
+        additional_properties <- openapi_resolve_schema(schema$additionalProperties, openapi_spec)
+      } else {
+        additional_properties <- NULL
+      }
     } else {
       additional_properties <- NULL
     }
@@ -332,4 +506,8 @@ if (is_installed("memoise")) {
   parse_schema_memoised <- memoise::memoise(parse_schema, omit_args = "openapi_spec")
 } else {
   parse_schema_memoised <- parse_schema
+}
+
+fast_tibble <- function(x, n = NULL) {
+  vctrs::new_data_frame(x, n = n, class = c("tbl_df", "tbl"))
 }
