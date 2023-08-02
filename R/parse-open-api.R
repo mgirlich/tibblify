@@ -104,25 +104,31 @@ parse_openapi_schema <- function(file) {
 }
 
 read_spec <- function(file, arg = caller_arg(file), call = caller_env()) {
-  rlang::check_installed("yaml")
   if (is_list(file)) {
-    file
-  } else if (is_character(file)) {
+    return(file)
+  }
+
+  rlang::check_installed("yaml")
+  if (inherits(file, "connection")) {
+    return(yaml::read_yaml(file))
+  }
+
+  if (is_character(file)) {
     check_string(file)
 
     if (grepl("\n", file)) {
-      yaml::yaml.load(file)
+      out <- yaml::yaml.load(file)
     } else {
-      yaml::read_yaml(file)
+      out <- yaml::read_yaml(file, readLines.warn = FALSE)
     }
-  } else if (inherits(file, "connection")) {
-    yaml::read_yaml(file)
-  } else {
-    stop_input_type(
-      file,
-      c("a string", "a connection")
-    )
+
+    return(out)
   }
+
+  stop_input_type(
+    file,
+    c("a string", "a connection", "a list")
+  )
 }
 
 parse_path_item_object <- function(path_item_object, openapi_spec) {
