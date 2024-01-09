@@ -84,22 +84,3 @@ enum vctrs_class_type class_type_impl(r_obj* cls) {
 
   return VCTRS_CLASS_unknown;
 }
-
-static
-const char* class_type_as_str(enum vctrs_class_type type) {
-  switch (type) {
-  case VCTRS_CLASS_list: return "list";
-  case VCTRS_CLASS_data_frame: return "data_frame";
-  case VCTRS_CLASS_bare_asis: return "bare_asis";
-  case VCTRS_CLASS_bare_data_frame: return "bare_data_frame";
-  case VCTRS_CLASS_bare_tibble: return "bare_tibble";
-  case VCTRS_CLASS_bare_factor: return "bare_factor";
-  case VCTRS_CLASS_bare_ordered: return "bare_ordered";
-  case VCTRS_CLASS_bare_date: return "bare_date";
-  case VCTRS_CLASS_bare_posixct: return "bare_posixct";
-  case VCTRS_CLASS_bare_posixlt: return "bare_posixlt";
-  case VCTRS_CLASS_unknown: return "unknown";
-  case VCTRS_CLASS_none: return "none";
-  }
-  never_reached("class_type_as_str");
-}

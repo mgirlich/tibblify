@@ -71,13 +71,12 @@ tibblify(gh_users_small)
 #> The spec contains 1 unspecified field:
 #> • email
 #> # A tibble: 4 × 7
-#>   followers login      url                          name  locat…¹ email  publi…²
-#>       <int> <chr>      <chr>                        <chr> <chr>   <list>   <int>
-#> 1       780 jennybc    https://api.github.com/user… Jenn… Vancou… <NULL>      54
-#> 2      3958 jtleek     https://api.github.com/user… Jeff… Baltim… <NULL>      12
-#> 3       115 juliasilge https://api.github.com/user… Juli… Salt L… <NULL>       4
-#> 4       213 leeper     https://api.github.com/user… Thom… London… <NULL>      46
-#> # … with abbreviated variable names ¹​location, ²​public_gists
+#>   followers login      url                    name  location email  public_gists
+#>       <int> <chr>      <chr>                  <chr> <chr>    <list>        <int>
+#> 1       780 jennybc    https://api.github.co… Jenn… Vancouv… <NULL>           54
+#> 2      3958 jtleek     https://api.github.co… Jeff… Baltimo… <NULL>           12
+#> 3       115 juliasilge https://api.github.co… Juli… Salt La… <NULL>            4
+#> 4       213 leeper     https://api.github.co… Thom… London,… <NULL>           46
 ```
 
 We can now look at the specification `tibblify()` used for rectangling
@@ -342,7 +341,7 @@ tibblify(gh_repos_small, spec)
 #>  8 67959624 cmark       gaborcsardi 660288 https://api.github.com/users/gaborcs…
 #>  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…
 #> 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…
-#> # … with 20 more rows
+#> # ℹ 20 more rows
 ```
 
 If you don’t like the tibble column you can unpack it with
@@ -378,7 +377,7 @@ tibblify(gh_repos_small, spec2)
 #>  8 67959624 cmark         660288 gaborcsardi
 #>  9 63152619 conditions    660288 gaborcsardi
 #> 10 24343686 crayon        660288 gaborcsardi
-#> # … with 20 more rows
+#> # ℹ 20 more rows
 ```
 
 ## Required and Optional Fields
