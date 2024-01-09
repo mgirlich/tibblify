@@ -147,6 +147,6 @@ choose_type <- function(x, arg) {
   inform(x_overview)
 
   title <- cli::format_message("How do you want to parse {.arg {arg}}?")
-  choice <- menu(c("object", "object list"), title = title)
+  choice <- utils::menu(c("object", "object list"), title = title)
   return(choice)
 }
