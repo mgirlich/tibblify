@@ -9,6 +9,10 @@
 
 * Improved printing of lists parsed with `tspec_object()`.
 
+* Improved performance of the `tspec()` family.
+
+* Improved guessing.
+
 # tibblify 0.3.0
 
 * In column major format all fields are required.
