@@ -30,11 +30,11 @@
 #'   "properties": {
 #'     "name": {
 #'       "type": "string",
-#'       "description": "The name of this vehicle. The common name, such as Sand Crawler."
+#'       "description": "The name of this vehicle. The common name, e.g. Sand Crawler."
 #'     },
 #'     "model": {
 #'       "type": "string",
-#'       "description": "The model or official name of this vehicle. Such as All Terrain Attack Transport."
+#'       "description": "The model or official name of this vehicle."
 #'     },
 #'     "url": {
 #'       "type": "string",
@@ -44,7 +44,7 @@
 #'     "edited": {
 #'       "type": "string",
 #'       "format": "date-time",
-#'       "description": "the ISO 8601 date format of the time that this resource was edited."
+#'       "description": "the ISO 8601 date format of the time this resource was edited."
 #'     }
 #'   },
 #'   "required": [

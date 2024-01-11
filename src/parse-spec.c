@@ -128,8 +128,8 @@ struct collector* parse_spec_elt(r_obj* spec_elt,
                                 r_list_get_by_name(spec_elt, "list_of_ptype"),
                                 rowmajor);
   } else {
-    r_printf(CHAR(type)); // # nocov
-    r_printf(CHAR(r_string_types.scalar)); // # nocov
+    r_printf("%s", CHAR(type)); // # nocov
+    r_printf("%s", CHAR(r_string_types.scalar)); // # nocov
     r_stop_internal("Internal Error: Unsupported type"); // # nocov
   }
 }
