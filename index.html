@@ -13,8 +13,8 @@
     types.">
 <title>Rectangle Nested Lists • tibblify</title>
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
 <!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="Rectangle Nested Lists">
 <meta property="og:description" content="A tool to rectangle a nested list, that is to convert it into
@@ -36,7 +36,7 @@
     
     <a class="navbar-brand me-2" href="index.html">tibblify</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -126,13 +126,12 @@
 <span><span class="co">#&gt; The spec contains 1 unspecified field:</span></span>
 <span><span class="co">#&gt; • email</span></span>
 <span><span class="co">#&gt; # A tibble: 4 × 7</span></span>
-<span><span class="co">#&gt;   followers login      url                          name  locat…¹ email  publi…²</span></span>
-<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;                        &lt;chr&gt; &lt;chr&gt;   &lt;list&gt;   &lt;int&gt;</span></span>
-<span><span class="co">#&gt; 1       780 jennybc    https://api.github.com/user… Jenn… Vancou… &lt;NULL&gt;      54</span></span>
-<span><span class="co">#&gt; 2      3958 jtleek     https://api.github.com/user… Jeff… Baltim… &lt;NULL&gt;      12</span></span>
-<span><span class="co">#&gt; 3       115 juliasilge https://api.github.com/user… Juli… Salt L… &lt;NULL&gt;       4</span></span>
-<span><span class="co">#&gt; 4       213 leeper     https://api.github.com/user… Thom… London… &lt;NULL&gt;      46</span></span>
-<span><span class="co">#&gt; # … with abbreviated variable names ¹​location, ²​public_gists</span></span></code></pre></div>
+<span><span class="co">#&gt;   followers login      url                    name  location email  public_gists</span></span>
+<span><span class="co">#&gt;       &lt;int&gt; &lt;chr&gt;      &lt;chr&gt;                  &lt;chr&gt; &lt;chr&gt;    &lt;list&gt;        &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1       780 jennybc    https://api.github.co… Jenn… Vancouv… &lt;NULL&gt;           54</span></span>
+<span><span class="co">#&gt; 2      3958 jtleek     https://api.github.co… Jeff… Baltimo… &lt;NULL&gt;           12</span></span>
+<span><span class="co">#&gt; 3       115 juliasilge https://api.github.co… Juli… Salt La… &lt;NULL&gt;            4</span></span>
+<span><span class="co">#&gt; 4       213 leeper     https://api.github.co… Thom… London,… &lt;NULL&gt;           46</span></span></code></pre></div>
 <p>We can now look at the specification <code><a href="reference/tibblify.html">tibblify()</a></code> used for rectangling</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/guess_tspec.html">guess_tspec</a></span><span class="op">(</span><span class="va">gh_users_small</span><span class="op">)</span></span>
@@ -369,7 +368,7 @@
 <span><span class="co">#&gt;  8 67959624 cmark       gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions  gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon      gaborcsardi 660288 https://api.github.com/users/gaborcs…</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 20 more rows</span></span></code></pre></div>
 <p>If you don’t like the tibble column you can unpack it with <code>tidyr::unpack()</code>. Alternatively, if you only want to extract some of the fields in <code>owner</code> you can use a nested path</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec2</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/tspec_df.html">tspec_df</a></span><span class="op">(</span></span>
@@ -400,7 +399,7 @@
 <span><span class="co">#&gt;  8 67959624 cmark         660288 gaborcsardi</span></span>
 <span><span class="co">#&gt;  9 63152619 conditions    660288 gaborcsardi</span></span>
 <span><span class="co">#&gt; 10 24343686 crayon        660288 gaborcsardi</span></span>
-<span><span class="co">#&gt; # … with 20 more rows</span></span></code></pre></div>
+<span><span class="co">#&gt; # ℹ 20 more rows</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
