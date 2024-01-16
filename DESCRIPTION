@@ -1,6 +1,6 @@
 Package: tibblify
 Title: Rectangle Nested Lists
-Version: 0.3.1
+Version: 0.3.1.9000
 Authors@R: c(
     person("Maximilian", "Girlich", , "maximilian.girlich@outlook.com", role = c("aut", "cre", "cph")),
     person("Kirill", "Müller", role = "ctb")
