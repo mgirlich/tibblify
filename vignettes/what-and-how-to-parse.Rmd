@@ -1,0 +1,520 @@
+---
+title: "Spec Thoughts"
+author: "Maximilian Girlich"
+date: "2022-06-13"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# What is a tibblify specification?
+
+So far, a `tib_*()` function somehow specifies a field. But it does so in a very unspecific way. Some recent issues
+
+* [Use `tib_col()` for column-major data frame structure](https://github.com/mgirlich/tibblify/issues/66)
+* [Support intermediate type and vectorised transform](https://github.com/mgirlich/tibblify/issues/48)
+* [Turn nested vector into a one-column tibble](https://github.com/mgirlich/tibblify/issues/68)
+
+suggest that the specification actually should be thought of consisting of two parts:
+
+1. The **input structure** of the field which tells `tibblify()` how the field can be parsed.
+2. The **output structure** which tells `tibblify()` what the field should look like in the end.
+
+The `tib_col()` idea clearly concerns the input structure. Probably, also an intermediate ptype and an element wise transformation belong here.
+Having a nested vector as a one column tibble clearly only concerns the output structure.
+
+While `tibblify()` should be designed to work with the quirks of real life API (which is messy) the input structure for a specific field should be quite fixed and not mixed (up to some small variations e.g. for JSON parser compatibility).
+
+The next section goes over the input structures that should be supported and the corresponding output structures that make sense for the given input.
+This overview should help us in designing the tibblify API in a logical way.
+
+
+# What do we want to parse how?
+
+```{r}
+library(jsonlite)
+library(tibble)
+
+list_of <- vctrs::list_of
+parse_json <- function(x, vector = TRUE) {
+  fromJSON(x, simplifyVector = vector, simplifyMatrix = FALSE, simplifyDataFrame = FALSE)
+}
+```
+
+## Scalars
+Scalars only have one type of input and one type of output.
+
+**Input**
+
+a scalar value that can be cast into the `<input ptype>`.
+
+```{r}
+scalar_json <- '[{"x": 1}, {"x": 1}, {"x": null}]'
+cat(scalar_json)
+
+scalar_r <- parse_json(scalar_json)
+scalar_r %>% str()
+```
+
+**Parsing**
+
+```
+For i in 1 to n:
+  value = input[[i]][["x"]]
+  If `NULL`:
+    scalar = vec_init(<input ptype>)
+  Else:
+    Check that vec_size(value) is 1.
+    Apply elt_transform(value)
+    scalar = vec_cast(value, <input ptype>)
+  End
+  out[i] = scalar
+End
+out = vec_cast(out, <output ptype>)
+```
+
+**Output**
+
+an `<output ptype>` vector of length `n`.
+
+```{r}
+c(1, 1, NA)
+```
+
+
+## Vectors
+
+**Input**
+Vector have two types of JSON input and three types of R input:
+
+```{r}
+# JSON 1: each element is a list of scalars or null
+vector_json1 <- '[{"x": [1, 2, 3]}, {"x": []}, {"x": null}]'
+cat(vector_json1)
+
+# simplify vectors
+vector_r1a <- parse_json(vector_json1)
+# each element is an unnamed vector
+vector_r1a %>% str()
+
+# do not simplify vectors
+vector_r1b <- parse_json(vector_json1, vector = FALSE)
+# each element is NULL or an unnamed list where each element is a scalar
+vector_r1b %>% str()
+```
+
+
+```{r}
+# JSON 2: each element is null or an object where each value is a scalar or null
+vector_json2 <- '[{"x": {"a": 1, "b": null, "c": 3}}, {"x": {}}, {"x": null}]'
+cat(vector_json2)
+
+# Example: https://raw.githubusercontent.com/eddelbuettel/rcppsimdjson/master/inst/jsonexamples/citm_catalog.json
+
+vector_r2 <- parse_json(vector_json2)
+# each element is NULL or a named list where each element is a scalar or NULL
+vector_r2 %>% str()
+```
+
+**Parsing**
+```
+For i in 1 to n:
+  value = input[[i]][["x"]]
+  If `NULL`:
+    vector = NULL
+  Else:
+    CASE 1 (list, vectors simplified)
+      # no need to check vec_size()
+      vector = vec_cast(value, <input ptype>)
+    CASE 2 (list, vectors not simplified) and 3 (object)
+      names = names(value) # case 3 only
+      m = vec_size(value)
+      For j in 1 to m:
+        scalar = value[[j]]
+        If `NULL`:
+          vector[j] = vec_init(<input ptype>)
+        Else:
+          Check that vec_size(scalar) is 1.
+          vector[j] = vec_cast(scalar, <input ptype>)
+        End
+      End
+    out[i] = vector
+  End
+End for
+```
+
+**Output**
+
+There are four types of output:
+
+All cases:
+1. A list of `<output ptype>` of length `n`
+```{r}
+list_of(c(1, NA, 3), NULL, NULL) %>% str()
+```
+
+2. A list of `<tibble<value:<output ptype>>>` of length `n`
+```{r}
+list_of(tibble(x = c(1, NA, 3)), NULL, NULL) %>% str()
+```
+
+
+Case 3 only:
+3. A list of `<named output ptype>` of length `n`
+```{r}
+list_of(c(a = 1, b = NA, c = 3), NULL, NULL) %>% str()
+```
+
+4. A list of `<tibble<name:<character>, value:<output ptype>>>` of length `n`
+```{r}
+list_of(tibble(name = c("a", "b", "c"), x = c(1, NA, 3)), NULL, NULL) %>% str()
+```
+
+
+## Matrix Row
+
+Similar to vector case 1 and 2 but each list has a fixed size `k`. Not sure about case 3
+
+```{r}
+matrix_json <- '[{"x": [1, 2]}, {"x": [3, 4]}]'
+
+parse_json(matrix_json) %>% str()
+parse_json(matrix_json, vector = FALSE) %>% str()
+```
+
+**Output**
+
+A matrix of `vec_size()` `n`
+
+```{r}
+x <- matrix(1:4, byrow = TRUE, ncol = 2)
+# so in a tibble we get a matrix column
+tibble(x)
+```
+
+
+## Matrix
+
+**Input**
+
+There is one JSON input and two R inputs
+
+```{r}
+matrix_json <- '[
+{"x": [[1, 2], [3, 4]]},
+{"x": [[1, 2], [3, 4], [5, 6]]}
+]'
+
+parse_json(matrix_json) %>% str()
+parse_json(matrix_json, vector = FALSE) %>% str()
+```
+
+**Output**
+
+A list of matrix
+
+```{r}
+list_of(
+  matrix(1:4, byrow = TRUE, ncol = 2),
+  matrix(1:6, byrow = TRUE, ncol = 2),
+)
+```
+
+
+## List of Matrices
+
+This is quite rare. If there is an easy way to support this, we can add it but I
+don't see this as important.
+
+```{r}
+tmp <- parse_json("https://raw.githubusercontent.com/eddelbuettel/rcppsimdjson/master/inst/jsonexamples/canada.json")
+# tmp$features[[1]]$geometry$coordinates
+
+# tmp$features$geometry$coordinates %>% class()
+```
+
+
+[Example JSON: List of matrices](https://raw.githubusercontent.com/eddelbuettel/rcppsimdjson/master/inst/jsonexamples/canada.json)
+
+
+## Tibble Row
+
+[Example JSON: Object of tibble rows](https://raw.githubusercontent.com/eddelbuettel/rcppsimdjson/master/inst/jsonexamples/citm_catalog.json)
+
+There is only one input and one output format
+
+```{r}
+tibble_row_json <- '[
+  {"x": {"a": 1, "b": 2}},
+  {"x": {"a": NULL, "b": 3}}
+]'
+```
+
+## Tibble
+
+There are three input formats
+
+```{r}
+tibble_row_list_json <- '[
+  {"x": [{"a": 1, "b": 2}, {"a": 2, "b": null}]},
+  {"x": [{"a": null, "b": 3}]}
+]'
+
+parse_json(tibble_row_list_json) %>% str()
+```
+
+```{r}
+tibble_row_objects_json <- '[
+  {"x": {"row_1": {"a": 1, "b": 2}, "row_2": {"a": 2, "b": null}}},
+  {"x": {"row_1": {"a": null, "b": 3}}}
+]'
+
+parse_json(tibble_row_objects_json) %>% str()
+```
+
+```{r}
+tibble_col_major_json <- '[
+  {"x": {"a": [1, 2], "b": [2, null]}},
+  {"x": {"a": [null], "b": [3]}}
+]'
+
+parse_json(tibble_col_major_json) %>% str()
+```
+
+**Output**
+
+In all cases the output format is a list of tibble of length n. For the second
+case one might add a names column.
+
+```{r}
+list_of(
+  tibble(a = 1:2, b = c(2, NA)),
+  tibble(a = NA, b = 3)
+)
+```
+
+```{r}
+list_of(
+  tibble(name = c("row_1", "row_2"), a = 1:2, b = c(2, NA)),
+  tibble(name = "row_1", a = NA, b = 3)
+)
+```
+
+
+## Variant
+
+Can be used when the field is a mixed type.
+
+
+## Non-Vectors
+
+The parts on scalars and vectors basically also work for non-vector objects, e.g.
+a linear model. The main difference is that these objects do not form a vector
+but have to be wrapped in a list.
+
+
+## Other Formats
+
+**Question** Are there other common formats that should be supported?
+
+
+# Spec API
+
+Currently, there are
+
+* `tib_scalar()`
+* `tib_vector()`
+* `tib_variant()` (which replaces `tib_list()`)
+* `tib_row()`
+* `tib_df()`
+
+which currently stand for a specific input and and specific output format.
+
+To support the other formats from above one could add
+
+* `tib_matrix_row()`
+* `tib_matrix()`
+
+**Question** How to handle the difference between specifying the input and the output format?
+Options:
+
+1. A `tib_*()` represents a single input and a single output format.
+This would mean adding something like:
+
+* `tib_col()`: input is column major, output is a tibble
+* `tib_vector_df()`: input is like `tib_vector()`, output is a 1 tibble
+* `tib_scalar_list()`: input is a scalar list, output is a vector
+* `tib_scalar_list_df()`: input is a scalar list, output is a 2 column tibble
+* `tib_matrix_row_scalar_list()`
+* `tib_matrix_scalar_list()`
+
+Coming up with good names might be difficult and the interface might get confusing.
+Also if more format need to be added this could get ugly.
+
+2. A `tib_*()` stands for the "idea" of the input format.
+This is basically the current system.
+Need to add arguments to specify the exact input and output format.
+
+`tib_scalar()` can basically stay the same
+
+```{r}
+tib_scalar(
+  output_ptype, # this is the final type, e.g. `Date`
+  input_ptype, # input is first cast into this type, e.g. `character()`
+  vec_transform # transform is applied to the <input_type> vector, e.g. `as.Date()`
+)
+```
+
+`tib_vector()` gains two arguments
+
+* `form`: describes the R format (also kind of describes the JSON format)
+* `cols`:
+  * if `name` and `value` are `NULL` the output is a vector
+  * if `value` is a string the output is a tibble and this gives the name of value column
+  * if `name` is a string the name of the name column
+
+If the output is a tibble then `output_ptype` is the ptype of the value column.
+
+```{r}
+tib_vector(
+  output_ptype,
+  input_ptype,
+  transform,
+  form = c("vector", "scalar_list", "object"),
+  cols = c(value = NULL, name = NULL)
+)
+```
+
+Points that might cause confusion:
+
+* `output_ptype` might be `character()` but the output is actually a tibble
+* the `form` and the `cols` argument interact. `name` only makes sense for `form = "object"`
+* controlling the output type via `cols` might be confusing
+* what happens with the names if `form = "object"` but the output is a vector?
+
+
+`tib_matrix_row()` and `tib_matrix()`
+
+```{r}
+tib_matrix(
+  output_ptype,
+  ncol,
+  input_ptype,
+  transform,
+  form = c("vector", "scalar_list")
+)
+```
+
+`tib_row()` can stay as it is
+
+`tib_df()` gets a `form` argument
+
+```{r}
+tib_df(
+  ..., # list of parsers
+  form = c("row_major", "column_major")
+)
+```
+
+Note that `jsonlite::toJSON()` also supports `dataframe = "values"` which uses a
+list instead of an object
+
+```
+[
+  [5.1, 3.5, 1.4, 0.2, "setosa"],
+  [4.9, 3, 1.4, 0.2, "setosa"],
+  [4.7, 3.2, 1.3, 0.2, "setosa"]
+]
+```
+
+I think this format is terrible and should not be supported
+
+
+# Spec Overview
+
+In a specification all `tib_*()` have
+
+* `name`: a scalar character giving the _output_ name
+* `path`: a list - each element is a scalar character or scalar integer - specifying how to access the field
+* `required`: a scalar logical whether the field must exist
+* `default`: the default value to use if the field is **absent** (not sure if this should also apply if the field `vctrs::vec_equal_na()` is true).
+* `transform`: I'm not entirely sure about the details (element wise vs vectorised transform, intermediate ptype, ...)
+
+Currently, there are also the fields
+
+* `ptype`: the output type the field should be converted into.
+* `type`: one of "scalar", "vector", "row", "df"
+
+though they might have to be reconsidered with the new understanding of a spec
+consisting of a parsing instruction and an output instruction.
+
+# Represantation as tibble
+
+## `fields` as tibble column
+* The column only makes sense for `tib_df()` and `tib_row()`; must be `NULL` for the others
+* Represents well the nested nature
+* Example for computing on it
+
+```r
+spec_df <- tibble(
+  name = "df_col",
+  path = list("props"),
+  type = "df",
+  ptype = list(dplyr::bind_rows(
+    spec_scalar,
+    spec_vector
+  )),
+  required = TRUE,
+  default = list(NULL)
+)
+
+spec <- bind_rows(spec_scalar, spec_df, spec_vector)
+
+spec %>%
+  filter(type == "df") %>%
+  unnest_longer(ptype)
+#> # A tibble: 2 × 6
+#>   name   path      type  ptype$name $path  $type  $ptype $required required default
+#>   <chr>  <list>    <chr> <chr>      <list> <chr>  <list> <lgl>     <lgl>    <list>
+#> 1 df_col <chr [1]> df    height     <chr>  scalar <int>  FALSE     TRUE     <NULL>
+#> 2 df_col <chr [1]> df    names      <chr>  vector <chr>  TRUE      TRUE     <NULL>
+#> # … with 1 more variable: ptype$default <list>
+```
+
+## Use parent column
+* represents the nested nature not as directly
+* easier to manipulate with dplyr but probably also easier to unintentionally manipulate the wrong fields
+* if we really want to allow computing on it then we might want to provide custom dplyr methods
+* Example
+
+```r
+spec_df <- tibble(
+  id = "df_col", # this could simply be the full path
+  name = "df_col",
+  path = list("props"),
+  type = "df",
+  required = TRUE,
+  default = list(NULL)
+)
+
+bind_rows(
+  spec_scalar %>% mutate(id = "height"),
+  spec_df,
+  spec_scalar %>% mutate(id = "props_height", parent = "name"),
+  spec_vector %>% mutate(id = "props_names", parent = "name"),
+  spec_vector %>% mutate(id = "names")
+)
+
+#> # A tibble: 5 × 8
+#>   name   path      type   ptype     required default   id            parent
+#>   <chr>  <list>    <chr>  <list>    <lgl>    <list>    <chr>         <chr>
+#> 1 height <chr [1]> scalar <int [0]> FALSE    <int [1]> height        NA
+#> 2 df_col <chr [1]> df     <NULL>    TRUE     <NULL>    df_col        NA
+#> 3 height <chr [1]> scalar <int [0]> FALSE    <int [1]> props_height  df_col
+#> 4 names  <chr [1]> vector <chr [0]> TRUE     <chr [1]> props_names   df_col
+#> 5 names  <chr [1]> vector <chr [0]> TRUE     <chr [1]> names         NA
+```
+
+* The scalar and vector columns do not really need an `id`
